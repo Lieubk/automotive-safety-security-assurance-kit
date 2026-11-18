@@ -15,6 +15,8 @@ Commands
     status             items per type and state, and the latest verification runs
     list               IDs with state and title; --type, --status and --imported narrow it
     audit ID           compare a baseline record with the items as they are now
+    diff ID            what changed in an item since a review saw it (--since REV-ID;
+                       default: its newest review), from the version-control history
     practices [PROC]   per base practice of the processes in scope (or of one
                        process): the evidence the project holds and the findings
                        still open. The deterministic input of a process gate
@@ -28,10 +30,12 @@ File layout and hash definition: schema/item-format.md. Rules: schema/items.yaml
 Requires PyYAML. Exit code of `check`: 0 = no errors, 1 = errors.
 """
 import argparse
+import difflib
 import fnmatch
 import hashlib
 import json
 import re
+import subprocess
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -1111,6 +1115,65 @@ def cmd_hash(project, args):
     return 0
 
 
+def reviewed_text(item, reviewed_hash):
+    """(text, commit) of the item file as it was when it had the given content hash, from git; or (None, reason)."""
+    folder, name = item.path.parent, item.path.name
+
+    def git(*arguments):
+        done = subprocess.run(["git", "-C", str(folder)] + list(arguments), capture_output=True, text=True,
+                              encoding="utf-8", errors="replace")
+        return done.stdout if done.returncode == 0 else None
+
+    commits = git("log", "--format=%H", "--", name)
+    if commits is None:
+        return None, "the project is not under git, or git is not available"
+    for commit in commits.split():
+        text = git("show", "%s:./%s" % (commit, name))
+        match = FRONT_MATTER.match((text or "").replace("\r\n", "\n"))
+        if not match:
+            continue
+        try:
+            front = yaml.safe_load(match.group(1)) or {}
+        except yaml.YAMLError:
+            continue
+        if isinstance(front, dict) and content_hash(front, match.group(2)) == reviewed_hash:
+            return text.replace("\r\n", "\n"), commit[:12]
+    return None, "no commit holds %s at hash %s" % (name, reviewed_hash)
+
+
+def cmd_diff(project, args):
+    item = project.items.get(args.id)
+    if item is None:
+        print("no such item: %s" % args.id)
+        return 1
+    reviews = [r for r in project.of_type("review-record") if r.status == "final"
+               and any(isinstance(e, dict) and e.get("item") == item.id for e in as_list(r.front.get("subject")))]
+    if args.since:
+        reviews = [r for r in reviews if r.id == args.since]
+        if not reviews:
+            print("%s is not a final review record with %s as subject" % (args.since, item.id))
+            return 1
+    if not reviews:
+        print("no final review record has %s as subject: there is nothing to compare with" % item.id)
+        return 1
+    review = max(reviews, key=lambda r: record_number(r.id))
+    reviewed = next(str(e.get("hash")) for e in as_list(review.front.get("subject"))
+                    if isinstance(e, dict) and e.get("item") == item.id)
+    if reviewed == item.hash:
+        print("%s is unchanged since %s (hash %s)" % (item.id, review.id, item.hash))
+        return 0
+    text, where = reviewed_text(item, reviewed)
+    if text is None:
+        print("NOT ASSESSED: the text %s saw of %s (hash %s) cannot be found: %s. Without it, the whole item is "
+              "reviewed again. Commit items and records after every recorded review." % (review.id, item.id, reviewed, where))
+        return 2
+    now = item.path.read_text(encoding="utf-8").replace("\r\n", "\n")
+    print("%s: changed since %s (hash %s, commit %s -> hash %s, working tree)" % (item.id, review.id, reviewed, where, item.hash))
+    sys.stdout.writelines(difflib.unified_diff(text.splitlines(True), now.splitlines(True),
+                                               "%s as %s saw it" % (item.id, review.id), "%s now" % item.id, n=2))
+    return 0
+
+
 def cmd_status(project, args):
     table = defaultdict(lambda: defaultdict(int))
     for item in project.items.values():
@@ -1249,6 +1312,9 @@ def main():
     hashes.add_argument("--upstream", action="store_true")
     sub.add_parser("status")
     sub.add_parser("audit").add_argument("id")
+    diff = sub.add_parser("diff")
+    diff.add_argument("id")
+    diff.add_argument("--since", help="the review record to compare with (default: the newest that has the item as subject)")
     listing = sub.add_parser("list")
     listing.add_argument("--type")
     listing.add_argument("--status")
@@ -1259,7 +1325,8 @@ def main():
     args = ap.parse_args()
     project = Project(args.project)
     return {"check": cmd_check, "matrix": cmd_matrix, "show": cmd_show, "impact": cmd_impact,
-            "hash": cmd_hash, "status": cmd_status, "list": cmd_list, "audit": cmd_audit, "practices": cmd_practices}[args.command](project, args)
+            "hash": cmd_hash, "status": cmd_status, "list": cmd_list, "audit": cmd_audit, "practices": cmd_practices,
+            "diff": cmd_diff}[args.command](project, args)
 
 
 if __name__ == "__main__":

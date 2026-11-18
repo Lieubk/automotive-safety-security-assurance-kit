@@ -6,6 +6,8 @@ exactly one thing, and expects the engine to report exactly that.
 Run:  python -m unittest discover -s tools/tests -v
 """
 import copy
+import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -642,6 +644,40 @@ class Coverage(Case):
         items["CMR-0001"] = ({"type": "communication-record", "status": "final", "subject": "BL-0001", "audience": ["Customer"],
                               "channel": "release mail", "sent_at": "2026-01-03"}, {})
         self.assertNotIn(("COV-26", "BL-0001"), self.make(items).rules())
+
+
+@unittest.skipUnless(shutil.which("git"), "git is not available")
+class Diff(Case):
+    def git(self, root, *arguments):
+        subprocess.run(["git", "-C", str(root), "-c", "user.name=T", "-c", "user.email=t@example.invalid"] + list(arguments),
+                       check=True, capture_output=True)
+
+    def diff(self, root, *arguments):
+        done = subprocess.run([sys.executable, str(Path(__file__).resolve().parents[1] / "traceability.py"),
+                               "--project", str(root), "diff"] + list(arguments), capture_output=True, text=True)
+        return done.returncode, done.stdout
+
+    def test_the_change_since_the_review_is_shown_from_the_history(self):
+        fixture = self.make()
+        self.git(fixture.root, "init", "-q")
+        self.git(fixture.root, "add", "-A")
+        self.git(fixture.root, "commit", "-q", "-m", "reviewed state")
+        code, out = self.diff(fixture.root, "SWR-0001")
+        self.assertEqual(code, 0, out)
+        self.assertIn("unchanged since REV-0001", out)
+        fixture.edit("SWR-0001", title="Detect an obstacle early")
+        code, out = self.diff(fixture.root, "SWR-0001", "--since", "REV-0001")
+        self.assertEqual(code, 0, out)
+        self.assertIn("-title: Detect obstacle", out)
+        self.assertIn("+title: Detect an obstacle early", out)
+
+    def test_without_the_reviewed_text_the_diff_is_not_assessed(self):
+        fixture = self.make()
+        self.git(fixture.root, "init", "-q")
+        fixture.edit("SWR-0001", title="Detect an obstacle early")
+        code, out = self.diff(fixture.root, "SWR-0001")
+        self.assertEqual(code, 2, out)
+        self.assertIn("NOT ASSESSED", out)
 
 
 class OpenPoints(Case):
