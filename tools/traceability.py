@@ -13,7 +13,7 @@ Commands
     hash [ID ...]      content hashes; with --upstream a ready-to-paste block of
                        subject and references entries for a review record
     status             items per type and state, and the latest verification runs
-    list               IDs with state and title; --type and --status narrow it
+    list               IDs with state and title; --type, --status and --imported narrow it
     audit ID           compare a baseline record with the items as they are now
     practices [PROC]   per base practice of the processes in scope (or of one
                        process): the evidence the project holds and the findings
@@ -99,8 +99,11 @@ def split_sections(body):
     return sections
 
 
+HASH_EXCLUDED = ("status", "source_files")     # state, and the pointer from a unit design to its code
+
+
 def content_hash(front, body):
-    data = {k: v for k, v in front.items() if k != "status"}
+    data = {k: v for k, v in front.items() if k not in HASH_EXCLUDED}
     head = json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=False, default=str)
     lines = [line.rstrip() for line in body.replace("\r\n", "\n").split("\n")]
     text = "\n".join(lines).strip("\n")
@@ -192,10 +195,13 @@ class Project:
             for role in (item.front.get("links") or {}):
                 for target, _ in item.targets(role):
                     self.incoming[target][role].append(item.id)
-            if item.type == "software-interface":          # an interface depends on who provides and who uses it
-                for name in ("provided_by", "used_by"):
-                    for target in as_list(item.front.get(name)):
-                        self.incoming[str(target)][name].append(item.id)
+            if item.type == "software-interface":
+                # a change of the provider can change the interface; a change of the interface
+                # reaches the components that use it
+                for target in as_list(item.front.get("provided_by")):
+                    self.incoming[str(target)]["provided_by"].append(item.id)
+                for user in as_list(item.front.get("used_by")):
+                    self.incoming[item.id]["used_by"].append(str(user))
 
     # ---- helpers
 
@@ -289,6 +295,14 @@ class Project:
                    for e in as_list(rev.front.get("subject"))):
                 found.append(rev)
         return sorted(found, key=lambda r: record_number(r.id))
+
+    def unit_gap(self, rule_id, unit, message):
+        """A verification gap of a unit: an error once the unit has code, pending before."""
+        if as_list(unit.front.get("source_files")):
+            self.gap(rule_id, unit, message)
+        else:
+            self.add("warning" if unit.status == "approved" else "info", rule_id, unit.id,
+                     message + " (pending: the unit has no code yet)", self.own_supports(rule_id, unit))
 
     def approving_review(self, item):
         """The newest final review record that approved this item at its current content, if any."""
@@ -611,10 +625,10 @@ class Project:
             if not self.live(unit) or unit.front.get("origin") in ("generated", "third-party"):
                 continue
             if not self.sources(unit.id, "verifies", ["unit-test"]):
-                self.gap(rule, unit, "no unit test verifies it")
+                self.unit_gap(rule, unit, "no unit test verifies it")
             if unit.id not in analysed:
-                self.gap(rule, unit, "the latest final static analysis run has no entry for it"
-                         if run else "no final static analysis run exists")
+                self.unit_gap(rule, unit, "the latest final static analysis run has no entry for it"
+                              if run else "no final static analysis run exists")
 
     def cov_13(self, rule):
         self.need_incoming(rule, "software-interface", "verifies", ["software-integration-test"],
@@ -835,8 +849,8 @@ class Project:
             entry = by_unit.get(unit.id)
             if entry is None:
                 why = measured if isinstance(measured, str) else "no entry for the unit"
-                self.gap(rule, unit, "structural coverage not measured in %s (%s)" % (run.id, why)
-                         if run else "no final unit test run exists, so structural coverage is not measured")
+                self.unit_gap(rule, unit, "structural coverage not measured in %s (%s)" % (run.id, why)
+                              if run else "no final unit test run exists, so structural coverage is not measured")
                 continue
             for metric, wanted in sorted(target.items()):
                 got = entry.get(metric)
@@ -853,7 +867,7 @@ class Project:
             for function in as_list(unit.front.get("functions")):
                 if isinstance(function, dict) and function.get("category") in ("public", "scheduled", "callback") \
                         and function.get("name") not in named:
-                    self.gap(rule, unit, "no unit test verifies %s#%s" % (unit.id, function.get("name")))
+                    self.unit_gap(rule, unit, "no unit test verifies %s#%s" % (unit.id, function.get("name")))
 
     def cov_30(self, rule):
         supports = self.rules[rule]["supports"]
@@ -986,7 +1000,11 @@ def cmd_show(project, args):
             print("  %-13s -> %s%s  %s" % (role, target, "#" + anchor if anchor else "", other.title if other else "(missing)"))
     for role, sources in sorted(project.incoming[item.id].items()):
         for source in sorted(sources):
-            print("  %-13s <- %s  %s" % (role, source, project.items[source].title))
+            other = project.items.get(source)
+            print("  %-13s <- %s  %s" % (role, source, other.title if other else "(missing)"))
+    for interface in project.of_type("software-interface"):
+        if item.id in map(str, as_list(interface.front.get("used_by"))):
+            print("  %-13s -> %s  %s" % ("uses", interface.id, interface.title))
     return 0
 
 
@@ -1067,9 +1085,12 @@ def cmd_audit(project, args):
             differences.append("%s  content changed: baseline %s, now %s" % (item_id, entry.get("hash"), now.hash))
         elif now.status != entry.get("status"):
             differences.append("%s  status changed: baseline %s, now %s" % (item_id, entry.get("status"), now.status))
+    for item in sorted(project.items.values(), key=lambda i: i.id):
+        if project.types[item.type]["lifecycle"] == "engineering" and item.status == "approved" and item.id not in stored:
+            differences.append("%s  not listed: approved in the project, absent from the baseline" % item.id)
     for line in differences:
         print(line)
-    print("%s (%s, tag %s): %d items listed, %d differ from the project as it is now"
+    print("%s (%s, tag %s): %d items listed, %d differences from the project as it is now"
           % (base.id, base.front.get("purpose"), base.front.get("tag"), len(stored), len(differences)))
     print("run this at the tagged commit to verify the baseline itself; run it later to see what moved on since")
     return 1 if differences else 0
@@ -1077,7 +1098,7 @@ def cmd_audit(project, args):
 
 def cmd_list(project, args):
     for item in sorted(project.items.values(), key=lambda i: (i.type, record_number(i.id))):
-        if (args.type and item.type != args.type) or (args.status and item.status != args.status):
+        if (args.type and item.type != args.type) or (args.status and item.status != args.status)                 or (args.imported and not item.imported):
             continue
         print("%-10s %-11s %-28s %s" % (item.id, item.status, item.type, item.title))
     return 0
@@ -1172,6 +1193,7 @@ def main():
     listing = sub.add_parser("list")
     listing.add_argument("--type")
     listing.add_argument("--status")
+    listing.add_argument("--imported", action="store_true", help="only inputs received from outside the scope")
     practices = sub.add_parser("practices")
     practices.add_argument("process", nargs="?")
     practices.add_argument("--json", action="store_true")

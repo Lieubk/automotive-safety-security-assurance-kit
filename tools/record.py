@@ -45,9 +45,11 @@ Commands
            [--findings FILE] [--checks FILE] [--item-under-test REF] ID [ID ...]
         final review record for the named items at their current content. The
         subject and the references (every upstream item the subject links to)
-        are filled in with content hashes; for software units the hashes of
-        their source files are stored too, so the record says which code was
-        reviewed. Findings FILE is JSON: a list of
+        are filled in with content hashes. With --item-under-test the review
+        counts as a review of the code as well: for software units the hashes
+        of their source files are stored, so the record says which code was
+        reviewed. Without it the record covers the design only, and the trace
+        check keeps asking for a review of the code. Findings FILE is JSON: a list of
         {"id", "item", "text", "severity": "major"|"minor", "state": "open"|"closed",
          "closes": "<REV-ID>#<finding id>"}    (closes is optional)
         Checks FILE is JSON: a list of {"check", "result": "pass"|"finding"|"not-assessed", "note"}.
@@ -333,7 +335,7 @@ def cmd_review(project, args):
         front["item_under_test"] = args.item_under_test
     code = [f for i in args.ids if project.items[i].type == "software-unit"
             for f in project.items[i].front.get("source_files") or []]
-    if code:
+    if code and args.item_under_test:      # naming the code revision is what makes it a review of the code
         front["sources"] = source_hashes(project, code)
     path = write_item(project, "review-record", front)
     print("wrote %s: %s, %d items, %d references, %d findings"
@@ -372,6 +374,11 @@ def cmd_baseline(project, args):
 
 def cmd_communication(project, args):
     problems = ["no such item: %s" % s for s in args.subject if s not in project.items]
+    if args.sent_at:
+        try:
+            datetime.date.fromisoformat(args.sent_at)
+        except ValueError:
+            problems.append("--sent-at must be a date as YYYY-MM-DD, got %r" % args.sent_at)
     if problems:
         return stop(problems)
     front = {

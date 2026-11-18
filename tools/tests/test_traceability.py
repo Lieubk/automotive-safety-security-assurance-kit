@@ -201,6 +201,10 @@ class Hashing(Case):
         front = {"id": "X-1", "title": "t"}
         self.assertEqual(content_hash(front, "\n## A\n\ntext\n"), content_hash(front, "## A  \r\n\r\ntext   \r\n\r\n"))
 
+    def test_registering_the_code_of_a_unit_does_not_change_the_hash(self):
+        front = {"id": "UNT-1", "title": "t"}
+        self.assertEqual(content_hash(front, "text"), content_hash({**front, "source_files": ["src/a.c"]}, "text"))
+
     def test_any_other_change_changes_the_hash(self):
         front = {"id": "X-1", "title": "t"}
         self.assertNotEqual(content_hash(front, "text"), content_hash(front, "text."))
@@ -467,6 +471,20 @@ class Coverage(Case):
         self.assertEqual(fixture.rules("error"), [])
         self.assertIn(("COV-10", "UNT-0001"), fixture.rules("warning"))
 
+    def test_verification_of_a_unit_without_code_is_pending_not_failed(self):
+        items = changed(base_items(), "UNT-0001", source_files=[])
+        del items["UT-0001"], items["RUN-0001"], items["SAR-0001"]
+        fixture = self.make(items, files={"src/unit.c": None, "src/unit.h": None, "tests/test_unit.c": None})
+        self.assertEqual(fixture.rules("error"), [])              # a design baseline is possible with SWE.4 in scope
+        pending = {rule for rule, item in fixture.rules("warning") if item == "UNT-0001"}
+        self.assertLessEqual({"COV-10", "COV-12", "COV-28", "COV-29"}, pending)
+
+    def test_registering_the_code_keeps_the_design_approval(self):
+        items = changed(base_items(), "UNT-0001", source_files=[])
+        fixture = self.make(items)                               # reviewed while the unit listed no code
+        fixture.edit("UNT-0001", source_files=["src/unit.c", "src/unit.h"])
+        self.assertNotIn(("COV-19", "UNT-0001"), fixture.rules())
+
     def test_draft_shows_what_the_next_stage_will_ask_for(self):
         items = changed(base_items(), "SWR-0001", status="draft")
         del items["SWR-0001"][0]["kind"]
@@ -598,6 +616,28 @@ class Coverage(Case):
         items["CMR-0001"] = ({"type": "communication-record", "status": "final", "subject": "BL-0001", "audience": ["Customer"],
                               "channel": "release mail", "sent_at": "2026-01-03"}, {})
         self.assertNotIn(("COV-26", "BL-0001"), self.make(items).rules())
+
+
+class Impact(Case):
+    def downstream(self, fixture, item_id):
+        project = Project(fixture.root)
+        seen, queue = set(), [item_id]
+        while queue:
+            for sources in project.incoming[queue.pop()].values():
+                for source in sources:
+                    if source not in seen and source != item_id:
+                        seen.add(source)
+                        queue.append(source)
+        return seen
+
+    def test_a_requirement_change_reaches_design_and_tests(self):
+        self.assertLessEqual({"UNT-0001", "UT-0001"}, self.downstream(self.make(), "SWR-0001"))
+
+    def test_an_interface_change_reaches_the_components_that_use_it(self):
+        self.assertIn("CMP-0001", self.downstream(self.make(), "IFC-0001"))
+
+    def test_a_component_change_reaches_the_interface_it_provides(self):
+        self.assertIn("IFC-0001", self.downstream(self.make(), "CMP-0002"))
 
 
 class Scope(Case):

@@ -69,6 +69,18 @@ class PreWrite(HookCase):
             "file_path": str(target), "content": text.replace(version, "version: next-delivery") + "\nNew sentence.\n"}}
         self.assertEqual(self.decision(payload)[0], None)
 
+    def test_new_version_of_a_baselined_input_needs_a_change_request(self):
+        self.baseline("SYR-0001")
+        target = self.path("spec/system/requirements/SYR-0001.md")
+        text = target.read_text(encoding="utf-8")
+        import re
+        version = re.search(r"version: *(\S+)", text).group(0)
+        payload = {"tool_name": "Write", "tool_input": {
+            "file_path": str(target), "content": text.replace(version, "version: next-delivery") + "\nNew sentence.\n"}}
+        verdict, reason = self.decision(payload)
+        self.assertEqual(verdict, "deny")
+        self.assertIn("change request", reason)
+
     def test_accepted_imported_input_may_be_marked_obsolete(self):
         verdict, _ = self.decision(self.edit("spec/system/requirements/SYR-0001.md", "status: approved",
                                              "status: obsolete\nsuperseded_by: withdrawn by the customer"))
@@ -126,7 +138,20 @@ class PreWrite(HookCase):
 
     def test_status_change_alone_is_not_a_content_change(self):
         self.baseline("SWR-0001")
-        verdict, _ = self.decision(self.edit("spec/software/requirements/SWR-0001.md", "status: approved", "status: obsolete"))
+        verdict, _ = self.decision(self.edit("spec/software/requirements/SWR-0001.md", "status: approved", "status: in-review"))
+        self.assertIsNone(verdict)
+
+    def test_retiring_a_baselined_item_needs_a_change_request(self):
+        self.baseline("SWR-0001")
+        verdict, reason = self.decision(self.edit("spec/software/requirements/SWR-0001.md", "status: approved",
+                                                  "status: obsolete"))
+        self.assertEqual(verdict, "deny")
+        self.assertIn("retiring", reason)
+
+    def test_registering_code_on_a_baselined_unit_needs_no_change_request(self):
+        self.baseline("UNT-0003")
+        verdict, _ = self.decision(self.edit("spec/software/design/UNT-0003.md", "  - src/antipinch/AntiPinch.c",
+                                             "  - src/antipinch/AntiPinch.c\n  - src/antipinch/AntiPinch_Cfg.h"))
         self.assertIsNone(verdict)
 
 

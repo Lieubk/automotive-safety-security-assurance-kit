@@ -120,8 +120,9 @@ def pre_write(payload):
     if item is None:
         return 0
     front, body = after(trace, payload, path)
-    if front is not None and trace.content_hash(front, body) == item.hash:
-        return 0                                      # only the status changes; the content stays what was reviewed
+    retiring = (front or {}).get("status") in ("obsolete", "rejected") and item.status not in ("obsolete", "rejected")
+    if front is not None and trace.content_hash(front, body) == item.hash and not retiring:
+        return 0                                      # nothing that was reviewed changes
     if item.imported and project.reviews_of(item):
         # accepted through a review: from here on it changes only with its source
         new_version = isinstance((front or {}).get("imported"), dict) and \
@@ -130,7 +131,7 @@ def pre_write(payload):
             return deny("%s is an imported input that has been accepted, and is read-only. A problem with it is a "
                         "query to its source. A new version from the source is registered with /import-inputs, "
                         "which records the new `imported.version`." % item.id)
-        return 0
+        # a new delivery may replace the content - but not inside a baseline without a change request (below)
     if project.types[item.type]["lifecycle"] == "record" and item.status == "final":
         return deny("%s is a final record and is never edited. Create a new record that supersedes it "
                     "(python tools/record.py ...)." % item.id)
@@ -138,12 +139,14 @@ def pre_write(payload):
     holding = [b.id for b in project.of_type("baseline") if b.status == "final" and b.front.get("purpose") not in internal
                and any(isinstance(e, dict) and e.get("item") == item.id and str(e.get("hash")) == item.hash
                        for e in trace.as_list(b.front.get("items")))]
-    if holding and project.types[item.type]["lifecycle"] == "engineering" and not same_statement(trace, item, front, body):
+    if holding and project.types[item.type]["lifecycle"] == "engineering" \
+            and (retiring or not same_statement(trace, item, front, body)):
         permitted = [c.id for c in project.of_type("change-request")
                      if c.status in ("approved", "implemented") and (item.id, None) in c.targets("affects")]
         if not permitted:
-            return deny("%s is part of baseline %s at its current content. Changing it needs an approved change "
-                        "request that names it: run /change-request first." % (item.id, ", ".join(holding)))
+            return deny("%s is part of baseline %s at its current content. Changing or retiring it needs an "
+                        "approved change request that names it: run /change-request first."
+                        % (item.id, ", ".join(holding)))
     return 0
 
 
