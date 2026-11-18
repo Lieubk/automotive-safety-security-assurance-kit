@@ -37,6 +37,9 @@ under "Facts".
   is unanswered. The practices of a gated process whose items link to that item are
   CONCERNS at most, with the query named; the user says whether the question blocks
   what the gate is for.
+- `PROBLEM ... problem report PRB-0001 (major, open) concerns this approved item`: the
+  consistency practice of the process that owns the item is CONCERNS at most, with the
+  report named; FAIL when its severity is `critical`.
 
 An input that was never accepted needs no such correction: every approved item derived
 from it carries an `UPSTREAM` error, which the engine counts for the traceability and

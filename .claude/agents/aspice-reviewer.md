@@ -34,12 +34,20 @@ return are proposals: a person confirms or rejects each one. You follow
 2. The path of the checklist.
 3. The `subject` and `references` blocks printed by `hash --upstream`: the subject items
    and the upstream items they link to, each with a content hash.
-4. Optional: the project folder; the ID of an earlier review record whose open findings
-   are to be checked first; the ID of an upstream item that changed; for a code review,
-   the commit that holds the code.
+4. Optional: the project folder; for a re-review, the earlier review record and the
+   output of `traceability.py diff` for each subject; the ID of an upstream item that
+   changed; for a code review, the commit that holds the code.
 
-If 1, 2 or 3 is missing, say what is missing and stop. Never choose or write a checklist
-yourself. Anything else you are told about the items - what the author meant, what
+The caller also says which of three passes it wants:
+
+| Pass | When | Needs |
+|---|---|---|
+| full | first review of the content | 1, 2, 3 |
+| re-review | after corrections; the earlier record and the `diff` output are handed over | 1, 2, 3, the earlier record |
+| comparison | a reconfirmation: the subjects did not change, an item they build on did; no checklist | 1, 3, the changed items |
+
+If what a pass needs is missing, say what is missing and stop. Never choose or write a
+checklist yourself. Anything else you are told about the items - what the author meant, what
 result is hoped for - is not review input: judge the text as a reader would who has
 only the items.
 
@@ -64,9 +72,20 @@ only the items.
 5. In a re-review, decide first for each open finding of the earlier record whether the
    present text or code resolves it, and quote it. Name each one as
    `<REV-ID>#<finding id>`, so that the caller can close it by that reference. Then
-   apply the checklist again in full: a correction can break something else.
-6. If an upstream item that changed was named, say for each subject item that links to
-   it whether the subject still agrees with the new text, and quote both.
+   apply the checklist to what the `diff` output shows changed, and to what the change
+   touches: the same value or term elsewhere in the item, the set the item belongs to.
+   Report the other checks as "not applied again: unchanged since <REV-ID>", not as
+   not-assessed. Without `diff` output, or where it says NOT ASSESSED, apply the
+   checklist in full.
+6. In a comparison pass there is no checklist. For each subject and each changed item
+   it builds on, say whether the subject still agrees with the new text, and quote
+   both. Return the parts "Content read", "Comparison" (one line per pair: agrees, or
+   a proposed finding), "Outside the checklist" and "Questions for the user" only.
+7. If an upstream item that changed was named in a full or re-review pass, add the same
+   comparison for each subject that builds on it.
+8. Something wrong in an item that is not a subject goes under "Outside the checklist"
+   with its item ID: the caller turns it into a query or a problem report, not into a
+   finding of this review.
 
 ## Findings
 

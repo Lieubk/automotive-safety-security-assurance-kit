@@ -78,16 +78,15 @@ review?" Pass `--item-under-test <commit>` exactly when the answer is yes.
 | in `draft` or `in-review`, or `COV-19`; source files exist | design review, then review of the code |
 | approved; `CONSISTENCY ... a review of the code against the design is not evidenced` | review of the code |
 | approved; `SUSPECT ... the code is no longer the code that was reviewed` | review of the code |
-| approved, has code; `SUSPECT ... suspect link` only | review against the changed upstream item, then review of the code |
+| approved, has code; `SUSPECT ... suspect link` only | reconfirmation against the changed upstream item (`--reconfirm`), which carries the review of the unchanged code over; if the unit has to change, design review, then review of the code |
 
-The newest approving record of a unit decides. A design review or a comparison with a
-changed upstream item, recorded without `--item-under-test`, becomes that record, and
-`check` then prints the `CONSISTENCY` warning about the code again even if an earlier
-record named it. So for a unit that has code the review of the code is the last one
-recorded. In the last row of the table, when neither the unit nor the code changed and
-`check` printed no line about the code beforehand, that review can be short: the
-reviewers confirm the earlier one, and the checks carry its results as `recording.md`
-describes.
+The newest approving record of a unit decides. A design review recorded without
+`--item-under-test` becomes that record, and `check` then prints the `CONSISTENCY`
+warning about the code again even if an earlier record named it. So for a unit that
+has code and a changed design, the review of the code is the last one recorded. A
+reconfirmation is different: it carries the code review of the record it rests on over
+exactly as recorded, so unchanged code needs no new review, and code that changed
+since stays `SUSPECT`.
 
 When the code is part of the review:
 

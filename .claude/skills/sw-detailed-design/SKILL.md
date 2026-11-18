@@ -157,6 +157,9 @@ Run `python tools/traceability.py check --all`.
   "designed but not implemented" until `/sw-unit-implement` has run, and `COV-12`,
   `COV-28`, `COV-29` marked "pending: the unit has no code yet". They do not stand in
   the way of a design baseline. Say so.
+- Expected for a changed unit that already has code: `COV-22` (the code differs from the
+  design: functions or parameters) and `COV-29` for a new function, until
+  `/sw-unit-implement` and `/sw-unit-verify` have followed the approved design.
 - Run `python tools/traceability.py matrix`; quote its `part_of`, `realizes`, `implements` tables.
 
 ## Hand-over

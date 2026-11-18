@@ -44,13 +44,60 @@ Blocks `approved`:   SWR-0011 - still to come before approval: release
 | `state` | `open`: still to be corrected. `closed`: corrected, and a reviewer has confirmed the correction on the present text |
 | `closes` | optional: `<REV-ID>#<finding id>` of the finding of an earlier review that this entry settles |
 
-A reviewer may decide that a finding needs no correction. Then it is `closed` with the
-reason and the reviewer's name in `text`. This is the reviewer's decision; do not
-propose it.
+## Three ways on for a finding
 
-A finding can be `closed` in the same review only if the correction was made before the
-record is written. The content has then changed: repeat the script checks, and have
-the reviewer confirm the correction on the present text.
+Name all three for each confirmed finding; the reviewers choose, finding by finding.
+
+| Way | What happens | Record |
+|---|---|---|
+| Corrected in this sitting | the author corrects with the authoring skill before the record is written; the script checks are repeated, and the reviewers read the corrected passages on the present text | the finding `closed`, the record approves the corrected content |
+| Corrected after the review | the verdict is `rework`; the next review checks what changed (`re-review.md`) | the finding `open` |
+| Closed with a reason | the reviewers decide that the item may stay as it is; the reason and the reviewer's name go into `text` | the finding `closed` |
+
+- A correction made in the sitting needs no new semantic pass of the whole item: the
+  reviewers, or the agent when they want it, read what was changed and what it touches.
+- Closing with a reason is the reviewers' decision; do not propose it. It is not open
+  to an accountable check answered "no", and not to a problem that lies in another item.
+- A `minor` finding is by definition usable as it is. Reviewers often close minor
+  findings with a reason rather than start another round; that too is theirs to say.
+- When every way is taken and nothing new is found in what changed, the review is
+  done. A further pass over unchanged text is not required, and it will usually find
+  something: a semantic pass is a sample of a careful reading, not a proof.
+
+## Problems in items that are not subjects
+
+A review often shows something wrong in an item it only read: a view that is not a
+subject, the requirement a component fulfils, a neighbouring interface. That is not a
+finding of this record - `record.py review` refuses a finding whose `item` is not a
+subject - and it is not to be lost either.
+
+- An imported item: a `query` to its source (below).
+- An item of the project: a `problem-report` that `affects` it, written now, with the
+  user's yes. `check` then warns `PROBLEM` on the item while the report is not resolved.
+  Who resolves it is a matter of problem resolution (SUP.9); where that process is out
+  of scope, the report still keeps the problem visible, and its resolution is the
+  authoring skill of the item followed by `/review`.
+
+```markdown
+---
+id: PRB-0001
+type: problem-report
+title: Run time of the QM task is bounded by nothing
+status: open
+severity: major
+found_in: "review of IFC-0002, CMP-0003, CMP-0004 on <date>, at commit <commit>"
+links:
+  affects: [VIEW-0004]
+---
+
+## Description
+
+VIEW-0004 says ... (quote). Nothing bounds ... Seen while reviewing IFC-0002; VIEW-0004
+was not a subject of that review.
+```
+
+Take the ID from `python tools/record.py next-id problem-report`; the file goes to
+`records/problems/`. `severity` is the reviewers' word.
 
 ## Findings that need the source of an input
 
@@ -62,7 +109,9 @@ the position of detection' can be read in two ways; see QRY-0003."
   (a query appears as `about <- QRY-...`).
 - If no query covers the question, ask: "May I write this question as QRY-nnnn?" Take
   the ID from `python tools/record.py next-id query`, and ask whom the question goes
-  to and on which date it is put. Do not fill in either yourself.
+  to and whether it has been put already. Do not fill in either yourself. A question
+  that is decided but not sent yet is written without `asked_at`: `check` then says
+  that it is not put to its source yet, and `asked_at` is added on the day it is.
 
 ```markdown
 ---
@@ -71,7 +120,7 @@ type: query
 title: Meaning of "position of detection" in SYR-0002
 status: open
 to: "<who the user names at the source of the input>"
-asked_at: "<date the user states>"
+asked_at: "<date the user states; left out while the question is not sent>"
 links:
   about: [SYR-0002]
 ---
@@ -106,7 +155,10 @@ which states that there were none.
 
 JSON, a list with one entry for every check ID of the checklist - script, semantic and
 accountable, every part of the file. The tool reads the IDs from the checklist and
-refuses an approved verdict while one of them has no result.
+refuses an approved verdict while one of them has no result. A whole section that does
+not concern the subjects - "Each view" when no view is a subject - is one entry:
+`{"section": "Each view", "result": "not-applicable", "note": "no view among the subjects"}`;
+the tool records it for every check of that section the file does not list.
 
 | Field | Content |
 |---|---|
@@ -133,6 +185,9 @@ The example is shortened; a real file has all 20 check IDs of that checklist.
   of plan. It is not a way around a check that is inconvenient.
 - `not-assessed` is honest and blocks approval. Do not leave out a check to avoid it,
   and do not turn it into `not-applicable`.
+- A semantic check that waits for an answer only a person can give - a question of the
+  agent that the user cannot answer yet - is `not-assessed`, with the question in the
+  note, unless the reviewers turn the question into a finding.
 - An accountable check whose answer depends on something that has not happened yet -
   a decision of a board, an acceptance by the person responsible for functional safety -
   stays `not-assessed`. Then no approving record is written: the items stay `in-review`,
@@ -147,9 +202,11 @@ The example is shortened; a real file has all 20 check IDs of that checklist.
 - The agreement of those who build on the items - developers, integration, the customer -
   is not a check of an item checklist. It follows the approval and is recorded by
   `/baseline` as a communication record.
-- A check is never `pass` because an earlier record said so. Items that did not change
-  and are only compared with a changed upstream item are recorded with `--reconfirm`
-  (`re-review.md`), which needs no checks file.
+- A check is `pass` only for text that was read against it: in this review, or, in a
+  re-review, in the earlier record for passages that `traceability.py diff` shows
+  unchanged - the note then names that record. Items that did not change at all and
+  are compared with a changed upstream item are recorded with `--reconfirm`
+  (`re-review.md`), which takes no checks file.
 
 ## The command
 
@@ -190,6 +247,7 @@ wrote records/reviews/REV-0007.md: rework, 2 items, 3 references, 2 findings
 | `id` | the next free review record number |
 | `status: final` | a record is final when written |
 | `checklist_source` | `toolkit`, `external` with `--external-criteria`, or `reconfirmation` with `--reconfirm` |
+| `rests_on` | only with `--reconfirm`: the approving records of the subjects whose checks the reconfirmation does not repeat |
 | `reviewed_at` | the date of the command |
 | `subject` | the IDs given, each with its content hash at this moment |
 | `references` | every item the subject builds on that is not itself a subject, with its content hash: the items it links to and, for a component, the interfaces that name it as provider or user |
@@ -204,6 +262,9 @@ wrote records/reviews/REV-0007.md: rework, 2 items, 3 references, 2 findings
 | a finding without `severity` major or minor, or without `state` open or closed | `finding <id> needs severity major\|minor and state open\|closed` |
 | a check with a result that is not one of the four, or an ID the checklist does not have | `check <id> needs result ...`, `check <id> is not in <file>` |
 | `not-applicable` without a note | `check <id> is not-applicable: the note must say why` |
+| a finding on an item that is not a subject | `finding <id> is on <ID>, which is not a subject of this review ...` |
+| a section entry that names no section of the checklist, or gives another result than `not-applicable` | `section '<name>' is not a section of <file>`, `only not-applicable ... can be given for a whole section` |
+| `--reconfirm` with `--checks`, `--item-under-test` or `--external-criteria` | `--reconfirm applies no checklist ...`, `... cannot be combined ...` |
 | verdict `approved` while a finding is `open` | `verdict approved is not possible while a finding is open` |
 | verdict `approved` while a check of the checklist has no result | `verdict approved needs a result for every check of <file> (--checks); none for: <IDs>` |
 | verdict `approved` while a check is `not-assessed` | `verdict approved is not possible while checks are not assessed: <IDs>` |

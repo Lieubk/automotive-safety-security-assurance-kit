@@ -104,6 +104,8 @@ Report conflicts and risks to the user as a list; they decide what happens with 
 ### 7. Trace
 - `links.derived_from`: every parent, by ID. Check each link in both directions:
   the child follows from the parent, and together the children cover the parent.
+- `links.relies_on`: every software requirement whose term, value or behaviour this one
+  uses ("the report of SWR-0010", "the closing movement as SWR-0006 defines it").
 - Do not allocate here. `/sw-architecture` records the allocation on the architecture
   side (`fulfils`), so that it does not change requirements that are already approved.
 

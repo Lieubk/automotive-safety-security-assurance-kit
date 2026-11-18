@@ -19,6 +19,7 @@ verification_method: test
 origin: derived
 links:
   derived_from: [SYR-0002]
+  # relies_on: [SWR-0003]   # only where the statement uses what another requirement defines
 ---
 
 ## Statement

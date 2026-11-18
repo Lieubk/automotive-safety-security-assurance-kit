@@ -152,7 +152,8 @@ Question 3:
 | Rule | The message says | Recommend |
 |---|---|---|
 | `UPSTREAM` | `approved, but <target> (<role>) is in state draft` or `in-review` | the item rests on something not approved. Recommend `/review` of the target first; if the target is an input, its acceptance review. The tool refuses to approve anything above it until then |
-| `QUERY` | `open query <QRY-ID> is about this approved item` | a question to the source is open. The item stays approved; say what waits for the answer. The user gets the answer; `/import-inputs <QRY-ID>` records it |
+| `QUERY` | `open query <QRY-ID> is about this approved item` | a question to the source is open. The item stays approved; say what waits for the answer. The user gets the answer; `/import-inputs <QRY-ID>` records it. With "(not put to its source yet)": the question still has to be sent; the user adds `asked_at` when it is |
+| `PROBLEM` | `problem report <PRB-ID> (...) concerns this approved item` | a known problem in the item is not resolved. Recommend the authoring skill of the item, then `/review`; inside a baseline `/change-request` first |
 | `COV-19` | `review ... left findings open: ...` on an item in `draft` or `in-review` | the last review of the item ended in rework. Recommend the authoring skill to work on the findings, then `/review`; for an imported input the finding cites a query, and the next step is the answer to it |
 | `COV-19` | `stale approval: content changed since review ...` or `approved, but no final review record covers it` | `/review` |
 | `COV-19` | `review ... still has open findings`, or an earlier finding on the same content `open and not closed by a later finding entry` | the authoring skill to rework the item, then `/review`, which closes the earlier finding explicitly |

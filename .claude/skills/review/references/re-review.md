@@ -10,18 +10,24 @@ trace check reports.
 1. The author corrects with the authoring skill. `python tools/traceability.py
    check --all` shows which items still carry the findings of their last review:
    `COV-19 ... review REV-0007 left findings open: F1`. That line goes when the content
-   changes. Run `python tools/traceability.py hash <ID> ...` and compare with `subject`
-   of the earlier record. A different hash: the item was corrected. The same hash: the
-   item was not touched - as after a review whose findings were all against the code.
-2. Run `/review` for the items. In step 5 hand the reviewing agent the ID of the
-   earlier record as well. It first decides for each open finding whether the present
-   text or code resolves it, then applies the whole checklist again, because a
-   correction can break something else.
-3. In the new findings file every finding of the earlier record appears again: with a
+   changes.
+2. Run `python tools/traceability.py diff <ID> --since <REV-ID>` for each item. It
+   prints what changed since the earlier review saw the item, from the version-control
+   history. "unchanged" means the item was not touched - as after a review whose
+   findings were all against the code. "NOT ASSESSED ... cannot be found" means the
+   reviewed text was never committed: then the whole item is reviewed again, and from
+   now on the record and the items are committed after each review.
+3. Run `/review` for the items. In step 5 hand the reviewing agent the earlier record
+   and the `diff` output. It decides for each open finding whether the present text
+   resolves it, then applies the checklist to the changed passages and to whatever
+   they touch - another section that states the same value, the set the item belongs
+   to - not to the unchanged rest. The checks it did not apply again keep the result of
+   the earlier record, with a note that names it.
+4. In the new findings file every finding of the earlier record appears again: with a
    new `id` of this record, `closes` naming the earlier finding, its origin at the start
    of `text`, and the state a reviewer confirmed - `closed` when it is resolved, `open`
    when it is not. New findings follow.
-4. The new record is the evidence that the findings were closed. The earlier record
+5. The new record is the evidence that the findings were closed. The earlier record
    keeps saying `rework` with open findings, and that stays true for what it describes.
 
 `closes` is what the tool looks at when the content is the same as in the earlier

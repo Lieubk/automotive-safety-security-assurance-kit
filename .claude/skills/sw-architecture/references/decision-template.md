@@ -93,7 +93,7 @@ SYE-0001), and the consequence names the query by its ID. The layout of a query 
 | `Context` | before review | the question, why it has to be decided now, what it fixes for others |
 | `Evaluation criteria` | before review | the criteria, each decidable, with weight or rank |
 | `Alternatives` | before review | each alternative described, and assessed against each criterion |
-| `Decision` | before approval | the chosen alternative and why, as the user decided it |
+| `Decision` | before approval | the chosen alternative and why, and who decided - name or role and date, as the user states it |
 | `Consequences` | before approval | what follows for components, interfaces, views and other parties; what is accepted |
 | `links.concerns` | every decision | the components, interfaces and views the decision shapes; for an ASIL decomposition also every requirement whose ASIL is lower than that of its source |
 
@@ -114,8 +114,10 @@ alternative against every criterion in one table, with the reason in the cell. N
 are derived in the cell or by reference to an item, not asserted. If a scoring scheme
 is used, state it; the scheme supports the reasoning and does not replace it.
 
-**Decision.** One alternative, and the reason in terms of the criteria. The person who
-decides is the user or whoever the user names. A decision the skill only proposes is
+**Decision.** One alternative, the reason in terms of the criteria, and who decided:
+ask "Who takes this decision, in which role?" and write the answer, for example
+"Decided by the software lead, <name as stated>, on <date>". "The user" is not an
+answer a reviewer can check (ARC-67). A decision the skill only proposes is
 labelled as a proposal in the conversation and is not written into the item.
 
 **Consequences.** What the choice costs and what others must now do: new interfaces,

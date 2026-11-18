@@ -7,20 +7,16 @@ allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Agent, Bash(pytho
 
 # Review
 
-Prepares a review so that people can decide on facts, and records what they decided.
-The skill runs the script checks, has the semantic checks of the checklist applied by a
-reviewing agent that cannot write, puts findings and open questions before the user,
-and writes the review record with `tools/record.py` once named people have given a
-verdict. It covers every item type of the `engineering` lifecycle, plans included, the
-input acceptance review of imported items, and the review of unit code against its
-design. Nothing else sets an item to `approved`.
+Prepares a review so that people can decide on facts, and records what they decided:
+script checks, semantic checks against the checklist, findings confirmed by people, a
+record written by `tools/record.py`. It covers engineering items and plans, the input
+acceptance of imported items, and unit code. Nothing else sets an item to `approved`.
 
 | Base practice | What this skill does | Evidence it leaves |
 |---|---|---|
 | SUP.1.BP2 | has each item checked against a versioned checklist and records the result of every check | `review-record`: checklist, `checks`, reviewers, verdict, findings |
 | SYS.2.BP7, SYS.3.BP7, SYS.4.BP8, SYS.5.BP6, SWE.1.BP7, SWE.2.BP8, SWE.3.BP6, SWE.4.BP6, SWE.5.BP8, SWE.6.BP6 (those in scope) | has the subject compared with every upstream item it links to, and a unit with its code, each at a recorded hash | `subject`, `references` and `sources` of the review record |
-| SUP.1.BP1 | not done here: the quality assurance strategy is a `plan` of kind `quality-assurance`; this skill reviews it like any plan | - |
-| SUP.1.BP3, SUP.1.BP4, SUP.1.BP5, SUP.1.BP6 | not done here: checks of process activities, reporting, resolution of deviations and escalation lie with the people that plan names | - |
+| SUP.1.BP1, SUP.1.BP3 to SUP.1.BP6 | not done here: the quality assurance strategy is a `plan` of kind `quality-assurance`, reviewed like any plan; process checks, reporting, resolution and escalation lie with the people it names | - |
 
 Whether a review counts as quality assurance depends on who reviewed: the quality
 assurance plan says how independent that person must be. The agent is never that person.
@@ -39,9 +35,8 @@ assurance plan says how independent that person must be. The agent is never that
    `plan`, its `kind` under `plan_kinds`) and items marked `imported`. For an item that
    is neither, stop: it comes from outside the scope and is registered with
    `/import-inputs`.
-5. Change requests, problem reports and queries are not reviewed here, although the tool
-   would take their IDs. The review of a change request's implementation is prepared
-   and recorded by `/change-request`.
+5. Change requests, problem reports and queries are not reviewed here; the review of a
+   change request's implementation belongs to `/change-request`.
 6. If nothing is waiting (step 1), say so and stop.
 
 ## Steps
@@ -93,31 +88,38 @@ assurance plan says how independent that person must be. The agent is never that
   `conditions` of the schema for the type as well; the preview does not cover them.
 - Run `python tools/traceability.py hash --upstream <ID> ...` and keep the output:
   `references` is the list of items the subject has to be compared with.
-- For a unit that has code (files under `source_files` exist) ask: "Is the code part of
-  this review?" If yes: the code checklist applies, the unit must already be approved,
-  and the user names the commit and confirms that the working tree is clean at it. If
-  no: say that the record covers the design only and that `check` keeps a
-  `CONSISTENCY` warning on the unit until a review of the code follows.
+- For a unit that has code ask: "Is the code part of this review?" If yes, the user
+  names the commit and confirms the working tree is clean at it. `references/scoping.md`,
+  "Units and their code", says what follows from each answer.
 
 ### 5. Semantic checks
-- Delegate to the agent `aspice-reviewer`. Hand over the subject IDs, the path of the
-  checklist, the output of `hash --upstream`, and the project folder if it is not the
-  current one. Hand over nothing else: no explanation by the author, no hoped-for result.
-- It returns a result for every semantic check: `pass`, `finding` with the text it rests
-  on, `not-applicable` or `not-assessed`, each with the reason.
-- If the agent is not available (agent definitions load when a session starts; a new
-  session makes it available), or the review has at most three items, you may apply the
-  semantic checks yourself in the format of `.claude/agents/aspice-reviewer.md`. Then
-  tell the user, and repeat in the hand-over: "No independent pass took place." Say
-  also when this session drafted the items.
+- Two ways; say what each costs and let the user choose. The agent `aspice-reviewer`
+  is independent and reads every subject and upstream item in full on a strong model:
+  minutes per pass, and the largest share of the cost of a review. Applying the checks
+  in this session is cheaper and not independent; it is allowed for at most three
+  items, or when the agent is not available (agent definitions load when a session
+  starts). Then use the format of `.claude/agents/aspice-reviewer.md` and say, here and
+  in the hand-over: "No independent pass took place." Say also when this session
+  drafted the items.
+- Hand the agent the subject IDs, the path of the checklist, the output of
+  `hash --upstream`, and the project folder if it is not the current one. In a
+  re-review add the earlier record and, per subject, the output of
+  `python tools/traceability.py diff <ID> --since <REV-ID>` (`references/re-review.md`).
+  Hand over nothing else: no explanation by the author, no hoped-for result.
+- It returns a result for every semantic check - `pass`, `finding` with the text it
+  rests on, `not-applicable` or `not-assessed` - with the reason, and its questions.
 
 ### 6. Findings and accountable checks
 - Read `references/recording.md`. Present one overview, labelled by source:
   script findings (quoted), proposed semantic findings (item, check, severity, quoted
-  text, what is wrong, what would fix it), checks not assessed, open queries.
+  text, what is wrong, what would fix it), checks not assessed, questions, open queries.
 - The user accepts, rejects, changes or adds findings. Only what a person confirms
-  becomes a finding. A finding that only the source of an input can settle cites a
-  `query` item by ID; if none exists, ask to write one (`references/recording.md`).
+  becomes a finding. For each one name the three ways on, without recommending one:
+  corrected in this sitting, corrected after a `rework` verdict, or closed with a reason
+  the reviewers give (`references/recording.md`).
+- A problem in an item that is not a subject is not a finding of this review: it
+  becomes a query (imported item) or a problem report (item of the project). A question
+  nobody can answer yet leaves its check `not-assessed`. Both: `references/recording.md`.
 - Ask every `accountable` check of the checklist as a question and note who answered.
   "Yes" is `pass`. "No" is a `finding` that no reviewer's decision closes: the verdict
   is `rework`. "Not yet", or nobody who could answer, is `not-assessed`: do not press
@@ -127,8 +129,9 @@ assurance plan says how independent that person must be. The agent is never that
 ### 7. Reviewers and verdict
 - Ask who is accountable for the verdict. Offer the names under `people` in
   `project.yaml`; if the key is absent or empty, ask, and do not assume anyone. Ask who
-  wrote the items: at least one reviewer must be someone else. If there is none, stop
-  before recording. A model, an agent or a tool is never a reviewer.
+  wrote the items: at least one reviewer must be someone else, and more where
+  `conventions.review_independence` asks for it. If there is none, stop before
+  recording. A model, an agent or a tool is never a reviewer.
 - Say what stands against `approved`. The tool refuses it while a finding is open,
   while a check has no result or is `not-assessed`, while an accountable check is
   answered with a finding, while an item the subject builds on is not approved, and
@@ -137,35 +140,34 @@ assurance plan says how independent that person must be. The agent is never that
   `approved` or `rework`. Do not propose one.
 
 ### 8. Record, and review again when needed
-Record the review and set the status as described under Writing.
-Read `references/re-review.md` when findings were corrected after a `rework` verdict,
-when code changed, or when an upstream item changed (`python tools/traceability.py
-impact <ID>` lists what depends on it). An item that did not change itself is confirmed
-against the new upstream version with `record.py review --reconfirm`, without the
-checklist. Findings are closed by a new review, with an entry that names the earlier
-finding under `closes`, never by editing the earlier record.
+Record the review and set the status as described under Writing. Read
+`references/re-review.md` when findings were corrected after a `rework` verdict, when
+code changed, or when an upstream item changed. A re-review reads what changed since
+the earlier record, not the whole item again. An item that did not change itself is
+confirmed against a new upstream version with `record.py review --reconfirm`, without
+the checklist. Findings are closed by a new review, with an entry that names the
+earlier finding under `closes`, never by editing the earlier record.
 
 ## Writing
 
 - Run `python tools/traceability.py hash <ID> ...` and compare with step 4. A different
   hash means the content changed after the checks: go back to step 4 for that item.
 - Write two JSON files outside the item folders, for example under `build/`: the
-  confirmed findings, and one result for every check ID of the checklist (`pass`,
-  `finding`, `not-applicable` with the reason, `not-assessed`), as in `recording.md`.
+  confirmed findings, and the results of the checks, as in `recording.md`.
 - Ask: "May I record this review: N items, checklist <name and version>, reviewers
   <names>, verdict <verdict>, M findings, K checks not assessed?"
-- Run `python tools/record.py review --checklist "<name> v<N>" --reviewer "<name>"
-  --verdict approved|rework --checks FILE [--findings FILE] [--item-under-test REF]
-  <ID> ...`, with one `--reviewer` per person. Pass `--item-under-test <commit>` exactly
-  when the code of the units was part of the review: only then does the tool store the
-  hashes of their source files. Pass `--external-criteria` only when the user named
-  criteria from outside the toolkit. The tool assigns the ID and fills in the date,
-  `subject` and `references`.
+- Run `python tools/record.py review` as `recording.md` shows, with one `--reviewer` per
+  person, `--item-under-test <commit>` exactly when the code of the units was part of
+  the review, `--external-criteria` only when the user named criteria from outside the
+  toolkit. The tool assigns the ID and fills in date, `subject` and `references`.
 - When the tool refuses ("no record written"), do not change a finding's state or a
   check's result to get past it; go back to the user.
 - Then set the status, changing the `status` line only: `approved` when the verdict is
   approved, `draft` when it is rework (the table in `references/recording.md` has the
   cases where an approved item keeps its status). Record first, status second.
+- Propose a commit of the record, the items and any query or problem report written:
+  a later re-review finds the reviewed text only in a commit, and a code review names
+  one. Commit on the user's yes.
 
 ## Checks before you finish
 
@@ -187,7 +189,8 @@ Report, in this order:
 3. Checks not assessed and why, with the answer that is awaited and from whom; whether
    an independent pass took place; proposals the user rejected (count); for units with
    code, whether a review of the code is still owed.
-4. Open queries by ID, each with the items it is about and whom it was put to.
+4. Open queries and problem reports by ID, each with the items it is about; for a
+   query whom it was put to, or that it is not sent yet.
 5. Next: the authoring skill for items in `draft`, then `/review` again; `/baseline`
    when the set is approved; `/trace-check` for what the check still reports.
 

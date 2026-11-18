@@ -53,7 +53,7 @@ obstacle is reported? The reversal travel of the software depends on it.
 | Part | Rule |
 |---|---|
 | `to` | who the question goes to at the source, by role or by the name the user gives |
-| `asked_at` | the day the question is put to the source, quoted. Ask the user; the toolkit sends nothing itself |
+| `asked_at` | the day the question is put to the source, quoted. Ask the user; the toolkit sends nothing itself. Left out while the question is written down but not sent; `check` then says "not put to its source yet" |
 | `about` | the IDs of the inputs the question concerns; they must be registered |
 | `Question` | the passage quoted with the identifier and version of the source, so that the source can find it without knowing the project's IDs; one question that can be answered; what depends on the answer |
 | `title` | a few words for lists |

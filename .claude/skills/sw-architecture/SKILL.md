@@ -148,8 +148,8 @@ proposals; correct what the user accepts.
   `interface-template.md`, `view-templates.md` and `decision-template.md` in `references/`.
 - The allocation is written as `links.fulfils` on the element; no requirement is edited.
 - Before changing an approved architecture item, say that its approval becomes stale
-  and run `python tools/traceability.py impact <ID>` to show what depends on it. Write
-  the changed item with `status: draft`; what depends on it stays as it is and is
+  and run `python tools/traceability.py impact <ID>` to show what depends on it. Change
+  the `status` line to `draft` first, then the content; what depends on it stays as it is and is
   reported as `UPSTREAM` and, once the item is approved again, as `SUSPECT`.
 - An element the user withdraws becomes `obsolete` with `superseded_by`, after every
   link to it has moved: `LINK` and `COV-24` report links to an obsolete item.

@@ -16,6 +16,7 @@ example is `examples/power-window`). They need Python 3 and PyYAML.
 | `show <ID>` | read one item's links in both directions | what it links to, what links to it; for a component also the interfaces it provides and uses |
 | `impact <ID>` | see what a change to an item affects | every item that depends on it, by distance |
 | `audit <BL-ID>` | compare a baseline record with the items as they are now | one line per difference; exit code 1 when there are any |
+| `diff <ID> [--since REV-ID]` | see what changed in an item since a review saw it; the reviewed text is taken from the git history by its content hash | a unified diff; "unchanged"; or NOT ASSESSED with exit code 2 when the reviewed text is in no commit |
 | `matrix` | produce the traceability tables for the link pairs in scope | Markdown tables |
 | `hash [ID ...]` | get content hashes | `ID hash` per line |
 | `hash --upstream ID ...` | prepare a review | `subject` and `references` blocks |
@@ -39,7 +40,8 @@ in review, or missing consistency evidence), `info` (drafts). Rule names: `FORMA
 `schema/items.yaml`), `SUSPECT` (an upstream item, or the code of a unit, changed after
 the review), `CONSISTENCY` (a review did not record what the item was compared with, or
 did not record the code of a unit), `UPSTREAM` (approved above something that is not),
-`QUERY` (an open query is about an approved item).
+`QUERY` (an open query is about an approved item), `PROBLEM` (an unresolved problem
+report affects an approved item).
 
 Only the coverage rules of processes in `scope.processes` of `project.yaml` are
 active. The summary line says how many.
@@ -78,7 +80,18 @@ module text). Records are final when written and are never edited afterwards.
 - An approved item whose upstream item is still in draft or in review is reported as
   `UPSTREAM`; `record.py review` refuses to approve it. Approve from the top down.
 - A question to the source of an input is a `query` item with an `about` link. While it is
-  open, `QUERY` warns on every approved item it is about.
+  open, `QUERY` warns on every approved item it is about, and says so when the question
+  has no `asked_at` yet, that is, it has not been put to its source.
+- A problem found in an item of the project outside a review of it is a
+  `problem-report` with an `affects` link; `PROBLEM` warns on the approved item until the
+  report is resolved. `record.py review` refuses a finding on an item that is not a
+  subject.
+- A requirement that uses what another requirement of its level defines links to it
+  with `relies_on`; a change of that requirement then makes it suspect.
+- While an item is in draft or in review, what builds on it is reported as `UPSTREAM`
+  only; once it is approved again, as `SUSPECT` until the comparison is recorded.
+- A re-review reads what changed: `diff <ID> --since <REV-ID>` finds the reviewed text
+  in the git history. Commit items and records after each review, or it cannot.
 - A draft or in-review item whose last review left findings open shows them under `COV-19`
   in `check --all`.
 - A unit may be approved as a design before it has code; the check then reports it as
