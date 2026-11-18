@@ -649,7 +649,7 @@ class Coverage(Case):
 @unittest.skipUnless(shutil.which("git"), "git is not available")
 class Diff(Case):
     def git(self, root, *arguments):
-        subprocess.run(["git", "-C", str(root), "-c", "user.name=T", "-c", "user.email=t@example.invalid"] + list(arguments),
+        subprocess.run(["git", "-C", str(root), "-c", "user.name=T", "-c", "user.email=tester"] + list(arguments),
                        check=True, capture_output=True)
 
     def diff(self, root, *arguments):
