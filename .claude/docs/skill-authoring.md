@@ -1,0 +1,99 @@
+# Writing skills and agents for this toolkit
+
+Read [working-agreement.md](working-agreement.md) and [tools.md](tools.md) first. This
+page says how a skill is built so that all of them behave the same way.
+`python tools/skill_lint.py` checks the mechanical parts.
+
+## Anatomy
+
+```
+.claude/skills/<name>/
+  SKILL.md            what to do, step by step; at most about 160 lines
+  references/*.md     detail read on demand: templates, rules, worked examples
+.claude/docs/checklists/<work-product>.md    review checklists, shared by the
+                                             authoring skill and the review skill
+```
+
+`SKILL.md` front matter:
+
+```yaml
+---
+name: sw-requirements                 # equals the folder name
+description: "<what it does, for which process, and when to use it>"
+argument-hint: "[what the user may pass]"
+allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Bash(python tools/traceability.py *), Bash(python tools/record.py *)
+---
+```
+
+Add `Agent` to `allowed-tools` only when the skill delegates. Do not pin a model.
+Do not run shell commands at load time; the first step runs them.
+
+## Sections of SKILL.md, in this order
+
+1. **Title and purpose** - one paragraph, then a table
+   `| Base practice | What this skill does | Evidence it leaves |` with one row per base
+   practice of the process. A practice the skill does not cover gets a row that says
+   so and names what covers it.
+2. **Before you start** - the preconditions and what to say when one fails:
+   - no `project.yaml`: stop, point to `/aspice-start`;
+   - process not in `scope.processes`: stop, say it is out of scope;
+   - required inputs missing or not approved: stop, name them and the skill that
+     produces them.
+   Then run `status` and `check` and read the result before reading any item.
+3. **Steps** - numbered. Each step says what to do, which command gives the facts,
+   what to ask the user, and what gets written. Detail lives in `references/`; the
+   step says when to read which file.
+4. **Writing** - IDs from `python tools/record.py next-id <type>`, the folder of the
+   type, status `draft`, and the question asked before anything is written.
+5. **Checks before you finish** - run `check`. Structural findings (`FORMAT`,
+   `SCHEMA`, `LINK`) on items written in this session are fixed. Coverage findings
+   are reported as they are, not explained away.
+6. **Hand-over** - the closing report: the base practice table again with what was
+   done, the evidence, and what is open; the next skill to run.
+7. **Do not** - the boundaries specific to this skill.
+
+## Rules for the text
+
+- Write instructions, not descriptions: "Run ...", "Ask ...", "Write ...".
+- A skill reads items by ID. It does not load a whole folder to "get an overview";
+  `status`, `matrix` and `show` give the overview.
+- Every process, base practice and work product ID comes from `aspice/3.1/`; every
+  item type, attribute, section and link role from `schema/items.yaml`. Do not invent
+  either. Do not quote the text of Automotive SPICE or of any other standard; refer to
+  IDs and say what is expected in your own words.
+- A skill never sets `status: approved`, never writes a review verdict on its own,
+  and never edits an imported item or a final record. Approval goes through `/review`.
+- Where a tool is needed that may be missing (compiler, analyser, coverage tool), the
+  skill checks for it and reports `NOT ASSESSED` with the reason instead of skipping.
+- Examples use the power window domain of `examples/power-window`. Nothing from a real
+  project appears in a skill: no product, customer or person names, no identifiers.
+- Plain Markdown, ASCII punctuation, lines up to about 100 characters.
+
+## Checklists
+
+`.claude/docs/checklists/<work-product>.md`:
+
+```
+# <Work product> review checklist
+Applies to: <item types>    Supports: <BP IDs>
+| ID | Check | How to check | Kind |
+```
+
+`Kind` is `script` (the trace engine or another tool answers it - name the rule or
+command), `semantic` (needs reading and judgement; a model may propose, a person
+confirms) or `accountable` (only a person can state it). A checklist has a version
+line at the top; review records cite the checklist with its version.
+
+## Agents
+
+`.claude/agents/<name>.md` front matter: `name`, `description` (when to use it),
+`tools`. An agent is a role with a boundary:
+
+- what it owns (item types and folders it may write);
+- what it may only read;
+- that it returns drafts and findings to whoever called it, and that questions for the
+  user go back through the caller;
+- that it follows the working agreement.
+
+The reviewing agent has no write tools at all: independence is a property of what it
+can do, not of what it is told.

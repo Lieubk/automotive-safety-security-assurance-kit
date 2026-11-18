@@ -40,12 +40,25 @@ Commands
         The reviewer names are the people accountable for the verdict: pass what
         the user states, never an invented name.
 
+    baseline --tag TAG --purpose TEXT
+        final baseline record: every plan and engineering item with its content
+        hash and status. Refused while the trace check reports errors, unless the
+        purpose is one of `trace.internal_baselines` of project.yaml. The version
+        control tag itself is set by whoever runs the command, after the record
+        is committed.
+
+    communication --subject ID [--subject ID ...] --audience WHO [--audience WHO ...]
+                  --channel TEXT [--agreement TEXT]
+        final communication record: what was made known to whom and how, and,
+        with --agreement, what was agreed. Pass what the user states happened.
+
 Options
     --project DIR      project root (default: current directory)
 
 Requires PyYAML.
 """
 import argparse
+import datetime
 import json
 import shutil
 import sys
@@ -231,6 +244,50 @@ def cmd_review(project, args):
     return 0
 
 
+def cmd_baseline(project, args):
+    internal = (project.config.get("trace") or {}).get("internal_baselines") or []
+    errors = [f for f in project.check() if f["level"] == "error"]
+    if errors and args.purpose not in internal:
+        return stop(["the trace check reports %d errors; a baseline with purpose '%s' needs none"
+                     % (len(errors), args.purpose)]
+                    + ["  %s %s %s" % (f["rule"], f["item"], f["message"]) for f in errors[:10]])
+    members = [i for i in project.items.values()
+               if project.types[i.type]["lifecycle"] != "record" and project.live(i)]
+    front = {
+        "id": next_id(project, "baseline"),
+        "type": "baseline",
+        "status": "final",
+        "tag": args.tag,
+        "purpose": args.purpose,
+        "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+        "items": [{"item": i.id, "hash": i.hash, "status": i.status} for i in sorted(members, key=lambda i: i.id)],
+    }
+    path = write_item(project, "baseline", front)
+    print("wrote %s: %d items, purpose %s, tag %s (set the tag after committing the record)"
+          % (path, len(members), args.purpose, args.tag))
+    return 0
+
+
+def cmd_communication(project, args):
+    problems = ["no such item: %s" % s for s in args.subject if s not in project.items]
+    if problems:
+        return stop(problems)
+    front = {
+        "id": next_id(project, "communication-record"),
+        "type": "communication-record",
+        "status": "final",
+        "subject": args.subject if len(args.subject) > 1 else args.subject[0],
+        "audience": args.audience,
+        "channel": args.channel,
+        "sent_at": datetime.date.today().isoformat(),
+    }
+    if args.agreement:
+        front["agreement"] = args.agreement
+    path = write_item(project, "communication-record", front)
+    print("wrote %s: %s to %s" % (path, ", ".join(args.subject), ", ".join(args.audience)))
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--project", default=".")
@@ -250,9 +307,18 @@ def main():
     review.add_argument("--verdict", required=True, choices=["approved", "rework"])
     review.add_argument("--findings")
     review.add_argument("ids", nargs="+")
+    baseline = sub.add_parser("baseline")
+    baseline.add_argument("--tag", required=True)
+    baseline.add_argument("--purpose", required=True)
+    told = sub.add_parser("communication")
+    told.add_argument("--subject", required=True, action="append")
+    told.add_argument("--audience", required=True, action="append")
+    told.add_argument("--channel", required=True)
+    told.add_argument("--agreement")
     args = ap.parse_args()
     project = Project(args.project)
-    commands = {"next-id": cmd_next_id, "test-run": cmd_test_run, "analysis-run": cmd_analysis_run, "review": cmd_review}
+    commands = {"next-id": cmd_next_id, "test-run": cmd_test_run, "analysis-run": cmd_analysis_run,
+                "review": cmd_review, "baseline": cmd_baseline, "communication": cmd_communication}
     return commands[args.command](project, args)
 
 

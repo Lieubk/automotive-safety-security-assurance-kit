@@ -324,7 +324,7 @@ types:
     prefix: UT
     folder: verification/unit
     lifecycle: engineering
-    supports: [SWE.4.BP2, SWE.4.BP3, "08-50"]
+    supports: [SWE.4.BP2, "08-50"]
     attributes: {use: [common, test-case]}
     sections: {Preconditions: optional, Steps: before-review, Expected result: before-review}
 
@@ -364,7 +364,7 @@ types:
     prefix: RUN
     folder: verification/runs
     lifecycle: record
-    supports: [SWE.4.BP4, SWE.5.BP6, SWE.6.BP4, SYS.4.BP6, SYS.5.BP4, "13-50"]
+    supports: [SWE.4.BP4, SWE.5.BP5, SWE.5.BP6, SWE.6.BP3, SWE.6.BP4, SYS.4.BP5, SYS.4.BP6, SYS.5.BP3, SYS.5.BP4, "13-50"]   # a run records which test cases were selected and what they showed
     attributes:
       id: {required: always}
       type: {required: always}
@@ -453,13 +453,14 @@ types:
     prefix: BL
     folder: records/baselines
     lifecycle: record
-    supports: [SUP.8.BP6, SYS.1.BP4, "13-08"]
+    supports: [SUP.8.BP6, SUP.8.BP7, SYS.1.BP4, "13-08"]   # the record lists every item with hash and status
     attributes:
       id: {required: always}
       type: {required: always}
       status: {required: always}
       tag: {required: always, note: "version control tag the baseline is anchored to"}
       purpose: {required: always, note: "for example requirements freeze, release candidate, delivery"}
+      created_at: {required: optional}
       items: {required: always, note: "list of {item: <ID>, hash: <content hash>, status}; generated"}
 
 # ---------------------------------------------------------------------------

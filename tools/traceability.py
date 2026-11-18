@@ -13,6 +13,9 @@ Commands
     hash [ID ...]      content hashes; with --upstream a ready-to-paste block of
                        subject and references entries for a review record
     status             items per type and state, and the latest verification runs
+    practices [PROC]   per base practice of the processes in scope (or of one
+                       process): the evidence the project holds and the findings
+                       still open. The deterministic input of a process gate
 
 Options
     --project DIR      project root (default: current directory)
@@ -857,6 +860,68 @@ def cmd_status(project, args):
     return 0
 
 
+def practice_rows(project, process_id=None):
+    """One row per base practice: evidence held and findings open. Observations only, no verdict."""
+    version = str((project.config.get("aspice") or {}).get("version") or project.schema.get("aspice_version"))
+    folder = ROOT / "aspice" / version / "processes"
+    wanted = [process_id] if process_id else sorted(project.scope or [f.stem for f in folder.glob("*.yaml")])
+    findings = project.check()
+    schema = project.schema
+    rows = []
+    for pid in wanted:
+        source = folder / (pid + ".yaml")
+        if not source.is_file():
+            rows.append({"practice": pid, "name": "process is not in the catalog", "state": "not assessed",
+                         "evidence": 0, "settled": 0, "errors": 0, "warnings": 0, "by": []})
+            continue
+        for bp in yaml.safe_load(source.read_text(encoding="utf-8"))["base_practices"]:
+            ref = bp["id"]
+            types = [name for name, spec in schema["types"].items() if ref in map(str, spec.get("supports") or [])]
+            kinds = [kind for kind, refs in schema["plan_kinds"].items() if ref in refs]
+            roles = sorted({role for role, link in schema["links"].items()
+                            for pair in link["pairs"] if ref in pair["supports"]})
+            rules = sorted(r["id"] for r in schema["coverage"] if ref in r["supports"])
+            held = [i for i in project.items.values() if i.type in types and project.live(i)
+                    and (i.type != "plan" or i.front.get("kind") in kinds or not kinds)]
+            settled = [i for i in held if i.status in ("approved", "final")]
+            mine = [f for f in findings if ref in f["supports"]]
+            errors = sum(1 for f in mine if f["level"] == "error")
+            warnings = sum(1 for f in mine if f["level"] == "warning")
+            if not (types or roles or rules):
+                state = "no evidence structure"          # the schema has nothing for this practice yet
+            elif errors:
+                state = "findings open"
+            elif types and not held:
+                state = "no evidence yet"
+            elif held and len(settled) < len(held):
+                state = "evidence not settled"           # items exist but are not all approved or final
+            elif warnings:
+                state = "warnings open"
+            else:
+                state = "evidence present"
+            rows.append({"practice": ref, "name": bp["name"], "state": state, "evidence": len(held),
+                         "settled": len(settled), "errors": errors, "warnings": warnings,
+                         "by": types + ["link " + r for r in roles] + rules})
+    return rows
+
+
+def cmd_practices(project, args):
+    if args.process and project.scope is not None and args.process not in project.scope:
+        print("%s is not in the scope of this project (%s)" % (args.process, ", ".join(sorted(project.scope))))
+        return 1
+    rows = practice_rows(project, args.process)
+    if args.json:
+        print(json.dumps(rows, indent=2))
+        return 0
+    print("%-11s %-22s %8s %8s %6s %8s  %s" % ("practice", "state", "evidence", "settled", "errors", "warnings", "name"))
+    for row in rows:
+        print("%-11s %-22s %8d %8d %6d %8d  %s" % (row["practice"], row["state"], row["evidence"], row["settled"],
+                                                 row["errors"], row["warnings"], row["name"]))
+    print("states are observations, not ratings: 'evidence present' means items exist, are approved or final, "
+          "and no rule in the schema objects; whether the practice is performed well is for a person to judge")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--project", default=".", help="project root (default: current directory)")
@@ -871,10 +936,13 @@ def main():
     hashes.add_argument("ids", nargs="*")
     hashes.add_argument("--upstream", action="store_true")
     sub.add_parser("status")
+    practices = sub.add_parser("practices")
+    practices.add_argument("process", nargs="?")
+    practices.add_argument("--json", action="store_true")
     args = ap.parse_args()
     project = Project(args.project)
     return {"check": cmd_check, "matrix": cmd_matrix, "show": cmd_show, "impact": cmd_impact,
-            "hash": cmd_hash, "status": cmd_status}[args.command](project, args)
+            "hash": cmd_hash, "status": cmd_status, "practices": cmd_practices}[args.command](project, args)
 
 
 if __name__ == "__main__":
