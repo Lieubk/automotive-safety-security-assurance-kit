@@ -13,6 +13,15 @@ with this checklist as a design, before it has code or when its design changes. 
 code is reviewed against it with `software-unit-code.md`, in a review of its own that
 is recorded with the code revision.
 
+The record cites this checklist as `software-detailed-design v1`, or by its title as
+`software detailed design review v1`. An approved verdict needs a result for every
+check: `pass`, `finding`, or `not-applicable` with a note that says why (SDD-41 for a
+unit without an ASIL, SDD-55 when no decision concerns the subjects, the checks of a
+component design when only a unit is reviewed again). A check that cannot be answered
+yet is `not-assessed`. This is normal for an accountable check that waits for someone
+outside the session, such as the agreement of those who build on the design: the
+items stay in review, and the review is completed when the answer exists.
+
 ## Each component design
 
 | ID | Check | How to check | Kind |
@@ -64,10 +73,11 @@ is recorded with the code revision.
 |---|---|---|---|
 | SDD-50 | Every developed component has a design and units | `check`: no `COV-09` finding | script |
 | SDD-51 | Every interface provided by a developed component is realized by a unit of that component | `check`: no `COV-21` finding | script |
-| SDD-52 | Every requirement allocated to a component with several units is implemented by an identified unit | `matrix`: compare the allocation tables (`allocated_to`, `fulfils`) with the `implements` table | semantic |
+| SDD-52 | Every requirement a component with several units fulfils is implemented by an identified unit | `matrix`: compare the `fulfils` table of the components with the `implements` table | semantic |
 | SDD-53 | Taken together, the units of each component cover everything the component is responsible for | read the component with its units (`show <component ID>`) | semantic |
 | SDD-54 | Terms, types, scalings and values are the same across the units, the interfaces and the requirements | compare linked and related items | semantic |
 | SDD-55 | Each detailed-design decision assesses every alternative against every criterion, and the design follows the decision | read the `design-decision` items that concern the subject | semantic |
 | SDD-56 | The project's evaluation criteria and limits were decided by the person entitled to do so | ask who decided, and when | accountable |
-| SDD-57 | Open queries to the owners of architecture and requirements are recorded, and none of them invalidates a design item under review | ask the author | accountable |
+| SDD-57 | Open questions about architecture and requirements are recorded - as `query` items for imported inputs, with their owner for items the project wrote - and none of them invalidates a design item under review | `list --type query --status open`; ask the author | accountable |
+| SDD-59 | Every item the subjects link to is approved, or is itself a subject of this review | `hash --upstream <ID>...` lists the targets; `list --status draft` and `list --status in-review` name none of them | script |
 | SDD-58 | Those who implement, verify and integrate the units have agreed to the design | ask who agreed, and when | accountable |

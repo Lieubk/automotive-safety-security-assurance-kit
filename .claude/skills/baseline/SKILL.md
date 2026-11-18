@@ -40,6 +40,8 @@ structure. `python tools/traceability.py practices SUP.8` says so, and
    user wants on record that items or results of a process in scope were made known:
    then do step 7 alone, with item IDs or run IDs as subject.
 3. Run `python tools/traceability.py status` and `python tools/traceability.py check`.
+   Every command here and in the references takes `--project <dir>` after the script
+   name when the project is not the current directory.
 4. Find the plan: Grep `kind: configuration-management` in `plans/`. If there is none,
    or the check reports `COV-27` for this kind, do step 1 and stop after it: until the
    plan is approved the tool refuses every baseline that is not an internal one.
@@ -66,8 +68,9 @@ structure. `python tools/traceability.py practices SUP.8` says so, and
 - Take the purpose and the tag pattern from the plan, character by character. Ask the
   user to confirm purpose, tag, and what the baseline will be used for.
 - Say before going on: the record lists the approved plans and engineering items;
-  what is not approved is left out. From then on a listed item is changed in content
-  or retired only through `/change-request`. An internal purpose lists everything and
+  what is not approved is left out, and an approved item that rests on an unapproved
+  one stops the tool (`UPSTREAM`). From then on a listed item is changed in content or
+  retired only through `/change-request`. An internal purpose lists everything and
   protects nothing.
 
 ### 3. Check the preconditions
@@ -98,7 +101,8 @@ structure. `python tools/traceability.py practices SUP.8` says so, and
 - Follow section "Audit" of `references/baseline-procedure.md`: on the content of the
   tag run `python tools/traceability.py audit <baseline ID>` and `check`. Report `PASS`,
   `FAIL` or `NOT ASSESSED` with the output. A difference stops the delivery; the record
-  is never repaired. Say that the output is not a record and who keeps it.
+  is never repaired. Say that the output is not a record and who keeps it; the last
+  part of that section says how a person puts the checks on record.
 
 ### 7. Communicate
 - Read `references/communication-record.md`.
@@ -126,6 +130,8 @@ structure. `python tools/traceability.py practices SUP.8` says so, and
 - Baseline and communication records are written only by `python tools/record.py`,
   never with Write or Edit, and only after the question of step 4 or step 7 was
   answered with yes.
+- A review record on a baseline record is written only on the verdict of a person the
+  user names, with the checklist cited as `baseline v1`.
 - Records are final when written. A record with a mistake is not edited: tell the user
   and supersede it with a new record.
 

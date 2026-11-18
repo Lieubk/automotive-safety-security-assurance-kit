@@ -64,7 +64,7 @@ python tools/record.py communication --subject BL-0001 --audience "customer syst
 Unit verification results (SWE.4.BP7):
 
 ```
-python tools/record.py communication --subject BL-0003 --subject RUN-0003 --subject SAR-0002 --audience "project lead" --audience "quality assurance" --channel "verification summary in the release meeting" --sent-at 2026-11-24
+python tools/record.py communication --subject BL-0003 --subject RUN-0001 --subject SAR-0001 --audience "project lead" --audience "quality assurance" --channel "verification summary in the release meeting" --sent-at 2026-11-24
 ```
 
 The tool prints `wrote records/communication/CMR-0001.md: BL-0001 to ...`. A subject

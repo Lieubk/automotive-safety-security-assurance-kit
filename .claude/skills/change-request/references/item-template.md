@@ -35,8 +35,9 @@ Related change requests: none.
 
 ## Impact analysis
 
-Candidates from `impact SYR-0001`, from `show SWR-0004` and `show CMP-0004`, and from a
-search for "5 mm" and `ANTIPINCH_ZONE_LIMIT` in the item, source and test folders.
+Candidates from `impact SYR-0001`, read distance by distance behind the items that
+change, and from a search for "5 mm" and `ANTIPINCH_ZONE_LIMIT` in the item, source and
+test folders.
 
 ### Items that change
 
@@ -57,16 +58,17 @@ in `tests/unit/test_AntiPinch.c` (`/sw-unit-verify`).
 | Item | Why |
 |---|---|
 | SWR-0003 | derived from SYR-0001, which changes; says nothing about the zone |
+| CMP-0004 | fulfils SWR-0004, which changes; names the protected zone without a value |
 | UT-0013 to UT-0015, UT-0017 to UT-0020 | verify UNT-0003; their steps do not use the zone limit |
 
 ### Looked at and not affected
 
 | Item | Why not |
 |---|---|
-| CMP-0004, CDS-0002 | name the protected zone without a value |
-| VIEW-0001 to VIEW-0005 | show CMP-0004, but neither the zone nor its limit |
+| SYE-0001, SYE-0002 | fulfil SYR-0001; inputs that version 2.2 leaves as they are |
+| CDS-0002, IFC-0003, VIEW-0001 to VIEW-0005 | hang on CMP-0004, whose text stays; none carries the limit |
 | IFC-0002 | range and resolution of the window opening are unchanged; 4 mm is 8 counts |
-| UNT-0002, UT-0006 to UT-0012 | reached only through SWR-0003, which does not change |
+| CMP-0003, UNT-0002, UT-0006 to UT-0012 | reached only through SWR-0003, which does not change |
 
 ### Open question to the requester
 
@@ -98,15 +100,16 @@ the request.
 ### Confirmation criteria
 
 1. SWR-0004 is approved with the limit 4 mm, and SWR-0003 is reviewed again, both in
-   reviews that record SYR-0001 at version 2.2 as a reference.
+   reviews that record SYR-0001 at version 2.2 as a reference. CMP-0004 is reviewed
+   again against the changed SWR-0004.
 2. UT-0016 passes with the boundary values 4.0 mm (request stays clear) and 4.5 mm
    (request set within 10 ms), in a unit test run on the commit that holds the change.
 3. All unit test cases of UNT-0003 pass in that run, and the coverage of the unit still
    meets the targets of PLN-0001.
 4. The changed code of UNT-0003 is reviewed, in a review recorded with the commit
    that holds the change.
-5. The trace check reports no `SUSPECT`, `COV-19` or `COV-30` finding on any item named
-   in this analysis.
+5. The trace check reports no `SUSPECT`, `UPSTREAM`, `COV-19` or `COV-30` finding on
+   any item named in this analysis.
 6. The requester's answer to question 1 is recorded.
 ```
 
@@ -130,6 +133,16 @@ the request.
   links:
     affects: [SWR-0004, UNT-0003, UT-0016]
     resolves: [PRB-0001]
+  ```
+
+- A request raised by an answered `query` names the query under `affects`, beside the
+  items that change, and cites it in `Description` as its source. `resolves` takes
+  problem reports only. The query is closed when the items it is about are in line with
+  its answer, which is what the change brings about:
+
+  ```yaml
+  links:
+    affects: [QRY-0001, SYR-0001, SWR-0004, CDS-0001, UNT-0003, UT-0016]
   ```
 
 - `decision` is added when the deciding body has decided, and `rejection_reason` when

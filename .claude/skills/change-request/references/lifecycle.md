@@ -14,6 +14,7 @@ in that baseline. Baselines with an internal purpose (`trace.internal_baselines`
 | An item that is in a baseline is to change in content | yes | working agreement, section 5; the write hook refuses the edit otherwise |
 | A new version of an imported input arrives, and the registered version or items derived from it are in a baseline | yes | the request names the input and every project item that has to follow; `/import-inputs` compares the versions and sends the user here before it registers anything |
 | A problem report needs a change to items that are in a baseline | yes, with `resolves` | the problem report says what is wrong, the change request what is changed |
+| The answer to a query calls for a change to items that are in a baseline | yes, with the query under `affects` | the query holds question and answer, the change request what follows from it; the query is closed when the items are in line with the answer |
 | An item that is in a baseline is retired (`obsolete`, `rejected`) | yes | the write hook refuses it otherwise |
 | The item is in no baseline: a draft, an item in review, an approved item never baselined, an item listed by an internal baseline only | no | it changes with its authoring skill; its approval becomes stale and `/review` renews it |
 | The item was changed after its last baseline and is not baselined again | no | its present content is listed nowhere; the next baseline will list it |
@@ -57,9 +58,9 @@ which command.
 | `submitted` -> `analysed` | `Impact analysis` is written and `affects` names every item that changes | `show <CR-ID>`; `check` without `SCHEMA` or `COV-20` on the request | whether the analysis is ready to be decided | `Impact analysis`, `links.affects`, status |
 | `analysed` -> `approved` | the deciding body has decided for the change | the user's statement | who decided, when, priority, release, conditions | `decision`, status |
 | `analysed` -> `rejected` | the deciding body has decided against it | the user's statement | who decided, when, the reason | `decision`, `rejection_reason`, status |
-| `approved` -> `implemented` | every item under `affects` is `approved` or `obsolete`; no `COV-19`, `SUSPECT` or `CONSISTENCY` finding on an item of the analysis | `show <CR-ID>`, `list --status draft`, `check` | - | status |
+| `approved` -> `implemented` | every item under `affects` is `approved` or `obsolete`, a query among them `closed`; no `COV-19`, `UPSTREAM`, `SUSPECT` or `CONSISTENCY` finding on an item of the analysis | `show <CR-ID>`, `list --status draft`, `check` | - | status |
 | `implemented` -> `verified` | the affected tests ran on the changed state; a final review record with verdict approved has the change request as subject | `check` without `COV-30` on the changed units and their test cases; `status` (latest run); Grep the change request ID in `records/reviews/` | reviewers and verdict | the review record, by tool; status |
-| `verified` -> `closed` | the requester is informed | the user's statement | by whom, how, when | communication record, by tool; status |
+| `verified` -> `closed` | the review record of the implementation exists with verdict approved; the requester is informed of the result and of the baseline or release that holds the change | Grep the change request ID in `records/reviews/`; the user's statement | by whom, how, when | communication record, by tool; status |
 
 A request that is put off stays `analysed`. Note in `decision` who put it off and until
 when; it is decided again later.
@@ -121,6 +122,10 @@ design before its changed requirement is approved produces a suspect link at onc
 After every step run `python tools/traceability.py check`:
 
 - `COV-19` names a changed item that still waits for its review.
+- `UPSTREAM` names an approved item that rests on an item now in draft or in review.
+  It disappears when the upper item is approved again. `python tools/record.py review`
+  refuses to approve an item while something above it is not approved: this is what
+  makes the order from the top down more than a recommendation.
 - `SUSPECT` names an item that links to something changed, or a unit whose code changed
   after its code review. It is reviewed against the new version whether its own text
   changes or not; the newest review of its present content clears the finding.
@@ -162,29 +167,35 @@ and imported inputs, not change requests, so this review is prepared and recorde
 The rules are those of `/review`: people give the verdict, the tool writes the record.
 
 1. Script checks: answer them from `check`, `status` and `show <CR-ID>`; quote the
-   output.
+   output. The tool will refuse verdict approved while an item under `affects` is not
+   approved.
 2. Semantic checks: run `python tools/traceability.py hash --upstream <CR-ID>` and hand
    the agent `aspice-reviewer` the change request ID, the path of the checklist and
    that output, nothing else. It applies the semantic checks of both parts and returns
-   proposed findings. If you apply the checks yourself instead, say "No independent
-   pass took place", also in the hand-over.
+   proposed findings. Agent definitions load when a session starts; if the agent is
+   not available, apply the checks yourself, say "No independent pass took place",
+   also in the hand-over, and tell the user that a new session makes it available.
 3. Show script findings, proposed findings and checks that could not be applied. The
    user confirms, rejects or adds findings. Ask every accountable check as a question.
 4. Ask who is accountable for the verdict and who implemented the change: at least one
    reviewer is someone else. A model or an agent is never a reviewer. Ask for the
    verdict, `approved` or `rework`; do not propose one.
-5. Write the result per check of part B as JSON to a file outside the item folders, for
-   example `build/cr-review-checks.json`: a list of entries with `check`, `result`
-   (pass, finding or not-assessed) and `note`. Findings go into a second file in the
-   format the help text of the tool gives.
+5. Write the result of every check of the checklist, part A and part B, as JSON to a
+   file outside the item folders, for example `build/cr-review-checks.json`: a list of
+   entries with `check`, `result` and `note`. Results are `pass`, `finding`,
+   `not-applicable` (the note says why) and `not-assessed`. Part A is answered again
+   on the present text. The tool refuses verdict approved when a check has no result
+   or is `not-assessed`. Findings go into a second file in the format the help text of
+   the tool gives.
 6. Ask: "May I record this review of CR-nnnn: checklist change-request v1, reviewers
    <names>, verdict <verdict>, N findings?" Then run
    `python tools/record.py review --checklist "change-request v1" --reviewer "<name>" --verdict <verdict> --checks <file> --item-under-test <commit> <CR-ID>`,
    with `--findings <file>` when there are findings and one `--reviewer` per person.
-   `<commit>` is the commit that holds the change. The tool fills in the change request
-   and every item it links to with their hashes: the record states which versions of
-   the affected items were confirmed. It refuses `approved` while a finding is open or
-   a check is not assessed; then go back to the user, do not change a result.
+   `<commit>` is the commit that holds the change. The checklist is cited by its file
+   name and version, exactly as shown; the tool reads the check IDs from that file. It
+   fills in the change request and every item it links to with their hashes: the
+   record states which versions of the affected items were confirmed. When it refuses,
+   go back to the user; do not change a result to get past it.
 7. Verdict `approved`: ask to set `verified`. Verdict `rework`: the state stays
    `implemented`, the findings go to the owning skills, and a new review follows.
 

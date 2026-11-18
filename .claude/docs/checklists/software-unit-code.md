@@ -15,6 +15,14 @@ every later change of the code; the check asks for it with `CONSISTENCY` or `SUS
 on the unit. The unit item itself stays approved throughout: registering code does not
 change its content.
 
+The record cites this checklist as `software-unit-code v1`, or by its title as
+`software unit code review v1`. An approved verdict needs a result for every check:
+`pass`, `finding`, or `not-applicable` with a note that says why (SUC-40 to SUC-45 for
+a unit without an ASIL, SUC-51 for a handwritten unit, SUC-39 when there is no
+deviation, the reading checks for generated or third-party code). A check that cannot
+be answered yet is `not-assessed` and blocks the approval: the review stays open and
+is completed when the build has run or the person asked has answered.
+
 The design is the reference. Where code and design differ, the finding is against the
 code unless the reviewer shows that the design is wrong; then it is a finding against
 the design, which changes through its owner and a review with the design checklist,
@@ -27,7 +35,7 @@ the script checks and SUC-51 apply to it.
 | ID | Check | How to check | Kind |
 |---|---|---|---|
 | SUC-01 | The design the code implements is approved at its current content | `check`: no `COV-19` finding on the unit | script |
-| SUC-02 | No item the unit links to has changed since the design was reviewed | `check`: no `SUSPECT` finding "suspect link" on the unit | script |
+| SUC-02 | No item the unit links to has changed since the design was reviewed, and none is back in draft or in review | `check`: no `SUSPECT` finding "suspect link" and no `UPSTREAM` finding on the unit | script |
 | SUC-03 | The code under review is identified by a commit, and the files read are the files of that commit | ask for the commit; it goes into the record as `--item-under-test`, without which the record does not count as a review of the code | accountable |
 
 ## Code against design

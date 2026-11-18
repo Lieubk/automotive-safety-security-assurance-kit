@@ -25,10 +25,14 @@ sense of MAN.3 and not a statement about capability.
 1. If there is no `project.yaml`, say: "This project has no scope yet. Run
    `/aspice-start` first." That is the whole recommendation; stop.
 2. Read `project.yaml`: `scope.processes`, `scope.assessment_scope`, `inputs`,
-   `aspice.target_level`.
+   `aspice.target_level`. If one of these keys is missing, say that it is not
+   recorded and ask the user or point to `/aspice-start`; do not assume a target
+   level, an assessment scope or that nothing was received.
 3. Run `python tools/traceability.py status`,
    `python tools/traceability.py check --all` and
-   `python tools/traceability.py practices`.
+   `python tools/traceability.py practices`. Every command of this skill takes
+   `--project <dir>` after the script name when the project is not the current
+   directory.
 4. If a command does not run (a missing Python package, a broken `project.yaml`),
    report `NOT ASSESSED` with the message of the tool, recommend repairing that, and
    stop. Do not describe the state of a project the tools could not read.
@@ -55,7 +59,8 @@ that need Grep or `list`, and what to do where no authoring skill exists.
 |---|---|---|
 | No scope | no `project.yaml` | `/aspice-start` |
 | Inputs not registered | an entry of `inputs` whose `source` appears in no item | `/import-inputs` |
-| Inputs not accepted | `list --imported --status draft` or `--status in-review` prints items | `/review` with the checklist `input-acceptance` |
+| Inputs not accepted | `list --imported --status draft` or `--status in-review` prints items | `/review`; it applies the checklist `input-acceptance` |
+| A question to a source is open | `QUERY` on an approved item; `list --type query --status open` | the user chases the answer; `/import-inputs <QRY-ID>` records it |
 | A plan the scope needs is missing | `COV-27` | the skill of the process: `/sw-unit-verify`, `/baseline`, `/change-request`; by hand for the other plan kinds |
 | System requirements not refined | `COV-05` | `/sw-requirements` |
 | Requirements not allocated | `COV-07`; also `COV-08`, `COV-24`, `COV-25` | `/sw-architecture` |
@@ -63,6 +68,8 @@ that need Grep or `list`, and what to do where no authoring skill exists.
 | Units without code | `COV-10`, `COV-22` | `/sw-unit-implement` |
 | Units not verified | `COV-12`, `COV-18`, `COV-28`, `COV-29`, `COV-30`; `COV-17` on unit tests | `/sw-unit-verify` |
 | Drafts not complete | `still to come before review: ...` in `check --all` | the authoring skill of the item |
+| A review left findings open on a draft | `COV-19` with `left findings open` on an item in `draft` or `in-review` | the authoring skill of the item, then `/review`; for an input: the query its finding cites |
+| Approved above something that is not | `UPSTREAM` | `/review` of the upstream item named in the message; work is approved from the top down |
 | Drafts and stale approvals | items in `draft` or `in-review`; `COV-19` | `/review` |
 | An item builds on a retired one | `LINK` with `target <ID> is obsolete` or `is rejected` | the authoring skill of the linking item |
 | Suspect links, among them a new version of an input | `SUSPECT` | `python tools/traceability.py impact <changed ID>`, then `/review` |

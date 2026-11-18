@@ -7,10 +7,12 @@ trace check reports.
 
 ## After a `rework` verdict
 
-1. The author corrects with the authoring skill. Run
-   `python tools/traceability.py hash <ID> ...` and compare with `subject` of the
-   earlier record. A different hash: the item was corrected. The same hash: the item
-   was not touched - as after a code review whose findings were all against the code.
+1. The author corrects with the authoring skill. `python tools/traceability.py
+   check --all` shows which items still carry the findings of their last review:
+   `COV-19 ... review REV-0007 left findings open: F1`. That line goes when the content
+   changes. Run `python tools/traceability.py hash <ID> ...` and compare with `subject`
+   of the earlier record. A different hash: the item was corrected. The same hash: the
+   item was not touched - as after a review whose findings were all against the code.
 2. Run `/review` for the items. In step 5 hand the reviewing agent the ID of the
    earlier record as well. It first decides for each open finding whether the present
    text or code resolves it, then applies the whole checklist again, because a
@@ -29,10 +31,10 @@ for corrected content as well; it then simply makes the trail searchable.
 
 ```json
 [
-  {"id": "F1", "item": "SWR-0010", "severity": "major", "state": "closed", "closes": "REV-0010#F1",
-   "text": "REV-0010#F1 (SWR-09, closing speeds not given): resolved, the criteria now name 80 mm/s and 250 mm/s."},
-  {"id": "F2", "item": "SWR-0011", "severity": "minor", "state": "closed", "closes": "REV-0010#F2",
-   "text": "REV-0010#F2 (SWR-04, two needs): resolved, storing the event is now SWR-0012."}
+  {"id": "F1", "item": "SWR-0010", "severity": "major", "state": "closed", "closes": "REV-0007#F1",
+   "text": "REV-0007#F1 (SWR-09, closing speeds not given): resolved, the criteria now name 80 mm/s and 250 mm/s."},
+  {"id": "F2", "item": "SWR-0011", "severity": "minor", "state": "closed", "closes": "REV-0007#F2",
+   "text": "REV-0007#F2 (SWR-04, two needs): resolved, storing the event is now SWR-0012."}
 ]
 ```
 
@@ -66,21 +68,23 @@ possible but weak; say so, and ask whether to wait for the runs.
   changed item, by distance. For SWR-0003 of the power window project:
 
 ```
+1  CMP-0003   software-component           WindowPos - window position and speed acquisition  (fulfils SWR-0003)
 1  UNT-0002   software-unit                WindowPos - window position and speed  (implements SWR-0003)
-2  UT-0006    unit-test                    WindowPos - state after initialisation  (verifies UNT-0002)
+2  CDS-0001   component-design             Detailed design of WindowPos  (refines CMP-0003)
 ...
-8 items depend on SWR-0003
+44 items depend on SWR-0003
 ```
 
 Only the items at distance 1 link to the changed item, and only they are reported as
-suspect. An item further away becomes suspect when the item between them changes in
-turn.
+suspect: here the component that fulfils the requirement and the unit that implements
+it. An item further away becomes suspect when the item between them changes in turn.
 
 ### Order
 
 1. The changed item, at its new content. Until it is approved again (or, for an
    imported item, until `/import-inputs` has registered the new version and it has
-   passed its input acceptance review), a comparison with it will not last.
+   passed its input acceptance review), nothing that links to it can be approved: the
+   tool refuses, and `check` reports `UPSTREAM` on what is approved above it.
 2. The items at distance 1.
 3. Further items only if step 2 changed the item they link to. Run `check` again to see.
 
@@ -110,10 +114,11 @@ SWR-0004 link to it and are reported as suspect. The reviewers find that SWR-000
 (window speed) does not depend on the limit: a new review of SWR-0003, verdict
 approved. SWR-0004 states the speed drop at which an obstacle is detected, and that
 value follows from the limit: verdict rework, back to `/sw-requirements`. Once SWR-0004
-has changed and is approved again, `check` reports UNT-0003, the unit that implements
-it, as suspect, and the same steps repeat one level down. UNT-0003 has code: whatever
-the outcome of its comparison, the review of its code is recorded last, and if the unit
-has to change, its code and the runs follow.
+has changed and is approved again, `check` reports CMP-0004, the component that fulfils
+it, and UNT-0003, the unit that implements it, as suspect, and the same steps repeat
+one level down, the component first. UNT-0003 has code: whatever the outcome of its
+comparison, the review of its code is recorded last, and if the unit has to change,
+its code and the runs follow.
 
 ### After recording
 

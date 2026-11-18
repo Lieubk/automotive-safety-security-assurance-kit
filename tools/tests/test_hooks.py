@@ -81,6 +81,10 @@ class PreWrite(HookCase):
         self.assertEqual(verdict, "deny")
         self.assertIn("change request", reason)
 
+    def test_links_of_an_accepted_imported_element_may_be_updated(self):
+        verdict, _ = self.decision(self.edit("spec/system/architecture/SYE-0001.md", "SYR-0004]", "SYR-0004, SYR-0005]"))
+        self.assertIsNone(verdict)
+
     def test_accepted_imported_input_may_be_marked_obsolete(self):
         verdict, _ = self.decision(self.edit("spec/system/requirements/SYR-0001.md", "status: approved",
                                              "status: obsolete\nsuperseded_by: withdrawn by the customer"))

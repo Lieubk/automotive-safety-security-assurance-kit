@@ -22,55 +22,105 @@ Not a query: a typing error with only one possible reading (note it for the revi
 not correct it); a question the delivery answers elsewhere (cite the place); a wish
 for a better requirement.
 
-## Format
+## A query is an item
 
-One question per query. The passage is quoted from the item; the question can be
-answered by someone at the source who does not know the project's items.
+A question to the source is written as a `query` item, not as a line in a hand-over
+and not as text inside a finding. The item names who is asked and when, links to the
+inputs it is about, and later holds the answer. One question per query; a question
+that concerns several inputs (a contradiction between two) links to all of them.
 
+File: `records/queries/QRY-0001.md`. ID from `python tools/record.py next-id query`.
+
+```markdown
+---
+id: QRY-0001
+type: query
+title: Meaning of "position of detection"
+status: open
+to: Requirements contact at the customer
+asked_at: "2026-03-05"
+links:
+  about: [SYR-0002]
+---
+
+## Question
+
+DM-SYS-042, version 2.1, says "from the position of detection". Is this the window
+position at first contact with the obstacle, or the position at the moment the
+obstacle is reported? The reversal travel of the software depends on it.
 ```
-Q3   SYR-0002 (DM-SYS-042, version 2.1)   unclear
-Passage:   "from the position of detection"
-Question:  Is the position of detection the window position at first contact with the
-           obstacle, or the position at the moment the obstacle is reported?
-Needed for: the reversal travel in the software requirements
-Blocks acceptance: proposed yes
+
+| Part | Rule |
+|---|---|
+| `to` | who the question goes to at the source, by role or by the name the user gives |
+| `asked_at` | the day the question is put to the source, quoted. Ask the user; the toolkit sends nothing itself |
+| `about` | the IDs of the inputs the question concerns; they must be registered |
+| `Question` | the passage quoted with the identifier and version of the source, so that the source can find it without knowing the project's IDs; one question that can be answered; what depends on the answer |
+| `title` | a few words for lists |
+
+When the user reports the answer, the same item is completed (step 8 of the skill):
+
+```markdown
+status: answered
+answered_by: Requirements contact at the customer, 2026-03-12
 ```
 
-`Blocks acceptance` is a proposal with one line of reason. The reviewer decides.
+and a section
 
-## Where queries are kept
+```markdown
+## Answer
 
-1. In the hand-over of this skill, always, as a numbered list.
-2. As proposed findings for `/review`. A query that is still open at the review
-   becomes an open finding in the review record. `record.py review` refuses the
-   verdict `approved` while a finding is open, so an item with an open query is
-   either left out of the approving review, or the reviewer closes the finding with
-   the reason why the open question does not block the use of the item. A finding
-   left open in a review with verdict `rework` has to be closed explicitly in the
-   later review of the same content; `/review` does that.
-3. As a communication record, once the user states that queries were sent - to whom,
-   how and when:
+The position at the moment the obstacle is reported by the software. Version 2.2 of
+the specification will say so.
+```
 
-   `python tools/record.py communication --subject <ID> --audience "<who received
-   them>" --channel "<how and when they were sent>"`
+| State | Means | Set when |
+|---|---|---|
+| `open` | asked, no answer | the query is written |
+| `answered` | the answer and who gave it are recorded | the user reports the answer |
+| `closed` | the inputs the query is about are in line with the answer | the user confirms it: nothing in the input had to change, or the new version that carries the change is registered |
 
-   with one `--subject` per item concerned; and again when the user states that an
-   answer came, with `--agreement "<what the source answered, who answered, when>"`
-   added. The command is typed on one line.
+An answer that does not settle the question puts the query back to `open`, with the
+reason added to the `Answer` section.
 
-   Pass what the user states and nothing else. The record is final when written. If
-   the event was on an earlier day, add `--sent-at <date>` with the date the user
-   names.
+While a query is open, the check prints `QUERY` as a warning on every approved item it
+is about, and `still to come before review` as an `info` line on the query itself.
 
 ## What an answer changes
 
-- The item does not change, whether it is accepted already or not. An answer that
+- The input does not change, whether it is accepted already or not. An answer that
   alters the requirement has to arrive as a new version of the input, which is
   registered as described in `new-version.md`.
-- Until then the answer lives in the communication record. An author who builds on
-  the clarified meaning cites the record ID in the `Rationale` or `Analysis` of the
-  derived item, so that the review can follow it.
-- An answer never reaches an item by way of this skill "improving" the text.
+- Until then the answer lives in the query. An author who builds on the clarified
+  meaning cites the query ID in the `Rationale` or `Analysis` of the derived item, so
+  that the review can follow it.
+- An answer never reaches an input by way of this skill "improving" the text.
+
+## Open queries at the acceptance review
+
+This is the rule `/review` follows as well:
+
+1. Every registered input of the delivery is reviewed. An open query is no reason to
+   leave an input out.
+2. For an input with an open query the review records a finding that cites the query
+   by its ID, and the verdict for that input is `rework`.
+3. One review record has one verdict. The review of a delivery therefore ends in two
+   records: one with the verdict `approved` for the inputs that have no open query and
+   no other open finding, and one with the verdict `rework` for the others.
+4. An input in `rework` is not accepted and goes back to `draft`; nothing is changed
+   in it. Nothing derived from it can be approved (`UPSTREAM`), and an element that
+   fulfils it cannot be accepted before it: that element is left out of the record of
+   the accepted inputs and waits. Say this to the user when the queries are written:
+   an open question has a price.
+5. The reviewers may decide that an open question does not stand in the way of using
+   the input. Then they close the finding with that reason and their name, the input
+   is accepted with the others, and `QUERY` warns on it until the query is closed.
+6. When the query is closed, an input that was in rework is reviewed again; that
+   review closes the earlier finding. If the answer came as a new version, the review
+   is the acceptance of the new content.
+
+A query raised later about an input that is already accepted (by `/sw-requirements`,
+for example) does not take the acceptance back. It shows as `QUERY` until it is closed.
 
 ## Preparing the acceptance review
 
@@ -80,10 +130,12 @@ records their verdict. This skill hands over, and suggests no verdict:
 | Hand over | Content |
 |---|---|
 | Subject | the IDs of the registered items of the delivery; for a partial registration, which part of the document they cover |
-| Checklist | `input-acceptance`, with the version given in its first line |
+| Order | the requirements before the architecture that fulfils them: an element is approved only when every requirement in its `fulfils` is |
+| Checklist | `input-acceptance`, cited with its version as `input-acceptance v1` |
 | Script results | the lines of `python tools/traceability.py check --all` that concern these items, quoted; "none" if there are none |
 | Proposed findings | per finding: item ID, checklist ID, the passage it rests on, what was observed |
-| Queries | the numbered list, with which were sent and which answered, as the user stated |
+| Queries | the IDs of the open queries and the inputs each is about |
+| Checks that do not apply | for example the new-version checks at a first delivery: named, with the reason, so that they are recorded as not applicable |
 | For people only | the checks of kind `accountable` in the checklist: they are asked in the review, not answered here |
 
 Accepting an input means: this is the version the team works from, and the open points

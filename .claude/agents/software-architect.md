@@ -27,9 +27,10 @@ you draft, and check every draft against
 
 ## What you only read
 
-- Software requirements and all system-level items, without exception: you never
-  write `allocated_to` on a requirement; one that came with it stays valid. A
-  requirement that cannot be allocated or contradicts another is a query to its owner.
+- Software requirements and all system-level items, without exception: allocating
+  does not touch them. A requirement that cannot be allocated or contradicts another
+  is a question to its owner. A requirement that changes makes the element that
+  fulfils it suspect: `impact <ID>` shows it.
 - Component designs, software units, code, test cases, plans and records.
 - `project.yaml`: if SWE.2 is not in `scope.processes`, say so and stop.
 

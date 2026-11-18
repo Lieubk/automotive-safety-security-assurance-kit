@@ -12,12 +12,19 @@ itself is reviewed with `.claude/docs/checklists/plan.md`. "The plan" below is t
 approved plan of kind `configuration-management`. For a baseline with an internal
 purpose only BSL-04 and BSL-10 to BSL-12 apply before, and BSL-20 to BSL-22 after.
 
+Where a person puts these checks on record, the checklist is cited as `baseline v1`,
+and the record carries a result for every check. A check that does not apply to this
+baseline (BSL-13 for a requirements freeze, the audit where the plan asks for none) is
+`not-applicable` with that reason as its note. A check that waits for something that
+has not happened yet (the audience has not confirmed, the tag is not pushed) stays
+`not-assessed`, and the record is written when the answer exists.
+
 ## Before the record is created
 
 | ID | Check | How to check | Kind |
 |---|---|---|---|
 | BSL-01 | An approved configuration management plan exists | `check`: no `COV-27` finding that names kind configuration-management | script |
-| BSL-02 | The trace check reports no error | `check`: the summary line shows `0 errors` | script |
+| BSL-02 | The trace check reports no error; in particular no approved item rests on one that is still in draft or in review | `check`: the summary line shows `0 errors`, no `UPSTREAM` line | script |
 | BSL-03 | Every earlier baseline is communicated | `check`: no `COV-26` finding | script |
 | BSL-04 | The purpose is one the plan defines and is written exactly as there; a purpose treated as internal is listed under `trace.internal_baselines` | compare the purpose with the plan and with `project.yaml` | semantic |
 | BSL-05 | The baseline is due: what the plan demands for this purpose is the case | compare `status` with the plan | semantic |

@@ -20,6 +20,8 @@ Asked for by: <who>. Gate for: <baseline purpose | release | delivery | current 
 - Processes in scope: <list>. Coverage rules active: <n> of <m>.
 - Not checked by any rule: <what the inactive rules would cover, in one line>.
 - Units without code: <IDs from the `COV-10` lines "designed but not implemented"; or "none">.
+- Items with open review findings: <IDs from the `COV-19` lines "left findings open"; or "none">.
+- Open queries: <`QUERY` lines, or "none">.
 
 ## <PROCESS> - <verdict> (<n> PASS, <n> CONCERNS, <n> FAIL, <n> NOT ASSESSED)
 
@@ -60,19 +62,19 @@ data, and the gate says what that means.
 ```markdown
 ## Facts
 
-- check: `79 items | scope: SUP.8, SWE.1, SWE.2, SWE.3, SWE.4 | 21 of 30 coverage rules active | 0 errors, 0 warnings, 0 on drafts`
+- check: `73 items | scope: SUP.8, SWE.1, SWE.2, SWE.3, SWE.4 | 21 of 30 coverage rules active | 0 errors, 0 warnings, 0 on drafts`
 - Processes in scope: SUP.8, SWE.1, SWE.2, SWE.3, SWE.4. Coverage rules active: 21 of 30.
 - Not checked by any rule: system level as own work, integration and qualification
   tests, change requests.
-- Units without code: none.
+- Units without code: none. Items with open review findings: none. Open queries: none.
 
 ## SWE.4 - FAIL
 
 | Practice | Engine state | Deterministic | Sample | Verdict | Basis |
 |---|---|---|---|---|---|
 | SWE.4.BP1 | evidence present | PASS | no concern in 1 of 1 | PASS | PLN-0001 read: methods in order, regression rule, exit criteria per unit, coverage targets per ASIL |
-| SWE.4.BP3 | evidence present | PASS | concern | CONCERNS | SAR-0002, `tool`: "compiler static analysis (/analyze), no coding-guideline rule set"; PLN-0001 declares this as a limitation. For a person to accept, with the reason |
-| SWE.4.BP6 | evidence present | PASS | not an accountable review | FAIL | REV-0009, `reviewers`: "Demonstration data - no review by a person took place" |
+| SWE.4.BP3 | evidence present | PASS | concern | CONCERNS | SAR-0001, `tool`: "compiler static analysis (/analyze), no coding-guideline rule set"; PLN-0001 declares this as a limitation. For a person to accept, with the reason |
+| SWE.4.BP6 | evidence present | PASS | not an accountable review | FAIL | REV-0006, `reviewers`: "Demonstration data - no review by a person took place" |
 | SWE.4.BP7 | no evidence yet | FAIL | - | FAIL | no `communication-record` exists; nobody was informed of the results |
 ```
 

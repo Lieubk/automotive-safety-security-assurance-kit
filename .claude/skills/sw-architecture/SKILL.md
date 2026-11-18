@@ -29,12 +29,18 @@ Every requirement is allocated. All items are written in state `draft`, ready fo
 1. No `project.yaml`: stop. "This project has no scope yet. Run `/aspice-start` first."
 2. `SWE.2` not in `scope.processes`: stop. "SWE.2 is out of scope for this project. An
    architecture delivered from outside is registered with `/import-inputs`."
-3. Run `python tools/traceability.py status` and `python tools/traceability.py check --all`.
+3. Run `python tools/traceability.py status` and `python tools/traceability.py check --all`
+   (every command takes `--project <dir>` when the project is not the current directory).
 4. The inputs are `software-requirement` items, approved or imported with an input
    acceptance review. If there are none, stop and name `/sw-requirements` or
-   `/import-inputs`. Those in `draft` or `in-review` are listed to the user and left out.
-5. If the check reports `COV-19` or `SUSPECT` on an input you are about to use, say so
-   before continuing: an architecture built on it inherits that uncertainty.
+   `/import-inputs`.
+5. A requirement in `draft` or `in-review`, or with a `COV-19` finding, is not settled.
+   Name each one and ask: wait, or design against it at risk. Elements that fulfil it
+   stay in `draft` until it is approved: the check reports `UPSTREAM`, and the review
+   refuses to approve an item above one that is not approved.
+6. `SUSPECT` on an existing element means that a requirement it fulfils changed after
+   its review: read the new version first. An open `QUERY` on an input means a question
+   to its source is unanswered: read the query before designing on that input.
 
 ## Steps
 
@@ -42,8 +48,8 @@ Every requirement is allocated. All items are written in state `draft`, ready fo
 - With arguments: the named requirements, component or feature. Without: every `COV-07`
   (requirement not allocated), `COV-08` (component without a requirement) and `COV-25`
   (required view kind missing) finding, plus existing draft architecture items.
-- Run `python tools/traceability.py matrix`; its `allocated_to`, `fulfils`, `part_of`,
-  `realizes` and `shows` tables show what exists. For the IDs of one type run
+- Run `python tools/traceability.py matrix`; its `fulfils`, `part_of`, `realizes` and
+  `shows` tables show what exists. For the IDs of one type run
   `python tools/traceability.py list --type software-component`. Ask the user whether the
   list is the right scope.
 
@@ -52,7 +58,10 @@ Every requirement is allocated. All items are written in state `draft`, ready fo
   timing, resources, safety or reuse, and add the project goals the user names.
 - Propose evaluation criteria from this list and ask the user to rank them before any
   structure is drawn. Every `design-decision` uses them (step 8).
-- An unclear or contradictory requirement is a query to its author, not design input.
+- A question the user cannot answer is not design input. About an imported item it
+  becomes a `query` item (`python tools/record.py next-id query`; folder
+  `records/queries`; `to`, `asked_at`, a `Question` section, `about` linking the item).
+  About a requirement the project wrote, it goes back to `/sw-requirements`.
 
 ### 3. Decompose
 - Read `references/architecture-guidance.md` first. Propose the components, each with
@@ -106,8 +115,7 @@ Every requirement is allocated. All items are written in state `draft`, ready fo
 
 ### 9. Allocate
 - Per requirement choose the responsible component, or for `kind: interface` the
-  interface, and record it as `fulfils` on that element. Requirements are not edited; an
-  `allocated_to` that came with a requirement stays valid and is not repeated.
+  interface, and record it as `fulfils` on that element. Requirements are not edited.
 - Check both directions with `python tools/traceability.py show <ID>`: `Responsibility`
   covers every requirement of the element, and every element has a requirement or a
   recorded reason (`COV-08`).
@@ -133,25 +141,24 @@ proposals; correct what the user accepts.
 
 - Show a table of the drafts (ID, type, title, kind, ASIL, links) and the allocation, and
   ask: "May I write these N items to `spec/software/architecture/`, `spec/views/` and
-  `spec/decisions/`?"
+  `spec/decisions/`?" Queries go to `records/queries/`.
 - IDs: `python tools/record.py next-id software-component`, likewise for the other
   types; then count upwards. Status `draft`. File layout: `component-template.md`,
   `interface-template.md`, `view-templates.md` and `decision-template.md` in `references/`.
-- The allocation is written as `links.fulfils` on the element. Never write
-  `allocated_to` on a requirement, whether draft, approved or imported.
+- The allocation is written as `links.fulfils` on the element; no requirement is edited.
 - Before changing an approved architecture item, say that its approval becomes stale
-  and run `python tools/traceability.py impact <ID>`. For an interface also name the
-  components in its `used_by`. An item inside a baseline needs an approved change
-  request first (`/change-request`).
+  and run `python tools/traceability.py impact <ID>` to show what depends on it.
 - An element the user withdraws becomes `obsolete` with `superseded_by`, after every
   link to it has moved: `LINK` and `COV-24` report links to an obsolete item.
+- Inside a baseline, changing or withdrawing an item needs an approved change request
+  first (`/change-request`).
 
 ## Checks before you finish
 
 Run `python tools/traceability.py check --all` and `python tools/traceability.py matrix`.
 - `FORMAT`, `SCHEMA` and `LINK` findings on items written in this session: fix them.
 - `COV-07`, `COV-08`, `COV-23` and `COV-24` for the scope of this session should be
-  gone. If one remains, report it with the reason. Quote the allocation tables.
+  gone. If one remains, report it with the reason. Quote the `fulfils` tables.
 - Expected, and to be said: `COV-25` until `/review` has approved the views; `COV-23`
   until a decomposition decision is approved; `COV-09` and `COV-21` until the detailed
   design exists.
@@ -161,16 +168,17 @@ Run `python tools/traceability.py check --all` and `python tools/traceability.py
 Report, in this order:
 1. The base practice table with what was done in this session and what is open.
 2. The budget sums against capacity and reserve; what is `NOT ASSESSED` and why.
-3. Decisions the user has not taken; queries to requirement authors, suppliers and the
-   owner of the hardware; needs handed to `/sw-requirements`.
+3. Decisions the user has not taken; the queries written, by ID; needs and questions
+   handed to `/sw-requirements`.
 4. The remaining findings of the check that concern these items.
-5. Next: `/review` for the architecture items (its record names the requirements they
-   fulfil); `/baseline` for the agreed architecture; then `/sw-detailed-design`.
+5. Next: `/review`, top down: requirements before the elements that fulfil them, shown
+   items before or together with their views. Then `/baseline`, then
+   `/sw-detailed-design`.
 
 ## Do not
 
-- Do not set `status` to anything but `draft`, or `obsolete` for an element the user
-  withdraws, and do not write a review record.
+- Do not set `status` to anything but `draft` (`open` for a query), or `obsolete` for an
+  element the user withdraws, and do not write a review record.
 - Do not edit requirements, imported items (a problem with one is a query) or
   `project.yaml`, and do not design units.
 - Do not decide between alternatives, lower an ASIL or state a measured value.

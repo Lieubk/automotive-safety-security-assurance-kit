@@ -92,14 +92,14 @@ def after(trace, payload, path):
     return (front, match.group(2)) if isinstance(front, dict) else (None, None)
 
 
-def same_statement(trace, item, front, body):
+def same_statement(trace, item, front, body, also=()):
     """True when only the disposition of the item changes, not what it says."""
     current = trace.FRONT_MATTER.match(item.path.read_text(encoding="utf-8").replace("\r\n", "\n"))
     if front is None or current is None:
         return False
 
     def statement(data):
-        return {key: value for key, value in data.items() if key not in DISPOSITION}
+        return {key: value for key, value in data.items() if key not in DISPOSITION and key not in also}
 
     return trace.content_hash(statement(front), body) == trace.content_hash(statement(item.front), current.group(2))
 
@@ -127,7 +127,9 @@ def pre_write(payload):
         # accepted through a review: from here on it changes only with its source
         new_version = isinstance((front or {}).get("imported"), dict) and \
             front["imported"].get("version") != (item.front.get("imported") or {}).get("version")
-        if not new_version and not same_statement(trace, item, front, body):
+        # the links of an imported item are the project's own bookkeeping (for example which
+        # requirements a delivered element fulfils), not part of what was delivered
+        if not new_version and not same_statement(trace, item, front, body, also=("links",)):
             return deny("%s is an imported input that has been accepted, and is read-only. A problem with it is a "
                         "query to its source. A new version from the source is registered with /import-inputs, "
                         "which records the new `imported.version`." % item.id)

@@ -259,8 +259,9 @@ What the check cannot tell is whether a link is true. Read each one in both dire
 - upwards: is there anything in the unit that no requirement, interface or stated
   reason asks for?
 
-The requirements a component is responsible for may be stated on the requirement
-(`allocated_to`) or on the component (`fulfils`); `show <component ID>` lists both.
+The requirements a component is responsible for are those it `fulfils`: the link is
+on the component, `show <component ID>` lists the requirements, and
+`show <requirement ID>` lists the component and the units that implement it.
 Link a requirement to the unit that fulfils it, not to every unit of the component.
 Where a component has one unit, the path requirement, component, unit already exists
 and `implements` adds nothing new; the worked example sets it anyway so that the unit
@@ -272,6 +273,25 @@ has been reviewed against the new version; `impact <ID>` shows this in advance. 
 code of a unit is covered by a review of its own, recorded with the code revision:
 that record stores the hash of every source file, so that a later change of the code
 shows as `SUSPECT` on the unit as well.
+
+Approval goes from the top down. A design item cannot be approved while an item it
+links to - its component, an interface, a requirement, a unit it uses, the design a
+decision concerns - is in draft or in review, unless that item is a subject of the
+same review: `/review` refuses the verdict, and an approved item above an unsettled
+one is reported as `UPSTREAM`. Review a component design, its units and their
+decisions together.
+
+## Questions that come up while designing
+
+| The question is about | It becomes | Who answers |
+|---|---|---|
+| an imported item: a delivered requirement, element, interface or component | a `query` item with an `about` link to that item (`item-templates.md`). While it is open, the check warns with `QUERY` on every approved item it is about | the source of the input, named in `to` |
+| an item the project wrote: its architecture, its requirements | a point for the owner of that item, passed on through the user and listed in the hand-over. The owner changes the item with `/sw-architecture` or `/sw-requirements`; it is then reviewed again and the design becomes `SUSPECT` until it has followed | the owner of the item |
+| the design itself | a decision in `Design concept`, or a `design-decision` | the user |
+
+Either way the design does not answer the question for the other side. If work goes
+on before the answer, the assumption is written into `Design concept` with its owner,
+and with the ID of the query where there is one.
 
 ## Units with an ASIL
 

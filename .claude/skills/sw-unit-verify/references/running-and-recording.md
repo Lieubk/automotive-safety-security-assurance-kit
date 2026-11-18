@@ -133,9 +133,9 @@ summary. The remedy is a tool: tell the user which one is needed.
 
 The trace check looks at the **latest** final unit run only. If a run with coverage is
 followed by a recorded run from a toolchain without coverage, `COV-28` comes back for
-every unit. When two toolchains are used, as in the example (`RUN-0001` without
-coverage; `RUN-0002` and `RUN-0003` with gcc and gcov), record the run with coverage
-last.
+every unit. When the tests are run with two toolchains, record the run with coverage
+last. The example has one unit run, `RUN-0001`, made with gcc and gcov, and one analysis
+run, `SAR-0001`, made with the analyser of another compiler; both name the same commit.
 
 ## Static verification: what ran, exactly
 
@@ -144,7 +144,7 @@ last.
 | Build without warnings | the build section of each test log; the compiler and its options in `environment` of the test run. The runner treats warnings as errors, so a warning makes every case of that test program fail | the unit and its test compile cleanly at that warning level | anything about a different compiler or other options |
 | Defect analysis | `static-analysis-run` whose `tool` names a compiler analyser | none of the defects this analyser looks for (for example null dereference, use of an uninitialised value, buffer overrun) was reported | absence of defects; conformance to a coding guideline |
 | Coding guideline conformance | `static-analysis-run` whose `tool` names a guideline analyser and its rule set | the rules of that set were checked and what was found | anything, if no such analyser ran |
-| Code review | a review record with the unit as subject, recorded by `/review` with the code revision: it carries `item_under_test` and the hashes of the unit's source files (`REV-0007` in the example) | a named person compared this code with the unit design | anything, while `check` reports `CONSISTENCY` ("a review of the code against the design is not evidenced": the design was reviewed, the code was not) or `SUSPECT` ("the code is no longer the code that was reviewed") on the unit |
+| Code review | a review record with the unit as subject, recorded by `/review` with the code revision: it carries `item_under_test` and the hashes of the unit's source files (`REV-0005` in the example, a fixture and not a review) | a named person compared this code with the unit design | anything, while `check` reports `CONSISTENCY` ("a review of the code against the design is not evidenced": the design was reviewed, the code was not) or `SUSPECT` ("the code is no longer the code that was reviewed") on the unit |
 
 Quote the `tool` text of the record when reporting. A project that has a guideline
 analyser converts its report into the analysis result format, with the rule ID in
@@ -247,7 +247,7 @@ marked `(uses <ID>)` are units that call the changed unit.
 
 | What changed | What `check` reports | Test cases to look at again | Run again |
 |---|---|---|---|
-| The design of a unit | `COV-19` on the unit; `SUSPECT` on each approved test case that verifies it; `COV-29` for a new function no case names | every `unit-test` at distance 1 in `impact <unit ID>`: re-derive against the new design, then `/review` | everything for the unit and for the units that use it |
+| The design of a unit | `COV-19` on the unit; `SUSPECT` on each approved test case that verifies it, and `UPSTREAM` on them while the unit is back in draft or in review; `COV-29` for a new function no case names | every `unit-test` at distance 1 in `impact <unit ID>`: re-derive against the new design, then `/review`, the unit first and its test cases after it | everything for the unit and for the units that use it |
 | The code of a unit, design unchanged | `COV-30` on the unit for the latest test run and analysis run; `SUSPECT` on the unit, because the reviewed code changed. The unit item itself is unchanged and stays approved | none | `/review` with the unit as subject and the code revision named; then build, analysis, all test cases and coverage of the unit, and of the units that use it where the strategy says so |
 | An interface | `SUSPECT` on the units that realize or use it; `impact <interface ID>` lists them at distance 1 and their test cases at distance 2 | those whose unit design changes as a result | as for each changed unit |
 | A test case item | `COV-19` (stale approval) on it | that item: `/review` | the test program it belongs to |

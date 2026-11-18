@@ -1,8 +1,9 @@
 # Imported items
 
 Layout as in `schema/item-format.md`: one item per file, named `<ID>.md`, in the
-folder of its type. The examples are the inputs of `examples/power-window` as this
-skill writes them: in state `draft`, before the input acceptance review.
+folder of its type. The examples are inputs of the power window project as this skill
+writes them: in state `draft`, before the input acceptance review. The template of a
+`query` item is in `queries-and-acceptance.md`.
 
 ## Types, folders and sections
 
@@ -44,8 +45,6 @@ imported:
   version: "2.1"
   received: "2026-03-02"
   source_id: DM-SYS-041
-links:
-  allocated_to: [SYE-0001, SYE-0002]
 ---
 
 ## Statement
@@ -65,16 +64,62 @@ Notes:
 - `kind` to `origin` are there because this source gives them per requirement. A
   source that gives none of them yields an item with `id`, `type`, `title`, `status`,
   `imported` and the statement, and that is a complete imported item.
-- `allocated_to` is the allocation as this source states it, per requirement. Where
-  the architecture document states it instead ("this element answers DM-SYS-041 and
-  DM-SYS-042"), the same fact is written on the element or interface item as
-  `links: {fulfils: [SYR-0001, SYR-0002]}`, and the requirement carries no allocation
-  link. Without any stated allocation both are left out and the allocation is a
-  query: only from it can the trace engine tell which system requirements concern the
-  software, and rule COV-05 then asks for a software requirement derived from each.
+- A requirement carries no allocation link. Its allocation is the `fulfils` link of
+  the element that answers it (next template).
 - Where the text of a requirement names another object of the delivery, the name
-  stays as the source wrote it. The registered item is found through its
-  `imported.source_id`.
+  stays as the source wrote it, for example "the test body of DM-SYS-041". The
+  registered item is found through its `imported.source_id`.
+
+## System element
+
+File: `spec/system/architecture/SYE-0001.md`
+
+```markdown
+---
+id: SYE-0001
+type: system-element
+title: Window control software
+status: draft
+kind: software
+asil: B
+security_relevant: false
+imported:
+  source: Front Door Module - System Architecture Description
+  version: "1.4"
+  received: "2026-03-02"
+  source_id: "4.1"
+links:
+  fulfils: [SYR-0001, SYR-0002, SYR-0003, SYR-0004]
+---
+
+## Responsibility
+
+The application software of the door module that moves the window. It evaluates the
+switch request and the Hall sensor pulses and commands the motor. It tracks the window
+opening and the window speed, detects an obstacle during closing and reverses the
+window.
+
+## Dynamic behavior
+
+- Cycle times: 5 ms for position, speed, obstacle detection and motor command; 20 ms
+  for the evaluation of the switch request.
+- Start-up: the element is ready 50 ms after the reset is released, with the motor
+  stopped.
+```
+
+Notes:
+
+- `fulfils` is the allocation: the delivery says that this element answers
+  DM-SYS-041 to DM-SYS-044, registered as SYR-0001 to SYR-0004. The link names item
+  IDs; the text of the item keeps the source's identifiers.
+- `kind` matters: rule COV-05 asks for a software requirement derived from each system
+  requirement that an element of kind `software` fulfils. The other values are
+  `hardware`, `mechanical` and `external`.
+- The requirements are written before the element, so that the link has its targets,
+  and they are accepted before it: an element cannot be approved while a requirement
+  it fulfils is still in draft or in review.
+- The text is shortened here. A registered item holds everything the source says about
+  the element.
 
 ## System interface
 
@@ -115,14 +160,11 @@ with the acknowledgement of the next command.
 
 Notes:
 
-- This source gives its interfaces no identifiers, so `source_id` is the place in the
-  document: here the chapter that defines the interface. The query list then asks the
-  source for identifiers. (The architecture items in `examples/power-window` were
-  written without `source_id`; a new import does not leave it out.)
-- A system element has the same front matter with `kind` out of `hardware`,
-  `software`, `mechanical`, `external`, and the sections `Responsibility` and
-  `Dynamic behavior`. The `kind` matters: rule COV-05 asks for software requirements
-  only where a system requirement is allocated to an element of kind `software`.
+- This source gives its elements and interfaces no identifiers, so `source_id` is the
+  place in the document: here the chapter that defines the interface. A query then
+  asks the source for identifiers.
+- An interface may carry `fulfils` as well, when the delivery allocates a requirement
+  to the interface rather than to an element.
 
 ## Stakeholder requirement
 

@@ -72,7 +72,8 @@ A finding rests on text. Quote the words it is based on, with the item and the s
 or attribute they stand in. For something that is absent, say where you looked:
 "SWR-0010, `Verification criteria`: no pass condition for the highest closing speed".
 A concern you cannot tie to a place in the items is a question for the caller, not a
-finding.
+finding. When only the source of an imported input could settle a finding, say so in
+"fix": the caller turns it into a query item; you do not word a message to anyone.
 
 Severity:
 
@@ -91,11 +92,13 @@ Exactly these parts, in this order.
 handed over; files read besides the items.
 
 ## Result per check
-<check ID>: pass | finding | not-assessed - pass on <IDs>; finding on <IDs>; not applied to <IDs>
-One line per semantic check. The result is `not-assessed` if the check could not be
-applied to at least one item, otherwise `finding` if you propose one, otherwise `pass`.
-Every subject item the check applies to appears in exactly one of the three groups. A
-check about the set says "the set" instead of IDs.
+<check ID>: pass | finding | not-applicable | not-assessed - pass on <IDs>; finding on <IDs>; not applied to <IDs>
+One line per semantic check. `not-applicable`: the check concerns none of the subject
+items, and you say why (no item has `origin: internal`; the plan is of another kind).
+Otherwise `not-assessed` if the check could not be applied to at least one item it
+concerns, otherwise `finding` if you propose one, otherwise `pass`. Every subject item
+the check concerns appears in exactly one of the three groups. A check about the set
+says "the set" instead of IDs.
 
 ## Earlier findings (re-review only)
 <REV-ID>#<finding id>: resolved | not resolved - the present text or code, quoted
@@ -110,7 +113,8 @@ check about the set says "the set" instead of IDs.
 
 ## Checks not applied
 <check ID>, <IDs>: why not - for example an upstream item could not be read, the check
-needs a fact only a person has, or the source file named does not exist.
+needs a fact only a person has, or the source file named does not exist. And for each
+check reported as not-applicable: the reason.
 
 ## Not mine
 The script and accountable checks of the checklist, by ID.
@@ -122,9 +126,11 @@ Something plainly wrong that no check covers, with the same fields and check `-`
 ```
 
 `pass` is always written out for the check and the items concerned, never implied by
-silence. A check that is missing from "Result per check" counts as `not-assessed`. The
-three results are the ones the review record stores per check; the caller copies yours
-for the semantic checks once a person has confirmed or rejected the proposals.
+silence. A check that is missing from "Result per check" counts as `not-assessed`. Do
+not use `not-applicable` for a check that is hard to apply: it means there is nothing
+for the check to look at. The four results are the ones the review record stores per
+check; the caller copies yours for the semantic checks once a person has confirmed or
+rejected the proposals.
 
 ## Rules
 

@@ -29,7 +29,9 @@ practices start from; none of the rows is evidence for a rating on its own.
    it, read "Changing an existing file" in `references/project-yaml.md`, show the
    current file, ask what is to change and go through only the steps concerned.
 2. Run `python tools/traceability.py status`. If it lists items although there is no
-   `project.yaml`, say so: without a scope the trace engine runs every rule.
+   `project.yaml`, say so: without a scope the trace engine runs every rule. Every
+   command of this skill takes `--project <dir>` after the script name when the
+   project is not the current directory; `project.yaml` is then written there.
 3. Read `aspice/3.1/index.yaml` and list the installed skills with Glob
    `.claude/skills/*/SKILL.md`. Step 3 states both as facts, not from memory.
 4. Ask one step at a time, in the order below. After each answer restate what will be

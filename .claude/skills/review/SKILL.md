@@ -1,6 +1,6 @@
 ---
 name: review
-description: "Prepare and record the review of engineering items, plans, imported inputs and the code of software units: script checks, an independent semantic pass against the checklist, findings confirmed by people, and a review record written by tooling with the result of every check (SUP.1.BP2 and the consistency practices of the SYS and SWE processes). Use when items wait in draft or in-review, when the trace check reports COV-19, SUSPECT or CONSISTENCY, after code was written or changed, or after an upstream item has changed. It is the only way an item becomes approved."
+description: "Prepare and record the review of engineering items, plans, imported inputs and the code of software units: script checks, an independent semantic pass against the checklist, findings confirmed by people, and a review record written by tooling with the result of every check (SUP.1.BP2 and the consistency practices of the SYS and SWE processes). Use when items wait in draft or in-review, when the trace check reports COV-19, SUSPECT, CONSISTENCY or UPSTREAM, after code was written or changed, or after an upstream item has changed. It is the only way an item becomes approved."
 argument-hint: "[item IDs, an item type, or nothing to review whatever is waiting]"
 allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Agent, Bash(python tools/traceability.py *), Bash(python tools/record.py *)
 ---
@@ -29,19 +29,20 @@ assurance plan says how independent that person must be. The agent is never that
 
 1. If there is no `project.yaml`, stop: "This project has no scope yet. Run
    `/aspice-start` first."
-2. Run `python tools/traceability.py status` and `python tools/traceability.py check --all`
-   and read both before reading any item (`--project <dir>` when the project is not the
-   current directory). If a command does not run, stop: the review preparation is NOT
-   ASSESSED, with the reason, and nothing is recorded.
-3. A review is not tied to one process. Reviewed are items whose type belongs to a
+2. Every command below takes `--project <dir>` right after the script name when the
+   project is not the current directory.
+3. Run `python tools/traceability.py status` and `python tools/traceability.py check --all`
+   and read both before reading any item. If a command does not run, stop: the review
+   preparation is NOT ASSESSED, with the reason, and nothing is recorded.
+4. A review is not tied to one process. Reviewed are items whose type belongs to a
    process in `scope.processes` (`supports` of the type in `schema/items.yaml`; for a
    `plan`, its `kind` under `plan_kinds`) and items marked `imported`. For an item that
    is neither, stop: it comes from outside the scope and is registered with
    `/import-inputs`.
-4. Change requests and problem reports are not reviewed here, although the tool would
-   take their IDs: their states are decisions of their own lifecycles. The review of a
-   change request's implementation is prepared and recorded by `/change-request`.
-5. If nothing is waiting (step 1), say so and stop.
+5. Change requests, problem reports and queries are not reviewed here, although the tool
+   would take their IDs. The review of a change request's implementation is prepared
+   and recorded by `/change-request`.
+6. If nothing is waiting (step 1), say so and stop.
 
 ## Steps
 
@@ -49,23 +50,30 @@ assurance plan says how independent that person must be. The agent is never that
 - With IDs or a type as argument: those items. Without: collect
   - `python tools/traceability.py list --status draft` and `list --status in-review`,
     engineering items only;
-  - `COV-19` findings: approvals that are stale, missing, or carry open findings;
+  - `COV-19` findings: approvals that are stale or missing. `left findings open` on a
+    draft means the author has not corrected it yet: not ready;
   - `SUSPECT` findings: an upstream item, or the code of a unit, changed after the review;
   - `CONSISTENCY` findings: a review did not record what the item was compared with, or
-    the code of a unit was never reviewed against its design.
+    the code of a unit was never reviewed against its design;
+  - `UPSTREAM` findings: the item named in the message, still in draft or in review.
 - Read `references/scoping.md` and group the items into reviews: one checklist per
   review, what must be read together in one review, small enough to read properly. It
   also says when a unit needs a design review, a review of its code, or both.
-- Show the reviews as a table (items, checklist, number of upstream items) and ask
-  which one to run now. Steps 2 to 8 are done for one review at a time.
+- Order the reviews from the top down. The tool refuses to approve an item while an
+  item it links to is in draft or in review, unless both are subjects of one review.
+- Show the reviews as a table (items, checklist, number of upstream items, open queries
+  about them from `list --type query --status open`) and ask which one to run now.
+  Steps 2 to 8 are done for one review at a time.
 
 ### 2. Pick the checklist
 - Imported items: `.claude/docs/checklists/input-acceptance.md`. Otherwise the checklist
   whose `Applies to:` sentence names the item type (Grep it in
-  `.claude/docs/checklists/`). Read it; cite it as `references/scoping.md` says.
+  `.claude/docs/checklists/`). Read it. Cite it as `"<file name without .md> v<N>"`,
+  with the number of its version line: `software-requirements v1`.
 - No checklist for the type: say "Semantic checks: NOT ASSESSED - the toolkit has no
   checklist for <type>". Do not write one on the spot. Ask which criteria the
-  reviewers use; the record cites what the user names. Without stated criteria, stop.
+  reviewers use; the record names them and is written with `--external-criteria`.
+  Without stated criteria, stop.
 
 ### 3. Set the items to in-review
 - Ask: "May I set these N items to `in-review`?" Then change the `status` line only.
@@ -94,36 +102,40 @@ assurance plan says how independent that person must be. The agent is never that
 - Delegate to the agent `aspice-reviewer`. Hand over the subject IDs, the path of the
   checklist, the output of `hash --upstream`, and the project folder if it is not the
   current one. Hand over nothing else: no explanation by the author, no hoped-for result.
-- It returns a result for every semantic check - `pass`, `finding` with the text it
-  rests on, or `not-assessed` with the reason.
-- For a review of up to three items you may apply the semantic checks yourself, in the
-  format of `.claude/agents/aspice-reviewer.md`. Then tell the user, and repeat in the
-  hand-over: "No independent pass took place." Say also when this session drafted the
-  items.
+- It returns a result for every semantic check: `pass`, `finding` with the text it rests
+  on, `not-applicable` or `not-assessed`, each with the reason.
+- If the agent is not available (agent definitions load when a session starts; a new
+  session makes it available), or the review has at most three items, you may apply the
+  semantic checks yourself in the format of `.claude/agents/aspice-reviewer.md`. Then
+  tell the user, and repeat in the hand-over: "No independent pass took place." Say
+  also when this session drafted the items.
 
 ### 6. Findings and accountable checks
 - Read `references/recording.md`. Present one overview, labelled by source:
   script findings (quoted), proposed semantic findings (item, check, severity, quoted
-  text, what is wrong, what would fix it), checks not assessed.
+  text, what is wrong, what would fix it), checks not assessed, open queries.
 - The user accepts, rejects, changes or adds findings. Only what a person confirms
-  becomes a finding.
+  becomes a finding. A finding that only the source of an input can settle cites a
+  `query` item by ID; if none exists, ask to write one (`references/recording.md`).
 - Ask every `accountable` check of the checklist as a question and note who answered.
-  "No" or "not yet" is a finding. An unanswered check is `not-assessed`.
+  "No" or "not yet" is a finding. An unanswered check is `not-assessed`. If the answer
+  needs something that has not happened yet (a confirmation by the customer), do not
+  press for it: the check stays `not-assessed`, the items stay `in-review`, nothing is
+  approved, and the review is completed when the answer exists.
 
 ### 7. Reviewers and verdict
 - Ask who is accountable for the verdict. Offer the names under `people` in
-  `project.yaml` if there are any; otherwise the user states them. Ask who wrote the
-  items: at least one reviewer must be someone else. If there is none, stop before
-  recording. A model, an agent or a tool is never a reviewer.
+  `project.yaml`; if the key is absent or empty, ask, and do not assume anyone. Ask who
+  wrote the items: at least one reviewer must be someone else. If there is none, stop
+  before recording. A model, an agent or a tool is never a reviewer.
 - Say what stands against `approved`. The tool refuses it while a finding is open,
-  while a check is `not-assessed`, and while an open finding of an earlier review of the
-  same content is not closed; missing mandatory content (step 4) stands against it too.
-  Then ask for the verdict, `approved` or `rework`. Do not propose one.
+  while a check has no result or is `not-assessed`, while an item the subject links to
+  is not approved, and while an open finding of an earlier review of the same content
+  is not closed; missing mandatory content (step 4) stands against it too. Then ask for
+  the verdict, `approved` or `rework`. Do not propose one.
 
-### 8. Record
+### 8. Record, and review again when needed
 Record the review and set the status as described under Writing.
-
-### 9. Reviewing again
 Read `references/re-review.md` when findings were corrected after a `rework` verdict,
 when code changed, or when an upstream item changed (`python tools/traceability.py
 impact <ID>` lists what depends on it). Findings are closed by a new review, with an
@@ -134,16 +146,17 @@ entry that names the earlier finding under `closes`, never by editing the earlie
 - Run `python tools/traceability.py hash <ID> ...` and compare with step 4. A different
   hash means the content changed after the checks: go back to step 4 for that item.
 - Write two JSON files outside the item folders, for example under `build/`: the
-  confirmed findings, and the result of every check of the checklist (`pass`, `finding`
-  or `not-assessed`, with a note). Formats: `references/recording.md`.
+  confirmed findings, and one result for every check ID of the checklist (`pass`,
+  `finding`, `not-applicable` with the reason, `not-assessed`), as in `recording.md`.
 - Ask: "May I record this review: N items, checklist <name and version>, reviewers
   <names>, verdict <verdict>, M findings, K checks not assessed?"
 - Run `python tools/record.py review --checklist "<name> v<N>" --reviewer "<name>"
   --verdict approved|rework --checks FILE [--findings FILE] [--item-under-test REF]
   <ID> ...`, with one `--reviewer` per person. Pass `--item-under-test <commit>` exactly
   when the code of the units was part of the review: only then does the tool store the
-  hashes of their source files. It assigns the ID and fills in the date, `subject` and
-  `references`.
+  hashes of their source files. Pass `--external-criteria` only when the user named
+  criteria from outside the toolkit. The tool assigns the ID and fills in the date,
+  `subject` and `references`.
 - When the tool refuses ("no record written"), do not change a finding's state or a
   check's result to get past it; go back to the user.
 - Then set the status, changing the `status` line only: `approved` when the verdict is
@@ -153,9 +166,9 @@ entry that names the earlier finding under `closes`, never by editing the earlie
 ## Checks before you finish
 
 Run `python tools/traceability.py check`.
-- `COV-19`, `SUSPECT` and `CONSISTENCY` on items approved in this session are gone. If
-  a line remains, quote it and say what it still asks for; do not edit a record or an
-  item to make it disappear.
+- `COV-19`, `SUSPECT`, `CONSISTENCY` and `UPSTREAM` on items approved in this session
+  are gone. If a line remains, quote it and say what it still asks for; do not edit a
+  record or an item to make it disappear.
 - A `SCHEMA` error on an item just approved means mandatory content is missing: tell
   the user; correcting it makes the approval stale and needs a new review.
 - Other coverage findings on the subject are reported as they are. One that was a
@@ -167,9 +180,10 @@ Report, in this order:
 1. The base practice table with what was done in this session.
 2. Per review: record ID, checklist and version, reviewers as stated, verdict; items
    now `approved`; items back in `draft` with their open findings.
-3. Checks not assessed and why; whether an independent pass took place; proposals the
-   user rejected (count); for units with code, whether a code review is still owed.
-4. Findings on imported items as queries for the source of the input.
+3. Checks not assessed and why, with the answer that is awaited and from whom; whether
+   an independent pass took place; proposals the user rejected (count); for units with
+   code, whether a review of the code is still owed.
+4. Open queries by ID, each with the items it is about and whom it was put to.
 5. Next: the authoring skill for items in `draft`, then `/review` again; `/baseline`
    when the set is approved; `/trace-check` for what the check still reports.
 
@@ -178,7 +192,6 @@ Report, in this order:
 - Do not supply a reviewer's name, and do not decide or suggest the verdict.
 - Do not set `approved` without a record that covers the item's current hash.
 - Do not edit a final record, not even to close a finding.
-- Do not correct the items or the code under review. Corrections belong to the
-  authoring skill.
-- Do not change the content of an imported item; a problem with it is a query.
+- Do not correct items or code under review; that is the work of the authoring skill.
+- Do not change the content of an imported item; a problem with it is a query item.
 - Do not put unrelated items into one review, and do not improvise a checklist.

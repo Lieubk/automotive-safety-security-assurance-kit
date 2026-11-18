@@ -6,6 +6,10 @@ SWE.1.BP3, SWE.1.BP4, SWE.1.BP5, SWE.1.BP6, SWE.1.BP7.
 Kinds: `script` - a tool answers it; `semantic` - needs reading and judgement, a model
 may propose and a person confirms; `accountable` - only a person can state it.
 
+A check that does not apply to the item under review is recorded as `not-applicable`
+with the reason. An accountable check whose answer does not exist yet (an agreement that
+is still to be reached) stays `not-assessed`: the item remains in review until it does.
+
 ## Each requirement
 
 | ID | Check | How to check | Kind |
@@ -34,5 +38,5 @@ may propose and a person confirms; `accountable` - only a person can state it.
 | SWR-22 | No two requirements regulate the same behaviour differently; no requirement repeats another | read related requirements together | semantic |
 | SWR-23 | Start-up, shutdown, every operating mode, loss or invalidity of every input, and the limits of every value are covered or deliberately left out | walk the list against the set | semantic |
 | SWR-24 | Each requirement is assigned to a release, and the release content is achievable | read `release`; ask the project lead | accountable |
-| SWR-25 | Open queries to the source of the inputs are recorded and none of them invalidates a requirement under review | ask the author | accountable |
+| SWR-25 | No open query is about a requirement under review or about one of its parents; or the reviewers have decided that the open query does not affect it | `check`: no `QUERY` finding on the subject or its parents; otherwise ask the reviewers and note the decision | accountable |
 | SWR-26 | The parties that depend on these requirements have agreed to them | ask who agreed, and when | accountable |

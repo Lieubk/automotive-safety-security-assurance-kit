@@ -10,6 +10,17 @@ A plan says how a process is going to be performed in this project. Apply the pa
 "Every plan" to each plan, then the part for its `kind`. The parts follow `plan_kinds`
 in `schema/items.yaml`. A kind whose process is not in `scope.processes` needs no plan.
 
+Recording: the review record needs a result for every check ID of this file. The checks
+of the parts for other kinds are `not-applicable`, with the note "plan of kind <kind>".
+Plans of different kinds are reviewed in separate reviews.
+
+Accountable checks: some answers depend on something that cannot happen in the sitting -
+an agreement of people who are not present, a confirmation from outside the team. Such
+a check stays `not-assessed`, the plan stays `in-review`, and the review is completed
+when the answer exists. It is not answered on someone's behalf. Where a check refers to
+`project.yaml` (`scope.processes`, `people`, `safety`, `trace`) and the key is absent or
+empty, ask the user; do not assume a value.
+
 ## Every plan
 
 | ID | Check | How to check | Kind |
@@ -19,7 +30,7 @@ in `schema/items.yaml`. A kind whose process is not in `scope.processes` needs n
 | PLN-03 | `Scope` says what the plan covers, what it leaves out, and who covers what is left out; nothing the process needs falls between two plans | read `Scope`; compare with the other plans | semantic |
 | PLN-04 | The plan is written for this project: it names the item types, units, tools and environments actually in use, and would not fit an arbitrary project unchanged | read the plan against `status` and the items it refers to | semantic |
 | PLN-05 | `Approach` names the methods, their order and what triggers each activity; someone new to the project could work by it | read `Approach` | semantic |
-| PLN-06 | Where the rigour depends on ASIL, the plan says how, for every ASIL that occurs in the project | compare `Approach` and `Criteria` with the `asil` values in use | semantic |
+| PLN-06 | Where the rigour depends on ASIL, the plan says how, for every ASIL that occurs in the project | compare `Approach` and `Criteria` with the `asil` values of the items and with `safety.highest_asil` in `project.yaml` | semantic |
 | PLN-07 | Every criterion in `Criteria` can be decided as met or not met from a record or a tool output the project produces | read `Criteria`; name the record for each criterion | semantic |
 | PLN-08 | The plan agrees with the other plans and with `project.yaml`: same terms, roles, tools, states and baseline purposes; no rule that another plan contradicts | read the plans side by side | semantic |
 | PLN-09 | `Environment and tools` names each tool with its use and with where its version is recorded; the limits of tools and environment are stated | read the section | semantic |
@@ -28,7 +39,7 @@ in `schema/items.yaml`. A kind whose process is not in `scope.processes` needs n
 | PLN-12 | The plan says which events lead to its update (a new release, a change of scope, of tools or of ASIL) | read the plan | semantic |
 | PLN-13 | The people who work by the plan know it and consider it workable | ask who was informed, how, and whether objections remain | accountable |
 | PLN-14 | The plan fits the project schedule and the release plan, and the people, tools and equipment it relies on are available | ask the project lead | accountable |
-| PLN-15 | The roles named in `Responsibilities` are filled | ask who holds each role | accountable |
+| PLN-15 | The roles named in `Responsibilities` are filled | ask who holds each role; compare with `people` in `project.yaml` where that key is filled | accountable |
 
 ## Kind unit-verification (SWE.4.BP1)
 

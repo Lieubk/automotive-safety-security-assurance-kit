@@ -100,12 +100,11 @@ CMP-0006.
 | `links.realizes` | when the interface carries the software side of a `system-interface` | that system interface |
 | `links.fulfils` | when a requirement is allocated to the interface | the software requirements the interface is responsible for, usually of `kind: interface` |
 
-`provided_by` and `used_by` are attributes of the interface. To find the interfaces of a
-component run `python tools/traceability.py show <component ID>`: it lists them as
-`provided_by` and `used_by`, and `impact <component ID>` counts them among what depends
-on the component. The other direction is in the item itself: `impact <interface ID>`
-lists the units and views that depend on an interface, and its `used_by` names the
-components.
+`provided_by` and `used_by` are attributes of the interface, and the trace commands
+follow them. `python tools/traceability.py show <interface ID>` lists the components
+that use the interface, and `impact <interface ID>` adds the units and views that depend
+on it. `show <component ID>` lists the interfaces a component provides (`provided_by`)
+and the interfaces it uses (`uses`).
 
 ## Choosing `kind`
 

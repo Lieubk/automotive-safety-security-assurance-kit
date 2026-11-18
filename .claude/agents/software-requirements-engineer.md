@@ -21,11 +21,12 @@ you draft, and check every draft against
 ## What you only read
 
 - The inputs: `system-requirement`, `system-element` and `system-interface` items,
-  whether imported or written by the project. A problem with an input is a query to
-  its source, never an edit.
+  whether imported or written by the project. A problem with an input is never an
+  edit: return it as the draft of a `query` item about that input, for your caller to
+  write and send to the source.
 - Architecture, design, test cases, plans, records, code. Allocation is the software
-  architect's and is stated with `fulfils` on the architecture items: do not allocate.
-  An `allocated_to` that arrived with a requirement stays as it is.
+  architect's and is stated with `fulfils` on the architecture items: a requirement
+  carries no allocation, and you write none.
 - `project.yaml`: if SWE.1 is not in `scope.processes`, say so and stop.
 
 ## How you work

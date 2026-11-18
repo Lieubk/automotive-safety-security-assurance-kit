@@ -198,29 +198,66 @@ requirement is missing (hand it to `/sw-requirements`) or the duty is not needed
 requirement that no sentence of `Responsibility` covers means the allocation or the text
 is wrong.
 
-Where the link is written:
+The link is written on the element, as `fulfils`, because the element depends on the
+requirement and not the other way round:
 
-- This skill writes `fulfils` on the component or interface. No requirement is touched,
-  so approved requirements stay approved and imported ones can be allocated at all.
-- `allocated_to` on a requirement is the same allocation stated from the other side. It
-  is used when the allocation arrives with the requirement, as in the example project.
-  Leave such links as they are, and do not repeat them as `fulfils`. If one of them is
-  wrong, that is a query to the owner of the requirement. When an element named this
-  way changes, `check` reports the requirement's link as `SUSPECT`: the requirement is
-  reviewed again against the new element, without being edited.
-- Both appear in `matrix` (the `allocated_to` table and the two `fulfils` tables) and in
-  `show`; `COV-07`, `COV-08` and `COV-23` accept either.
+- No requirement is touched. Approved requirements stay approved, and imported ones
+  can be allocated.
+- `matrix` has one `fulfils` table for components and one for interfaces. A requirement
+  with `-` in both is not allocated (`COV-07`).
 - `python tools/traceability.py hash --upstream <ID>` lists the requirements an element
   fulfils as references. The review record of the architecture therefore names them, and
-  that is the consistency evidence for the allocation. When such a requirement changes
-  later, `check` reports the link as `SUSPECT` until the element is reviewed again.
+  that is the consistency evidence for the allocation.
+- When a requirement changes later, `impact <requirement ID>` names the elements that
+  fulfil it, and `check` reports their links as `SUSPECT` until they are reviewed again.
+- Approval goes top down. An element cannot be approved while a requirement it fulfils
+  is in `draft` or `in-review`: `check` reports `UPSTREAM` on an approved item above an
+  unapproved one, and the review refuses the verdict. The same holds inside the
+  architecture: a part after or together with its composition, a view after or together
+  with the items it shows, a decision after or together with the items it concerns.
 
 Withdrawing an element: nothing is deleted. First move what points to the element -
 `part_of` of its parts, `shows` of views, `concerns` of decisions, `used_by` and
 `provided_by` of interfaces, links of units and tests - then set it to `obsolete` with
 `superseded_by` naming its successor or the reason. `LINK` reports every link from a
-live item to an obsolete one, and `COV-24` every view that still shows it. A requirement
-that names the element in `allocated_to` has to be changed by its owner; list it.
+live item to an obsolete one, and `COV-24` every view that still shows it. An element
+inside a baseline is withdrawn only with an approved change request.
+
+## Questions to the source of an input
+
+A question about an imported item - a system element or interface, a delivered
+requirement, the description of supplied software - that the user cannot answer is
+written as a `query` item, not as a remark in the hand-over. While it is open, `check`
+warns with `QUERY` on every approved item it is about. A design statement that rests on
+the open answer names the query by ID.
+
+```markdown
+---
+id: QRY-0001
+type: query
+title: Memory separation between the QM and the ASIL B partition
+status: open
+to: "customer, system architect of the front door module"
+asked_at: "2026-11-18"
+links:
+  about: [SYE-0001]
+---
+
+## Question
+
+SYE-0001 assigns the window control software two tasks and one interrupt on the
+microcontroller of the door module. The software architecture runs the command logic
+(QM) and the obstacle detection (ASIL B) in different partitions and relies on the QM
+partition having no write access to data of the ASIL B partition.
+
+Is this separation enforced by memory protection in the basic software release 5.4.1,
+and is the mechanism developed to ASIL B?
+```
+
+One question per query, answerable by someone who does not know the project's items.
+`Answer` and `answered_by` are added when the user reports the answer; the status then
+becomes `answered`, and `closed` once the items are in line with it. A question about a
+requirement the project wrote itself is not a query: it goes back to `/sw-requirements`.
 
 ## ASIL and partitioning
 
@@ -275,7 +312,8 @@ Say in the hand-over which of these applied in the session.
 | No alternatives, because the structure was given | adopting a given structure is recorded as a decision, with what was checked |
 | Criteria that were written after the choice | criteria are ranked by the user before a structure is drawn |
 | Links exist, but the component cannot fulfil the requirement | allocation is checked in both directions against `Responsibility` |
-| Allocating un-approves the requirements, so nobody dares to update the allocation | the allocation is stated on the element (`fulfils`); requirements are not touched |
+| A requirement changes and the architecture silently stays as it was | the element that fulfils it becomes `SUSPECT`; `impact <requirement ID>` names it |
+| Open questions live in mails and hand-over notes | a question to the source of an input is a `query` item; `QUERY` shows while it is open |
 | Consistency is claimed because every requirement has a link | the skill claims none; `/review` records what was compared, and `check` reports `CONSISTENCY` and `SUSPECT` |
 | Description and model drift apart | `model` names the source; nothing is retyped; the comparison is reported as `NOT ASSESSED` |
 | An ASIL is lowered without anyone deciding it | `COV-23`; only an approved decision that concerns the element is accepted |

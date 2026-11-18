@@ -27,15 +27,18 @@ coverage, and records that tooling writes from tool output. The result is a `pla
 
 1. No `project.yaml`: stop. "This project has no scope yet. Run `/aspice-start` first."
 2. `SWE.4` not in `scope.processes`: stop. "SWE.4 is out of scope for this project."
-3. Run `python tools/traceability.py status` and `python tools/traceability.py check --all`.
+3. Run `python tools/traceability.py status` and `python tools/traceability.py check --all`
+   (every command takes `--project <dir>` when the project is not the current directory;
+   the runner and the analysis script are called by their path inside the project).
 4. Everything after step 1 needs approved units:
    `python tools/traceability.py list --type software-unit --status approved`. If there
-   are none, stop after the strategy: `/sw-detailed-design` writes the unit design.
+   are none, stop after the strategy: `/sw-detailed-design` writes the unit design. Name
+   and leave out a unit in draft or in review: its test cases could not be approved
+   (`UPSTREAM`), because approval goes from the top down.
 5. A unit may be approved before it has code. `check` then prints `COV-12`, `COV-28` and
-   `COV-29` for it as warnings ending in "(pending: the unit has no code yet)". Pending
-   means the rule applies once the code exists; nothing is wrong yet. Derive and write
-   the test cases now (steps 3 and 4); running and recording wait for
-   `/sw-unit-implement`. Say which units are pending.
+   `COV-29` for it as warnings ending in "(pending: the unit has no code yet)": the rule
+   applies once the code exists, nothing is wrong yet. Write the test cases now (steps 3
+   and 4); running and recording wait for `/sw-unit-implement`. Say which units are pending.
 6. If the check reports `COV-19`, `SUSPECT` or `CONSISTENCY` on a unit you are about to
    verify, say so first: its design is unreviewed or has changed, or its code is not the
    code that was reviewed. Test cases and runs inherit that doubt.
@@ -69,8 +72,9 @@ coverage, and records that tooling writes from tool output. The result is a `pla
 - Read `references/deriving-test-cases.md` and build the derivation table per unit: one
   or more cases per designed function, boundary values, every error return, every state
   and transition, and for units with an ASIL the failure of each called service.
-- Where the design does not say what shall happen, list a query for
-  `/sw-detailed-design`; do not fill the gap from the code.
+- Where the design does not say what shall happen, list a question for the designer
+  (`/sw-detailed-design`); for an imported unit write a `query` item about it. Do not
+  fill the gap from the code.
 - Set `verifies` to `<unit ID>#<function>` for every function the case checks (`COV-29`
   reports a public, scheduled or callback function no case names) and `asil` to the
   highest ASIL of the units verified (`COV-23` reports a lower one).
@@ -137,8 +141,10 @@ Follow the command sequence in `references/running-and-recording.md` exactly.
 - Apply `.claude/docs/checklists/unit-test-specification.md` to the test cases and their
   test code, and `.claude/docs/checklists/plan.md` to a drafted strategy. Show the
   findings as proposals and correct what the user accepts.
-- `/review` adds what this skill cannot: a named reviewer's verdict and the hashes of the
-  unit design the test cases were compared with; a later design change shows as `SUSPECT`.
+- `/review` adds a named reviewer's verdict and the hashes of the unit design the test
+  cases were compared with; a later design change shows as `SUSPECT`. It cites
+  `unit-test-specification v1` and needs a result for every check; before runs exist the
+  checks of the part on results are `not-applicable`.
 - Summarize as "Summary for the user" in `references/running-and-recording.md` says.
 
 ## Writing
@@ -148,6 +154,8 @@ Follow the command sequence in `references/running-and-recording.md` exactly.
   Ask separately before writing a plan to `plans/`.
 - IDs: `python tools/record.py next-id unit-test` or `next-id plan`, then count upwards.
   Status `draft`. Before changing an approved item, say that its approval becomes stale.
+- A `query` item: `python tools/record.py next-id query`, folder `records/queries`,
+  status `open`; layout in `references/deriving-test-cases.md`.
 
 ## Checks before you finish
 
@@ -169,8 +177,8 @@ Report, in this order:
 2. The verdict per part - build, unit tests, structural coverage, defect analysis, coding
    guideline conformance, code review - each with record ID and commit, or
    `NOT ASSESSED` and why.
-3. Failed cases and where each goes; queries for `/sw-detailed-design`; deviations
-   proposed and who has to decide.
+3. Failed cases and where each goes; questions for the designer and `query` items
+   written; deviations proposed and who has to decide.
 4. The remaining findings of the check that concern these items.
 5. Next: `/review` for the strategy and the test cases, and, with the code revision
    named, for any unit whose code changed; `/sw-unit-implement` or `/sw-detailed-design`

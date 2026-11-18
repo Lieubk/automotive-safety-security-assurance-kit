@@ -10,7 +10,8 @@ line of `check` reads `level  rule  item  message  [base practices]`.
 |---|---|---|
 | summary line of `check` says `scope: all processes` | `scope.processes` is missing or empty; every rule runs | `/aspice-start` |
 | `practices` prints `process is not in the catalog` for an ID | the scope names a process the catalog does not have | `/aspice-start` |
-| `inputs` is missing in `project.yaml` | what was received is not recorded | `/aspice-start inputs` |
+| `inputs` is missing in `project.yaml` | what was received is not recorded | `/aspice-start inputs`; do not conclude that nothing was received |
+| `aspice.target_level` or `scope.assessment_scope` is missing | target and assessment scope are not recorded | say so and ask the user; do not assume level 1 or "no assessment" |
 | a process in `assessment_scope` that is not in `processes` | rated, but not checked | a warning in the report, not a stop |
 
 ## Stop 2: structure
@@ -47,9 +48,17 @@ Whether an input was registered and accepted is looked up; the tools report the 
    version. Recommend `/review` with the checklist `input-acceptance` and those IDs.
    `COV-19` on an imported item means the same: its acceptance review is missing or
    no longer covers its content.
-3. Changed or retired? A new version of an input shows as `SUSPECT` on the items
-   derived from it (stop 5, question 3), a withdrawn input as the `LINK` message of
-   stop 2. Nothing has to be looked up for either.
+3. Changed or retired? A new version of an input shows as `UPSTREAM` and `SUSPECT`
+   on the items derived from it (stop 5, question 3), a withdrawn input as the `LINK`
+   message of stop 2. Nothing has to be looked up for either.
+4. Questions open? `python tools/traceability.py list --type query --status open`
+   names the open queries, `show <QRY-ID>` the inputs each is about. An input whose
+   acceptance review ended in rework because of a query waits for the answer: the
+   recommendation is to the user, to get it from the source, and then
+   `/import-inputs <QRY-ID>` to record it. `--status answered` names the queries whose
+   answer is recorded but not yet carried into the items: `/import-inputs` when the
+   answer came as a new version, otherwise `/review` of the input, which closes the
+   finding.
 
 ## Stop 4: plans
 
@@ -74,8 +83,9 @@ Skip what is not in scope. For each process ask three questions, in this order:
 
 1. Is work of this process missing? (rules of the first table)
 2. Are its items still in `draft` or `in-review`? (`status`, by item type)
-3. Is an approval stale, a link suspect, or consistency not evidenced?
-   (`COV-19`, `SUSPECT`, `CONSISTENCY` on its items)
+3. Is an approval stale or resting on something unapproved, a link suspect,
+   consistency not evidenced, a review finding or a query open?
+   (`COV-19`, `UPSTREAM`, `SUSPECT`, `CONSISTENCY`, `QUERY` on its items)
 
 Findings on items in `draft` are printed at level `info`; they are real, and they are
 the reason `check --all` is used here. For every draft that is not complete,
@@ -112,8 +122,9 @@ software. If `trace.derive_via_elements` is `true` in `project.yaml`, a software
 requirement derived from the software element is enough for all requirements
 allocated to that element; say so in the report whenever `COV-05` is silent for that
 reason, because single system requirements can then be uncovered without a finding.
-An allocation counts whichever way it is written: `allocated_to` on the requirement
-or `fulfils` on the element.
+An allocation is the `fulfils` link of an element or interface. A system requirement
+that no element of kind `software` fulfils is not looked at by `COV-05` at all; for
+imported requirements that is a question for `/import-inputs`.
 
 Question 2, by type:
 
@@ -140,6 +151,9 @@ Question 3:
 
 | Rule | The message says | Recommend |
 |---|---|---|
+| `UPSTREAM` | `approved, but <target> (<role>) is in state draft` or `in-review` | the item rests on something not approved. Recommend `/review` of the target first; if the target is an input, its acceptance review. The tool refuses to approve anything above it until then |
+| `QUERY` | `open query <QRY-ID> is about this approved item` | a question to the source is open. The item stays approved; say what waits for the answer. The user gets the answer; `/import-inputs <QRY-ID>` records it |
+| `COV-19` | `review ... left findings open: ...` on an item in `draft` or `in-review` | the last review of the item ended in rework. Recommend the authoring skill to work on the findings, then `/review`; for an imported input the finding cites a query, and the next step is the answer to it |
 | `COV-19` | `stale approval: content changed since review ...` or `approved, but no final review record covers it` | `/review` |
 | `COV-19` | `review ... still has open findings`, or an earlier finding on the same content `open and not closed by a later finding entry` | the authoring skill to rework the item, then `/review`, which closes the earlier finding explicitly |
 | `SUSPECT` | `suspect link: <target> (<role>) changed after review ...` | run `python tools/traceability.py impact <target>` and show it; then `/review` of the suspect item against the new content; the authoring skill first if the item itself has to change |

@@ -30,14 +30,19 @@ tests from. The result is one `component-design` item per developed component an
 2. If `SWE.3` is not in `scope.processes`, stop: "SWE.3 is out of scope for this project.
    A detailed design delivered from outside is registered with `/import-inputs`."
 3. Run `python tools/traceability.py status` and `python tools/traceability.py check --all`.
+   Every command of this skill takes `--project <dir>` when the project is not the
+   current directory.
 4. The inputs are the `software-component` to be designed, the `software-interface`
-   items it provides and uses, the `software-requirement` items allocated to it and the
+   items it provides and uses, the `software-requirement` items it fulfils and the
    software-level `architecture-view` items that show it: approved, or imported and
    covered by an input acceptance review. If one is missing or not approved, stop and
    name it and its skill: `/sw-architecture` for components, interfaces and views,
-   `/sw-requirements` for requirements, `/import-inputs` for delivered inputs.
-5. If the check reports `COV-19` or `SUSPECT` on an input you are about to use, say so
-   before continuing: a design built on such an input inherits that uncertainty.
+   `/sw-requirements` for requirements, `/import-inputs` for delivered inputs. A design
+   item cannot be approved above an input in draft or in review: `/review` refuses it,
+   and the check reports `UPSTREAM`.
+5. If the check reports `COV-19`, `SUSPECT`, `UPSTREAM` or `QUERY` on an input you are
+   about to use, say so before continuing: a design built on such an input inherits
+   that uncertainty.
 
 ## Steps
 
@@ -45,7 +50,8 @@ tests from. The result is one `component-design` item per developed component an
 - With arguments: the named components or units. Without: every `COV-09` finding (a
   developed component without design or units), every `COV-21` finding (a provided
   interface no unit realizes), plus the design items still in draft
-  (`python tools/traceability.py list --status draft` shows them with their type).
+  (`python tools/traceability.py list --status draft` shows them with their type; the
+  findings their last review left open are under `COV-19`).
 - Design only components with `origin: developed` and a `kind` other than
   `composition`. A `reused` or `supplied` component is not redesigned and gets no
   design item: its design belongs to its source. Changing such a component is a change
@@ -53,16 +59,23 @@ tests from. The result is one `component-design` item per developed component an
 - Tell the user the list and ask whether it is the right scope for this session.
 
 ### 2. Read the frame the architecture sets
-- Run `python tools/traceability.py show <CMP-ID>`: it lists the requirements
-  allocated to the component (`allocated_to` or `fulfils`), the interfaces it provides
-  and uses, the views and the decisions. Read these items by ID.
+- Run `python tools/traceability.py show <CMP-ID>`: it lists the requirements the
+  component fulfils (`fulfils`), the interfaces it provides and uses, the views and
+  the decisions. Read these items by ID.
 - Note what binds the design: `asil`, `execution_context`, `resource_budget`, `model`,
   tasks and call order of the execution model, ranges and error behaviour of the
   interfaces, and what `project.yaml` says under `platform` and `safety`.
-- Collect what is missing or contradictory as **queries** to the owner of architecture
-  or requirements; do not repair the architecture inside the design. Ask which queries
-  the user can answer now. For the rest ask: wait, or go on with an assumption that is
-  written into `Design concept` with its owner.
+- Collect what is missing or contradictory in architecture and requirements; do not
+  repair it inside the design. Ask which questions the user can answer now. The rest:
+  - about an imported item: a `query` item to the source of the input
+    (`python tools/record.py next-id query`; folder `records/queries`; `to`,
+    `asked_at`, a `Question` section, `about` linking the item), written with the
+    other items of this session;
+  - about an item the project wrote: it goes to the owner of that item through the
+    user, who changes it with `/sw-architecture` or `/sw-requirements`. It is listed
+    in the hand-over and is not a `query` item.
+- For each open question ask: wait, or go on with an assumption that is written into
+  `Design concept` with its owner and, where there is one, the ID of the query.
 
 ### 3. Design concept and units
 - Read `references/designing-units.md` before drafting. Propose the design concept and
@@ -126,9 +139,9 @@ findings to the user as proposals, grouped by item, and correct what they accept
 - Show a table of the drafts (ID, type, title, ASIL, component, files, requirements) and
   ask: "May I write these N design items to `spec/software/design/`?" Decisions go to
   `spec/decisions/`.
-- IDs: `python tools/record.py next-id component-design`, `next-id software-unit` and
-  `next-id design-decision`, then count upwards.
-- File layout: `references/item-templates.md`. Status `draft`.
+- IDs: `python tools/record.py next-id component-design`, `next-id software-unit`,
+  `next-id design-decision` and `next-id query`, then count upwards.
+- File layout: `references/item-templates.md`. Status `draft`; a query starts `open`.
 - When changing an approved item, say first that its approval becomes stale, that code
   and tests built on it become suspect, and that `python tools/traceability.py impact <ID>`
   lists them. Inside a baseline whose purpose is not internal the change needs an
@@ -150,20 +163,25 @@ Run `python tools/traceability.py check --all`.
 
 Report, in this order:
 1. The base practice table with what was done in this session and what is open.
-2. Queries for the owners of architecture and requirements, numbered, each with the
-   item ID; assumptions the design rests on, each with its owner.
+2. The query items written in this session, each with the input it is about and who
+   it goes to; questions for the owners of architecture and requirements the project
+   wrote, numbered, each with the item ID; assumptions the design rests on, each with
+   its owner.
 3. Risks from the evaluation that have no owner or no decided measure yet.
 4. The remaining findings of the check that concern these items.
-5. Next: `/review` for the design items and decisions; `/baseline` to record the agreed
-   design and who was informed; `/sw-unit-implement` for the approved units, and
-   `/sw-unit-verify` to derive test cases from the approved design: every designed
-   function of category public, scheduled or callback needs a test that names it.
+5. Next: `/review` for the design items and decisions, a component design together
+   with its units, checklist `software-detailed-design v1`. Approval goes from the top
+   down: everything a subject links to has to be approved or be a subject of the same
+   review. Then `/baseline` to record the agreed design and who was informed,
+   `/sw-unit-implement` for the approved units, and `/sw-unit-verify` to derive test
+   cases from the approved design: every designed function of category public,
+   scheduled or callback needs a test that names it.
 
 ## Do not
 
 - Do not set `status` to anything but `draft`, and do not write a review record.
 - Do not design reused, supplied or composition components, and do not edit imported items.
 - Do not write or change code; a design written after its code says so in `Design notes`.
-- Do not change a component, an interface or a requirement to fit the design: query its owner.
+- Do not change a component, an interface or a requirement to fit the design: ask its owner.
 - Do not let the design become a second source for names the component description
   defines, and do not invent complexity figures, risk owners or acceptances.

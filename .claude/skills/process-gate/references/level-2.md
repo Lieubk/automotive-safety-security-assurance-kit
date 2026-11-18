@@ -6,7 +6,8 @@ its work products are kept under control. That is judged per process, by generic
 practices, and almost all of the evidence lies outside the item files.
 
 When `aspice.target_level` in `project.yaml` is 2 or higher, list every generic practice
-below for each process gated, with the verdict **NOT ASSESSED by the toolkit**. Do not
+below for each process gated, with the verdict **NOT ASSESSED by the toolkit**. If the
+key is absent or empty, ask the user for the target level; do not assume one. Do not
 shorten the list to a sentence, and do not replace a line by "probably fine".
 
 Say with the list:
@@ -41,7 +42,9 @@ Say with the list:
 | GP 2.2.4 | reviews held as planned, against the criteria defined for the work product; findings followed to closure; rework and renewed approval | `review-record` items that name checklist and version, the date, the result of every check and the findings with their state; whether the reviews were held as planned is not in the repository |
 
 A starting point is not evidence. It tells the person who looks where to begin; whether
-it is enough is that person's judgement.
+it is enough is that person's judgement. The keys of `project.yaml` named above
+(`people`, `toolchain`, `inputs`) may be absent or empty: then say so instead of
+describing what they would hold.
 
 ## Level 3
 

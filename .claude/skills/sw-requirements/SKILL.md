@@ -30,14 +30,21 @@ ready for `/review`.
 2. If `SWE.1` is not in `scope.processes`, stop: "SWE.1 is out of scope for this
    project. Software requirements delivered from outside are registered with
    `/import-inputs`."
-3. Run `python tools/traceability.py status` and `python tools/traceability.py check --all`.
+3. Run `python tools/traceability.py status` and `python tools/traceability.py check --all`
+   (every command takes `--project <dir>` when the project is not the current directory).
 4. The inputs are `system-requirement`, `system-element` and `system-interface` items,
    either produced by the project (approved) or imported (covered by an input
    acceptance review). If there are none, stop and say which skill provides them:
    `/import-inputs` for delivered inputs, the system-level skills otherwise.
-5. If the check reports `COV-19` or `SUSPECT` on an input you are about to use, say so
-   before continuing: requirements derived from an unapproved or changed input inherit
-   that uncertainty.
+5. An input that is not approved - in `draft` or `in-review`, or carrying `COV-19` - is
+   not settled. Name each such input and ask the user: wait for its acceptance, or draft
+   against it at risk. Drafting at risk is allowed; the requirements derived from it stay
+   in `draft` until the input is approved, because the check reports `UPSTREAM` and the
+   review refuses to approve an item above something that is not approved.
+6. `SUSPECT` on an existing software requirement means its input changed after the last
+   review: read the input's new version and decide with the user whether the requirement
+   changes. An open `QUERY` on an input means a question to its source is unanswered:
+   read the query before deriving from that input.
 
 ## Steps
 
@@ -52,9 +59,12 @@ ready for `/review`.
 ### 2. Understand each input
 - Read the input items by ID. For each one answer: what must the *software* do or
   guarantee for this to hold? What is left to hardware or to other elements?
-- Collect what is unclear, contradictory or not verifiable as **queries**. Do not
-  guess. Ask the user which queries they can answer now; the rest go back to the
-  source of the input and are listed in the hand-over.
+- What is unclear, contradictory or not verifiable in an input is a question to its
+  source. Do not guess. Ask the user which questions they can answer now. Each of the
+  rest becomes a `query` item (`python tools/record.py next-id query`; folder
+  `records/queries`; `to`, `asked_at`, a `Question` section, and `about` linking the
+  input), written with the other items of this session. A requirement that depends on
+  an open query says so in its `Analysis` section, by the query's ID.
 
 ### 3. Draft the requirements
 - Read `references/writing-requirements.md` before drafting.
@@ -112,12 +122,15 @@ Run `python tools/traceability.py check --all`.
 - `COV-05` and `COV-06` for the inputs in scope of this session should be gone. If one
   remains, report it with the reason.
 - `COV-07` (not allocated) is expected until the architecture exists. Say so.
+- `UPSTREAM` is expected for nothing written here: the new items are drafts. If it
+  appears on an existing approved requirement, its input went back to draft or review.
 
 ## Hand-over
 
 Report, in this order:
 1. The base practice table with what was done in this session and what is open.
-2. Queries for the source of the inputs, numbered, each with the input ID.
+2. The query items written in this session, each with the input it is about, and who
+   the user wants to send them to.
 3. Conflicts and risks the user has not decided.
 4. The remaining findings of the check that concern these items.
 5. Next: `/review` for the new requirements; `/sw-architecture` to allocate them.

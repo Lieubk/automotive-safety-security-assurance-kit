@@ -79,6 +79,11 @@ function. C meets them but adds a component whose only duty MotorDrive already h
 In a draft, `Decision` and `Consequences` are written only when the user has decided.
 Until then the item ends after `Alternatives`, and the hand-over lists it as open.
 
+A consequence that someone outside the project has to confirm, like the last one above,
+is not left as a sentence: it becomes a `query` item `about` the input concerned (here
+SYE-0001), and the consequence names the query by its ID. The layout of a query is in
+`architecture-guidance.md`.
+
 ## What is needed when
 
 | Attribute or section | Needed | What to write |

@@ -7,8 +7,10 @@ A baseline is a tag in version control plus a baseline record, both for the same
 - The record (`records/baselines/<ID>.md`, type `baseline`) is written by
   `python tools/record.py baseline`. Its `items` list holds the approved plans and
   engineering items, imported inputs included, each as `{item, hash, status}`. Items
-  that are not approved are left out. With an internal purpose the list holds every
-  plan and engineering item, whatever its state.
+  that are not approved are left out. An approved item that links to one still in
+  draft or in review is an `UPSTREAM` error of the trace check, and the tool refuses
+  while errors exist: what gets in is approved all the way up. With an internal
+  purpose the list holds every plan and engineering item, whatever its state.
 - Never listed: change requests, problem reports, records (reviews, runs, earlier
   baselines, communication records), and files that are not items (code, test code,
   scripts). They are frozen by the tagged commit. This is why the tag belongs to the
@@ -57,7 +59,7 @@ For an internal purpose only checks 6 to 8 apply.
 | No. | Check | Command | Passes when | If it does not |
 |---|---|---|---|---|
 | 1 | The plan is approved | `python tools/traceability.py check` | no `COV-27` line names kind configuration-management | write or review the plan first |
-| 2 | The trace check has no error | the same output | the summary line shows `0 errors` | each finding names an item: its authoring skill, then `/review` |
+| 2 | The trace check has no error | the same output | the summary line shows `0 errors` | each finding names an item: its authoring skill, then `/review`. For `UPSTREAM`: the item above is reviewed first |
 | 3 | What the purpose freezes is approved | `python tools/traceability.py list --status draft` and `list --status in-review` | none of the items printed belongs to what the plan demands for this purpose | finish and review them; or the user accepts, where the plan allows it, that they are left out of the baseline |
 | 4 | No change request is open on what will be listed | `python tools/traceability.py list --type change-request` | every line shows `closed` or `rejected` | read the open ones by ID; the plan says who may accept one as a known open point |
 | 5 | Earlier baselines are communicated | the `check` output | no `COV-26` line | step 7 of the skill for the baseline named |
@@ -173,6 +175,27 @@ delivery, the communication record can say so in the user's words.
 
 Run in the working tree later on, the same command shows what has moved on since the
 baseline. That is useful for a change overview, and it is not an audit.
+
+### Putting the checks on record
+
+If the plan or the user wants the checks of a baseline, the audit among them, on
+record under a person's name, that person states the verdict and the tool writes a
+review record whose subject is the baseline record:
+
+```
+python tools/record.py review --checklist "baseline v1" --reviewer "<name as the user stated it>" --verdict approved --checks build/baseline-checks.json BL-0004
+```
+
+- The checks file is JSON, a list of entries with `check`, `result` and `note`, with a
+  result for every check of `.claude/docs/checklists/baseline.md`: `pass`, `finding`,
+  `not-applicable` (the note says why) or `not-assessed`. The tool refuses verdict
+  approved while a check has no result or is `not-assessed`. Write the file outside the
+  item folders.
+- Do this after the communication, when every part of the checklist can be answered.
+  Ask who is accountable for the verdict; a model or an agent is never the reviewer.
+- The record is evidence that a named person confirmed the checks for this baseline
+  record. `practices SUP.8` still shows `no evidence structure` for SUP.8.BP8: the
+  schema does not map the record to that practice. Say so.
 
 ## After the baseline
 

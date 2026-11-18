@@ -38,7 +38,10 @@ on the vehicle at worst.
    - the options you see, each with its consequence for behaviour, tests and other
      units. A recommendation is welcome; a decision is not yours.
 3. **Ask the user** who owns the design of this unit and how the problem reaches them.
-   Tell the user in the same message which functions wait for the answer.
+   Tell the user in the same message which functions wait for the answer. The design
+   is the project's own work, so the problem goes to its owner and is not a `query`
+   item. If its cause lies in an imported input, the owner raises the query to the
+   source of that input with `/sw-detailed-design`.
 4. **The owner changes the design**, with `/sw-detailed-design`. That sets the item
    back to `draft`; its approval and everything built on it becomes stale, and
    `python tools/traceability.py impact <UNT-ID>` lists the unit tests and units that

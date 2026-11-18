@@ -22,7 +22,7 @@ does not change the affected items itself.
 | SUP.10.BP5 Approve change requests before implementation | prepares the request for the deciding body and records its decision as the user states it; no affected item is touched before | `decision` (demanded by the schema from `approved` or `rejected` on); the state |
 | SUP.10.BP6 Review the implementation of change requests | checks that the affected items are approved again and the affected tests ran; has the implementation reviewed against the confirmation criteria and records the verdict people give | review records of the affected items (by `/review`); a `review-record` whose subject is the change request; `test-run` records |
 | SUP.10.BP7 Track change requests to closure | says for every open request what it waits for; records that the requester was informed, as the user states it | states up to `closed`; `communication-record` naming the change request |
-| SUP.10.BP8 Establish bidirectional traceability | links the request to every affected item and to the problem report it resolves | `affects` and `resolves` links (COV-20); `show` output |
+| SUP.10.BP8 Establish bidirectional traceability | links the request to every affected item, to the problem report it resolves and to the query that raised it | `affects` and `resolves` links (COV-20); `show` output |
 
 ## Before you start
 
@@ -38,6 +38,8 @@ does not change the affected items itself.
      then the `purpose` of each record), stop: nothing is protected, items change with
      their authoring skill and are reviewed again.
 3. Run `python tools/traceability.py status` and `python tools/traceability.py check`.
+   Every command here and in the references takes `--project <dir>` after the script
+   name when the project is not the current directory.
 4. In full mode: if the check reports `COV-27` for kind change-request-management, do
    step 1 first. A request that cannot wait is recorded as `submitted` meanwhile.
 5. Decide whether a change request is needed at all, with the table "When a change
@@ -58,6 +60,8 @@ does not change the affected items itself.
   wanted. Do not fill in a reason the user has not given.
 - If a `problem-report` item is the trigger, read it by ID; the request will carry
   `resolves`. If the problem exists only in words, say that no problem report is linked.
+- If an answered `query` item is the trigger, read it by ID; the request will name it
+  under `affects` and cite it in `Description`.
 - Run `python tools/traceability.py impact <ID>` for each item the request names: a
   change request that already affects it is listed there.
   `python tools/traceability.py list --type change-request` shows all requests with
@@ -88,7 +92,7 @@ does not change the affected items itself.
   `references/lifecycle.md`, upstream first. Name for each the owning skill; the user
   runs it, then `/review`. This skill edits none of them.
 - After each step run `python tools/traceability.py check` and quote the `COV-19`,
-  `SUSPECT` and `COV-30` lines: they are the work still to do. Changed code of a unit
+  `UPSTREAM`, `SUSPECT` and `COV-30` lines: they are the work still to do. Changed code of a unit
   goes through `/review` with the unit as subject and the code revision.
 - If an item turns out to be affected that the analysis did not name, stop. Add it to
   `Impact analysis` and `affects`, and ask whether the decision covers it or the
@@ -105,8 +109,9 @@ does not change the affected items itself.
 - Review of the implementation: part B of the checklist. Follow section "Review of the
   implementation" in `references/lifecycle.md`: semantic checks by the agent
   `aspice-reviewer`, findings confirmed by the user, verdict and reviewers stated by the
-  user, record written by `python tools/record.py review`. On `approved` ask to set
-  `verified`.
+  user, record written by `python tools/record.py review` with the checklist cited as
+  `change-request v1` and a result for every one of its checks. On `approved` ask to
+  set `verified`.
 
 ### 7. Close
 - Ask whether the requester was informed of the result, by whom, how and when. Only
@@ -130,8 +135,8 @@ Run `python tools/traceability.py check --all`.
 - `FORMAT`, `SCHEMA` and `LINK` findings on the change request or the plan: fix them.
 - `COV-20` must not appear. In the reduced mode the rule is not active: run
   `python tools/traceability.py show <CR-ID>` and check the `affects` lines yourself.
-- `COV-19`, `SUSPECT` and `COV-30` findings caused by the change are reported as open
-  work, not explained away.
+- `COV-19`, `UPSTREAM`, `SUSPECT` and `COV-30` findings caused by the change are
+  reported as open work, not explained away.
 
 ## Hand-over
 

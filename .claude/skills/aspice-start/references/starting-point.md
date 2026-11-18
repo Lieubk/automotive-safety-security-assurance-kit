@@ -84,7 +84,9 @@ Give the order for the processes in scope only, and name the skill for each step
    first baseline, each verification strategy before its test cases are written.
 2. Boundary inputs: `/import-inputs`, then `/review` with the checklist
    `input-acceptance`.
-3. Left side, top down. Each step is drafted, reviewed, and only then built upon:
+3. Left side, top down. Each step is drafted, reviewed, and only then built upon; the
+   tools hold to this order and refuse to approve an item above one that is not
+   approved:
    SYS.2 and SYS.3 (by hand today), SWE.1 `/sw-requirements`, SWE.2
    `/sw-architecture`, SWE.3 `/sw-detailed-design` and then `/sw-unit-implement`.
 4. Right side, bottom up: SWE.4 `/sw-unit-verify`, then SWE.5, SWE.6, SYS.4 and SYS.5

@@ -25,9 +25,11 @@ rating and no capability level.
 
 1. If there is no `project.yaml`, stop: "This project has no scope yet. Run
    `/aspice-start` first."
-2. Run `python tools/traceability.py status` and `python tools/traceability.py check`
-   and read both. If they do not run, stop: every verdict is NOT ASSESSED, with the
-   reason (for example PyYAML is missing).
+2. Run `python tools/traceability.py status` and `python tools/traceability.py check
+   --all` and read both. Every command of this skill takes `--project <dir>` right
+   after the script name when the project is not the current directory. If the
+   commands do not run, stop: every verdict is NOT ASSESSED, with the reason (for
+   example PyYAML is missing).
 3. With a process as argument run `python tools/traceability.py practices <PROCESS>`.
    If it answers "<PROCESS> is not in the scope of this project", stop: "<PROCESS>: NOT
    ASSESSED - out of scope." Do not gate a process the project is not responsible for.
@@ -41,8 +43,10 @@ rating and no capability level.
 
 ### 1. Collect the facts
 - Keep the `practices` table and the summary line of `check`, both as printed.
-- Run `python tools/traceability.py check --all` and note the units without code: the
-  `COV-10` lines "designed but not implemented". The report names them.
+- From the output of `check --all` note three things the states alone do not show:
+  units without code (`COV-10 ... designed but not implemented`), items in draft or
+  in review whose last review left findings open (`COV-19 ... left findings open`),
+  and lines without a bracket. The report names all three.
 - Run `python tools/traceability.py practices <PROCESS> --json` as well: `by` names the
   item types, link roles and rules that feed each practice.
 - Read `references/verdicts.md` now. It holds the mapping, what the states do not
@@ -59,7 +63,7 @@ lines without a bracket separately; `references/verdicts.md` says what they mean
 |---|---|
 | `findings open` | FAIL; quote the `check` lines behind it |
 | `no evidence yet` | FAIL; name the item types that would carry the evidence |
-| `evidence not settled` | CONCERNS or FAIL, depending on what is unsettled (`references/verdicts.md`) |
+| `evidence not settled` | FAIL when an unsettled item carries open review findings or belongs to what the gate is for; otherwise CONCERNS (`references/verdicts.md`) |
 | `warnings open` | CONCERNS; quote the warnings. Warnings marked pending on units without code: `references/verdicts.md` |
 | `no evidence structure` | NOT ASSESSED by the toolkit; go to step 3 |
 | `evidence present` | PASS for the deterministic part only; go to step 4 |
@@ -87,7 +91,8 @@ ASSESSED, CONCERNS, PASS. Always give the count per verdict next to it, so that 
 ASSESSED does not hide the concerns beside it.
 
 ### 6. Capability level
-Read `aspice.target_level` in `project.yaml`; if it is empty, ask. For level 2 or higher
+Read `aspice.target_level` in `project.yaml`. If the key is absent or empty, ask the
+user for the target level; do not assume level 1. For level 2 or higher
 read `references/level-2.md` and list every generic practice of level 2 as NOT ASSESSED
 by the toolkit, with what a person would look for. Say plainly: a result at level 1 is
 not a result at level 2, whatever the verdicts above are.
@@ -112,8 +117,8 @@ save it.
 - Every NOT ASSESSED names what was not assessed and why; every PASS names what was
   read; every FAIL and CONCERNS quotes a line or a text.
 - Every `check` line without a bracket is quoted and its consequence stated.
-- No item, record or status changed: run `python tools/traceability.py check` again and
-  compare the summary line with the one from the start.
+- No item, record or status changed: run `python tools/traceability.py check --all`
+  again and compare the summary line with the one from the start.
 
 ## Hand-over
 

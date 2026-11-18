@@ -118,7 +118,10 @@ people:                    # who is accountable; review records need these names
 
 1. Read the file and run `python tools/traceability.py check`; keep the summary line.
 2. Show the file and ask what is to change. Go through only the steps of the skill
-   that concern the change, with the same confirm-each-answer rule.
+   that concern the change, with the same confirm-each-answer rule. If the file lacks
+   keys of the template (it was written by hand, or before a key existed), name them
+   and ask for the answers; add a key empty rather than with a default the user has
+   not confirmed. Other skills ask the user when a key is missing; they do not assume.
 3. Before writing, say what the change does:
 
 | Change | Say this first |
@@ -137,63 +140,12 @@ people:                    # who is accountable; review records need these names
 
 ## Example
 
-The file this skill would write at the start of the worked example
-`examples/power-window` (invented data; a real file names tool versions and real
-people):
+`examples/power-window/project.yaml` is a complete file in this format, for a software
+supplier that is responsible for SWE.1 to SWE.4 and SUP.8 and received a system
+requirements specification and a system architecture description. Read it before
+writing the first file of a project.
 
-```yaml
-schema_version: 1
-project:
-  name: "Power window control"
-  product: "Software of a power window control with anti-pinch protection, one door"
-aspice:
-  version: "3.1"
-  target_level: 1
-scope:
-  role: software-supplier
-  processes: [SWE.1, SWE.2, SWE.3, SWE.4, SUP.8]
-  assessment_scope: []
-inputs:
-  - level: system requirements
-    source: "Front Door Module - System Requirements Specification"
-    version: "2.1"
-    received: "2026-03-02"
-    format: PDF
-  - level: system architecture
-    source: "Front Door Module - System Architecture Description"
-    version: "1.4"
-    received: "2026-03-02"
-    format: PDF
-safety:
-  highest_asil: B
-security:
-  relevant: false
-platform:
-  architecture: autosar-classic
-  microcontroller: "32 bit, one core, 128 KB program flash, 16 KB RAM"
-  language: C99
-  coding_guideline: ""
-toolchain:
-  compiler: "gcc on the host; the target compiler is the customer's"
-  static_analysis: "defect analysis of the compiler"
-  unit_test: "plain C test functions, built and run by tests/unit/run_tests.py"
-  coverage: "gcov"
-  alm: ""
-paths:
-  items: [plans, spec, verification, records]
-  source_roots: [src]
-  generated: []
-  third_party: []
-trace:
-  views_not_applicable: {}
-  internal_baselines: [working]
-  derive_via_elements: false
-people:
-  - name: "A. Author"
-    roles: [requirements engineer, software architect, developer]
-  - name: "B. Reviewer"
-    roles: [reviewer of inputs, reviewer of requirements, reviewer of design and code]
-```
-
-Open in this example, and listed as such in the hand-over: the coding guideline set
-and the tool that checks it.
+It also shows what an honest file looks like when answers are open: the
+microcontroller and the coding guideline set are empty, and `people` is an empty list
+because the example has no reviewers. A real project names its people; a hand-over
+lists every empty value as open.

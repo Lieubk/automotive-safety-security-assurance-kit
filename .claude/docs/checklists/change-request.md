@@ -8,11 +8,19 @@ may propose and a person confirms; `accountable` - only a person can state it.
 
 Part A is applied before a change request is put before the deciding body. Part B is
 the review of the implementation, applied before the change request is set to
-`verified`, and its last three checks before `closed`. `/change-request` applies both
-and records the review of part B itself; `/review` does not take change requests.
-The affected items themselves are reviewed with the checklists of their types. `<ID>`
-is the ID of the change request. Where SUP.10 is out of scope, `COV-20` is not active:
-answer CRQ-02 from `show <ID>`.
+`verified`. `/change-request` applies both and records the review of the
+implementation itself; `/review` does not take change requests. The affected items
+themselves are reviewed with the checklists of their types. `<ID>` is the ID of the
+change request. Where SUP.10 is out of scope, `COV-20` is not active: answer CRQ-02
+from `show <ID>`.
+
+In a review record this checklist is cited as `change-request v1`. The record of the
+implementation review carries a result for every check of both parts: part A is
+answered again on the present text of the change request, and a check that cannot
+apply any more or does not apply to this request (CRQ-15 after implementation, CRQ-40
+without a problem report) is `not-applicable` with that reason as its note. A check
+that waits for an answer nobody can give yet stays `not-assessed`: the change request
+then stays `implemented`, and the review is recorded when the answer exists.
 
 ## Part A - before the decision
 
@@ -22,7 +30,7 @@ answer CRQ-02 from `show <ID>`.
 | CRQ-02 | It names at least one affected item, and every link target exists | `check`: no `COV-20` and no `LINK` finding on the item; `show <ID>` lists the `affects` lines | script |
 | CRQ-03 | Requester, request, reason and source are stated so that someone who was not part of the discussion understands what is wanted and why | read `Description` | semantic |
 | CRQ-04 | It is one change: nothing unrelated is bundled into it | read `Description` and the list of affected items | semantic |
-| CRQ-05 | A change that comes from a new version of an input names the input and the version; a change caused by a problem links the problem report | read `Description`; `show <ID>` lists `resolves` | semantic |
+| CRQ-05 | A change that comes from a new version of an input names the input and the version; a change caused by a problem links the problem report with `resolves`; a change raised by an answered query names the query under `affects` | read `Description`; `show <ID>` lists the links | semantic |
 | CRQ-06 | The candidates were collected from `impact` and `show` for every item the request names, and from a text search for what changes | read `Impact analysis`; run `impact` for the named items and compare | semantic |
 | CRQ-07 | Every candidate is sorted - changes, reviewed again without change, not affected - with a reason the text of the item supports | read the candidates beside the analysis | semantic |
 | CRQ-08 | Every item said to change is under `affects`, and every item under `affects` is explained in the analysis | compare `show <ID>` with the section | semantic |
@@ -42,7 +50,7 @@ answer CRQ-02 from `show <ID>`.
 |---|---|---|---|
 | CRQ-30 | The decision is recorded with who decided and when, priority and target release | `check`: no `SCHEMA` finding on the change request; read `decision` | semantic |
 | CRQ-31 | The decision was taken before the first affected item changed | compare the date in `decision` with the version control history of the affected items | semantic |
-| CRQ-32 | Every item under `affects` is approved again or obsolete | `show <ID>` for the list; `check`: no `COV-19` finding on any of them; `status` | script |
+| CRQ-32 | Every item under `affects` is approved again or obsolete, and a query under `affects` is closed | `show <ID>` for the list; `check`: no `COV-19` and no `UPSTREAM` finding on any of them; `list --status draft` | script |
 | CRQ-33 | No item still refers to an old version of something that changed, and the changed code of every unit was reviewed in a review that names the code revision | `check`: no `SUSPECT` and no `CONSISTENCY` finding on an item named in the analysis | script |
 | CRQ-34 | Each item changed as the analysis said | read the changed items against "Items that change" | semantic |
 | CRQ-35 | Nothing changed that the request does not name; an item added later was added to the analysis and put before the deciding body | compare the changes made since the decision with `affects` | semantic |
@@ -53,6 +61,3 @@ answer CRQ-02 from `show <ID>`.
 | CRQ-40 | A linked problem report: the change removes what the problem report describes | read the problem report beside the changed items | semantic |
 | CRQ-41 | Questions to the requester are answered, or carried into a new change request | read the analysis; ask the user | accountable |
 | CRQ-42 | At least one reviewer of the implementation did not implement the change | ask who implemented and who reviews | accountable |
-| CRQ-43 | Before `closed`: a final review record with verdict approved has the change request as subject | Grep the change request ID in `records/reviews/`; read `verdict` | script |
-| CRQ-44 | Before `closed`: a final communication record names the change request | Grep the change request ID in `records/communication/` | script |
-| CRQ-45 | Before `closed`: the requester has received the result and knows in which baseline or release the change is contained | ask who informed the requester, and when | accountable |

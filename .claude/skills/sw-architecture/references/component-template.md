@@ -2,8 +2,7 @@
 
 File: `spec/software/architecture/<ID>.md`. Attributes and sections are those of type
 `software-component` in `schema/items.yaml`; the layout is defined in
-`schema/item-format.md`. The example is CMP-0004 of `examples/power-window`, the way
-this skill drafts it: with the allocation stated on the component (`fulfils`).
+`schema/item-format.md`. The example is CMP-0004 of `examples/power-window`, as a draft.
 
 ```markdown
 ---
@@ -75,17 +74,18 @@ nor what depends on another attribute, such as `supplier`.
 | `links.part_of` | every component except the top of the hierarchy | the composition it belongs to; exactly one |
 | `links.fulfils` | every component that requirements are allocated to | the software requirements the component is responsible for |
 
-`fulfils` is the allocation. It is stated on the component, so that allocating never
-changes a requirement. An allocation may also arrive with a requirement, as
-`allocated_to` on the requirement: in the example project all nine requirements carry
-it, and the components there have no `fulfils`. Either side establishes the allocation;
-do not state the same one on both. `python tools/traceability.py show <ID>` lists the
-requirements of a component whichever side names them, together with the interfaces it
-provides and uses.
+`fulfils` is the allocation. It is stated on the component because the component
+depends on the requirement: allocating never changes a requirement, and a requirement
+that changes makes the component suspect. `python tools/traceability.py show <ID>` lists
+the requirements a component fulfils, the interfaces it provides (`provided_by`) and the
+interfaces it uses (`uses`).
 
 A changed `fulfils` list is a change of the component: an approved component loses its
-approval until `/review` covers it again. The review record then names the requirements
-as references, which is the evidence that component and requirements were compared.
+approval until `/review` covers it again. The review record names the requirements as
+references, which is the evidence that component and requirements were compared. A
+component cannot be approved while a requirement it fulfils, or the composition it is
+part of, is still in `draft` or `in-review` (`UPSTREAM`), unless that item is a subject
+of the same review.
 
 ## The three sections
 

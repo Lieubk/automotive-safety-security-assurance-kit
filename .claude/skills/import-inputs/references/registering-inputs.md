@@ -53,11 +53,31 @@ rest.
 | `title` | The source's own heading or object name. If there is none, a few words taken from the text itself. Never a judgement ("unclear timing requirement"). |
 | `status` | `draft`. `/review` moves it on. |
 | `asil`, `security_relevant` | Only as stated by the source. |
-| `kind`, `priority`, `release`, `verification_method`, `origin` | Only when the source has such an attribute and its values map one to one. A scale that does not map (priority 1 to 5, a customer-specific category) is left out; the mapping question goes on the query list. |
+| `kind`, `priority`, `release`, `verification_method`, `origin` | Only when the source has such an attribute and its values map one to one. A scale that does not map (priority 1 to 5, a customer-specific category) is left out; the mapping question becomes a query. |
 | Structured attributes (`elements`, `operations`, `functions`, `data`, `table`) | Only when the delivery gives every mandatory key of the structure. Otherwise keep the delivered table as a table in the text section and raise a query. |
 | `links` | Only relations the delivery states: an allocation, `derived_from` between delivered levels, `part_of`, `realizes`, `shows`. The target must be registered too. |
-| Allocation | Written where the delivery states it: `allocated_to` on the requirement when the requirement names its element, `fulfils` on the element or interface when the architecture lists the requirements it answers. The two are equivalent for the checks; do not write both for one pair. An architecture that arrives after the requirements were accepted is registered with `fulfils`, because accepted requirements are not changed. |
+| Allocation | Always on the architecture side: the element or interface item carries `fulfils` with the IDs of the requirements allocated to it. The requirement item carries no allocation link, also when it is the requirements document that names the element. See "Allocation" below. |
+| References in the text | Stay as the source wrote them: its own identifiers, names and chapter numbers. They are not replaced by item IDs of the project; the registered item is found through `imported.source_id`. |
 | Sections | The section names of the type. Put the delivered text under the section it belongs to; keep the source's own sub-headings as third-level headings. A section the delivery has no text for is left out - do not write `Not applicable:` in the name of the source. |
+
+### Allocation
+
+The trace engine learns from `fulfils` which system requirements concern the software:
+rule COV-05 asks for a software requirement derived from every system requirement that
+an element of kind `software` fulfils.
+
+| What the delivery gives | What is registered |
+|---|---|
+| An architecture that lists, per element, the requirements it answers | `fulfils` on each element or interface item |
+| A requirements document with an attribute naming the element, and an architecture that has that element | the same: `fulfils` on the element item; say in the hand-over that the allocation was taken from the requirements document |
+| A requirements document naming an element, and no architecture at all | ask the user: either register the named element as a `system-element` item of that source, with its name, its `kind` and `fulfils` and nothing else, or leave the allocation out. Without it COV-05 asks for nothing. The missing architecture is a query either way. |
+| No allocation anywhere | nothing; the allocation is a query. Do not conclude from the title of the document that everything concerns the software. |
+
+An element is accepted only after every requirement it fulfils: `/review` refuses the
+element while one of them is still in draft or in review. And an element that has been
+accepted cannot take a further requirement into `fulfils` without a new version of its
+own source. A requirement that arrives later therefore needs the architecture to be
+delivered again, or its allocation stays a query.
 
 Tables stay tables, cell for cell. A figure cannot be carried over: put one line in
 square brackets where it stood, `[Figure 7 of the source, not reproduced]`, and add a
@@ -86,14 +106,18 @@ Each one needs an `assessment` before approval: `accepted`,
 decision of the people who have to fulfil the requirement. Set it only to what the
 user states; an item with an open query is a candidate for `needs-clarification`, and
 you may say so. Any value but `accepted` needs `agreement`: the ID of the
-communication record that documents what was agreed with the stakeholder. Reasons and
-notes of the team go into `Assessment notes`, never into `Statement`.
+communication record that documents what was agreed with the stakeholder. That record
+is written once the user states the agreement, with
+`python tools/record.py communication --subject <ID> --audience "<who>" --channel
+"<how>" --agreement "<what was agreed, by whom>"` (one line; `--sent-at <date>` when
+it happened on an earlier day). Reasons and notes of the team go into
+`Assessment notes`, never into `Statement`.
 
 Imported stakeholder requirements (SYS.1 out of scope) carry an `assessment` only when
 the delivery states one per requirement. Without it rule COV-01 treats the item as
 accepted and asks for a system requirement derived from it. If the delivering party
-did reject or defer a requirement, that has to be stated by them: put the question on
-the query list rather than leaving the requirement out.
+did reject or defer a requirement, that has to be stated by them: raise a query
+rather than leaving the requirement out.
 
 ## Code
 

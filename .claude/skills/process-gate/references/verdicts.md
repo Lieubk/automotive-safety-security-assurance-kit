@@ -21,17 +21,33 @@ The engine decides the state in this order: nothing in `by` -> `no evidence stru
 any error -> `findings open`; no item -> `no evidence yet`; an item not settled ->
 `evidence not settled`; any warning -> `warnings open`; otherwise `evidence present`.
 
-## Two things the states do not tell
+## Three things the states do not tell
 
 ### Findings that count for no practice
 
-A `check` line without a bracket is counted for no practice. This happens for a finding
-on an imported item whose process is out of scope, for example
-`COV-19 SYR-0003 stale approval: content changed since review REV-0001`: the input is
-no longer covered by its acceptance review. Quote every such line under "Facts". If a
-gated process has items that link to the item named (`show <ID>`), its consistency
-practice is FAIL with the reason "input not accepted", whatever state the engine
-printed for it.
+A `check` line without a bracket is counted for no practice. Quote every such line
+under "Facts".
+
+- A finding on an imported item whose process is out of scope, for example
+  `COV-19 SYR-0003 stale approval: content changed since review REV-0001`: the input is
+  no longer covered by its acceptance review. If a gated process has items that link
+  to the item named (`show <ID>`), its consistency practice is FAIL with the reason
+  "input not accepted", whatever state the engine printed for it.
+- `QUERY ... open query QRY-0003 is about this approved item`: a question to the source
+  is unanswered. The practices of a gated process whose items link to that item are
+  CONCERNS at most, with the query named; the user says whether the question blocks
+  what the gate is for.
+
+An input that was never accepted needs no such correction: every approved item derived
+from it carries an `UPSTREAM` error, which the engine counts for the traceability and
+consistency practices of the deriving process. That is `findings open`, FAIL.
+
+### Open review findings on items that are not approved
+
+`check --all` prints `COV-19 ... review REV-0007 left findings open: F1` on an item in
+draft (as `info`) or in review (as `warning`). The item was reviewed, found wanting and
+not corrected. `practices` shows the practices behind it as `evidence not settled`; an
+`info` line is not even counted. Such an item makes the practice FAIL, see below.
 
 ### Communication records
 
@@ -58,6 +74,7 @@ types named in `by`, or `list --status draft` and `list --status in-review`.
 
 | What is unsettled | Verdict |
 |---|---|
+| An item whose last review left findings open (`COV-19 ... left findings open` in `check --all`) | FAIL: a known finding stands against it. Quote the line and name the record |
 | Everything: `settled` is 0 | FAIL |
 | An item in `draft` or `in-review` that belongs to what the gate is for: the release named (requirements carry `release`), the delivery, or a baseline whose purpose is not listed under `trace.internal_baselines` | FAIL |
 | A record in state `open` | FAIL: an open record is not evidence |
@@ -103,7 +120,7 @@ says must be true, with its typical evidence as orientation.
 | specifying, designing, writing test cases (item types in `by`) | three items of the type | the part of the item that belongs to this practice. One type often backs several practices: for a software requirement, `Statement` for SWE.1.BP1, `kind`, `priority` and `release` for SWE.1.BP2, `Analysis` for SWE.1.BP3 and SWE.1.BP4, `Verification criteria` for SWE.1.BP5. An optional section that is absent everywhere is a concern for its practice |
 | a strategy (`plan` in `by`) | the plan of the kind | every element the row of the practice names; the part for the kind in `.claude/docs/checklists/plan.md` can serve as a lens |
 | traceability (only link roles and rules in `by`) | three links from `matrix`, both ends | whether the downstream item really states, implements or verifies what the upstream item says |
-| consistency (`COV-19` in `by`) | the newest approving review records of three items of the process (Grep the item ID under `records/reviews/`) | reviewers are people; the checklist is named with its version; `checks` holds a result for every check of that checklist and none is `not-assessed`; `references` lists the upstream items with hashes; for a unit with code, `sources` and `item_under_test` are there and the checklist is the one for code; no finding is open |
+| consistency (`COV-19` in `by`) | the newest approving review records of three items of the process (Grep the item ID under `records/reviews/`) | reviewers are people; `checklist_source` is `toolkit` and the checklist is named with its version, or the external criteria are named so that a reader can find them; `checks` holds a result for every check, and every `not-applicable` has a reason that holds; `references` lists the upstream items with hashes; for a unit with code, `sources` and `item_under_test` are there and the checklist is the one for code; no finding is open |
 | writing the code (SWE.3.BP8) | three units with their source files | what `COV-22` cannot compare: that the code does what `Behavior` and `Error handling` describe |
 | performing verification (run records in `by`) | the latest final run of the level | `item_under_test` names a commit, tag or baseline; every test case has a verdict; coverage or the reason it was not measured, deviations with the reason a person accepted; the evidence files exist |
 | communicating or summarizing (`communication-record` in `by`) | the communication records | the subject is a baseline or a set that contains this process's items at their present hashes; the audience covers the parties the row names; for results, a reader can judge the consequences |
@@ -115,12 +132,12 @@ says must be true, with its typical evidence as orientation.
 | nothing that contradicts the row | "no concern in N of M" | PASS |
 | something a careful reader would question | a proposed concern, with the quoted text | CONCERNS; the user confirms or rejects it. A concern the user confirms as missing mandatory content is reported as FAIL, "confirmed by <who>" |
 | a review record whose `reviewers` names no person - a placeholder, a tool, a model | quoted | FAIL for the consistency practice: the record is not an accountable review |
-| a review record without `checks` | quoted | CONCERNS for the consistency practice: the record does not say which checks were applied |
+| a review record without `checks` (possible only with `checklist_source: external`) | quoted | CONCERNS for the consistency practice: the record does not say which checks were applied; the user says where the external criteria and their results are kept |
 | a communication record that does not concern this process | quoted | FAIL for the practice: no evidence for it exists |
 | the notes or the items cannot be read | the reason | NOT ASSESSED |
 
 The power window example shows the third row. `practices SWE.4` prints SWE.4.BP6 as
-`evidence present`. The newest record that approves the unit test cases, REV-0009, says
+`evidence present`. The record that approves the unit test cases, REV-0006, says
 `reviewers: Demonstration data - no review by a person took place`. The verdict for
 SWE.4.BP6 is FAIL.
 

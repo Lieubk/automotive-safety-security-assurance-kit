@@ -32,8 +32,11 @@ part of the content the design approval covers.
 2. If `SWE.3` is not in `scope.processes`, stop: "SWE.3 is out of scope for this
    project. Units delivered from outside are registered with `/import-inputs`."
 3. Run `python tools/traceability.py status` and `python tools/traceability.py check --all`.
+   Every command of this skill takes `--project <dir>` when the project is not the
+   current directory.
 4. For every unit to implement, the `software-unit` item must have `status: approved`,
-   and the check must report neither `COV-19` nor a `SUSPECT` "suspect link" for it.
+   and the check must report neither `COV-19`, `UPSTREAM` nor a `SUSPECT` "suspect
+   link" for it.
    Otherwise stop for that unit: "UNT-0004 is not approved (<status, or the finding>).
    Code is written from an approved unit design only. `/sw-detailed-design` produces
    the design, `/review` approves it." Do not start "in advance" and do not offer to
@@ -162,9 +165,10 @@ Report, in this order:
 6. Next, after every change to the code, in the order the unit verification strategy
    gives: `/sw-unit-verify` for a test of every designed function and for test and
    analysis runs of the present code; `/review` with the unit as subject, the checklist
-   `.claude/docs/checklists/software-unit-code.md` and the commit named. Only a review
-   recorded with the code revision counts as a review of the code: its record stores
-   the hash of every source file. A person gives the verdict.
+   `.claude/docs/checklists/software-unit-code.md` (cited as `software-unit-code v1`)
+   and the commit named. Only a review recorded with the code revision counts as a
+   review of the code: its record stores the hash of every source file. A person
+   gives the verdict.
 
 ## Do not
 

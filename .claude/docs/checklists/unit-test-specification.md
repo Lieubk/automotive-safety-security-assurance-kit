@@ -19,11 +19,22 @@ Apply the parts that have something to look at:
 - "The results of a unit": once a test run and an analysis run of the unit's code are
   recorded.
 
-Name the parts that were not applied in the review; their checks are not recorded as
-passed. For a unit without code `check` prints `COV-12`, `COV-28` and `COV-29` as
-warnings ending in "(pending: the unit has no code yet)". Pending means that the rule
-applies as soon as the code exists; nothing is wrong yet. One pending line still is a
-finding against the test cases: `COV-29`, a designed function that no test case names.
+A review record cites this checklist as `unit-test-specification v1`, and a review that
+approves needs a result for every check. A check of a part that has nothing to look at
+yet is recorded as `not-applicable` with the reason - "no recorded run yet" for every
+check of "The results of a unit" - and never as passed. Those checks are applied in a
+review held after the first recorded run. An accountable check whose answer does not
+exist yet (a deviation the person named in the strategy has still to decide) stays
+`not-assessed`: the test cases remain in review until it does.
+
+A test case cannot be approved while a unit it verifies is in draft or in review: the
+record tool refuses, and `check` reports `UPSTREAM` on a test case approved earlier.
+Review the unit first.
+
+For a unit without code `check` prints `COV-12`, `COV-28` and `COV-29` as warnings
+ending in "(pending: the unit has no code yet)". Pending means that the rule applies as
+soon as the code exists; nothing is wrong yet. One pending line still is a finding
+against the test cases: `COV-29`, a designed function that no test case names.
 
 ## Each test case
 
@@ -35,7 +46,7 @@ finding against the test cases: `COV-29`, a designed function that no test case 
 | UT-04 | `asil` is not lower than the ASIL of any unit verified | `check`: no `COV-23` finding on the item | script |
 | UT-05 | The design basis is named: unit, section or function contract, and the requirement criterion where one fixes a value | read the text before the first heading | semantic |
 | UT-06 | Every expected value is found in the design or can be calculated from it; none is there only because the code returns it | read the item beside the unit design; recalculate one value per case | semantic |
-| UT-07 | Where the design does not determine the result, a query to the designer exists instead of an expected value | ask the author for the queries; read the hand-over of the authoring session | semantic |
+| UT-07 | Where the design does not determine the result, a question to the designer exists instead of an expected value (for an imported unit: a `query` item about it) | ask the author for the open questions; read the hand-over of the authoring session | semantic |
 | UT-08 | `Preconditions` give the test program, the test doubles, the start state and every term the steps use; the case does not rely on another case having run | read the section | semantic |
 | UT-09 | `Steps` are numbered and concrete: calls, values, units, number of cycles | read the section | semantic |
 | UT-10 | `Expected result` has an entry for every step and is exact: a value, a state, a return value; no "works", "correct", "as expected" | read both sections side by side | semantic |
@@ -56,7 +67,7 @@ finding against the test cases: `COV-29`, a designed function that no test case 
 | UT-25 | For a unit with an ASIL: the failure of every called service is injected, or the strategy says why not | walk the `uses` links and the strategy | semantic |
 | UT-26 | Design statements without a test case are listed with a reason (not reachable through the interface, shown by review, left to another level) | read the derivation table of the authoring session | semantic |
 | UT-27 | No case lacks a design basis, and no two cases check the same thing | read the set | semantic |
-| UT-28 | The test cases were compared with the current, approved unit design | `check`: no `SUSPECT` on the test cases and no `COV-19` on the unit; `hash --upstream <IDs>` lists the design versions | script |
+| UT-28 | The test cases were compared with the current, approved unit design | `check`: no `SUSPECT` or `UPSTREAM` on the test cases and no `COV-19` on the unit; `hash --upstream <IDs>` lists the design versions | script |
 | UT-29 | What the host cannot show for this unit (timing, stack, behaviour of the target compiler) is named in the strategy and assigned to another level | read `Scope` of the unit verification plan | semantic |
 | UT-30 | The test cases were derived from the design and not from the finished code | ask the author how the expected results were obtained | accountable |
 | UT-31 | The reviewer did not write the test cases or the unit, and is as independent as the strategy requires for the unit's ASIL | ask who wrote and who reviews; compare with `Responsibilities` of the plan | accountable |

@@ -7,13 +7,17 @@ SWE.2.BP2, SWE.2.BP3, SWE.2.BP4, SWE.2.BP5, SWE.2.BP6, SWE.2.BP7, SWE.2.BP8.
 Kinds: `script` - a tool answers it; `semantic` - needs reading and judgement, a model
 may propose and a person confirms; `accountable` - only a person can state it.
 
-Review a component together with its interfaces and the views that show it.
-`python tools/traceability.py hash --upstream <ID>...` lists subjects and references;
-the requirements an element names under `fulfils` are among the references. Where the
-allocation is stated on a requirement instead (`allocated_to`), the element does not
-name it; read those requirements all the same.
-`python tools/traceability.py show <ID>` lists what is allocated to an element,
-whichever side states it, and the interfaces a component provides and uses.
+A check that does not apply to the items under review - a check for another item type
+or view kind, or `ARC-32` before a detailed design exists - is recorded as
+`not-applicable` with the reason. An accountable check whose answer does not exist yet
+(an agreement still to be reached, a confirmation by the customer) stays `not-assessed`:
+the items remain in review until it does.
+
+Review a component together with its interfaces and the views that show it, after the
+requirements it fulfils are approved. `python tools/traceability.py hash --upstream
+<ID>...` lists subjects and references; the requirements an element names under
+`fulfils` are among the references. `python tools/traceability.py show <ID>` lists the
+requirements an element fulfils and the interfaces a component provides and uses.
 `check` means `python tools/traceability.py check --all`.
 
 ## Each component
@@ -21,7 +25,7 @@ whichever side states it, and the interfaces a component provides and uses.
 | ID | Check | How to check | Kind |
 |---|---|---|---|
 | ARC-01 | Mandatory attributes and sections for its state are present, values are allowed, `supplier` is given for a supplied or reused component | `check`: no `SCHEMA` or `FORMAT` finding on the item | script |
-| ARC-02 | A requirement is allocated to it or to one of its parts (`fulfils` on the element or `allocated_to` on the requirement), or it is supplied or generated and `Purpose` says why it is present | `check`: no `COV-08` finding | script |
+| ARC-02 | It or one of its parts fulfils at least one requirement, or it is supplied or generated and `Purpose` says why it is present | `check`: no `COV-08` finding | script |
 | ARC-03 | Its ASIL is not lower than that of any requirement allocated to it, or an approved decision documents the decomposition | `check`: no `COV-23` finding | script |
 | ARC-04 | `Purpose` says why the component exists as an element of its own and does not only repeat the title | read the section | semantic |
 | ARC-05 | `Responsibility` says what the component does and what it does not do, and covers every requirement allocated to it | read the section against the requirements listed by `show <ID>` | semantic |
@@ -87,10 +91,10 @@ whichever side states it, and the interfaces a component provides and uses.
 
 | ID | Check | How to check | Kind |
 |---|---|---|---|
-| ARC-70 | Every software requirement is allocated to a component or interface, or is a constraint with a rationale | `check`: no `COV-07` finding; the `allocated_to` and `fulfils` tables of `matrix` | script |
+| ARC-70 | Every software requirement is fulfilled by a component or interface, or is a constraint with a rationale | `check`: no `COV-07` finding; the `fulfils` tables of `matrix` | script |
 | ARC-71 | A view of each of the kinds `structure`, `execution-model` and `resource-summary` and at least one of kind `state-machine` or `sequence` exists, or the kind is declared not applicable with a reason | `check`: `COV-25` names the kinds without an approved view; each named kind is among the views under review | script |
-| ARC-72 | No item under review has a stale approval, a suspect link or missing consistency evidence | `check`: no `COV-19`, `SUSPECT` or `CONSISTENCY` finding | script |
-| ARC-73 | Each requirement is allocated to the element that can fulfil it; where several share one, each share is named; no allocation is stated on both sides | read each requirement with its elements (`show <requirement ID>`) | semantic |
+| ARC-72 | No item under review has a stale approval, a suspect link, missing consistency evidence, or a link to an item that is still in draft or in review and not a subject of this review | `check`: no `COV-19`, `SUSPECT`, `CONSISTENCY` or `UPSTREAM` finding; `python tools/traceability.py list --status draft` and `--status in-review` name none of the references | script |
+| ARC-73 | Each requirement is allocated to the element that can fulfil it; where several share one, each share is named | read each requirement with its elements (`show <requirement ID>`) | semantic |
 | ARC-74 | Non-functional requirements (timing, resources, safety, robustness, diagnosability) are answered by a mechanism that can be pointed to in a component, interface or view | walk the non-functional requirements against the items | semantic |
 | ARC-75 | The hierarchy is a tree: every component is part of at most one composition, no composition contains itself, and every component appears in a structure view | `part_of` and `shows` tables of `matrix` | semantic |
 | ARC-76 | No component exchanges data with another outside an interface item; every interface has a provider and at least one user | compare `Responsibility` texts and views with `provided_by` and `used_by` | semantic |
@@ -103,4 +107,4 @@ whichever side states it, and the interfaces a component provides and uses.
 | ARC-83 | The architecture can be built on the target with the given team and time, and the developers who build on it agree | ask who was consulted, and when | accountable |
 | ARC-84 | Capacities and reserves are the ones agreed with the owner of the hardware | ask who agreed, and when | accountable |
 | ARC-85 | Where safety requirements are allocated: the analyses the safety plan asks for at architecture level exist, and their results are reflected in requirements and elements | ask the person responsible for functional safety | accountable |
-| ARC-86 | Open queries to requirement authors, suppliers and the customer are recorded, and none of them invalidates an item under review | ask the author | accountable |
+| ARC-86 | Open questions to the source of an input are `query` items, and no open one invalidates an item under review | `python tools/traceability.py list --type query --status open`; go through each with the author | accountable |

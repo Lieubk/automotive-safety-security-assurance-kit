@@ -297,3 +297,38 @@ Notes:
 - Every alternative is assessed against every criterion, including the one that lost.
 - `Decision` and `Consequences` are required before approval. The decision is taken
   by the user; write into `Decision` what they decided and why, not what you prefer.
+
+## Query to the source of an input
+
+File: `records/queries/<ID>.md`, prefix QRY. Written when a question about an imported
+item cannot be answered inside the project. The example is an illustration and not
+part of the worked example.
+
+```markdown
+---
+id: QRY-0001
+type: query
+title: Time to the first Hall pulse at low supply voltage
+status: open
+to: "customer, system architect"
+asked_at: "2026-11-18"
+links:
+  about: [SYE-0002]
+---
+
+## Question
+
+SYE-0002 states that the first Hall pulse follows within 60 ms after the bridge has
+been switched on. Does this hold at 9 V and at the lowest operating temperature?
+UNT-0002 takes the fully open end stop as reached after 200 ms of opening drive
+without a pulse; a start that takes longer would be taken for the end stop.
+```
+
+Notes:
+
+- `to` and `asked_at` are always required, and so is the `Question` section. Ask one
+  question per item, say what depends on the answer, and name the items by ID.
+- `about` links every item the question is about. `answered_by` and the `Answer`
+  section are added when the answer exists; the user states who answered, and when.
+- A question about an item the project itself wrote is not a query: it goes to the
+  owner of that item.

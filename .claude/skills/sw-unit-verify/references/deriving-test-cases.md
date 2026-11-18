@@ -70,9 +70,19 @@ needs three unrelated set-ups is three cases.
   design says "rounded down", so the expected value is 149.
 - Never from running the code and writing down what it returned. A test built that way
   passes by construction and fails only when the code changes.
-- If the design does not determine the result, write a query. Typical gaps: the
-  reaction to an invalid value in one particular state, the result at exactly the limit
-  ("more than" or "at least"?), the order of two checks.
+- If the design does not determine the result, ask instead of deciding. Typical gaps:
+  the reaction to an invalid value in one particular state, the result at exactly the
+  limit ("more than" or "at least"?), the order of two checks.
+
+Where the question goes depends on who owns the design:
+
+- A unit the project designs: the question is listed for the designer in the hand-over
+  and answered by a change of the unit item through `/sw-detailed-design`.
+- A unit that is an imported input: the question is a `query` item, so that it stays
+  visible until it is answered. File `records/queries/<ID>.md`, attributes `to` (the
+  source of the input, by role) and `asked_at`, status `open`, `links.about` with the
+  unit ID, and a section `Question` that quotes the design text and says what is
+  missing. Ask the user before writing it; never edit the imported unit.
 
 ## Worked example: `AntiPinch_Step` of UNT-0003
 
@@ -131,7 +141,7 @@ test case title, functions for `verifies`. List separately:
 
 - design statements for which no case is proposed, each with the reason (not reachable
   through the interface, shown by review, left to another level by the strategy);
-- queries: places where the design does not determine the expected result.
+- open questions: places where the design does not determine the expected result.
 
 ## Signs that a case was derived from the code
 
@@ -140,7 +150,7 @@ test case title, functions for `verifies`. List separately:
   design, or name `local` functions as the thing tested.
 - The case exists "for coverage" and has no design basis.
 - The design is silent on the situation, yet the case has an expected result and no
-  query was raised.
+  question was raised.
 - Only the paths that work are tested, with the values the developer tried.
 
 Each of these is a finding in the self-check and in the review.
