@@ -41,8 +41,8 @@ Commands
         Findings are attributed to software units through `source_files`. A live
         unit none of whose C files was analysed stops the command.
 
-    review --checklist NAME --reviewer NAME [--reviewer NAME ...] --verdict approved|rework
-           [--findings FILE] [--checks FILE] [--item-under-test REF] ID [ID ...]
+    review --checklist "NAME vN" --reviewer NAME [--reviewer NAME ...] --verdict approved|rework
+           [--findings FILE] [--checks FILE] [--item-under-test REF] [--external-criteria] ID [ID ...]
         final review record for the named items at their current content. The
         subject and the references (every upstream item the subject links to)
         are filled in with content hashes. With --item-under-test the review
@@ -52,10 +52,17 @@ Commands
         check keeps asking for a review of the code. Findings FILE is JSON: a list of
         {"id", "item", "text", "severity": "major"|"minor", "state": "open"|"closed",
          "closes": "<REV-ID>#<finding id>"}    (closes is optional)
-        Checks FILE is JSON: a list of {"check", "result": "pass"|"finding"|"not-assessed", "note"}.
-        Verdict approved is refused while a finding is open, while a check is
-        not assessed, and while an open finding of an earlier review of the same
-        content is not closed by an entry with `closes`.
+        Checks FILE is JSON: a list of
+        {"check", "result": "pass"|"finding"|"not-applicable"|"not-assessed", "note"}.
+        The checklist is cited as "<name> v<N>", <name> being a file under
+        .claude/docs/checklists (without .md) or its title without the word
+        "checklist"; the version must be the one in the file. Criteria from
+        outside the toolkit are recorded with --external-criteria.
+        Verdict approved is refused while a finding is open; while a check of
+        the checklist has no result or is not assessed; while an item the
+        subject links to is still in draft or in review; and while an open
+        finding of an earlier review of the same content is not closed by an
+        entry with `closes`.
         The reviewer names are the people accountable for the verdict: pass what
         the user states, never an invented name.
 
@@ -81,6 +88,7 @@ Requires PyYAML.
 import argparse
 import datetime
 import json
+import re
 import shutil
 import sys
 from collections import defaultdict
@@ -284,6 +292,35 @@ def cmd_analysis_run(project, args):
     return 0
 
 
+CHECKLISTS = Path(__file__).resolve().parent.parent / ".claude" / "docs" / "checklists"
+RESULTS = ("pass", "finding", "not-applicable", "not-assessed")
+
+
+def plain(text):
+    return " ".join(re.findall(r"[a-z0-9]+", str(text).lower()))
+
+
+def find_checklist(citation):
+    """(file name, version, check IDs) of the toolkit checklist that '<name> v<N>' cites, or None.
+
+    <name> is the file name without extension or the title without the word "checklist";
+    spaces and hyphens are interchangeable.
+    """
+    cited = re.match(r"^(.*?)\s+v(\d+)$", str(citation).strip(), re.I)
+    if not cited:
+        return None
+    for path in sorted(CHECKLISTS.glob("*.md")):
+        text = path.read_text(encoding="utf-8")
+        title = re.search(r"^#\s+(.+)$", text, re.M)
+        names = {plain(path.stem)}
+        if title:
+            names.add(plain(re.sub(r"(?i)\bchecklist\b", " ", title.group(1))))
+        if plain(cited.group(1)) in names:
+            version = re.search(r"^Version (\d+)", text, re.M)
+            return path.name, version.group(1) if version else None, re.findall(r"(?m)^\|\s*([A-Z]{2,5}-\d+)\s*\|", text), cited.group(2)
+    return None
+
+
 def cmd_review(project, args):
     problems = ["no such item: %s" % i for i in args.ids if i not in project.items]
     findings = json.loads(Path(args.findings).read_text(encoding="utf-8")) if args.findings else []
@@ -294,8 +331,36 @@ def cmd_review(project, args):
         problems.append("verdict approved is not possible while a finding is open")
     checks = json.loads(Path(args.checks).read_text(encoding="utf-8")) if args.checks else []
     for entry in checks:
-        if entry.get("result") not in ("pass", "finding", "not-assessed"):
-            problems.append("check %s needs result pass|finding|not-assessed" % entry.get("check"))
+        if entry.get("result") not in RESULTS:
+            problems.append("check %s needs result %s" % (entry.get("check"), "|".join(RESULTS)))
+        elif entry["result"] == "not-applicable" and not entry.get("note"):
+            problems.append("check %s is not-applicable: the note must say why" % entry.get("check"))
+    listed = None if args.external_criteria else find_checklist(args.checklist)
+    if listed is None and not args.external_criteria:
+        problems.append("'%s' cites no checklist of this toolkit: expected '<name> v<N>' for a file under "
+                        ".claude/docs/checklists. For criteria from outside the toolkit pass --external-criteria."
+                        % args.checklist)
+    elif listed:
+        file_name, version, known, cited_version = listed
+        if version != cited_version:
+            problems.append("%s is at version %s, the citation says v%s" % (file_name, version, cited_version))
+        given = [str(c.get("check")) for c in checks]
+        problems += ["check %s is not in %s" % (c, file_name) for c in given if c not in known]
+        if args.verdict == "approved":
+            missing = [c for c in known if c not in given]
+            if missing:
+                problems.append("verdict approved needs a result for every check of %s (--checks); none for: %s"
+                                % (file_name, ", ".join(missing)))
+    if args.verdict == "approved" and not any("no such item" in p for p in problems):
+        for item_id in args.ids:
+            item = project.items[item_id]
+            for role in (item.front.get("links") or {}):
+                for target_id, _ in item.targets(role):
+                    target = project.items.get(target_id)
+                    if target is not None and target_id not in args.ids and project.live(target) \
+                            and project.types[target.type]["lifecycle"] == "engineering" and target.status != "approved":
+                        problems.append("%s cannot be approved while %s (%s) is in state %s"
+                                        % (item_id, target_id, role, target.status))
     unassessed = [str(c.get("check")) for c in checks if c.get("result") == "not-assessed"]
     if args.verdict == "approved" and unassessed:
         problems.append("verdict approved is not possible while checks are not assessed: %s" % ", ".join(unassessed))
@@ -322,6 +387,7 @@ def cmd_review(project, args):
         "type": "review-record",
         "status": "final",
         "checklist": args.checklist,
+        "checklist_source": "external" if args.external_criteria else "toolkit",
         "reviewers": args.reviewer,
         "verdict": args.verdict,
         "reviewed_at": datetime.date.today().isoformat(),
@@ -418,6 +484,8 @@ def main():
     review.add_argument("--findings")
     review.add_argument("--checks")
     review.add_argument("--item-under-test")
+    review.add_argument("--external-criteria", action="store_true",
+                        help="the review used criteria from outside the toolkit, named under --checklist")
     review.add_argument("ids", nargs="+")
     baseline = sub.add_parser("baseline")
     baseline.add_argument("--tag", required=True)

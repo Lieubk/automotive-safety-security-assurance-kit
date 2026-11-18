@@ -243,16 +243,14 @@ class Project:
         return [s for s in found if self.live(s) and (types is None or s.type in types)]
 
     def allocation_targets(self, requirement):
-        """Architectural elements a requirement is allocated to, whichever side states it."""
-        stated = [self.items[t] for t, _ in requirement.targets("allocated_to") if t in self.items]
-        return stated + self.sources(requirement.id, "fulfils")
+        """Architectural elements a requirement is allocated to (the elements that fulfil it)."""
+        return self.sources(requirement.id, "fulfils")
 
     def allocated_requirements(self, element_id, types=None):
-        """Requirements allocated to an architectural element, whichever side states it."""
+        """Requirements allocated to an architectural element (the requirements it fulfils)."""
         element = self.items.get(element_id)
-        stated = [self.items[t] for t, _ in element.targets("fulfils") if t in self.items] if element else []
-        found = self.sources(element_id, "allocated_to") + [r for r in stated if self.live(r)]
-        return [r for r in found if types is None or r.type in types]
+        found = [self.items[t] for t, _ in element.targets("fulfils") if t in self.items] if element else []
+        return [r for r in found if self.live(r) and (types is None or r.type in types)]
 
     def in_scope(self, supports):
         if self.scope is None:
@@ -682,7 +680,17 @@ class Project:
 
     def cov_19(self, rule):
         for item in self.items.values():
-            if self.types.get(item.type, {}).get("lifecycle") != "engineering" or item.status != "approved":
+            if self.types.get(item.type, {}).get("lifecycle") != "engineering":
+                continue
+            if item.status in ("draft", "in-review"):
+                # not approved yet: say what the last review of this content left open
+                reviews = self.reviews_of(item)
+                opened = [str(f.get("id")) for f in as_list(reviews[-1].front.get("findings")) if isinstance(f, dict)
+                          and f.get("state") == "open" and f.get("item") in (None, item.id)] if reviews else []
+                if opened:
+                    self.gap(rule, item, "review %s left findings open: %s" % (reviews[-1].id, ", ".join(opened)))
+                continue
+            if item.status != "approved":
                 continue
             review = self.approving_review(item)
             if review is None:
@@ -944,9 +952,34 @@ class Project:
                         self.add("error", "SUSPECT", item.id, "suspect link: %s (%s) changed after review %s"
                                  % (target_id, role, review.id), supports)
 
+    def check_upstream(self):
+        """An approved item cannot be more settled than what it builds on; open queries stay visible."""
+        for item in self.items.values():
+            if self.types.get(item.type, {}).get("lifecycle") != "engineering" or item.status != "approved" or item.imported:
+                continue
+            for role, link in self.schema["links"].items():
+                pairs = [p for p in link["pairs"] if p["from"] == item.type]
+                supports = [s for p in pairs for s in p["supports"]]
+                if not pairs or not self.in_scope(supports):
+                    continue
+                for target_id, _ in item.targets(role):
+                    target = self.items.get(target_id)
+                    if target is not None and self.live(target) and target.status != "approved" \
+                            and self.types.get(target.type, {}).get("lifecycle") == "engineering":
+                        self.add("error", "UPSTREAM", item.id, "approved, but %s (%s) is in state %s"
+                                 % (target_id, role, target.status), supports)
+        for query in self.of_type("query"):
+            if query.status != "open":
+                continue
+            for target_id, _ in query.targets("about"):
+                target = self.items.get(target_id)
+                if target is not None and target.status == "approved":
+                    self.add("warning", "QUERY", target_id, "open query %s is about this approved item" % query.id)
+
     def check(self):
         self.check_structure()
         self.check_coverage()
+        self.check_upstream()
         return self.findings
 
 

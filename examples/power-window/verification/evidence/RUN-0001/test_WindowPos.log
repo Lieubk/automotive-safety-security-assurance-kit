@@ -1,7 +1,4 @@
 == build: tests/unit/test_WindowPos.c + src/windowpos/WindowPos.c
-test_WindowPos.c
-WindowPos.c
-Generating Code...
 == run: exit code 0
 UT-0006 PASS
 UT-0007 PASS
@@ -10,3 +7,10 @@ UT-0009 PASS
 UT-0010 PASS
 UT-0011 PASS
 UT-0012 PASS
+== coverage
+File 'src/windowpos/WindowPos.c'
+Lines executed:100.00% of 80
+Branches executed:100.00% of 46
+Taken at least once:100.00% of 46
+Calls executed:100.00% of 5
+Lines executed:100.00% of 80

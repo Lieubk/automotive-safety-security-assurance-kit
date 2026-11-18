@@ -26,7 +26,6 @@ verification_method: test
 origin: derived
 links:
   derived_from: [SYR-0002]
-  allocated_to: [CMP-0004]
 ---
 
 ## Statement
@@ -45,7 +44,9 @@ zone, the obstacle signal is set no later than the second 5 ms cycle after the d
 - YAML between two `---` lines at the top of the file.
 - `id`, `type`, `title`, `status` are always present.
 - `links` is a mapping from link role to a list of target IDs. A link is written on
-  the downstream item only; the reverse direction is computed.
+  the downstream item only - the one that depends on the other; the reverse direction
+  is computed. That is why a requirement does not name the component it is allocated
+  to: the component names the requirements it `fulfils`.
 - A target may address one design element inside an item: `UNT-0012#AntiPinch_Step`.
 - Structured attributes (`elements`, `operations`, `functions`, `data`, `table`) are
   lists of mappings with the keys the schema defines under `structures`;

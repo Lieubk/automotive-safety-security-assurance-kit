@@ -29,12 +29,13 @@ def base_items():
     test_sections = {"Steps": "Call the step.", "Expected result": "Nothing happens."}
     return {
         "SYE-0001": ({"type": "system-element", "title": "ECU software", "status": "approved", "kind": "software",
-                      "imported": {"source": "Customer architecture", "version": "1"}}, {}),
+                      "imported": {"source": "Customer architecture", "version": "1"},
+                      "links": {"fulfils": ["SYR-0001"]}}, {}),
         "SYR-0001": ({"type": "system-requirement", "title": "Reverse on obstacle", "status": "approved", "asil": "B",
                       "imported": {"source": "Customer specification", "version": "1"},
-                      "links": {"allocated_to": ["SYE-0001"]}}, {"Statement": "The system shall reverse."}),
+                      "links": {}}, {"Statement": "The system shall reverse."}),
         "SWR-0001": ({"type": "software-requirement", "title": "Detect obstacle", "status": "approved", **crit, **req,
-                      "links": {"derived_from": ["SYR-0001"], "allocated_to": ["CMP-0002"]}},
+                      "links": {"derived_from": ["SYR-0001"]}},
                      {"Statement": "The software shall detect.", "Verification criteria": "Detected within 10 ms."}),
         "CMP-0001": ({"type": "software-component", "title": "Window control", "status": "approved", **crit,
                       "kind": "composition", "layer": "application", "origin": "developed",
@@ -43,7 +44,7 @@ def base_items():
         "CMP-0002": ({"type": "software-component", "title": "Detection", "status": "approved", **crit,
                       "kind": "application", "layer": "application", "origin": "developed",
                       "resource_budget": {"rom_bytes": 2048, "ram_bytes": 64},
-                      "links": {"part_of": ["CMP-0001"]}},
+                      "links": {"part_of": ["CMP-0001"], "fulfils": ["SWR-0001"]}},
                      {"Purpose": "Protects.", "Responsibility": "Detects.", "Dynamic behavior": "Runs every 5 ms."}),
         "IFC-0001": ({"type": "software-interface", "title": "Obstacle state", "status": "approved", **crit,
                       "kind": "sender-receiver", "provided_by": "CMP-0002", "used_by": ["CMP-0001"],
@@ -126,14 +127,16 @@ class Fixture:
         body = "".join("\n## %s\n\n%s\n" % (name, text) for name, text in sections.items())
         (folder / (item_id + ".md")).write_text("---\n" + yaml.safe_dump(front, sort_keys=False) + "---\n" + body, encoding="utf-8")
 
-    def review(self, rev_id="REV-0001", findings=None, skip_references=(), only=None, without=(), record_code=True):
+    def review(self, rev_id="REV-0001", findings=None, skip_references=(), only=None, without=(), record_code=True,
+               include_drafts=False):
         """Write a final review record that approves engineering items at their current content.
 
         By default every approved engineering item is the subject; `only` and `without` narrow that.
         """
         project = Project(self.root)
         engineering = [i for i in project.items.values()
-                       if project.types[i.type]["lifecycle"] == "engineering" and i.status == "approved"
+                       if project.types[i.type]["lifecycle"] == "engineering"
+                       and (i.status == "approved" or include_drafts)
                        and (only is None or i.id in only) and i.id not in without]
         subject = {i.id for i in engineering}
         upstream = sorted({target for i in engineering for role in (i.front.get("links") or {})
@@ -260,15 +263,15 @@ class Structure(Case):
 
 class Links(Case):
     def test_target_does_not_exist(self):
-        items = changed(base_items(), "SWR-0001", links={"derived_from": ["SYR-0009"], "allocated_to": ["CMP-0002"]})
+        items = changed(base_items(), "SWR-0001", links={"derived_from": ["SYR-0009"]})
         self.assertIn(("LINK", "SWR-0001"), self.make(items).rules())
 
     def test_target_of_a_type_the_role_does_not_allow(self):
-        items = changed(base_items(), "SWR-0001", links={"derived_from": ["SYR-0001"], "allocated_to": ["UNT-0001"]})
+        items = changed(base_items(), "SWR-0001", links={"derived_from": ["UNT-0001"]})
         self.assertIn(("LINK", "SWR-0001"), self.make(items).rules())
 
     def test_role_the_type_may_not_carry(self):
-        items = changed(base_items(), "SWR-0001", links={"derived_from": ["SYR-0001"], "allocated_to": ["CMP-0002"],
+        items = changed(base_items(), "SWR-0001", links={"derived_from": ["SYR-0001"],
                                                          "verifies": ["UNT-0001"]})
         self.assertIn(("LINK", "SWR-0001"), self.make(items).rules())
 
@@ -293,7 +296,7 @@ class Coverage(Case):
         self.expect("COV-05", "SYR-0001", changed(base_items(), "SWR-0001", drop_links=["derived_from"], origin="internal"))
 
     def test_deriving_from_the_element_does_not_cover_the_requirement(self):
-        items = changed(base_items(), "SWR-0001", links={"derived_from": ["SYE-0001"], "allocated_to": ["CMP-0002"]})
+        items = changed(base_items(), "SWR-0001", links={"derived_from": ["SYE-0001"]})
         self.expect("COV-05", "SYR-0001", items)
         fixture = self.make(items, config={"trace": {"derive_via_elements": True}})
         self.assertNotIn(("COV-05", "SYR-0001"), fixture.rules())
@@ -307,22 +310,45 @@ class Coverage(Case):
         self.assertIn(("SCHEMA", "SYR-0001"), self.make(items).rules())
 
     def test_requirement_not_allocated(self):
-        self.expect("COV-07", "SWR-0001", changed(base_items(), "SWR-0001", drop_links=["allocated_to"]))
+        self.expect("COV-07", "SWR-0001", changed(base_items(), "CMP-0002", drop_links=["fulfils"]))
 
-    def test_allocation_stated_on_the_component_counts(self):
-        items = changed(base_items(), "SWR-0001", drop_links=["allocated_to"])
-        items["CMP-0002"][0]["links"]["fulfils"] = ["SWR-0001"]
-        self.assertEqual(self.make(items).rules(), [])
+    def test_allocation_to_an_interface_counts(self):
+        items = changed(base_items(), "CMP-0002", drop_links=["fulfils"])
+        items["IFC-0001"][0]["links"] = {"fulfils": ["SWR-0001"]}
+        self.assertNotIn(("COV-07", "SWR-0001"), self.make(items).rules())
 
-    def test_allocation_on_the_component_is_subject_to_the_asil_rule(self):
-        items = changed(base_items(), "SWR-0001", drop_links=["allocated_to"])
-        items["CMP-0002"][0]["links"]["fulfils"] = ["SWR-0001"]
-        items["CMP-0002"][0]["asil"] = "A"
+    def test_component_with_lower_asil_than_a_requirement_it_fulfils(self):
+        items = changed(base_items(), "CMP-0002", asil="A")
         self.assertIn(("COV-23", "CMP-0002"), self.make(items).rules())
 
+    def test_a_changed_requirement_makes_the_component_that_fulfils_it_suspect(self):
+        fixture = self.make()
+        fixture.edit("SWR-0001", title="Detect obstacle quickly")
+        self.assertIn(("SUSPECT", "CMP-0002"), fixture.rules())
+
+    def test_approved_item_above_a_draft(self):
+        items = changed(base_items(), "SWR-0001", status="draft")
+        fixture = self.make(items)
+        self.assertIn(("UPSTREAM", "UNT-0001"), fixture.rules())      # the unit implements the draft requirement
+        self.assertIn(("UPSTREAM", "CMP-0002"), fixture.rules())      # the component fulfils it
+
+    def test_open_query_about_an_approved_item(self):
+        items = base_items()
+        items["QRY-0001"] = ({"type": "query", "title": "Reversal distance", "status": "open", "to": "Customer",
+                              "asked_at": "2026-01-05", "links": {"about": ["SYR-0001"]}}, {"Question": "Which distance?"})
+        fixture = self.make(items)
+        self.assertEqual(fixture.rules("warning"), [("QUERY", "SYR-0001")])
+        self.assertEqual(fixture.rules("error"), [])
+
+    def test_draft_with_open_findings_of_its_last_review_is_visible(self):
+        fixture = self.make(changed(base_items(), "SWR-0001", status="draft"), review=False)
+        fixture.review("REV-0001", only=["SWR-0001"], include_drafts=True,
+                       findings=[{"id": "F1", "item": "SWR-0001", "text": "x", "severity": "major", "state": "open"}])
+        messages = [f["message"] for f in fixture.findings("info") if f["rule"] == "COV-19"]
+        self.assertEqual(messages, ["review REV-0001 left findings open: F1"])
+
     def test_component_without_requirement(self):
-        items = changed(base_items(), "SWR-0001", links={"derived_from": ["SYR-0001"], "allocated_to": ["IFC-0001"]})
-        self.expect("COV-08", "CMP-0002", items)
+        self.expect("COV-08", "CMP-0002", changed(base_items(), "CMP-0002", drop_links=["fulfils"]))
 
     def test_supplied_component_needs_no_requirement(self):
         items = base_items()
@@ -649,7 +675,8 @@ class Scope(Case):
         self.assertFalse({"COV-09", "COV-11", "COV-12", "COV-18", "COV-21"} & rules, rules)
 
     def test_gaps_on_drafts_are_information_only(self):
-        items = changed(base_items(), "SWR-0001", drop_links=["allocated_to"], status="draft")
+        items = changed(base_items(), "SWR-0001", status="draft")
+        items["CMP-0002"][0]["links"].pop("fulfils")
         fixture = self.make(items)
         self.assertNotIn(("COV-07", "SWR-0001"), fixture.rules("error"))
         self.assertIn(("COV-07", "SWR-0001"), fixture.rules("info"))

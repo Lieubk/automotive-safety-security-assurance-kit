@@ -38,7 +38,8 @@ in review, or missing consistency evidence), `info` (drafts). Rule names: `FORMA
 `SCHEMA`, `LINK` (structure), `COV-01` to `COV-30` (coverage rules of
 `schema/items.yaml`), `SUSPECT` (an upstream item, or the code of a unit, changed after
 the review), `CONSISTENCY` (a review did not record what the item was compared with, or
-did not record the code of a unit).
+did not record the code of a unit), `UPSTREAM` (approved above something that is not),
+`QUERY` (an open query is about an approved item).
 
 Only the coverage rules of processes in `scope.processes` of `project.yaml` are
 active. The summary line says how many.
@@ -50,7 +51,7 @@ active. The summary line says how many.
 | `next-id <type>` | get the next free ID before creating an item |
 | `test-run --level L --results FILE --item-under-test REF --environment NAME [--deviation UNIT=TEXT]` | turn a test result file into a final test-run record, with coverage per unit and a hash of every source and test file. `--deviation` records why a person accepted a coverage figure below target |
 | `analysis-run --results FILE --item-under-test REF` | turn a static analysis result file into a final record, attributed to units; justified deviations in the file are recorded as such, not as open findings |
-| `review --checklist NAME --reviewer NAME --verdict approved\|rework [--findings FILE] [--checks FILE] [--item-under-test REF] ID ...` | record a review a person has given a verdict on; hashes and references are filled in. With `--item-under-test` it is a review of the code as well: the hashes of the units' source files are stored; without it the record covers the design only. `--checks` stores the result per checklist item. Verdict approved is refused while a finding is open, while a check is not assessed, or while an open finding of an earlier review of the same content is not closed by an entry with `closes` |
+| `review --checklist "NAME vN" --reviewer NAME --verdict approved\|rework [--findings FILE] [--checks FILE] [--item-under-test REF] [--external-criteria] ID ...` | record a review a person has given a verdict on; the checklist is cited as the file name under `.claude/docs/checklists` (or its title) and its version, and must exist unless `--external-criteria` is given; hashes and references are filled in. With `--item-under-test` it is a review of the code as well: the hashes of the units' source files are stored; without it the record covers the design only. `--checks` stores the result per checklist item (`pass`, `finding`, `not-applicable` with a note, `not-assessed`). Verdict approved is refused while a finding is open, while a check of the checklist has no result or is not assessed, while an item the subject links to is not approved, or while an open finding of an earlier review of the same content is not closed by an entry with `closes` |
 | `baseline --tag TAG --purpose TEXT` | write a baseline record: the approved plans and engineering items with hash and status (an internal purpose: all of them). Refused while the trace check reports errors, unless the purpose is an internal one |
 | `communication --subject ID --audience WHO --channel TEXT [--agreement TEXT] [--sent-at DATE]` | record what was made known to whom, and what was agreed; `--subject` and `--audience` may repeat |
 
@@ -61,9 +62,15 @@ module text). Records are final when written and are never edited afterwards.
 
 - The newest final review record of an item's current content decides. A re-review
   that records the upstream versions clears `SUSPECT` and `CONSISTENCY`.
-- An allocation may be stated on the requirement (`allocated_to`) or on the
-  architectural element (`fulfils`). Architecture work uses `fulfils`, so that it does not
-  change requirements that are already approved.
+- An allocation is stated on the architectural element: it `fulfils` the requirement.
+  The requirement itself is not touched, so allocating does not change requirements that
+  are already approved, and a requirement that changes makes the element suspect.
+- An approved item whose upstream item is still in draft or in review is reported as
+  `UPSTREAM`; `record.py review` refuses to approve it. Approve from the top down.
+- A question to the source of an input is a `query` item with an `about` link. While it is
+  open, `QUERY` warns on every approved item it is about.
+- A draft or in-review item whose last review left findings open shows them under `COV-19`
+  in `check --all`.
 - A unit may be approved as a design before it has code; the check then reports it as
   not implemented, and its verification rules (`COV-12`, `COV-28`, `COV-29`) as pending:
   warnings, so a design baseline stays possible. Registering `source_files` afterwards

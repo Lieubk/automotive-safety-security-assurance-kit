@@ -1,8 +1,44 @@
 # Power window control with anti-pinch protection - worked example.
-# Configuration read by the trace engine (schema/item-format.md).
+# Written in the format `/aspice-start` produces. The trace engine reads `scope.processes`,
+# `paths` and `trace`; the rest is for skills and people. Everything here is invented.
 
+schema_version: 1
+project:
+  name: "Power window control"
+  product: "Software of a power window control with anti-pinch protection, one door"
+aspice:
+  version: "3.1"
+  target_level: 1
 scope:
+  role: software-supplier
   processes: [SWE.1, SWE.2, SWE.3, SWE.4, SUP.8]   # the software supplier's responsibility; system level is imported
+  assessment_scope: []                              # no assessment planned for the example
+inputs:
+  - level: system requirements
+    source: Front Door Module - System Requirements Specification
+    version: "2.1"
+    received: "2026-03-02"
+    format: text export
+  - level: system architecture
+    source: Front Door Module - System Architecture Description
+    version: "1.4"
+    received: "2026-03-02"
+    format: text export
+safety:
+  highest_asil: B
+security:
+  relevant: false
+platform:
+  architecture: autosar-classic
+  microcontroller: ""                               # not decided in the example: the code is delivered as source
+  language: C99
+  coding_guideline: ""                              # none checked in the example, see plans/PLN-0001.md
+toolchain:
+  compiler: "gcc 13 and Microsoft C/C++ 19 (host builds of the unit tests)"
+  static_analysis: "static analysis of the Microsoft C/C++ compiler; no coding-guideline analyser"
+  unit_test: "plain C test functions, tests/unit/run_tests.py"
+  coverage: "gcov"
+  alm: ""
 paths:
   items: [plans, spec, verification, records]       # folders scanned for item files
   source_roots: [src]                               # code that must belong to a software unit
@@ -15,3 +51,5 @@ trace:
     fault-reaction: "fault storage and degraded operation of the door module are part of the customer's basic software; the reactions of the delivered components to invalid inputs are specified with each interface and unit"
     communication: "the delivered software has no access to the body network; the one bus signal it uses reaches it as interface IFC-0006 from the customer's communication stack"
   internal_baselines: [working]                     # baseline purposes that need no communication record
+  derive_via_elements: false
+people: []                                          # the example has no reviewers: its review records are fixtures

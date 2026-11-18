@@ -63,6 +63,13 @@ lifecycles:
       - {from: in-resolution, to: resolved, when: "the resolution is implemented"}
       - {from: resolved, to: closed, when: "effectiveness is shown by a retest or review that is linked"}
       - {from: [open, analysed], to: rejected, when: "the reason is recorded"}
+  query:                           # questions to whoever delivered an input
+    states: [open, answered, closed]
+    stages: {before-review: [answered, closed], before-approval: [closed]}
+    transitions:
+      - {from: open, to: answered, when: "the answer and who gave it are recorded"}
+      - {from: answered, to: closed, when: "the items the query is about have been brought in line with the answer"}
+      - {from: answered, to: open, when: "the answer does not settle the question"}
   record:                          # review records, test runs, baselines, communication records
     states: [open, final]
     stages: {before-review: [final], before-approval: [final]}
@@ -408,7 +415,8 @@ types:
       verdict: {values: [approved, rework], required: always}
       findings: {required: always, may_be_empty: true, note: "list of {id, item, text, severity: major | minor, state: open | closed, closes: <REV-ID>#<finding id>}; an empty list states that there were none; closes marks an entry that settles an open finding of an earlier review of the same content"}
       reviewed_at: {required: optional}
-      checks: {required: optional, note: "list of {check: <checklist ID>, result: pass | finding | not-assessed, note}: what each check of the checklist gave, including the answers to accountable checks"}
+      checks: {required: optional, note: "list of {check: <checklist ID>, result: pass | finding | not-applicable | not-assessed, note}: what each check of the checklist gave, including the answers to accountable checks"}
+      checklist_source: {values: [toolkit, external], required: optional, note: "toolkit: a checklist under .claude/docs/checklists at the cited version; external: criteria from outside the toolkit, named in `checklist`"}
       item_under_test: {required: optional, note: "commit, tag or baseline ID of the code that was reviewed"}
       sources: {required: optional, note: "list of {file, hash} of the source files of the units reviewed; written by tooling"}
 
@@ -426,6 +434,20 @@ types:
       channel: {required: always, note: "how they were informed"}
       sent_at: {required: always}
       agreement: {required: optional, note: "what was agreed and by whom, when the record documents an agreement rather than a notification"}
+
+  query:
+    prefix: QRY
+    folder: records/queries
+    lifecycle: query
+    supports: [SYS.1.BP6]
+    attributes:
+      use: [common]
+      to: {required: always, note: "who the question goes to: the source of the input, by role or name"}
+      asked_at: {required: always}
+      answered_by: {required: before-review, note: "who answered, and when"}
+    sections:
+      Question: always
+      Answer: before-review
 
   change-request:
     prefix: CR
@@ -514,13 +536,8 @@ links:
     pairs:
       - {from: system-requirement, to: [stakeholder-requirement], supports: [SYS.2.BP6, SYS.2.BP7]}
       - {from: software-requirement, to: [system-requirement, system-element, system-interface], supports: [SWE.1.BP6, SWE.1.BP7]}
-  allocated_to:
-    meaning: "the architectural element responsible for fulfilling the requirement, stated on the requirement. Use it when the allocation arrives with the requirement; architecture work uses `fulfils` instead, so that it does not change requirements that are already approved"
-    pairs:
-      - {from: system-requirement, to: [system-element, system-interface], supports: [SYS.3.BP2, SYS.3.BP6, SYS.3.BP7]}
-      - {from: software-requirement, to: [software-component, software-interface], supports: [SWE.2.BP2, SWE.2.BP7, SWE.2.BP8]}
   fulfils:
-    meaning: "the requirement is allocated to this architectural element, stated on the element. Equivalent to `allocated_to` read the other way; either one establishes the allocation"
+    meaning: "the requirement is allocated to this architectural element. The link is stored on the element because the element depends on the requirement: when the requirement changes, the element becomes suspect"
     pairs:
       - {from: system-element, to: [system-requirement], supports: [SYS.3.BP2, SYS.3.BP6, SYS.3.BP7]}
       - {from: system-interface, to: [system-requirement], supports: [SYS.3.BP2, SYS.3.BP6, SYS.3.BP7]}
@@ -564,6 +581,10 @@ links:
     meaning: "the decision shapes the target"
     pairs:
       - {from: design-decision, to: [system-requirement, software-requirement, system-element, system-interface, software-component, software-interface, architecture-view, component-design, software-unit], supports: [SYS.3.BP5, SWE.2.BP6, SWE.3.BP4]}
+  about:
+    meaning: "the query asks about the target"
+    pairs:
+      - {from: query, to: any, supports: [SYS.1.BP6]}
   affects:
     meaning: "the change or problem touches the target"
     pairs:
@@ -594,11 +615,11 @@ links:
 coverage:
   - {id: COV-01, subject: stakeholder-requirement, expect: "assessment accepted or accepted-with-deviation -> at least one system-requirement derived_from it", waiver: "assessment rejected, with agreement", supports: [SYS.2.BP6]}
   - {id: COV-02, subject: system-requirement, expect: "at least one derived_from link", waiver: "origin internal with a Rationale section", supports: [SYS.2.BP6]}
-  - {id: COV-03, subject: system-requirement, expect: "allocated to at least one system-element or system-interface (allocated_to on the requirement, or fulfils on the element)", waiver: "kind constraint with a Rationale section", supports: [SYS.3.BP2, SYS.3.BP6]}
+  - {id: COV-03, subject: system-requirement, expect: "at least one system-element or system-interface fulfils it", waiver: "kind constraint with a Rationale section", supports: [SYS.3.BP2, SYS.3.BP6]}
   - {id: COV-04, subject: system-element, expect: "at least one system-requirement allocated to it", waiver: "none", supports: [SYS.3.BP6]}
   - {id: COV-05, subject: system-requirement, expect: "allocated to an element of kind software -> at least one software-requirement derived_from the requirement", waiver: "trace.derive_via_elements in the project configuration: a software-requirement derived_from the element is then enough", supports: [SWE.1.BP6]}
   - {id: COV-06, subject: software-requirement, expect: "at least one derived_from link", waiver: "origin internal with a Rationale section", supports: [SWE.1.BP6]}
-  - {id: COV-07, subject: software-requirement, expect: "allocated to at least one software-component or software-interface (allocated_to on the requirement, or fulfils on the element)", waiver: "kind constraint with a Rationale section", supports: [SWE.2.BP2, SWE.2.BP7]}
+  - {id: COV-07, subject: software-requirement, expect: "at least one software-component or software-interface fulfils it", waiver: "kind constraint with a Rationale section", supports: [SWE.2.BP2, SWE.2.BP7]}
   - {id: COV-08, subject: software-component, expect: "at least one software-requirement allocated to it or to a component that is part_of it", waiver: "origin supplied or generated, with the reason for its presence in the Purpose section", supports: [SWE.2.BP7]}
   - {id: COV-09, subject: software-component, expect: "origin developed and kind other than composition -> one component-design refines it and at least one software-unit is part_of it", waiver: "none", supports: [SWE.3.BP5]}
   - {id: COV-10, subject: software-unit, expect: "exactly one part_of link, and every listed source file exists; a unit that lists none is reported as not implemented", waiver: "none", supports: [SWE.3.BP5, SWE.3.BP8]}
@@ -627,6 +648,8 @@ coverage:
 # Derived facts (computed by the trace engine, never stored on the item)
 # ---------------------------------------------------------------------------
 derived:
+  upstream-not-approved: "status approved, while an item it links to is still in draft or in review (reported as UPSTREAM)"
+  open-query: "an open query is about an approved item (reported as QUERY)"
   stale-approval: "status approved, but no final approving review record matches the current content hash"
   suspect-link: "the target's current content hash differs from the one recorded under references in the review that approved the linking item"
   implemented: "requirement: every component it is allocated to has approved units whose source files exist in the item under test"

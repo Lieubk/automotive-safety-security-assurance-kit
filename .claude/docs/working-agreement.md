@@ -21,7 +21,7 @@ Three kinds of statement are kept apart and labelled:
 
 | Kind | Source | Example |
 |---|---|---|
-| Deterministic | `tools/traceability.py`, compilers, test runners, analysers | "SWR-0007 has no allocated_to link" |
+| Deterministic | `tools/traceability.py`, compilers, test runners, analysers | "no component fulfils SWR-0007" |
 | Semantic | a model reading the items, always shown with the text it is based on | "SWR-0007 states two needs in one sentence" |
 | Accountable | a named person | "approved", "agreed with the customer" |
 
