@@ -767,6 +767,14 @@ class ProjectManagement(Case):
         self.assertEqual(Project(fixture.root).items["WP-0001"].hash, before)
         self.assertEqual(fixture.findings("error"), [])
 
+    def test_linking_what_was_delivered_does_not_make_the_plan_stale(self):
+        items = planned_items()
+        items["WP-0003"][0]["links"] = {"delivers": []}
+        fixture = self.plan(items)
+        before = Project(fixture.root).items["WP-0003"].hash
+        fixture.edit("WP-0003", links={"delivers": ["PLN-0002"]})
+        self.assertEqual(Project(fixture.root).items["WP-0003"].hash, before)
+
     def test_a_changed_deliverable_does_not_make_the_package_suspect(self):
         fixture = self.plan()
         fixture.edit("SWR-0001", title="Detect obstacle, reworded", status="draft")

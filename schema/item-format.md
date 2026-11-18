@@ -69,14 +69,18 @@ zone, the obstacle signal is set no later than the second 5 ms cycle after the d
 Approval, baselines and suspect links all refer to the content of an item at one point
 in time. That content is identified by a hash computed as follows:
 
-1. Take the front matter as data and remove the keys `status` and `source_files`.
+1. Take the front matter as data and remove the keys `status`, `source_files` and
+   `progress`, and the link role `delivers` under `links` (the key `links` itself when
+   nothing else is left in it).
 2. Serialize it as JSON with sorted keys, separators `,` and `:`, no ASCII escaping.
 3. Take the body, convert line endings to LF, strip trailing whitespace from every
    line, and strip blank lines at the start and the end.
 4. Hash `<json>\n<body>` with SHA-256 and keep the first 12 hexadecimal characters.
 
 Changing the status does not change the hash, and neither does `source_files`: a unit
-design stays approved when its code is registered. The code is covered separately - a
+design stays approved when its code is registered. In the same way a work package stays
+approved while its owner records progress (`progress`) and links the items it has
+produced (`delivers`): both are tracking, not plan. The code is covered separately - a
 review that names the code revision stores a hash of every source file. Changing
 anything else changes the hash. An item whose status is `approved` while no final review
 record lists its current hash has a stale approval.

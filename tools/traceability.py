@@ -107,6 +107,7 @@ def split_sections(body):
 
 
 HASH_EXCLUDED = ("status", "source_files", "progress")   # state, the pointer from a unit design to its code, tracking
+HASH_EXCLUDED_LINKS = ("delivers",)       # which items a work package has produced so far: tracking, not plan
 # What a component is to an interface that names it. The names differ from every link role
 # on purpose: `uses` is a link of software units.
 INTERFACE_ROLES = {"provided_by": "provider of", "used_by": "user of"}
@@ -115,6 +116,10 @@ UNRESOLVED = ("open", "analysed", "in-resolution")          # states of a proble
 
 def content_hash(front, body):
     data = {k: v for k, v in front.items() if k not in HASH_EXCLUDED}
+    if isinstance(data.get("links"), dict) and any(r in data["links"] for r in HASH_EXCLUDED_LINKS):
+        data["links"] = {r: t for r, t in data["links"].items() if r not in HASH_EXCLUDED_LINKS}
+        if not data["links"]:
+            del data["links"]
     head = json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=False, default=str)
     lines = [line.rstrip() for line in body.replace("\r\n", "\n").split("\n")]
     text = "\n".join(lines).strip("\n")
