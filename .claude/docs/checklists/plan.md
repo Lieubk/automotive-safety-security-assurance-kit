@@ -1,7 +1,8 @@
 # Plan review checklist
 
-Version 1. Applies to: `plan`. Supports: SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1,
-SYS.4.BP1, SYS.4.BP2, SYS.5.BP1, SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1.
+Version 1. Applies to: `plan`. Supports: MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6,
+MAN.3.BP7, SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1,
+SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1.
 
 Kinds: `script` - a tool answers it; `semantic` - needs reading and judgement, a model
 may propose and a person confirms; `accountable` - only a person can state it.
@@ -45,6 +46,22 @@ empty, ask the user; do not assume a value.
 | PLN-13 | The people who work by the plan know it and consider it workable | ask who was informed, how, and whether objections remain | accountable |
 | PLN-14 | The plan fits the project schedule and the release plan, and the people, tools and equipment it relies on are available | ask the project lead | accountable |
 | PLN-15 | The roles named in `Responsibilities` are filled | ask who holds each role; compare with `people` in `project.yaml` where that key is filled | accountable |
+
+## Kind project (MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6, MAN.3.BP7)
+
+| ID | Check | How to check | Kind |
+|---|---|---|---|
+| PLN-110 | `Feasibility`, `Interfaces and commitments`, `Reporting` and `milestones` are present | `check`: no `SCHEMA` finding on the item | script |
+| PLN-111 | `Scope` names goals, deliverables, exclusions and the agreement or inputs it rests on; it agrees with `scope.processes` and `inputs` of `project.yaml` | read `Scope` next to `project.yaml` | semantic |
+| PLN-112 | The life cycle in `Approach` fits the processes in scope and the customer's milestones the inputs name; every phase ends at a milestone | read `Approach` and `milestones` | semantic |
+| PLN-113 | Every milestone has a date and a `baseline_purpose` that the configuration management plan defines, or `Criteria` says how it is decided instead | `progress`: no milestone "not assessed"; compare purposes with the configuration management plan | semantic |
+| PLN-114 | The estimation method and its unit are stated, and every resource the work needs - people, tools, equipment, samples - with where it comes from and from when | read `Approach`, `Environment and tools` | semantic |
+| PLN-115 | Each role has the skills its work needs stated; every gap has a way to close it with a date | read `Responsibilities` | semantic |
+| PLN-116 | Every party the project receives from or delivers to is named with what is exchanged; every source under `inputs` appears; every commitment has a date and a state | read `Interfaces and commitments` next to `inputs` | semantic |
+| PLN-117 | `Reporting` states cadence, audience, content and the thresholds that call for a corrective action | read `Reporting` | semantic |
+| PLN-118 | `Feasibility` lists facts, assumptions and risks, and records the decision with who took it and when | read `Feasibility` | semantic |
+| PLN-119 | The decision on feasibility was taken by the person entitled to take it | the plan names who decided; ask the project lead whether that is the person entitled | accountable |
+| PLN-120 | The people the plan relies on in `Responsibilities` are assigned to the project for the planned period | ask the project lead | accountable |
 
 ## Kind unit-verification (SWE.4.BP1)
 

@@ -18,8 +18,8 @@ practices start from; none of the rows is evidence for a rating on its own.
 
 | Base practice | What this skill does | Evidence it leaves |
 |---|---|---|
-| MAN.3.BP1 Define the scope of work | records which processes the team is responsible for and which an assessment will rate; goals, deliverables and exclusions of the project are not defined here | `scope` in `project.yaml` |
-| MAN.3.BP7 Identify, monitor and adjust project interfaces and agreed commitments | records who delivered which input and who is accountable for reviews; monitoring is not done here | `inputs`, `people` |
+| MAN.3.BP1 Define the scope of work | records which processes the team is responsible for and which an assessment will rate; goals, deliverables and exclusions of the project are defined by `/project-plan` | `scope` in `project.yaml` |
+| MAN.3.BP7 Identify, monitor and adjust project interfaces and agreed commitments | records who delivered which input and who is accountable for reviews; the interfaces and commitments of the project are kept by `/project-plan` | `inputs`, `people` |
 | SYS.1.BP1 Obtain stakeholder requirements and requests | records which documents were received, in which version and when; their content is registered by `/import-inputs` | `inputs` |
 | SUP.8.BP2 Identify configuration items | records where items and code live and which code is generated or third-party; the list of configuration items belongs to the configuration management plan | `paths` |
 

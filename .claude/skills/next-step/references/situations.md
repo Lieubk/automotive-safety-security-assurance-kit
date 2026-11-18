@@ -69,6 +69,7 @@ Whether an input was registered and accepted is looked up; the tools report the 
 | `unit-verification` | SWE.4 | `/sw-unit-verify` |
 | `configuration-management` | SUP.8 | `/baseline` |
 | `change-request-management` | SUP.10 | `/change-request` |
+| `project` | MAN.3 | `/project-plan` |
 | `software-integration`, `software-qualification-test`, `system-integration`, `system-qualification-test`, `quality-assurance`, `problem-resolution` | SWE.5, SWE.6, SYS.4, SYS.5, SUP.1, SUP.9 | by hand: a `plan` item with the sections of the schema |
 
 The three skills draft the plan of their process; their base practice tables say so.
@@ -116,6 +117,9 @@ sections that are missing. Such a draft goes back to its authoring skill, not to
 | SYS.4 | `COV-15` | a system interface has no integration test | by hand |
 | SYS.5 | `COV-16` | a system requirement has no qualification test or review | by hand |
 | any | `COV-23` | an item has a lower ASIL than what it depends on; a test case lower than what it verifies | the authoring skill of the item; a decomposition needs an approved `design-decision` |
+| MAN.3 | `COV-31`, `COV-33`, `COV-34` | the work breakdown has a cycle, lacks a category, or dates that do not fit | `/work-breakdown` |
+| MAN.3 | `COV-32` | an item no work package delivers | `/work-breakdown link` |
+| MAN.3 | - | `progress` shows a package late, a milestone missed or at risk, a corrective action overdue, or no status report since the last reporting date of the plan | `/project-status` |
 
 `COV-05` asks for a software requirement per system requirement that is allocated to
 software. If `trace.derive_via_elements` is `true` in `project.yaml`, a software
@@ -141,6 +145,8 @@ Question 2, by type:
 | `system-integration-test`, `system-qualification-test` | SYS.4, SYS.5 | none today | `/review` |
 | `plan` | the process of its `kind` (stop 4) | see stop 4 | `/review` |
 | `change-request` | SUP.10 | `/change-request` | - |
+| `work-package` | MAN.3 | `/work-breakdown` | `/review` |
+| `corrective-action` | MAN.3 | `/project-status` | - |
 | `problem-report` | SUP.9 | none today | - |
 
 To name the IDs behind a count, run

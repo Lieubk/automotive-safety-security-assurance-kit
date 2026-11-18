@@ -46,7 +46,7 @@ type and no rule for the process, so its evidence lives outside the toolkit.
 | Supporting | SUP.8 | Configuration Management | vda | authoring for baselines: `/baseline` |
 | Supporting | SUP.9 | Problem Resolution Management | vda | checked |
 | Supporting | SUP.10 | Change Request Management | vda | authoring for change requests: `/change-request` |
-| Management | MAN.3 | Project Management | vda | catalog |
+| Management | MAN.3 | Project Management | vda | authoring: `/project-plan`, `/work-breakdown`, `/project-status` |
 | Management | MAN.5 | Risk Management | extended | catalog |
 | Acquisition | ACQ.4 | Supplier Monitoring | vda | catalog |
 | Supply | SPL.2 | Product Release | extended | catalog |

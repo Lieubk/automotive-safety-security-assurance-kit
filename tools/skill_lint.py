@@ -31,8 +31,9 @@ MODELS = {"opus", "sonnet", "haiku", "fable", "inherit"}      # aliases only: a 
 EFFORTS = {"low", "medium", "high", "xhigh", "max"}
 BUILT_IN_AGENTS = {"general-purpose", "Explore", "Plan"}
 MAX_LINES = 200
-TRACE_COMMANDS = {"check", "matrix", "show", "impact", "hash", "status", "list", "audit", "practices", "diff"}
-RECORD_COMMANDS = {"next-id", "test-run", "analysis-run", "review", "baseline", "communication"}
+TRACE_COMMANDS = {"check", "matrix", "show", "impact", "hash", "status", "list", "audit", "practices", "diff",
+                  "progress"}
+RECORD_COMMANDS = {"next-id", "test-run", "analysis-run", "review", "baseline", "communication", "status-report"}
 
 
 def front_matter(path, errors):
@@ -66,7 +67,9 @@ def vocabulary():
         "roles": set(schema["links"]),
         # terms that resemble type names without being typos of them
         "other": set(schema["plan_kinds"]) | set(schema["structures"]) | set(schema["lifecycles"])
-                 | {state for lc in schema["lifecycles"].values() for state in lc["states"]},
+                 | {state for lc in schema["lifecycles"].values() for state in lc["states"]}
+                 | {name for spec in schema["types"].values() for name in spec.get("attributes", {}) if name != "use"}
+                 | {name for group in schema["attribute_sets"].values() for name in group},
     }
 
 
@@ -105,6 +108,7 @@ def check_references(path, text, vocab, skills, errors, warnings):
 CANDIDATE_SKILL_NAMES = {
     "aspice-start", "import-inputs", "next-step", "sw-requirements", "sw-architecture", "sw-detailed-design",
     "sw-unit-implement", "sw-unit-verify", "review", "trace-check", "process-gate", "baseline", "change-request",
+    "project-plan", "work-breakdown", "project-status",
 }
 
 

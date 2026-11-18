@@ -134,6 +134,10 @@ requirement. Nothing is written on the requirement.
 | `COV-28` | software unit whose ASIL has a target in the approved unit verification plan | the latest final unit test run reports structural coverage of the unit that reaches the target. As `warning` on the plan: it sets no `coverage_targets` at all | coverage not measured in the latest run; tests do not reach all code; pending while the unit has no code | SWE.4.BP2, SWE.4.BP4 | SWE.4 | `/sw-unit-verify` | Yes: `origin` generated or third-party; or a deviation recorded with the coverage entry of the run, with the reason a person accepted |
 | `COV-29` | software unit | every designed function of category public, scheduled or callback is named by at least one unit test (`verifies` with `<unit>#<function>`) | test cases link to the unit as a whole; a function was added to the design after the tests; pending while the unit has no code | SWE.4.BP2, SWE.4.BP5 | SWE.4 | `/sw-unit-verify` | Yes: `origin` generated or third-party |
 | `COV-30` | software unit and unit test | the unit's source files and the test files of its test cases are unchanged since the latest final unit test run and the latest final static analysis run recorded them. As `warning` on a run: it records no source hashes, so a later change cannot be told | code or test code changed after the run; a run written by an older tool version | SWE.4.BP3, SWE.4.BP4 | SWE.4 | `/sw-unit-verify`: run again and record | No |
+| `COV-31` | work package | part of at most one work package; no cycle in `part_of` or `depends_on` | a package placed under two parents; two packages that wait for each other | MAN.3.BP4, MAN.3.BP8 | MAN.3 | `/work-breakdown` | No |
+| `COV-32` | engineering item | some live work package delivers it | an item written outside the plan; a package not yet linked to what it produced | MAN.3.BP4, MAN.3.BP9 | MAN.3 | `/work-breakdown link` | No |
+| `COV-33` | project | live work packages exist for engineering, management and support work | only engineering work was planned | MAN.3.BP4 | MAN.3 | `/work-breakdown` | No |
+| `COV-34` | work package | the dates fit: finish after start, inside the parent, after the packages it depends on; activities inside the package | a date moved in one package and not in those around it | MAN.3.BP8, MAN.3.BP9 | MAN.3 | `/work-breakdown` | No |
 
 ## Link roles and the practices behind `UPSTREAM`, `SUSPECT` and `CONSISTENCY`
 
@@ -161,6 +165,8 @@ requirement. Nothing is written on the requirement.
 | `about` | query | any item | SYS.1.BP6 |
 | `affects` | change request, problem report | any item | SUP.10.BP8, SUP.9.BP4 |
 | `resolves` | change request | problem report | SUP.10.BP8 |
+| `part_of`, `depends_on`, `delivers` | work package | work package; for `delivers` any item | MAN.3.BP4, MAN.3.BP8, MAN.3.BP9 - planning and tracking: never `UPSTREAM`, `SUSPECT` or `CONSISTENCY` |
+| `addresses` | corrective action | any item | MAN.3.BP10 - tracking, as above |
 
 Allocation has one direction: the element `fulfils` the requirement. A requirement that
 changes therefore makes the elements that fulfil it suspect, and `impact <requirement>`

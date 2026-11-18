@@ -16,6 +16,7 @@ example is `examples/power-window`). They need Python 3 and PyYAML.
 | `show <ID>` | read one item's links in both directions | what it links to, what links to it; for a component also the interfaces it provides and uses |
 | `impact <ID>` | see what a change to an item affects | every item that depends on it, by distance |
 | `audit <BL-ID>` | compare a baseline record with the items as they are now | one line per difference; exit code 1 when there are any |
+| `progress [--as-of DATE] [--json]` | compare the plan with what the items show: per work package its state read from the items it delivers, lateness, effort against estimate; milestones against baselines; open corrective actions | a tree of work packages, milestones, corrective actions, a summary line |
 | `diff <ID> [--since REV-ID]` | see what changed in an item since a review saw it; the reviewed text is taken from the git history by its content hash | a unified diff; "unchanged"; or NOT ASSESSED with exit code 2 when the reviewed text is in no commit |
 | `matrix` | produce the traceability tables for the link pairs in scope | Markdown tables |
 | `hash [ID ...]` | get content hashes | `ID hash` per line |
@@ -56,6 +57,7 @@ active. The summary line says how many.
 | `review --checklist "NAME vN" --reviewer NAME --verdict approved\|rework [--findings FILE] [--checks FILE] [--item-under-test REF] [--external-criteria] ID ...` | record a review a person has given a verdict on; the checklist is cited as the file name under `.claude/docs/checklists` (or its title) and its version, and must exist unless `--external-criteria` is given; hashes and references are filled in. With `--item-under-test` it is a review of the code as well: the hashes of the units' source files are stored; without it the record covers the design only. `--checks` stores the result per checklist item (`pass`, `finding`, `not-applicable` with a note, `not-assessed`). Verdict approved is refused while a finding is open, while a check of the checklist has no result or is not assessed, while an accountable check is answered with a finding, while an item the subject builds on is not approved, or while an open finding of an earlier review of the same content is not closed by an entry with `closes` |
 | `review --reconfirm --reviewer NAME --verdict approved\|rework [--findings FILE] ID ...` | record that items which did not change were compared with new versions of what they build on. No checklist and no check results; refused for an item whose present content has no approving review. The new versions are recorded as references. The code review of a unit is carried over as it was recorded, so code that changed since stays `SUSPECT`; it cannot be combined with `--item-under-test` |
 | `baseline --tag TAG --purpose TEXT` | write a baseline record: the approved plans and engineering items with hash and status (an internal purpose: all of them). Refused while the trace check reports errors, unless the purpose is an internal one |
+| `status-report --reported-by NAME --assessment FILE [--as-of DATE] [--period TEXT]` | write a project status report: the figures of `progress` and `check` for the date, and the reporter's assessment from the file, in their words. Refused without an assessment |
 | `communication --subject ID --audience WHO --channel TEXT [--agreement TEXT] [--sent-at DATE]` | record what was made known to whom, and what was agreed; `--subject` and `--audience` may repeat |
 
 Input file formats are in the tool's help (`python tools/record.py --help` and the
@@ -90,6 +92,14 @@ module text). Records are final when written and are never edited afterwards.
   with `relies_on`; a change of that requirement then makes it suspect.
 - While an item is in draft or in review, what builds on it is reported as `UPSTREAM`
   only; once it is approved again, as `SUSPECT` until the comparison is recorded.
+- Work packages plan; their links to the items they deliver, and the owner's `progress`,
+  track. Tracking is left out of the content hash, and links that plan or track work
+  (`delivers`, `depends_on`, `part_of` between packages, `addresses`) are not compared
+  in reviews: they raise no `SUSPECT`, `UPSTREAM` or `CONSISTENCY`. A package is done
+  when its owner states it and every item it delivers is settled; `progress` reports a
+  stated completion that the items contradict.
+- `progress` depends on the date it is given; `check` does not. Lateness is never a
+  `check` finding.
 - A re-review reads what changed: `diff <ID> --since <REV-ID>` finds the reviewed text
   in the git history. Commit items and records after each review, or it cannot.
 - A draft or in-review item whose last review left findings open shows them under `COV-19`
