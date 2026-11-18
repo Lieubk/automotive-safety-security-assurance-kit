@@ -89,6 +89,12 @@ the product is cybersecurity relevant. Say what follows: items carry `asil` and
 `security_relevant`, an item may not fall below what it is derived from (COV-23), and
 unit coverage targets are set per ASIL in the unit verification plan (COV-28). QM is a
 statement, not a default: if nobody has decided yet, leave the value empty.
+Then ask for the project's rules that reviews check against, one by one, as listed
+under `conventions` in `references/project-yaml.md`: what the safety plan or the
+customer demands of the design notation and of review independence per ASIL, the
+naming convention, the limits for functions. Record what the user states and where it
+is written; for "nothing" or "not known yet" leave the value empty and say which
+toolkit default applies until someone states otherwise.
 
 ### 7. Platform and toolchain
 Ask: AUTOSAR Classic or not (if not, what instead); microcontroller; language

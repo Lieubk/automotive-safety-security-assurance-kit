@@ -75,7 +75,7 @@ review reads their results where they exist and does not replace them.
 | SUC-30 | Every source file of the unit compiles with the project's compiler and options without error or warning | the build output for the reviewed commit: compiler line and result. Without a build the result of this check is `not-assessed` | script |
 | SUC-31 | What compiler and analyser have reported for this code so far is corrected, or justified at its place; where no analysis has run yet, the review says so | the build output; the unit's entry in the latest static analysis run, unless a `COV-30` finding says that run describes older code | semantic |
 | SUC-33 | The rules no tool checked hold: named constants, bounded loops, single exit, checked return values, range checks before use, results limited to their range | read the code against the rules whose check is `review` | semantic |
-| SUC-34 | Functions are inside the project's limits for complexity, nesting depth, parameters and length | metric output of the analyser; without one, count by reading and say so | semantic |
+| SUC-34 | Functions are inside the limits for complexity, nesting depth, parameters and length: those of `conventions.design_limits` in `project.yaml`, or of the component design when it is empty | metric output of the analyser; without one, count by reading and say so | semantic |
 | SUC-35 | Arithmetic cannot overflow or lose range unnoticed; every cast has a visible reason; every intended wrap-around is commented | read each expression with a cast, a subtraction or a multiplication | semantic |
 | SUC-36 | No `TODO`, `FIXME`, commented-out code, debug output or test-only branch | search the files for these markers; read what the search cannot find | semantic |
 | SUC-37 | Comments explain intent, units and scaling, and none contradicts the code | read the comments | semantic |
@@ -91,7 +91,7 @@ review reads their results where they exist and does not replace them.
 | SUC-42 | The code adds no safety mechanism of its own and leaves none of the designed ones out | compare `Error handling` with the code in both directions | semantic |
 | SUC-43 | Defensive branches that a test cannot reach are marked with the reason | read each `default` branch and each check whose condition the callers rule out | semantic |
 | SUC-44 | The unit calls no code of a lower ASIL and shares no variable with it, unless the design says so | read the calls and includes against `uses` and the `asil` of the targets | semantic |
-| SUC-45 | The review has the form and the independence the project's plans require for this ASIL | ask who reviewed, and compare with the plan | accountable |
+| SUC-45 | The review has the independence `conventions.review_independence` in `project.yaml` asks for this ASIL; when it is empty, at least one reviewer did not write the unit | ask who reviewed and who wrote the code; compare | accountable |
 
 ## Closing
 

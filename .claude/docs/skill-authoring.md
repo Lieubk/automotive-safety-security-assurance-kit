@@ -111,7 +111,14 @@ Applies to: <item types>    Supports: <BP IDs>
 `Kind` is `script` (the trace engine or another tool answers it - name the rule or
 command), `semantic` (needs reading and judgement; a model may propose, a person
 confirms) or `accountable` (only a person can state it). A checklist has a version
-line at the top; review records cite the checklist with its version.
+line at the top; review records cite the checklist with its version. From the first
+release on, a check that is added, removed or changes its meaning raises the version.
+
+A check answers from what the project holds: items, tool output, `project.yaml`. A
+check that refers to a rule of the project names where it is found - normally under
+`conventions` in `project.yaml` - and what applies when nothing is recorded there. A
+check that can only be answered from a document the toolkit has no place for stops
+every review that meets it: give the document a place first.
 
 ## Agents
 

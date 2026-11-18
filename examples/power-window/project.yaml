@@ -28,6 +28,11 @@ safety:
   highest_asil: B
 security:
   relevant: false
+conventions:                                        # rules the reviews check against; empty = toolkit default
+  naming: ""                                        # the defaults of .claude/rules/c-code.md, "Naming"
+  design_limits: "Design evaluation of CDS-0001"
+  design_notation: ""                               # the unit format of the toolkit; the example has no safety plan
+  review_independence: "Responsibilities of PLN-0001 for code and test cases; otherwise a reviewer who did not write the item"
 platform:
   architecture: autosar-classic
   microcontroller: ""                               # not decided in the example: the code is delivered as source

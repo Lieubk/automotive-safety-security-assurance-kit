@@ -75,7 +75,7 @@ against the test cases: `COV-29`, a designed function that no test case names.
 | UT-28 | The test cases were compared with the current, approved unit design | `check`: no `SUSPECT` or `UPSTREAM` on the test cases and no `COV-19` on the unit; `hash --upstream <IDs>` lists the design versions | script |
 | UT-29 | What the host cannot show for this unit (timing, stack, behaviour of the target compiler) is named in the strategy and assigned to another level | read `Scope` of the unit verification plan | semantic |
 | UT-30 | The test cases were derived from the design and not from the finished code | ask the author how the expected results were obtained | accountable |
-| UT-31 | The reviewer did not write the test cases or the unit, and is as independent as the strategy requires for the unit's ASIL | ask who wrote and who reviews; compare with `Responsibilities` of the plan | accountable |
+| UT-31 | The reviewer did not write the test cases or the unit, and is as independent as `conventions.review_independence` in `project.yaml` or `Responsibilities` of the strategy asks for the unit's ASIL | ask who wrote and who reviews; compare | accountable |
 
 ## The test code behind a test case
 

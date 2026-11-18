@@ -158,7 +158,7 @@ create or change under a source root.
 ## Naming
 
 Names are decided by the project's naming convention, not here. Find it through
-`platform.coding_guideline` in `project.yaml` or ask. A name the unit design gives is
+`conventions.naming` in `project.yaml`, or `platform.coding_guideline`, or ask. A name the unit design gives is
 used exactly as designed; if it breaks the convention, that is a finding against the
 design. Where the code has to follow naming rules of the platform (names in the
 component description, generated access functions), those come first.

@@ -9,10 +9,13 @@ alternatives is a `design-decision` item. Worked examples: CDS-0001 and CDS-0002
 An evaluation without criteria is an opinion. Before writing a result, establish what
 the project measures the design against:
 
-1. Ask the user where the project's evaluation criteria and limits are written: an
-   approved `component-design` that already states them, the approved `plan` of kind
+1. Read `conventions.design_limits` in `project.yaml`. Where it is empty, ask the user
+   where the project's evaluation criteria and limits are written: an approved
+   `component-design` that already states them, the approved `plan` of kind
    `unit-verification` (its `Criteria` section may hold complexity limits and what
    each ASIL means for verification), a customer requirement, a project guideline.
+   Once they are decided, propose to record where they are under
+   `conventions.design_limits` with `/aspice-start`.
 2. If they exist, use them as they are and refer to them. CDS-0002 does it in one
    line: "Limits as in CDS-0001."
 3. If they do not exist, propose a set and let the user decide. The set has two parts:
@@ -22,8 +25,8 @@ the project measures the design against:
    memory. These are example values, not a recommendation for every project.
 4. Write the decided criteria once, at the top of the `Design evaluation` of the first
    component design, and refer to that item from the others. Do not paste the scale
-   into every component. The schema has no item of its own for project-wide design
-   limits; until it has, this section is their home, and the hand-over says so.
+   into every component. Write who decided them, by name or role as the user states
+   it (SDD-56 asks for it).
 
 The six aspects come from the process: interaction, interoperability, criticality,
 technical complexity, testability, risks. A project may add its own (memory or timing
