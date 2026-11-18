@@ -27,8 +27,11 @@ CLAUDE = ROOT / ".claude"
 FRONT = re.compile(r"\A---\n(.*?)\n---[ \t]*\n", re.S)
 SECTIONS = ["Before you start", "Steps", "Writing", "Checks before you finish", "Hand-over", "Do not"]
 KINDS = {"script", "semantic", "accountable"}
+MODELS = {"opus", "sonnet", "haiku", "fable", "inherit"}      # aliases only: a published toolkit pins no version
+EFFORTS = {"low", "medium", "high", "xhigh", "max"}
+BUILT_IN_AGENTS = {"general-purpose", "Explore", "Plan"}
 MAX_LINES = 200
-TRACE_COMMANDS = {"check", "matrix", "show", "impact", "hash", "status", "list", "audit", "practices"}
+TRACE_COMMANDS = {"check", "matrix", "show", "impact", "hash", "status", "list", "audit", "practices", "diff"}
 RECORD_COMMANDS = {"next-id", "test-run", "analysis-run", "review", "baseline", "communication"}
 
 
@@ -119,8 +122,21 @@ def lint_skill(folder, vocab, skills, errors, warnings):
     tools = str(front.get("allowed-tools") or "")
     if not tools:
         errors.append("%s: no allowed-tools" % name)
-    if "model" in front:
-        warnings.append("%s: pins a model; skills here inherit the session's model" % name)
+    forked = front.get("context") == "fork"
+    if "context" in front and not forked:
+        errors.append("%s: context '%s' is not a value Claude Code knows; only 'fork'" % (name, front.get("context")))
+    for key in ("model", "effort"):
+        if key in front and not forked:
+            errors.append("%s: %s on a skill that runs in the conversation switches the session's %s for the turn, "
+                          "and the conversation is read again without cache; leave it out, or run the skill with "
+                          "context: fork" % (name, key, key))
+    check_model(name, front, errors)
+    if forked:
+        if "AskUserQuestion" in tools:
+            errors.append("%s: a forked skill cannot hold a conversation with the user; drop AskUserQuestion or the fork" % name)
+        agent = front.get("agent")
+        if agent and agent not in BUILT_IN_AGENTS and not (CLAUDE / "agents" / ("%s.md" % agent)).is_file():
+            errors.append("%s: agent '%s' is neither built in nor defined in .claude/agents" % (name, agent))
     lines = body.count("\n") + 1
     if lines > MAX_LINES:
         errors.append("%s: %d lines; move detail to references/ (limit %d)" % (name, lines, MAX_LINES))
@@ -147,6 +163,13 @@ def lint_skill(folder, vocab, skills, errors, warnings):
         check_references(file, file.read_text(encoding="utf-8"), vocab, skills, errors, warnings)
 
 
+def check_model(name, front, errors):
+    if "model" in front and str(front["model"]) not in MODELS:
+        errors.append("%s: model '%s' is not one of %s" % (name, front["model"], ", ".join(sorted(MODELS))))
+    if "effort" in front and str(front["effort"]) not in EFFORTS:
+        errors.append("%s: effort '%s' is not one of %s" % (name, front["effort"], ", ".join(sorted(EFFORTS))))
+
+
 def lint_agent(path, vocab, skills, errors, warnings):
     front, body = front_matter(path, errors)
     name = rel(path)
@@ -157,6 +180,11 @@ def lint_agent(path, vocab, skills, errors, warnings):
     tools = str(front.get("tools") or "")
     if not tools:
         errors.append("%s: no tools listed" % name)
+    for key in ("model", "effort"):
+        if key not in front:
+            errors.append("%s: no %s; every agent states the %s its work needs (skill-authoring.md, Model and effort)"
+                          % (name, key, key))
+    check_model(name, front, errors)
     if "review" in path.stem and re.search(r"\b(Write|Edit|NotebookEdit)\b", tools):
         errors.append("%s: a reviewing agent must not have write tools" % name)
     if "working-agreement" not in body:

@@ -2,6 +2,8 @@
 name: configuration-manager
 description: "Role agent for configuration and change control (SUP.8, SUP.10). Use it to check whether a baseline can be taken, to prepare baseline and communication records, to audit a baseline, to draft the configuration management plan, or to write and analyse a change request. It returns drafts, check results and questions to its caller; it decides nothing, commits nothing and approves nothing."
 tools: Read, Glob, Grep, Write, Edit, Bash(python tools/traceability.py *), Bash(python tools/record.py *), Bash(git status *), Bash(git log *), Bash(git tag *)
+model: sonnet
+effort: medium
 ---
 
 # Configuration manager

@@ -25,8 +25,37 @@ allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Bash(python tools
 ---
 ```
 
-Add `Agent` to `allowed-tools` only when the skill delegates. Do not pin a model.
+Add `Agent` to `allowed-tools` only when the skill delegates. A skill that works with
+the user states no `model` and no `effort`; see "Model and effort" below.
 Do not run shell commands at load time; the first step runs them.
+
+## Model and effort
+
+The model is chosen by what a wrong answer costs, not by how hard the work looks.
+
+| Work | Model, effort | Where |
+|---|---|---|
+| Independent judgement that people rely on: a missed contradiction becomes an approved defect | `opus`, `high` | `aspice-reviewer`, `software-architect` |
+| Writing items or code from a given input and template, where a review follows | `sonnet`, `high` | `software-requirements-engineer`, `software-developer` |
+| Deriving from a design and driving tools, turning their output into records | `sonnet`, `medium` | `unit-verification-engineer`, `configuration-manager` |
+| Reading tool output and explaining it; no question to the user, nothing written | `haiku`, `low` or `medium`, forked | `/trace-check`, `/next-step` |
+| Working through a task with the user | the session's model | every other skill |
+
+- Every agent states `model` and `effort` in its frontmatter. An agent runs in a
+  context of its own, so its model costs nothing beyond its own work.
+- A skill that works with the user states neither. In the conversation, `model` and
+  `effort` switch the session for the rest of the turn: the new model reads the whole
+  conversation again without cache, which costs more than it saves, and the user loses
+  the model they chose.
+- A skill that needs nothing from the conversation and asks the user nothing may run
+  in a fork (`context: fork`, `background: false`) on a smaller model. It cannot ask
+  questions there: where it would, it says what is missing and which skill provides it.
+- A skill that starts an agent passes no model: the agent's file decides.
+- Aliases only (`opus`, `sonnet`, `haiku`, `inherit`), never a version: a published
+  toolkit must keep working when models change. Reducing cost is done by giving a
+  model less to read - a re-review that reads what changed (`traceability.py diff`),
+  a fork that does not carry the conversation - before it is done by a smaller model.
+- `python tools/skill_lint.py` checks the values and that only forked skills set them.
 
 ## Sections of SKILL.md, in this order
 

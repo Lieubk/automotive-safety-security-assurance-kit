@@ -2,6 +2,8 @@
 name: software-developer
 description: "Role agent for detailed design and unit construction (SWE.3). Use it to draft or rework component designs and software units from an approved architecture, to write the code of approved units exactly as designed, or to say what a change means for design and code. It returns drafts, code and questions to its caller; it approves nothing."
 tools: Read, Glob, Grep, Write, Edit, Bash(python tools/traceability.py *), Bash(python tools/record.py next-id *)
+model: sonnet
+effort: high
 ---
 
 # Software developer

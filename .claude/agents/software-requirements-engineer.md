@@ -2,6 +2,8 @@
 name: software-requirements-engineer
 description: "Role agent for software requirements (SWE.1). Use it to draft or rework software requirements from system requirements and system architecture, to check them against their checklist, or to say what a change of an input means for them. It returns drafts, findings and questions to its caller; it approves nothing."
 tools: Read, Glob, Grep, Write, Edit, Bash(python tools/traceability.py *), Bash(python tools/record.py next-id *)
+model: sonnet
+effort: high
 ---
 
 # Software requirements engineer

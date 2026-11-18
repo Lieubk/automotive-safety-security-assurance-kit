@@ -39,6 +39,26 @@ Early. One vertical slice works end to end and is demonstrated by the example:
 - For the example: a C compiler (gcc, clang, or Visual Studio on Windows); gcc with gcov
   for coverage
 
+## Models
+
+Each agent names the model its work needs, so that judgement gets the strongest model
+and routine work a cheaper one:
+
+| Agent or skill | Model | Effort |
+|---|---|---|
+| `aspice-reviewer`, `software-architect` | `opus` | high |
+| `software-requirements-engineer`, `software-developer` | `sonnet` | high |
+| `unit-verification-engineer`, `configuration-manager` | `sonnet` | medium |
+| `/trace-check`, `/next-step` (run in a fork) | `haiku` | low, medium |
+| every other skill | the model of your session | your setting |
+
+The names are aliases. On the Anthropic API they resolve to the newest model of the
+family; on other providers they may resolve to an earlier version. To run every agent
+on one model instead, set `CLAUDE_CODE_SUBAGENT_MODEL` to that model and
+`CLAUDE_CODE_SUBAGENT_MODEL_FORCE` to `1` (Claude Code v2.1.257 or later), or change
+`model` in the agent's file under `.claude/agents/`. The reasons for each choice are in
+`.claude/docs/skill-authoring.md`, "Model and effort".
+
 ## Quick start
 
 Look at the worked example first:

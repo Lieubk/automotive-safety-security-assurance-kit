@@ -3,6 +3,10 @@ name: trace-check
 description: "Run the trace engine and explain what it reports: findings grouped by rule, what each rule means in plain words, which base practice it matters for, and which skill resolves it. Reads only and fixes nothing. Use when the check shows errors or warnings, before a review, a baseline or a process gate, or when someone asks what a FORMAT, SCHEMA, LINK, COV, UPSTREAM, SUSPECT, CONSISTENCY or QUERY line means."
 argument-hint: "[--all to include drafts, and optionally a rule name or an item ID to narrow the explanation]"
 allowed-tools: Read, Glob, Grep, Bash(python tools/traceability.py *)
+context: fork
+model: haiku
+effort: low
+background: false
 ---
 
 # Trace check, explained

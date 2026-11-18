@@ -3,6 +3,10 @@ name: next-step
 description: "Say where the project stands and which skill to run next, from the state of the items, the open findings of the trace check and the evidence per base practice, in the order of the processes in scope. Recommends only; changes nothing. Use at the start of a session, after any skill has finished, or whenever it is unclear what to do next."
 argument-hint: "[nothing, or one process ID of the scope to look at only that process]"
 allowed-tools: Read, Glob, Grep, Bash(python tools/traceability.py *)
+context: fork
+model: haiku
+effort: medium
+background: false
 ---
 
 # Where the project stands and what comes next
@@ -26,8 +30,8 @@ sense of MAN.3 and not a statement about capability.
    `/aspice-start` first." That is the whole recommendation; stop.
 2. Read `project.yaml`: `scope.processes`, `scope.assessment_scope`, `inputs`,
    `aspice.target_level`. If one of these keys is missing, say that it is not
-   recorded and ask the user or point to `/aspice-start`; do not assume a target
-   level, an assessment scope or that nothing was received.
+   recorded and point to `/aspice-start`; do not assume a target level, an
+   assessment scope or that nothing was received.
 3. Run `python tools/traceability.py status`,
    `python tools/traceability.py check --all` and
    `python tools/traceability.py practices`. Every command of this skill takes
