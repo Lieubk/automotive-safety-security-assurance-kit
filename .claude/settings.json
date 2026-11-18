@@ -1,0 +1,59 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python tools/traceability.py *)",
+      "Bash(python tools/catalog.py *)",
+      "Bash(python tools/schema_check.py*)",
+      "Bash(python tools/skill_lint.py*)",
+      "Bash(python tools/record.py next-id *)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo `# >$null <#` >/dev/null; PY=$(command -v python || command -v python3); \"$PY\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/aspice_hooks.py\" session-start; exit $? #> ; python \"$env:CLAUDE_PROJECT_DIR/.claude/hooks/aspice_hooks.py\" session-start; exit $LASTEXITCODE",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo `# >$null <#` >/dev/null; PY=$(command -v python || command -v python3); \"$PY\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/aspice_hooks.py\" pre-write; exit $? #> ; python \"$env:CLAUDE_PROJECT_DIR/.claude/hooks/aspice_hooks.py\" pre-write; exit $LASTEXITCODE",
+            "timeout": 60
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo `# >$null <#` >/dev/null; PY=$(command -v python || command -v python3); \"$PY\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/aspice_hooks.py\" pre-shell; exit $? #> ; python \"$env:CLAUDE_PROJECT_DIR/.claude/hooks/aspice_hooks.py\" pre-shell; exit $LASTEXITCODE",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo `# >$null <#` >/dev/null; PY=$(command -v python || command -v python3); \"$PY\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/aspice_hooks.py\" post-write; exit $? #> ; python \"$env:CLAUDE_PROJECT_DIR/.claude/hooks/aspice_hooks.py\" post-write; exit $LASTEXITCODE",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}

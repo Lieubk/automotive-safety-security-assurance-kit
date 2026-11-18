@@ -11,12 +11,17 @@ Commands
         print the next free ID for an item type, for example `next-id review-record`
 
     test-run --level LEVEL --results FILE --item-under-test REF --environment NAME
+             [--deviation UNIT=TEXT ...]
         final test-run record from a results file (JSON):
         {"executed_at": "<ISO time>", "compiler": "...",            (compiler optional)
          "results": [{"test": "UT-0001", "verdict": "passed", "evidence": "<path>"}],
          "coverage": [{"file": "src/a.c", "statement_percent": 100.0, "branch_percent": 97.5}]}
         `coverage` is optional: a list per source file (attributed to the owning
-        unit), or a text saying why it was not measured.
+        unit; every key ending in `_percent` is kept), or a text saying why it
+        was not measured. --deviation records, for one unit, the reason a person
+        accepted a coverage figure below target: pass what that person states.
+        The record also stores a hash of every unit source and test file, so a
+        change of the code after the run can be seen.
         Every test named must be a test case of that level, and every approved
         test case of that level must appear; otherwise nothing is written.
         Evidence files are copied to verification/evidence/<record id>/.
@@ -27,28 +32,42 @@ Commands
          "files": ["src/a.c", ...],                       (every file that was analysed)
          "findings": [{"file": "src/a.c", "line": 12, "rule": "...", "severity": "...",
                        "message": "..."}],
+         "deviations": [{"file", "line", "rule", "justification", "accepted_by"}],   (optional)
+         "metrics": [{"file", "name", "value"}],                                    (optional)
          "evidence": "<path of the raw tool output>"}
+        A finding matched by a deviation (same file, rule and line) is recorded
+        as justified, not as open; a deviation that matches nothing stops the
+        command.
         Findings are attributed to software units through `source_files`. A live
         unit none of whose C files was analysed stops the command.
 
     review --checklist NAME --reviewer NAME [--reviewer NAME ...] --verdict approved|rework
-           [--findings FILE] ID [ID ...]
+           [--findings FILE] [--checks FILE] [--item-under-test REF] ID [ID ...]
         final review record for the named items at their current content. The
         subject and the references (every upstream item the subject links to)
-        are filled in with content hashes. FILE is JSON: a list of
-        {"id", "item", "text", "severity": "major"|"minor", "state": "open"|"closed"}.
+        are filled in with content hashes; for software units the hashes of
+        their source files are stored too, so the record says which code was
+        reviewed. Findings FILE is JSON: a list of
+        {"id", "item", "text", "severity": "major"|"minor", "state": "open"|"closed",
+         "closes": "<REV-ID>#<finding id>"}    (closes is optional)
+        Checks FILE is JSON: a list of {"check", "result": "pass"|"finding"|"not-assessed", "note"}.
+        Verdict approved is refused while a finding is open, while a check is
+        not assessed, and while an open finding of an earlier review of the same
+        content is not closed by an entry with `closes`.
         The reviewer names are the people accountable for the verdict: pass what
         the user states, never an invented name.
 
     baseline --tag TAG --purpose TEXT
-        final baseline record: every plan and engineering item with its content
-        hash and status. Refused while the trace check reports errors, unless the
+        final baseline record: the approved plans and engineering items with
+        content hash and status (for an internal purpose: all of them, whatever
+        their state). Change requests, problem reports and records are not part
+        of a baseline. Refused while the trace check reports errors, unless the
         purpose is one of `trace.internal_baselines` of project.yaml. The version
         control tag itself is set by whoever runs the command, after the record
         is committed.
 
     communication --subject ID [--subject ID ...] --audience WHO [--audience WHO ...]
-                  --channel TEXT [--agreement TEXT]
+                  --channel TEXT [--agreement TEXT] [--sent-at DATE]
         final communication record: what was made known to whom and how, and,
         with --agreement, what was agreed. Pass what the user states happened.
 
@@ -68,7 +87,7 @@ from pathlib import Path
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from traceability import TEST_TYPES, VERDICTS, Project  # noqa: E402
+from traceability import TEST_TYPES, VERDICTS, Project, file_hash  # noqa: E402
 
 
 def next_id(project, type_name):
@@ -95,6 +114,19 @@ def keep_evidence(project, record_id, path):
     folder.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(source, folder / source.name)
     return (folder / source.name).relative_to(project.root).as_posix()
+
+
+def source_hashes(project, files):
+    """[{file, hash}] for the given repository paths that exist, so a later change of the code can be seen."""
+    out = []
+    for name in sorted({Path(str(f)).as_posix() for f in files}):
+        if (project.root / name).is_file():
+            out.append({"file": name, "hash": file_hash(project.root / name)})
+    return out
+
+
+def unit_sources(project):
+    return [f for u in project.of_type("software-unit") if project.live(u) for f in u.front.get("source_files") or []]
 
 
 def stop(problems):
@@ -139,9 +171,21 @@ def cmd_test_run(project, args):
         unowned = [c.get("file") for c in coverage if Path(str(c.get("file"))).as_posix() not in owner]
         if unowned:
             return stop(["coverage reported for %s, which belongs to no software unit" % f for f in unowned])
-        coverage = [{"unit": owner[Path(str(c["file"])).as_posix()], "file": c["file"],
-                     "statement_percent": c.get("statement_percent"), "branch_percent": c.get("branch_percent")}
-                    for c in coverage]
+        kept = []
+        for c in coverage:
+            entry = {"unit": owner[Path(str(c["file"])).as_posix()], "file": c["file"]}
+            entry.update({k: v for k, v in c.items() if k.endswith("_percent") or k == "deviation"})
+            kept.append(entry)
+        coverage = kept
+    deviations = dict(d.split("=", 1) for d in args.deviation or [] if "=" in d)
+    if deviations:
+        by_unit = {c["unit"]: c for c in coverage} if isinstance(coverage, list) else {}
+        missing = sorted(set(deviations) - set(by_unit))
+        if missing or len(deviations) != len(args.deviation):
+            return stop(["--deviation needs UNIT=TEXT for a unit that has a coverage entry; no entry for: %s"
+                         % (", ".join(missing) or "(malformed argument)")])
+        for unit_id, text in deviations.items():
+            by_unit[unit_id]["deviation"] = text
     record_id = next_id(project, "test-run")
     for row in results:
         if row.get("evidence"):
@@ -158,6 +202,8 @@ def cmd_test_run(project, args):
     }
     if coverage:
         front["coverage"] = coverage       # a list per unit, or the reason it was not measured
+    scripts = [str(cases[r["test"]].front.get("script") or "").partition("::")[0] for r in results]
+    front["sources"] = source_hashes(project, unit_sources(project) + [s for s in scripts if s])
     path = write_item(project, "test-run", front)
     counts = {v: sum(1 for r in results if r["verdict"] == v) for v in sorted(VERDICTS)}
     print("wrote %s: %s" % (path, ", ".join("%d %s" % (n, v) for v, n in counts.items() if n)))
@@ -173,12 +219,32 @@ def cmd_analysis_run(project, args):
             owner[Path(str(path)).as_posix()] = unit.id
     problems = ["analysed file %s belongs to no software unit" % f for f in sorted(analysed) if f not in owner]
     per_unit = defaultdict(lambda: defaultdict(int))
+    justified = defaultdict(list)
+
+    def key(entry):
+        return Path(str(entry.get("file"))).as_posix(), str(entry.get("rule")), str(entry.get("line"))
+
+    accepted = {key(d): d for d in data.get("deviations", [])}
+    for d in data.get("deviations", []):
+        if not d.get("justification") or not d.get("accepted_by"):
+            problems.append("deviation for %s %s needs a justification and who accepted it" % (d.get("file"), d.get("rule")))
+    matched = set()
     for finding in data.get("findings", []):
         file = Path(str(finding.get("file"))).as_posix()
         if file not in owner:
             problems.append("finding in %s, which belongs to no software unit" % file)
+        elif key(finding) in accepted:
+            matched.add(key(finding))
+            justified[owner[file]].append(accepted[key(finding)])
         else:
             per_unit[owner[file]][str(finding.get("severity", "unclassified"))] += 1
+    problems += ["deviation for %s rule %s line %s matches no finding of this run" % k
+                 for k in sorted(set(accepted) - matched)]
+    metrics = defaultdict(list)
+    for metric in data.get("metrics", []):
+        file = Path(str(metric.get("file"))).as_posix()
+        if file in owner:
+            metrics[owner[file]].append({k: v for k, v in metric.items() if k != "file"})
     results = []
     for unit in sorted(units, key=lambda u: u.id):
         if unit.front.get("origin") in ("generated", "third-party"):
@@ -188,8 +254,13 @@ def cmd_analysis_run(project, args):
         if missing or not sources:
             problems.append("%s: not analysed: %s" % (unit.id, ", ".join(missing) or "no C source file listed"))
             continue
-        results.append({"unit": unit.id, "files": sources, "open_findings": dict(per_unit[unit.id]) or 0,
-                        "evidence": data.get("evidence")})
+        row = {"unit": unit.id, "files": sources, "open_findings": dict(per_unit[unit.id]) or 0}
+        if justified[unit.id]:
+            row["deviations"] = justified[unit.id]
+        if metrics[unit.id]:
+            row["metrics"] = metrics[unit.id]
+        row["evidence"] = data.get("evidence")
+        results.append(row)
     if problems:
         return stop(problems)
     record_id = next_id(project, "static-analysis-run")
@@ -204,6 +275,7 @@ def cmd_analysis_run(project, args):
         "tool": data.get("tool"),
         "executed_at": data.get("executed_at"),
         "results": results,
+        "sources": source_hashes(project, unit_sources(project)),
     }
     path = write_item(project, "static-analysis-run", front)
     print("wrote %s: %d units, %d findings" % (path, len(results), len(data.get("findings", []))))
@@ -218,6 +290,22 @@ def cmd_review(project, args):
             problems.append("finding %s needs severity major|minor and state open|closed" % finding.get("id"))
     if args.verdict == "approved" and any(f.get("state") == "open" for f in findings):
         problems.append("verdict approved is not possible while a finding is open")
+    checks = json.loads(Path(args.checks).read_text(encoding="utf-8")) if args.checks else []
+    for entry in checks:
+        if entry.get("result") not in ("pass", "finding", "not-assessed"):
+            problems.append("check %s needs result pass|finding|not-assessed" % entry.get("check"))
+    unassessed = [str(c.get("check")) for c in checks if c.get("result") == "not-assessed"]
+    if args.verdict == "approved" and unassessed:
+        problems.append("verdict approved is not possible while checks are not assessed: %s" % ", ".join(unassessed))
+    if args.verdict == "approved" and not problems:
+        closing = {str(f.get("closes")) for f in findings if f.get("closes") and f.get("state") == "closed"}
+        for item_id in args.ids:
+            for earlier in project.reviews_of(project.items[item_id]):
+                for finding in earlier.front.get("findings") or []:
+                    ref = "%s#%s" % (earlier.id, finding.get("id"))
+                    if finding.get("state") == "open" and finding.get("item") in (None, item_id) and ref not in closing:
+                        problems.append("%s: finding %s of an earlier review of the same content is open; close it "
+                                        "with a finding entry that has \"closes\": \"%s\"" % (item_id, ref, ref))
     if problems:
         return stop(problems)
     references = {}
@@ -234,10 +322,19 @@ def cmd_review(project, args):
         "checklist": args.checklist,
         "reviewers": args.reviewer,
         "verdict": args.verdict,
+        "reviewed_at": datetime.date.today().isoformat(),
         "subject": [{"item": i, "hash": project.items[i].hash} for i in args.ids],
         "references": [{"item": i, "hash": h} for i, h in sorted(references.items())],
         "findings": findings,
     }
+    if checks:
+        front["checks"] = checks
+    if args.item_under_test:
+        front["item_under_test"] = args.item_under_test
+    code = [f for i in args.ids if project.items[i].type == "software-unit"
+            for f in project.items[i].front.get("source_files") or []]
+    if code:
+        front["sources"] = source_hashes(project, code)
     path = write_item(project, "review-record", front)
     print("wrote %s: %s, %d items, %d references, %d findings"
           % (path, args.verdict, len(args.ids), len(references), len(findings)))
@@ -251,8 +348,11 @@ def cmd_baseline(project, args):
         return stop(["the trace check reports %d errors; a baseline with purpose '%s' needs none"
                      % (len(errors), args.purpose)]
                     + ["  %s %s %s" % (f["rule"], f["item"], f["message"]) for f in errors[:10]])
-    members = [i for i in project.items.values()
-               if project.types[i.type]["lifecycle"] != "record" and project.live(i)]
+    engineering = [i for i in project.items.values()
+                   if project.types[i.type]["lifecycle"] == "engineering" and project.live(i)]
+    # an internal baseline is a snapshot of everything; any other holds what is approved
+    members = engineering if args.purpose in internal else [i for i in engineering if i.status == "approved"]
+    left_out = len(engineering) - len(members)
     front = {
         "id": next_id(project, "baseline"),
         "type": "baseline",
@@ -265,6 +365,8 @@ def cmd_baseline(project, args):
     path = write_item(project, "baseline", front)
     print("wrote %s: %d items, purpose %s, tag %s (set the tag after committing the record)"
           % (path, len(members), args.purpose, args.tag))
+    if left_out:
+        print("not in the baseline: %d items that are not approved (python tools/traceability.py list --status draft)" % left_out)
     return 0
 
 
@@ -279,7 +381,7 @@ def cmd_communication(project, args):
         "subject": args.subject if len(args.subject) > 1 else args.subject[0],
         "audience": args.audience,
         "channel": args.channel,
-        "sent_at": datetime.date.today().isoformat(),
+        "sent_at": args.sent_at or datetime.date.today().isoformat(),
     }
     if args.agreement:
         front["agreement"] = args.agreement
@@ -298,6 +400,7 @@ def main():
     run.add_argument("--results", required=True)
     run.add_argument("--item-under-test", required=True)
     run.add_argument("--environment", required=True)
+    run.add_argument("--deviation", action="append", metavar="UNIT=TEXT")
     analysis = sub.add_parser("analysis-run")
     analysis.add_argument("--results", required=True)
     analysis.add_argument("--item-under-test", required=True)
@@ -306,6 +409,8 @@ def main():
     review.add_argument("--reviewer", required=True, action="append")
     review.add_argument("--verdict", required=True, choices=["approved", "rework"])
     review.add_argument("--findings")
+    review.add_argument("--checks")
+    review.add_argument("--item-under-test")
     review.add_argument("ids", nargs="+")
     baseline = sub.add_parser("baseline")
     baseline.add_argument("--tag", required=True)
@@ -315,6 +420,7 @@ def main():
     told.add_argument("--audience", required=True, action="append")
     told.add_argument("--channel", required=True)
     told.add_argument("--agreement")
+    told.add_argument("--sent-at", help="date it was sent, when not today")
     args = ap.parse_args()
     project = Project(args.project)
     commands = {"next-id": cmd_next_id, "test-run": cmd_test_run, "analysis-run": cmd_analysis_run,

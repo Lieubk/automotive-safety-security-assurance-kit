@@ -31,3 +31,6 @@ ORG.1 Process Establishment
 ORG.4 Skill development
 QNT.1 Quantitative Performance Management
 QNT.2 Quantitative Process Improvement
+
+# Trademark notice, to be given in these words
+Automotive SPICE is a registered trademark of the Verband der Automobilindustrie e.V. (VDA)

@@ -14,10 +14,12 @@ from pathlib import Path
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from traceability import Project, content_hash  # noqa: E402
+from traceability import Project, content_hash, file_hash  # noqa: E402
 
 SCOPE = ["SWE.1", "SWE.2", "SWE.3", "SWE.4", "SUP.8"]
 CODE = "#include \"unit.h\"\n\n/* one step */\nvoid Unit_Step(void)\n{\n}\n"
+TEST_CODE = "#include \"unit.h\"\n\nstatic void test_UT_0001(void)\n{\n    Unit_Step();\n}\n"
+RECORDED = ["src/unit.c", "src/unit.h", "tests/test_unit.c"]     # files whose hashes the fixture's runs record
 
 
 def base_items():
@@ -86,10 +88,10 @@ def base_items():
                       "environment": "host", "executed_at": "2026-01-02T10:00:00",
                       "results": [{"test": "UT-0001", "verdict": "passed", "evidence": "build/out.txt"}],
                       "coverage": [{"unit": "UNT-0001", "file": "src/unit.c", "statement_percent": 100.0,
-                                    "branch_percent": 100.0}]}, {}),
+                                    "branch_percent": 100.0}], "sources": "auto"}, {}),
         "SAR-0001": ({"type": "static-analysis-run", "status": "final", "item_under_test": "abc123",
                       "tool": "analyser 1.0", "executed_at": "2026-01-02T10:00:00",
-                      "results": [{"unit": "UNT-0001", "open_findings": 0}]}, {}),
+                      "results": [{"unit": "UNT-0001", "open_findings": 0}], "sources": "auto"}, {}),
     }
 
 
@@ -101,7 +103,10 @@ class Fixture:
         cfg = {"scope": {"processes": scope}, "paths": {"items": ["plans", "spec", "verification", "records"], "source_roots": ["src"]}}
         cfg.update(config or {})
         (self.root / "project.yaml").write_text(yaml.safe_dump(cfg), encoding="utf-8")
-        for name, text in {"src/unit.c": CODE, "src/unit.h": "void Unit_Step(void);\n", **(files or {})}.items():
+        for name, text in {"src/unit.c": CODE, "src/unit.h": "void Unit_Step(void);\n", "tests/test_unit.c": TEST_CODE,
+                           **(files or {})}.items():
+            if text is None:                    # a test that wants the file to be absent
+                continue
             path = self.root / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(text, encoding="utf-8")
@@ -113,12 +118,15 @@ class Fixture:
 
     def write(self, item_id, front, sections):
         front = {"id": item_id, **front}
+        if front.get("sources") == "auto":          # what the record tool would have stored at the time of the run
+            front["sources"] = [{"file": name, "hash": file_hash(self.root / name)}
+                                for name in RECORDED if (self.root / name).is_file()]
         folder = self.root / self.schema["types"][front["type"]]["folder"]
         folder.mkdir(parents=True, exist_ok=True)
         body = "".join("\n## %s\n\n%s\n" % (name, text) for name, text in sections.items())
         (folder / (item_id + ".md")).write_text("---\n" + yaml.safe_dump(front, sort_keys=False) + "---\n" + body, encoding="utf-8")
 
-    def review(self, rev_id="REV-0001", findings=None, skip_references=(), only=None, without=()):
+    def review(self, rev_id="REV-0001", findings=None, skip_references=(), only=None, without=(), record_code=True):
         """Write a final review record that approves engineering items at their current content.
 
         By default every approved engineering item is the subject; `only` and `without` narrow that.
@@ -127,12 +135,17 @@ class Fixture:
         engineering = [i for i in project.items.values()
                        if project.types[i.type]["lifecycle"] == "engineering" and i.status == "approved"
                        and (only is None or i.id in only) and i.id not in without]
+        subject = {i.id for i in engineering}
+        upstream = sorted({target for i in engineering for role in (i.front.get("links") or {})
+                           for target, _ in i.targets(role) if target in project.items and target not in subject})
         self.write(rev_id, {
             "type": "review-record", "status": "final", "checklist": "test checklist v1", "reviewers": ["A. Reviewer"],
             "verdict": "approved",
             "subject": [{"item": i.id, "hash": i.hash} for i in engineering],
-            "references": [{"item": i.id, "hash": i.hash} for i in engineering if i.id not in skip_references],
+            "references": [{"item": target, "hash": project.items[target].hash} for target in upstream
+                           if target not in skip_references],
             "findings": findings or [],
+            **({"sources": "auto"} if record_code and any(i.type == "software-unit" for i in engineering) else {}),
         }, {})
 
     def edit(self, item_id, **front_changes):
@@ -275,8 +288,33 @@ class Coverage(Case):
     def test_system_requirement_allocated_to_software_but_not_refined(self):
         self.expect("COV-05", "SYR-0001", changed(base_items(), "SWR-0001", drop_links=["derived_from"], origin="internal"))
 
+    def test_deriving_from_the_element_does_not_cover_the_requirement(self):
+        items = changed(base_items(), "SWR-0001", links={"derived_from": ["SYE-0001"], "allocated_to": ["CMP-0002"]})
+        self.expect("COV-05", "SYR-0001", items)
+        fixture = self.make(items, config={"trace": {"derive_via_elements": True}})
+        self.assertNotIn(("COV-05", "SYR-0001"), fixture.rules())
+
+    def test_link_to_an_obsolete_item(self):
+        items = changed(base_items(), "SYR-0001", status="obsolete", superseded_by="a newer delivery")
+        self.assertIn(("LINK", "SWR-0001"), self.make(items).rules())
+
+    def test_imported_item_without_source_and_version(self):
+        items = changed(base_items(), "SYR-0001", imported=True)
+        self.assertIn(("SCHEMA", "SYR-0001"), self.make(items).rules())
+
     def test_requirement_not_allocated(self):
         self.expect("COV-07", "SWR-0001", changed(base_items(), "SWR-0001", drop_links=["allocated_to"]))
+
+    def test_allocation_stated_on_the_component_counts(self):
+        items = changed(base_items(), "SWR-0001", drop_links=["allocated_to"])
+        items["CMP-0002"][0]["links"]["fulfils"] = ["SWR-0001"]
+        self.assertEqual(self.make(items).rules(), [])
+
+    def test_allocation_on_the_component_is_subject_to_the_asil_rule(self):
+        items = changed(base_items(), "SWR-0001", drop_links=["allocated_to"])
+        items["CMP-0002"][0]["links"]["fulfils"] = ["SWR-0001"]
+        items["CMP-0002"][0]["asil"] = "A"
+        self.assertIn(("COV-23", "CMP-0002"), self.make(items).rules())
 
     def test_component_without_requirement(self):
         items = changed(base_items(), "SWR-0001", links={"derived_from": ["SYR-0001"], "allocated_to": ["IFC-0001"]})
@@ -365,6 +403,25 @@ class Coverage(Case):
         fixture.edit("CMP-0002", title="Detection, renamed")
         self.assertIn(("SUSPECT", "UNT-0001"), fixture.rules())   # the unit is part of the changed component
 
+    def test_newest_review_of_the_same_content_decides(self):
+        inputs = ["SYE-0001", "SYR-0001"]
+        fixture = self.make(review=False)
+        fixture.review("REV-0001", only=inputs)
+        fixture.review("REV-0002", without=inputs, skip_references=["SYR-0001"])   # leaves a consistency warning
+        self.assertIn(("CONSISTENCY", "SWR-0001"), fixture.rules("warning"))
+        fixture.review("REV-0003", only=["SWR-0001"])                              # re-review records the parent
+        self.assertEqual(fixture.rules("warning"), [])
+
+    def test_earlier_open_finding_on_the_same_content_is_not_overridden(self):
+        fixture = self.make(review=False)
+        fixture.review("REV-0001", findings=[{"id": "F1", "item": "SWR-0001", "text": "x", "severity": "major", "state": "open"}])
+        fixture.review("REV-0002")
+        messages = [f["message"] for f in fixture.findings("error") if f["item"] == "SWR-0001"]
+        self.assertTrue(any("REV-0001#F1" in m for m in messages), messages)
+        fixture.review("REV-0003", findings=[{"id": "F1", "item": "SWR-0001", "text": "settled: not a defect",
+                                              "severity": "major", "state": "closed", "closes": "REV-0001#F1"}])
+        self.assertEqual([f for f in fixture.findings("error") if f["item"] == "SWR-0001"], [])
+
     def test_open_review_finding_blocks_the_approval(self):
         fixture = self.make(review=False)
         fixture.review(findings=[{"id": "F1", "item": "SWR-0001", "text": "unit missing", "severity": "minor", "state": "open"}])
@@ -373,6 +430,58 @@ class Coverage(Case):
 
     def test_interface_not_realized_by_a_unit_of_its_provider(self):
         self.expect("COV-21", "IFC-0001", changed(base_items(), "UNT-0001", drop_links=["realizes"]))
+
+    def test_parameter_types_differ_between_design_and_code(self):
+        items = changed(base_items(), "UNT-0001", functions=[
+            {"name": "Unit_Step", "category": "scheduled", "period_ms": 5, "return_type": "void",
+             "arguments": [{"name": "speed", "direction": "in", "type": "uint16"}]}])
+        messages = [f["message"] for f in self.make(items).findings("error") if f["rule"] == "COV-22"]
+        self.assertEqual(messages, ["parameters of Unit_Step differ: design (uint16), code (void)"])
+
+    def test_return_type_differs_between_design_and_code(self):
+        items = changed(base_items(), "UNT-0001", functions=[
+            {"name": "Unit_Step", "category": "scheduled", "period_ms": 5, "arguments": [],
+             "returns": [{"type": "Std_ReturnType", "value": "E_OK", "meaning": "done"}]}])
+        messages = [f["message"] for f in self.make(items).findings("error") if f["rule"] == "COV-22"]
+        self.assertEqual(messages, ["return type of Unit_Step differs: design Std_ReturnType, code void"])
+
+    def test_pointer_and_array_parameters_are_compared_by_type(self):
+        code = "#include \"unit.h\"\nvoid Unit_Step(void)\n{\n}\n" \
+               "Std_ReturnType Unit_Read(const uint8 *buffer, uint16 values[4], Unit_StateType * const state)\n{\n    return 0;\n}\n"
+        items = changed(base_items(), "UNT-0001", functions=[
+            {"name": "Unit_Step", "category": "scheduled", "period_ms": 5},
+            {"name": "Unit_Read", "category": "public", "return_type": "Std_ReturnType", "arguments": [
+                {"name": "buffer", "direction": "in", "type": "const uint8 *"},
+                {"name": "values", "direction": "in", "type": "uint16*"},
+                {"name": "state", "direction": "out", "type": "Unit_StateType * const"}]}])
+        items["UT-0002"] = copy.deepcopy(items["UT-0001"])
+        items["UT-0002"][0]["links"] = {"verifies": ["UNT-0001#Unit_Read"]}
+        items["RUN-0001"][0]["results"].append({"test": "UT-0002", "verdict": "passed"})
+        self.assertEqual(self.make(items, files={"src/unit.c": code}).rules(), [])
+
+    def test_designed_unit_without_code_is_a_warning_not_an_error(self):
+        items = changed(base_items(), "UNT-0001", source_files=[])
+        del items["UT-0001"], items["RUN-0001"], items["SAR-0001"]
+        fixture = self.make(items, scope=["SWE.1", "SWE.2", "SWE.3", "SUP.8"], files={"src/unit.c": None, "src/unit.h": None,
+                                                                                      "tests/test_unit.c": None})
+        self.assertEqual(fixture.rules("error"), [])
+        self.assertIn(("COV-10", "UNT-0001"), fixture.rules("warning"))
+
+    def test_draft_shows_what_the_next_stage_will_ask_for(self):
+        items = changed(base_items(), "SWR-0001", status="draft")
+        del items["SWR-0001"][0]["kind"]
+        messages = [f["message"] for f in self.make(items).findings("info") if f["rule"] == "SCHEMA"]
+        self.assertEqual(messages, ["still to come before review: kind"])
+
+    def test_code_changed_after_the_review_of_the_unit(self):
+        fixture = self.make()
+        (fixture.root / "src/unit.c").write_text(CODE + "/* edited */\n", encoding="utf-8")
+        self.assertIn(("SUSPECT", "UNT-0001"), fixture.rules())
+
+    def test_review_of_a_unit_that_does_not_record_the_code(self):
+        fixture = self.make(review=False)
+        fixture.review(record_code=False)
+        self.assertIn(("CONSISTENCY", "UNT-0001"), fixture.rules("warning"))
 
     def test_designed_function_missing_from_the_code(self):
         self.expect("COV-22", "UNT-0001", base_items(), files={"src/unit.c": "/* void Unit_Step(void) {} */\n"})
@@ -433,6 +542,41 @@ class Coverage(Case):
         items = base_items()
         del items["PLN-0001"][0]["coverage_targets"]
         self.assertIn(("COV-28", "PLN-0001"), self.make(items).rules("warning"))
+
+    def test_public_function_without_a_test_that_names_it(self):
+        items = changed(base_items(), "UT-0001", links={"verifies": ["UNT-0001"]})
+        messages = [f["message"] for f in self.make(items).findings("error") if f["rule"] == "COV-29"]
+        self.assertEqual(messages, ["no unit test verifies UNT-0001#Unit_Step"])
+
+    def test_code_changed_after_the_runs(self):
+        fixture = self.make()
+        (fixture.root / "src/unit.c").write_text(CODE + "/* edited */\n", encoding="utf-8")
+        messages = sorted(f["message"] for f in fixture.findings("error") if f["rule"] == "COV-30")
+        self.assertEqual(messages, ["src/unit.c changed after RUN-0001: that run does not describe the current code",
+                                    "src/unit.c changed after SAR-0001: that run does not describe the current code"])
+
+    def test_test_code_changed_after_the_run(self):
+        fixture = self.make()
+        (fixture.root / "tests/test_unit.c").write_text(TEST_CODE + "/* edited */\n", encoding="utf-8")
+        self.assertIn(("COV-30", "UT-0001"), fixture.rules())
+
+    def test_run_without_source_hashes_is_reported_as_not_assessable(self):
+        items = base_items()
+        del items["RUN-0001"][0]["sources"]
+        fixture = self.make(items)
+        self.assertIn(("COV-30", "RUN-0001"), fixture.rules("warning"))
+        self.assertEqual(fixture.rules("error"), [])
+
+    def test_test_script_that_does_not_exist(self):
+        items = changed(base_items(), "UT-0001", script="tests/missing.c::test_UT_0001")
+        self.assertIn(("LINK", "UT-0001"), self.make(items).rules())
+
+    def test_test_function_that_is_not_in_the_script(self):
+        items = changed(base_items(), "UT-0001", script="tests/test_unit.c::test_UT_0009")
+        self.assertIn(("LINK", "UT-0001"), self.make(items).rules())
+
+    def test_test_case_with_lower_asil_than_the_unit(self):
+        self.assertIn(("COV-23", "UT-0001"), self.make(changed(base_items(), "UT-0001", asil="A")).rules())
 
     def test_strategy_of_a_process_in_scope_is_missing(self):
         items = base_items()

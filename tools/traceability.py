@@ -13,6 +13,8 @@ Commands
     hash [ID ...]      content hashes; with --upstream a ready-to-paste block of
                        subject and references entries for a review record
     status             items per type and state, and the latest verification runs
+    list               IDs with state and title; --type and --status narrow it
+    audit ID           compare a baseline record with the items as they are now
     practices [PROC]   per base practice of the processes in scope (or of one
                        process): the evidence the project holds and the findings
                        still open. The deterministic input of a process gate
@@ -49,6 +51,7 @@ VERDICTS = {"passed", "failed", "blocked", "not-run"}
 FRONT_MATTER = re.compile(r"\A---\n(.*?)\n---[ \t]*(?:\n|\Z)(.*)\Z", re.S)
 HEADING = re.compile(r"^##\s+(.+?)\s*$")
 C_COMMENT = re.compile(r"/\*.*?\*/|//[^\n]*", re.S)
+C_SIGNATURE = re.compile(r"(?m)^[ \t]*((?:[A-Za-z_]\w*[ \t\*]+)+)([A-Za-z_]\w*)\s*\(([^;{}()]*)\)\s*[;{]")
 C_DEFINITION = re.compile(
     r"^(?!\s*(?:static|typedef|return|if|else|for|while|switch|do)\b)"
     r"[A-Za-z_][\w \t\*]*?\b([A-Za-z_]\w*)\s*\([^;{}()]*\)\s*\{", re.M)
@@ -104,6 +107,39 @@ def content_hash(front, body):
     return hashlib.sha256((head + "\n" + text).encode("utf-8")).hexdigest()[:12]
 
 
+def file_hash(path):
+    """Hash of a source file, independent of line-ending style."""
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()[:12]
+
+
+def record_number(item_id):
+    """The running number of an ID, for ordering records by age."""
+    tail = str(item_id).rsplit("-", 1)[-1]
+    return int(tail) if tail.isdigit() else 0
+
+
+def c_type(text):
+    """A C type written one way: single spaces, none around '*'."""
+    return re.sub(r"\s*\*\s*", "*", " ".join(str(text).split()))
+
+
+def c_signatures(code):
+    """{function: (return type, [parameter types])} for the declarations and definitions in comment-free C text."""
+    found = {}
+    for match in C_SIGNATURE.finditer(code):
+        returns = c_type(re.sub(r"\b(static|extern|inline)\b", " ", match.group(1)))
+        name, parameters = match.group(2), match.group(3).strip()
+        if not returns or name in ("if", "for", "while", "switch", "return", "sizeof"):
+            continue
+        types = []
+        if parameters and parameters != "void":
+            for parameter in parameters.split(","):
+                named = re.match(r"^(.*[\s\*])([A-Za-z_]\w*)\s*((?:\[[^\]]*\])*)$", parameter.strip())
+                types.append(c_type(named.group(1) + ("*" if named.group(3) else "")) if named else c_type(parameter))
+        found.setdefault(name, (returns, types))
+    return found
+
+
 def as_list(value):
     if value is None:
         return []
@@ -156,6 +192,10 @@ class Project:
             for role in (item.front.get("links") or {}):
                 for target, _ in item.targets(role):
                     self.incoming[target][role].append(item.id)
+            if item.type == "software-interface":          # an interface depends on who provides and who uses it
+                for name in ("provided_by", "used_by"):
+                    for target in as_list(item.front.get(name)):
+                        self.incoming[str(target)][name].append(item.id)
 
     # ---- helpers
 
@@ -196,6 +236,18 @@ class Project:
         found = [self.items[s] for s in self.incoming[target_id][role] if s in self.items]
         return [s for s in found if self.live(s) and (types is None or s.type in types)]
 
+    def allocation_targets(self, requirement):
+        """Architectural elements a requirement is allocated to, whichever side states it."""
+        stated = [self.items[t] for t, _ in requirement.targets("allocated_to") if t in self.items]
+        return stated + self.sources(requirement.id, "fulfils")
+
+    def allocated_requirements(self, element_id, types=None):
+        """Requirements allocated to an architectural element, whichever side states it."""
+        element = self.items.get(element_id)
+        stated = [self.items[t] for t, _ in element.targets("fulfils") if t in self.items] if element else []
+        found = self.sources(element_id, "allocated_to") + [r for r in stated if self.live(r)]
+        return [r for r in found if types is None or r.type in types]
+
     def in_scope(self, supports):
         if self.scope is None:
             return True
@@ -213,18 +265,35 @@ class Project:
             return "warning"
         return "info"
 
+    def own_supports(self, rule_id, item):
+        """The practices of a rule that belong to the process owning the item, so that a
+        finding on a requirement is not counted against the unit verification process."""
+        supports = self.rules[rule_id]["supports"]
+        if item.type == "plan":
+            refs = self.schema["plan_kinds"].get(item.front.get("kind"), [])
+        else:
+            refs = self.types.get(item.type, {}).get("supports") or []
+        processes = {str(r).split(".BP")[0] for r in refs if ".BP" in str(r)}
+        return [s for s in supports if str(s).split(".BP")[0] in processes] or supports
+
     def gap(self, rule_id, item, message):
-        self.add(self.level_for(item), rule_id, item.id, message, self.rules[rule_id]["supports"])
+        self.add(self.level_for(item), rule_id, item.id, message, self.own_supports(rule_id, item))
+
+    def reviews_of(self, item, verdict=None):
+        """Final review records whose subject names this item at its current content, oldest first."""
+        found = []
+        for rev in self.of_type("review-record"):
+            if rev.status != "final" or (verdict and rev.front.get("verdict") != verdict):
+                continue
+            if any(isinstance(e, dict) and e.get("item") == item.id and str(e.get("hash")) == item.hash
+                   for e in as_list(rev.front.get("subject"))):
+                found.append(rev)
+        return sorted(found, key=lambda r: record_number(r.id))
 
     def approving_review(self, item):
-        """The final review record that approved this item at its current content, if any."""
-        for rev in self.of_type("review-record"):
-            if rev.status != "final" or rev.front.get("verdict") != "approved":
-                continue
-            for entry in as_list(rev.front.get("subject")):
-                if isinstance(entry, dict) and entry.get("item") == item.id and str(entry.get("hash")) == item.hash:
-                    return rev
-        return None
+        """The newest final review record that approved this item at its current content, if any."""
+        reviews = self.reviews_of(item, "approved")
+        return reviews[-1] if reviews else None
 
     def latest_run(self, type_name, **match):
         runs = [r for r in self.of_type(type_name) if r.status == "final"
@@ -261,6 +330,9 @@ class Project:
         for name in item.front:
             if name not in attrs and name != "links":
                 self.add("warning", "SCHEMA", item.id, "attribute '%s' is not defined for type %s" % (name, item.type))
+        origin = item.front.get("imported")
+        if origin is not None and not (isinstance(origin, dict) and origin.get("source") and origin.get("version")):
+            self.add("error", "SCHEMA", item.id, "imported must be a mapping that names at least source and version")
         for name, spec in attrs.items():
             value = item.front.get(name)
             missing = value is None or value == "" or (value == [] and not spec.get("may_be_empty"))
@@ -277,6 +349,15 @@ class Project:
             for section, stage in (self.types[item.type].get("sections") or {}).items():
                 if self.due(item, stage) and not item.has_section(section):
                     self.add("error", "SCHEMA", item.id, "section '%s' is required (%s)" % (section, stage))
+            upcoming = next((s for s in ("before-review", "before-approval") if not self.due(item, s)), None)
+            if upcoming and self.live(item):
+                missing = [n for n, spec in attrs.items() if spec.get("required") == upcoming
+                           and item.front.get(n) in (None, "", [])]
+                missing += ["section " + s for s, stage in (self.types[item.type].get("sections") or {}).items()
+                            if stage == upcoming and not item.has_section(s)]
+                if missing:
+                    self.add("info", "SCHEMA", item.id, "still to come %s: %s"
+                             % (upcoming.replace("before-", "before "), ", ".join(missing)))
         for cond in self.schema.get("conditions") or []:
             if cond["types"] != "any" and item.type not in cond["types"]:
                 continue
@@ -339,6 +420,8 @@ class Project:
                 if "any" not in allowed[role] and target.type not in allowed[role]:
                     self.add("error", "LINK", item.id, "%s target %s is a %s; allowed: %s"
                              % (role, target_id, target.type, sorted(allowed[role])))
+                if self.live(item) and not self.live(target) and role != "shows":      # views: see COV-24
+                    self.add("error", "LINK", item.id, "%s target %s is %s" % (role, target_id, target.status))
                 if anchor:
                     names = {f.get("name") for f in as_list(target.front.get("functions")) if isinstance(f, dict)}
                     if anchor not in names:
@@ -349,6 +432,14 @@ class Project:
                 for ref in as_list(item.front.get(name)):
                     if getattr(self.items.get(str(ref)), "type", None) != "software-component":
                         self.add("error", "LINK", item.id, "%s names %s, which is not a software component" % (name, ref))
+        if item.type in TEST_TYPES and item.front.get("script"):
+            script, _, function = str(item.front["script"]).partition("::")
+            file = self.root / script
+            if not file.is_file():
+                self.add("error", "LINK", item.id, "script names %s, which does not exist" % script)
+            elif function and not re.search(r"\b%s\b" % re.escape(function),
+                                            file.read_text(encoding="utf-8", errors="replace")):
+                self.add("error", "LINK", item.id, "script names function %s, which is not in %s" % (function, script))
         ref = item.front.get("superseded_by")
         if ref and re.fullmatch(r"[A-Z]+-\d+", str(ref)) and str(ref) not in self.items:
             self.add("error", "LINK", item.id, "superseded_by names %s, which does not exist" % ref)
@@ -412,30 +503,38 @@ class Project:
     def cov_01(self, rule):
         self.need_incoming(rule, "stakeholder-requirement", "derived_from", ["system-requirement"],
                            "accepted, but no system requirement is derived from it",
-                           only=lambda i: i.front.get("assessment") in ("accepted", "accepted-with-deviation"))
+                           only=lambda i: i.front.get("assessment") in ("accepted", "accepted-with-deviation")
+                           or (i.imported and not i.front.get("assessment")))
 
     def cov_02(self, rule):
         self.need_link(rule, "system-requirement", "derived_from", self.internal_with_rationale,
                        "no derived_from link, and not marked origin internal with a Rationale")
 
+    def need_allocation(self, rule, type_name, text):
+        for req in self.of_type(type_name):
+            if self.live(req) and not self.allocation_targets(req) and not self.constraint_with_rationale(req):
+                self.gap(rule, req, text)
+
     def cov_03(self, rule):
-        self.need_link(rule, "system-requirement", "allocated_to", self.constraint_with_rationale,
-                       "not allocated to any system element or interface")
+        self.need_allocation(rule, "system-requirement", "not allocated to any system element or interface")
 
     def cov_04(self, rule):
-        self.need_incoming(rule, "system-element", "allocated_to", ["system-requirement"],
-                           "no system requirement is allocated to it")
+        for element in self.of_type("system-element"):
+            if self.live(element) and not self.allocated_requirements(element.id, ["system-requirement"]):
+                self.gap(rule, element, "no system requirement is allocated to it")
 
     def cov_05(self, rule):
         for req in self.of_type("system-requirement"):
             if not self.live(req):
                 continue
-            elements = [self.items[t] for t, _ in req.targets("allocated_to") if t in self.items]
+            elements = self.allocation_targets(req)
             software = [e for e in elements if e.type == "system-element" and e.front.get("kind") == "software"]
             if not software:
                 continue
             covered = self.sources(req.id, "derived_from", ["software-requirement"])
-            if not covered and not any(self.sources(e.id, "derived_from", ["software-requirement"]) for e in software):
+            by_element = (self.config.get("trace") or {}).get("derive_via_elements") and any(
+                self.sources(e.id, "derived_from", ["software-requirement"]) for e in software)
+            if not covered and not by_element:
                 self.gap(rule, req, "allocated to software, but no software requirement is derived from it")
 
     def cov_06(self, rule):
@@ -443,8 +542,7 @@ class Project:
                        "no derived_from link, and not marked origin internal with a Rationale")
 
     def cov_07(self, rule):
-        self.need_link(rule, "software-requirement", "allocated_to", self.constraint_with_rationale,
-                       "not allocated to any software component or interface")
+        self.need_allocation(rule, "software-requirement", "not allocated to any software component or interface")
 
     def descendants(self, component_id):
         out, queue = [], [component_id]
@@ -462,7 +560,7 @@ class Project:
             if comp.front.get("origin") in ("supplied", "generated") and comp.has_section("Purpose"):
                 continue
             family = [comp.id] + self.descendants(comp.id)
-            if not any(self.sources(cid, "allocated_to", ["software-requirement"]) for cid in family):
+            if not any(self.allocated_requirements(cid, ["software-requirement"]) for cid in family):
                 self.gap(rule, comp, "no software requirement is allocated to it or to a component inside it")
 
     def cov_09(self, rule):
@@ -485,6 +583,9 @@ class Project:
             for path in as_list(unit.front.get("source_files")):
                 if not (self.root / str(path)).is_file():
                     self.gap(rule, unit, "source file %s does not exist" % path)
+            if not as_list(unit.front.get("source_files")) and unit.front.get("origin") not in ("generated", "third-party"):
+                self.add("warning" if unit.status == "approved" else "info", rule, unit.id,
+                         "no source files listed: the unit is designed but not implemented", self.own_supports(rule, unit))
 
     def cov_11(self, rule):
         paths = self.config.get("paths") or {}
@@ -577,10 +678,19 @@ class Project:
                          % (", ".join(older), item.hash) if older else
                          "approved, but no final review record covers it (current hash %s)" % item.hash)
                 continue
-            opened = [f.get("id") for f in as_list(review.front.get("findings"))
+            opened = [str(f.get("id")) for f in as_list(review.front.get("findings"))
                       if isinstance(f, dict) and f.get("state") == "open" and f.get("item") in (None, item.id)]
             if opened:
-                self.gap(rule, item, "review %s still has open findings: %s" % (review.id, ", ".join(map(str, opened))))
+                self.gap(rule, item, "review %s still has open findings: %s" % (review.id, ", ".join(opened)))
+            closed = {str(f.get("closes")) for rev in self.reviews_of(item) for f in as_list(rev.front.get("findings"))
+                      if isinstance(f, dict) and f.get("closes") and f.get("state") == "closed"}
+            left = ["%s#%s" % (rev.id, f.get("id")) for rev in self.reviews_of(item) if rev.id != review.id
+                    for f in as_list(rev.front.get("findings"))
+                    if isinstance(f, dict) and f.get("state") == "open" and f.get("item") in (None, item.id)]
+            left = [ref for ref in left if ref not in closed]
+            if left:
+                self.gap(rule, item, "approved by %s although findings of an earlier review of the same content are "
+                         "open and not closed by a later finding entry: %s" % (review.id, ", ".join(left)))
 
     def cov_20(self, rule):
         for request in self.of_type("change-request"):
@@ -599,7 +709,9 @@ class Project:
                 self.gap(rule, interface, "no software unit of its provider %s realizes it" % provider.id)
 
     def cov_22(self, rule):
-        """Name-level comparison of designed functions and C definitions (not full signatures)."""
+        """Designed functions against the C code: existence both ways, and the signature
+        wherever the design gives the types (argument `type`, `return_type` or one `type`
+        shared by all `returns` entries)."""
         for unit in self.of_type("software-unit"):
             if not self.live(unit) or unit.front.get("origin") in ("generated", "third-party"):
                 continue
@@ -618,6 +730,27 @@ class Project:
             names = {f.get("name") for f in designed}
             for name in sorted(set(C_DEFINITION.findall(code)) - names):
                 self.gap(rule, unit, "function %s is defined in the code but not in the design" % name)
+            everything = code
+            for path in as_list(unit.front.get("source_files")):
+                file = self.root / str(path)
+                if file.is_file() and file.suffix == ".h":
+                    everything += C_COMMENT.sub(" ", file.read_text(encoding="utf-8", errors="replace")) + "\n"
+            coded = c_signatures(everything)
+            for function in designed:
+                if function.get("name") not in coded:
+                    continue
+                code_returns, code_types = coded[function["name"]]
+                arguments = [a for a in as_list(function.get("arguments")) if isinstance(a, dict)]
+                if all(a.get("type") for a in arguments):
+                    wanted = [c_type(a["type"]) for a in arguments]
+                    if wanted != code_types:
+                        self.gap(rule, unit, "parameters of %s differ: design (%s), code (%s)"
+                                 % (function["name"], ", ".join(wanted) or "void", ", ".join(code_types) or "void"))
+                stated = {str(r.get("type")) for r in as_list(function.get("returns")) if isinstance(r, dict) and r.get("type")}
+                wanted = function.get("return_type") or (stated.pop() if len(stated) == 1 else None)
+                if wanted and "(" not in code_returns and c_type(wanted) != code_returns:
+                    self.gap(rule, unit, "return type of %s differs: design %s, code %s"
+                             % (function["name"], c_type(wanted), code_returns))
 
     def cov_23(self, rule):
         decided = {t for d in self.of_type("design-decision") if d.status == "approved" for t, _ in d.targets("concerns")}
@@ -634,7 +767,8 @@ class Project:
         for item in self.items.values():
             if not self.live(item) or item.imported:
                 continue
-            for role, relation in (("derived_from", "derived from it"), ("implements", "implements it")):
+            for role, relation in (("derived_from", "derived from it"), ("implements", "implements it"),
+                                   ("verifies", "verifies it")):
                 for target, _ in item.targets(role):
                     if target in self.items:
                         compare(item, self.items[target], relation)
@@ -643,7 +777,7 @@ class Project:
                     if target in self.items:
                         compare(item, self.items[target], "is part of it")
             if item.type in ("software-component", "software-interface", "system-element", "system-interface"):
-                for req in self.sources(item.id, "allocated_to"):
+                for req in self.allocated_requirements(item.id):
                     compare(item, req, "is allocated to this item")
 
     def cov_24(self, rule):
@@ -710,6 +844,50 @@ class Project:
                     self.gap(rule, unit, "%s is %s in %s, target for ASIL %s is %s"
                              % (metric, "not reported" if got is None else got, run.id, unit.front.get("asil"), wanted))
 
+    def cov_29(self, rule):
+        for unit in self.of_type("software-unit"):
+            if not self.live(unit) or unit.front.get("origin") in ("generated", "third-party"):
+                continue
+            named = {anchor for test in self.sources(unit.id, "verifies", ["unit-test"])
+                     for target, anchor in test.targets("verifies") if target == unit.id and anchor}
+            for function in as_list(unit.front.get("functions")):
+                if isinstance(function, dict) and function.get("category") in ("public", "scheduled", "callback") \
+                        and function.get("name") not in named:
+                    self.gap(rule, unit, "no unit test verifies %s#%s" % (unit.id, function.get("name")))
+
+    def cov_30(self, rule):
+        supports = self.rules[rule]["supports"]
+        recorded = {}
+        for run in (self.latest_run("test-run", level="unit"), self.latest_run("static-analysis-run")):
+            if run is None:
+                continue
+            sources = run.front.get("sources")
+            if not sources:
+                self.add("warning", rule, run.id, "records no source hashes: whether the code changed after this run "
+                         "cannot be told", supports)
+                continue
+            recorded[run.id] = {Path(str(s.get("file"))).as_posix(): str(s.get("hash"))
+                                for s in as_list(sources) if isinstance(s, dict)}
+
+        def compare(item, path):
+            file = self.root / str(path)
+            if not file.is_file():
+                return                                    # a missing file is reported by its own rule
+            name, now = Path(str(path)).as_posix(), file_hash(file)
+            for run_id, hashes in sorted(recorded.items()):
+                if name in hashes and hashes[name] != now:
+                    self.gap(rule, item, "%s changed after %s: that run does not describe the current code" % (name, run_id))
+                elif name not in hashes and item.type == "software-unit":
+                    self.gap(rule, item, "%s is not among the sources %s recorded" % (name, run_id))
+
+        for unit in self.of_type("software-unit"):
+            if self.live(unit) and unit.front.get("origin") not in ("generated", "third-party"):
+                for path in as_list(unit.front.get("source_files")):
+                    compare(unit, path)
+        for test in self.of_type("unit-test"):
+            if self.live(test) and test.front.get("script"):
+                compare(test, str(test.front["script"]).partition("::")[0])
+
     def check_consistency_evidence(self):
         """Suspect links and missing consistency evidence, from the references of approving reviews."""
         for item in self.items.values():
@@ -722,6 +900,20 @@ class Project:
             seen = {e.get("item"): str(e.get("hash"))
                     for name in ("references", "subject")
                     for e in as_list(review.front.get(name)) if isinstance(e, dict)}
+            files = as_list(item.front.get("source_files")) if item.type == "software-unit" else []
+            if files and self.in_scope(["SWE.3.BP6"]):
+                covered = {Path(str(s.get("file"))).as_posix(): str(s.get("hash"))
+                           for s in as_list(review.front.get("sources")) if isinstance(s, dict)}
+                for path in files:
+                    name, file = Path(str(path)).as_posix(), self.root / str(path)
+                    if not file.is_file():
+                        continue
+                    if name not in covered:
+                        self.add("warning", "CONSISTENCY", item.id, "review %s does not record %s: a review of the "
+                                 "code against the design is not evidenced" % (review.id, name), ["SWE.3.BP6"])
+                    elif covered[name] != file_hash(file):
+                        self.add("error", "SUSPECT", item.id, "%s changed after review %s: the code is no longer the "
+                                 "code that was reviewed" % (name, review.id), ["SWE.3.BP6"])
             for role, link in self.schema["links"].items():
                 pairs = [p for p in link["pairs"] if p["from"] == item.type]
                 if not pairs or not self.in_scope([s for p in pairs for s in p["supports"]]):
@@ -860,6 +1052,37 @@ def cmd_status(project, args):
     return 0
 
 
+def cmd_audit(project, args):
+    base = project.items.get(args.id)
+    if base is None or base.type != "baseline":
+        print("no such baseline: %s" % args.id)
+        return 1
+    stored = {e.get("item"): e for e in as_list(base.front.get("items")) if isinstance(e, dict)}
+    differences = []
+    for item_id, entry in sorted(stored.items()):
+        now = project.items.get(item_id)
+        if now is None:
+            differences.append("%s  missing: listed in the baseline, not in the project" % item_id)
+        elif now.hash != str(entry.get("hash")):
+            differences.append("%s  content changed: baseline %s, now %s" % (item_id, entry.get("hash"), now.hash))
+        elif now.status != entry.get("status"):
+            differences.append("%s  status changed: baseline %s, now %s" % (item_id, entry.get("status"), now.status))
+    for line in differences:
+        print(line)
+    print("%s (%s, tag %s): %d items listed, %d differ from the project as it is now"
+          % (base.id, base.front.get("purpose"), base.front.get("tag"), len(stored), len(differences)))
+    print("run this at the tagged commit to verify the baseline itself; run it later to see what moved on since")
+    return 1 if differences else 0
+
+
+def cmd_list(project, args):
+    for item in sorted(project.items.values(), key=lambda i: (i.type, record_number(i.id))):
+        if (args.type and item.type != args.type) or (args.status and item.status != args.status):
+            continue
+        print("%-10s %-11s %-28s %s" % (item.id, item.status, item.type, item.title))
+    return 0
+
+
 def practice_rows(project, process_id=None):
     """One row per base practice: evidence held and findings open. Observations only, no verdict."""
     version = str((project.config.get("aspice") or {}).get("version") or project.schema.get("aspice_version"))
@@ -883,7 +1106,16 @@ def practice_rows(project, process_id=None):
             rules = sorted(r["id"] for r in schema["coverage"] if ref in r["supports"])
             held = [i for i in project.items.values() if i.type in types and project.live(i)
                     and (i.type != "plan" or i.front.get("kind") in kinds or not kinds)]
-            settled = [i for i in held if i.status in ("approved", "final")]
+            if not types:                                 # evidenced by links or rules only: count what carries them
+                carriers = {i.id: i for role, link in schema["links"].items() for pair in link["pairs"]
+                            if ref in pair["supports"] for i in project.of_type(pair["from"])
+                            if project.live(i) and i.targets(role)}
+                subjects = {r["subject"] for r in schema["coverage"] if ref in r["supports"]}
+                carriers.update({i.id: i for i in project.items.values()
+                                 if not roles and i.type in subjects and project.live(i)})
+                held = list(carriers.values())
+            settled = [i for i in held
+                       if i.status in project.lifecycle(i).get("stages", {}).get("before-approval", [])]
             mine = [f for f in findings if ref in f["supports"]]
             errors = sum(1 for f in mine if f["level"] == "error")
             warnings = sum(1 for f in mine if f["level"] == "warning")
@@ -891,7 +1123,7 @@ def practice_rows(project, process_id=None):
                 state = "no evidence structure"          # the schema has nothing for this practice yet
             elif errors:
                 state = "findings open"
-            elif types and not held:
+            elif not held:
                 state = "no evidence yet"
             elif held and len(settled) < len(held):
                 state = "evidence not settled"           # items exist but are not all approved or final
@@ -936,13 +1168,17 @@ def main():
     hashes.add_argument("ids", nargs="*")
     hashes.add_argument("--upstream", action="store_true")
     sub.add_parser("status")
+    sub.add_parser("audit").add_argument("id")
+    listing = sub.add_parser("list")
+    listing.add_argument("--type")
+    listing.add_argument("--status")
     practices = sub.add_parser("practices")
     practices.add_argument("process", nargs="?")
     practices.add_argument("--json", action="store_true")
     args = ap.parse_args()
     project = Project(args.project)
     return {"check": cmd_check, "matrix": cmd_matrix, "show": cmd_show, "impact": cmd_impact,
-            "hash": cmd_hash, "status": cmd_status, "practices": cmd_practices}[args.command](project, args)
+            "hash": cmd_hash, "status": cmd_status, "list": cmd_list, "audit": cmd_audit, "practices": cmd_practices}[args.command](project, args)
 
 
 if __name__ == "__main__":

@@ -116,7 +116,7 @@ structures:
   functions:                       # software-unit.functions
     mandatory: [name, category]
     keys: [description, arguments, return_type, returns, preconditions, postconditions, errors, trigger, period_ms, call_context, reentrant]
-    note: "category is public, scheduled, callback or local; arguments is a list of data-element records; returns is a list of {value, meaning}; errors is a list of {condition, reaction}; trigger names the activating event of a scheduled function"
+    note: "category is public, scheduled, callback or local; arguments is a list of data-element records; the return type is return_type, or the one type given in every returns entry; returns is a list of {type, value, meaning}; errors is a list of {condition, reaction}; trigger names the activating event of a scheduled function"
   data:                            # software-unit.data
     mandatory: [name, type, scope]
     keys: [unit, min, max, initial, protection]
@@ -292,11 +292,11 @@ types:
       use: [common, criticality]
       origin: {values: [handwritten, generated, reused, third-party], required: before-review}
       generated_from: {required: optional, note: "model or configuration the unit is generated from; mandatory when origin is generated"}
-      source_files: {required: before-approval, note: "repository paths of the files that implement the unit; each source file belongs to exactly one unit"}
+      source_files: {required: optional, note: "repository paths of the files that implement the unit; each source file belongs to exactly one unit. Empty while the unit is designed but not yet implemented"}
       functions: {structure: functions, required: before-review}
       data: {structure: data, required: optional}
       resource_budget: {structure: resource-budget, required: optional}
-      platform: {required: optional, note: "platform resources the unit touches, as a mapping with any of the keys exclusive_areas, diagnostic_events, non_volatile_blocks, calibration_parameters, memory_sections, services"}
+      platform: {required: optional, note: "platform resources the unit touches, as a mapping with any of the keys exclusive_areas, interrupts, diagnostic_events, non_volatile_blocks, calibration_parameters, memory_sections, services"}
     sections:
       Purpose: before-review
       Behavior: before-review      # algorithm and states
@@ -312,7 +312,7 @@ types:
     attributes:
       use: [common]
       kind: {values: [unit-verification, software-integration, software-qualification-test, system-integration, system-qualification-test, configuration-management, quality-assurance, problem-resolution, change-request-management], required: always}
-      coverage_targets: {required: optional, note: "unit-verification plans: structural coverage a unit must reach, per ASIL, as {<ASIL>: {statement_percent, branch_percent}}; an ASIL without an entry has no target"}
+      coverage_targets: {required: optional, note: "unit-verification plans: structural coverage a unit must reach, per ASIL, as {<ASIL>: {statement_percent, branch_percent, mcdc_percent}} with any subset of the metrics; an ASIL without an entry has no target"}
     sections:
       Scope: before-review         # what the plan covers and what it leaves to others
       Approach: before-review      # methods, their order, and how they depend on ASIL
@@ -374,7 +374,8 @@ types:
       environment: {required: always}
       executed_at: {required: always}
       results: {required: always, note: "list of {test: <test case ID>, verdict: passed | failed | blocked | not-run, evidence: <report path>, reason: <why blocked or not run>}"}
-      coverage: {required: optional, note: "unit level: list of {unit, file, statement_percent, branch_percent, deviation} taken from the coverage report, or a text saying why coverage was not measured; deviation carries the accepted reason for a figure below target"}
+      coverage: {required: optional, note: "unit level: list of {unit, file, statement_percent, branch_percent, mcdc_percent, deviation} taken from the coverage report, or a text saying why coverage was not measured; deviation carries the accepted reason for a figure below target"}
+      sources: {required: optional, note: "list of {file, hash} of the unit sources and test files at the time of the run; written by tooling"}
 
   static-analysis-run:             # written by tooling from analyser reports
     prefix: SAR
@@ -389,6 +390,7 @@ types:
       tool: {required: always, note: "analyser, version and rule set"}
       executed_at: {required: always}
       results: {required: always, note: "list of {unit: <software unit ID>, open_findings: <count by severity>, deviations: <justified deviations>, metrics: <values>, evidence: <report path>}"}
+      sources: {required: optional, note: "list of {file, hash} of the unit sources at the time of the run; written by tooling"}
 
   review-record:
     prefix: REV
@@ -404,7 +406,11 @@ types:
       checklist: {required: always, note: "checklist applied, with its version"}
       reviewers: {required: always, note: "people accountable for the verdict; at least one who did not author the subject"}
       verdict: {values: [approved, rework], required: always}
-      findings: {required: always, may_be_empty: true, note: "list of {id, item, text, severity: major | minor, state: open | closed}; an empty list states that there were none"}
+      findings: {required: always, may_be_empty: true, note: "list of {id, item, text, severity: major | minor, state: open | closed, closes: <REV-ID>#<finding id>}; an empty list states that there were none; closes marks an entry that settles an open finding of an earlier review of the same content"}
+      reviewed_at: {required: optional}
+      checks: {required: optional, note: "list of {check: <checklist ID>, result: pass | finding | not-assessed, note}: what each check of the checklist gave, including the answers to accountable checks"}
+      item_under_test: {required: optional, note: "commit, tag or baseline ID of the code that was reviewed"}
+      sources: {required: optional, note: "list of {file, hash} of the source files of the units reviewed; written by tooling"}
 
   communication-record:
     prefix: CMR
@@ -497,6 +503,7 @@ conditions:
   - {types: [software-unit], when: {origin: [generated]}, attributes: [generated_from], stage: before-review}
   - {types: [unit-test, software-integration-test, software-qualification-test, system-integration-test, system-qualification-test], when: {execution: [automated]}, attributes: [script], stage: before-approval}
   - {types: any, when: {status: [rejected]}, attributes: [rejection_reason], stage: always}
+  - {types: [change-request], when: {status: [approved, rejected, implemented, verified, closed]}, attributes: [decision], stage: always}
 
 # ---------------------------------------------------------------------------
 # Link roles (stored on `from`, navigable both ways)
@@ -508,10 +515,17 @@ links:
       - {from: system-requirement, to: [stakeholder-requirement], supports: [SYS.2.BP6, SYS.2.BP7]}
       - {from: software-requirement, to: [system-requirement, system-element, system-interface], supports: [SWE.1.BP6, SWE.1.BP7]}
   allocated_to:
-    meaning: "the architectural element responsible for fulfilling the requirement"
+    meaning: "the architectural element responsible for fulfilling the requirement, stated on the requirement. Use it when the allocation arrives with the requirement; architecture work uses `fulfils` instead, so that it does not change requirements that are already approved"
     pairs:
       - {from: system-requirement, to: [system-element, system-interface], supports: [SYS.3.BP2, SYS.3.BP6, SYS.3.BP7]}
       - {from: software-requirement, to: [software-component, software-interface], supports: [SWE.2.BP2, SWE.2.BP7, SWE.2.BP8]}
+  fulfils:
+    meaning: "the requirement is allocated to this architectural element, stated on the element. Equivalent to `allocated_to` read the other way; either one establishes the allocation"
+    pairs:
+      - {from: system-element, to: [system-requirement], supports: [SYS.3.BP2, SYS.3.BP6, SYS.3.BP7]}
+      - {from: system-interface, to: [system-requirement], supports: [SYS.3.BP2, SYS.3.BP6, SYS.3.BP7]}
+      - {from: software-component, to: [software-requirement], supports: [SWE.2.BP2, SWE.2.BP7, SWE.2.BP8]}
+      - {from: software-interface, to: [software-requirement], supports: [SWE.2.BP2, SWE.2.BP7, SWE.2.BP8]}
   part_of:
     meaning: "the item belongs to the target: a component to its composition, a unit to its component"
     pairs:
@@ -549,7 +563,7 @@ links:
   concerns:
     meaning: "the decision shapes the target"
     pairs:
-      - {from: design-decision, to: [system-element, system-interface, software-component, software-interface, architecture-view, component-design, software-unit], supports: [SYS.3.BP5, SWE.2.BP6, SWE.3.BP4]}
+      - {from: design-decision, to: [system-requirement, software-requirement, system-element, system-interface, software-component, software-interface, architecture-view, component-design, software-unit], supports: [SYS.3.BP5, SWE.2.BP6, SWE.3.BP4]}
   affects:
     meaning: "the change or problem touches the target"
     pairs:
@@ -580,14 +594,14 @@ links:
 coverage:
   - {id: COV-01, subject: stakeholder-requirement, expect: "assessment accepted or accepted-with-deviation -> at least one system-requirement derived_from it", waiver: "assessment rejected, with agreement", supports: [SYS.2.BP6]}
   - {id: COV-02, subject: system-requirement, expect: "at least one derived_from link", waiver: "origin internal with a Rationale section", supports: [SYS.2.BP6]}
-  - {id: COV-03, subject: system-requirement, expect: "allocated_to at least one system-element or system-interface", waiver: "kind constraint with a Rationale section", supports: [SYS.3.BP2, SYS.3.BP6]}
+  - {id: COV-03, subject: system-requirement, expect: "allocated to at least one system-element or system-interface (allocated_to on the requirement, or fulfils on the element)", waiver: "kind constraint with a Rationale section", supports: [SYS.3.BP2, SYS.3.BP6]}
   - {id: COV-04, subject: system-element, expect: "at least one system-requirement allocated to it", waiver: "none", supports: [SYS.3.BP6]}
-  - {id: COV-05, subject: system-requirement, expect: "allocated to an element of kind software -> at least one software-requirement derived_from the requirement or the element", waiver: "none", supports: [SWE.1.BP6]}
+  - {id: COV-05, subject: system-requirement, expect: "allocated to an element of kind software -> at least one software-requirement derived_from the requirement", waiver: "trace.derive_via_elements in the project configuration: a software-requirement derived_from the element is then enough", supports: [SWE.1.BP6]}
   - {id: COV-06, subject: software-requirement, expect: "at least one derived_from link", waiver: "origin internal with a Rationale section", supports: [SWE.1.BP6]}
-  - {id: COV-07, subject: software-requirement, expect: "allocated_to at least one software-component or software-interface", waiver: "kind constraint with a Rationale section", supports: [SWE.2.BP2, SWE.2.BP7]}
+  - {id: COV-07, subject: software-requirement, expect: "allocated to at least one software-component or software-interface (allocated_to on the requirement, or fulfils on the element)", waiver: "kind constraint with a Rationale section", supports: [SWE.2.BP2, SWE.2.BP7]}
   - {id: COV-08, subject: software-component, expect: "at least one software-requirement allocated to it or to a component that is part_of it", waiver: "origin supplied or generated, with the reason for its presence in the Purpose section", supports: [SWE.2.BP7]}
   - {id: COV-09, subject: software-component, expect: "origin developed and kind other than composition -> one component-design refines it and at least one software-unit is part_of it", waiver: "none", supports: [SWE.3.BP5]}
-  - {id: COV-10, subject: software-unit, expect: "exactly one part_of link, and every listed source file exists", waiver: "none", supports: [SWE.3.BP5]}
+  - {id: COV-10, subject: software-unit, expect: "exactly one part_of link, and every listed source file exists; a unit that lists none is reported as not implemented", waiver: "none", supports: [SWE.3.BP5, SWE.3.BP8]}
   - {id: COV-11, subject: source-file, expect: "every file under the configured source roots is listed by exactly one software-unit", waiver: "path matched by the project's generated or third-party patterns", supports: [SWE.3.BP5]}
   - {id: COV-12, subject: software-unit, expect: "at least one unit-test verifies it, and the latest static-analysis-run has an entry for it", waiver: "origin generated or third-party, with the alternative verification named in the unit verification strategy", supports: [SWE.4.BP5]}
   - {id: COV-13, subject: software-interface, expect: "at least one software-integration-test verifies it", waiver: "none", supports: [SWE.5.BP7]}
@@ -599,13 +613,15 @@ coverage:
   - {id: COV-19, subject: any-engineering-item, expect: "a final review-record with verdict approved covers the current content hash and all its findings are closed", waiver: "none", supports: [SUP.1.BP2, SYS.2.BP7, SYS.3.BP7, SYS.4.BP8, SYS.5.BP6, SWE.1.BP7, SWE.2.BP8, SWE.3.BP6, SWE.4.BP6, SWE.5.BP8, SWE.6.BP6]}
   - {id: COV-20, subject: change-request, expect: "from state analysed on: at least one affects link", waiver: "none", supports: [SUP.10.BP8]}
   - {id: COV-21, subject: software-interface, expect: "provided by a component with origin developed -> at least one software-unit of that component realizes it", waiver: "none", supports: [SWE.3.BP2, SWE.3.BP5]}
-  - {id: COV-22, subject: software-unit, expect: "every function of category public, scheduled or callback exists in the listed source files with the designed signature, and no such function exists in the code without a design entry", waiver: "origin generated or third-party", supports: [SWE.3.BP5, SWE.3.BP8]}
+  - {id: COV-22, subject: software-unit, expect: "every function of category public, scheduled or callback is defined in the listed source files, no function is defined there without a design entry, and wherever the design states types the parameter types and the return type equal those in the code", waiver: "origin generated or third-party", supports: [SWE.3.BP5, SWE.3.BP8]}
   - {id: COV-23, subject: any-engineering-item, expect: "ASIL not lower than that of any item it is derived from or implements; a unit not lower than its component; a component or interface not lower than any requirement allocated to it", waiver: "an approved design-decision that documents the decomposition concerns the item", supports: [SWE.2.BP8, SWE.3.BP6]}
   - {id: COV-24, subject: architecture-view, expect: "at least one shows link, and every shown item exists and is not rejected or obsolete", waiver: "none", supports: [SWE.2.BP4, SYS.3.BP4]}
   - {id: COV-25, subject: project, expect: "at software level one approved architecture-view exists for each of the kinds structure, execution-model and resource-summary, and at least one of kind state-machine or sequence", waiver: "a kind declared not applicable in the project configuration, with the reason", supports: [SWE.2.BP1, SWE.2.BP4, SWE.2.BP5]}
   - {id: COV-27, subject: project, expect: "for every process in scope, an approved plan exists of each kind that plan_kinds maps to one of its base practices", waiver: "none", supports: [SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1, SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1]}
   - {id: COV-28, subject: software-unit, expect: "the latest final unit test run reports structural coverage of the unit that reaches the targets the approved unit-verification plan sets for the unit's ASIL", waiver: "origin generated or third-party; or a deviation recorded with the coverage entry", supports: [SWE.4.BP2, SWE.4.BP4]}
-  - {id: COV-26, subject: baseline, expect: "at least one final communication-record names the baseline as subject", waiver: "baseline purpose marked internal in the project configuration", supports: [SYS.2.BP8, SYS.3.BP8, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7]}
+  - {id: COV-29, subject: software-unit, expect: "every designed function of category public, scheduled or callback is named by at least one unit test (verifies <unit>#<function>)", waiver: "origin generated or third-party", supports: [SWE.4.BP2, SWE.4.BP5]}
+  - {id: COV-30, subject: software-unit, expect: "the unit's source files and the test files of its test cases are unchanged since the latest final unit test run and the latest final static analysis run recorded them", waiver: "none", supports: [SWE.4.BP3, SWE.4.BP4]}
+  - {id: COV-26, subject: baseline, expect: "at least one final communication-record names the baseline as subject", waiver: "baseline purpose marked internal in the project configuration", supports: [SYS.2.BP8, SYS.3.BP8, SYS.4.BP9, SYS.5.BP7, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7, SWE.4.BP7, SWE.5.BP9, SWE.6.BP7]}
 
 # ---------------------------------------------------------------------------
 # Derived facts (computed by the trace engine, never stored on the item)
