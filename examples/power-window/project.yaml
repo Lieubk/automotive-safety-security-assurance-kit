@@ -11,7 +11,7 @@ aspice:
   target_level: 1
 scope:
   role: software-supplier
-  processes: [SWE.1, SWE.2, SWE.3, SWE.4, SUP.8]   # the software supplier's responsibility; system level is imported
+  processes: [SWE.1, SWE.2, SWE.3, SWE.4, SUP.8, MAN.3]   # the software supplier's responsibility; system level is imported
   assessment_scope: []                              # no assessment planned for the example
 inputs:
   - level: system requirements
