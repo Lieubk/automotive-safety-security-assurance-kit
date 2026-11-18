@@ -13,7 +13,10 @@ Commands
     test-run --level LEVEL --results FILE --item-under-test REF --environment NAME
         final test-run record from a results file (JSON):
         {"executed_at": "<ISO time>", "compiler": "...",            (compiler optional)
-         "results": [{"test": "UT-0001", "verdict": "passed", "evidence": "<path>"}]}
+         "results": [{"test": "UT-0001", "verdict": "passed", "evidence": "<path>"}],
+         "coverage": [{"file": "src/a.c", "statement_percent": 100.0, "branch_percent": 97.5}]}
+        `coverage` is optional: a list per source file (attributed to the owning
+        unit), or a text saying why it was not measured.
         Every test named must be a test case of that level, and every approved
         test case of that level must appear; otherwise nothing is written.
         Evidence files are copied to verification/evidence/<record id>/.
@@ -116,6 +119,16 @@ def cmd_test_run(project, args):
                  for c in cases.values() if c.status == "approved" and c.id not in reported]
     if problems:
         return stop(problems)
+    coverage = data.get("coverage")
+    if isinstance(coverage, list):
+        owner = {Path(str(f)).as_posix(): u.id for u in project.of_type("software-unit")
+                 for f in u.front.get("source_files") or []}
+        unowned = [c.get("file") for c in coverage if Path(str(c.get("file"))).as_posix() not in owner]
+        if unowned:
+            return stop(["coverage reported for %s, which belongs to no software unit" % f for f in unowned])
+        coverage = [{"unit": owner[Path(str(c["file"])).as_posix()], "file": c["file"],
+                     "statement_percent": c.get("statement_percent"), "branch_percent": c.get("branch_percent")}
+                    for c in coverage]
     record_id = next_id(project, "test-run")
     for row in results:
         if row.get("evidence"):
@@ -130,6 +143,8 @@ def cmd_test_run(project, args):
         "executed_at": data.get("executed_at"),
         "results": sorted(results, key=lambda r: r["test"]),
     }
+    if coverage:
+        front["coverage"] = coverage       # a list per unit, or the reason it was not measured
     path = write_item(project, "test-run", front)
     counts = {v: sum(1 for r in results if r["verdict"] == v) for v in sorted(VERDICTS)}
     print("wrote %s: %s" % (path, ", ".join("%d %s" % (n, v) for v, n in counts.items() if n)))

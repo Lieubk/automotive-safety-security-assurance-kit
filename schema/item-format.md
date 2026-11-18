@@ -124,7 +124,7 @@ acceptance review record covers them at the boundary.
 scope:
   processes: [SWE.1, SWE.2, SWE.3, SWE.4, SUP.8]   # the processes the project is responsible for
 paths:
-  items: [spec, verification, records]              # folders scanned for item files
+  items: [plans, spec, verification, records]       # folders scanned for item files
   source_roots: [src]                               # code that must belong to a software unit
   generated: ["src/gen/**"]                         # exempt from the unit ownership rule
   third_party: ["src/vendor/**"]

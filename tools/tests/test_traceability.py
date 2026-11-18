@@ -74,9 +74,19 @@ def base_items():
         "UT-0001": ({"type": "unit-test", "title": "Step runs", "status": "approved", "asil": "B",
                      "execution": "automated", "script": "tests/test_unit.c::test_UT_0001", "environment": "host",
                      "regression": True, "links": {"verifies": ["UNT-0001#Unit_Step"]}}, test_sections),
+        "PLN-0001": ({"type": "plan", "title": "Unit verification strategy", "status": "approved", "kind": "unit-verification",
+                      "coverage_targets": {"B": {"statement_percent": 100, "branch_percent": 100}}},
+                     {"Scope": "All units.", "Approach": "Tests and analysis.", "Criteria": "All pass.",
+                      "Environment and tools": "Host.", "Responsibilities": "Developer."}),
+        "PLN-0002": ({"type": "plan", "title": "Configuration management plan", "status": "approved",
+                      "kind": "configuration-management"},
+                     {"Scope": "All items.", "Approach": "Git.", "Criteria": "Tags.",
+                      "Environment and tools": "Git.", "Responsibilities": "Configuration manager."}),
         "RUN-0001": ({"type": "test-run", "status": "final", "level": "unit", "item_under_test": "abc123",
                       "environment": "host", "executed_at": "2026-01-02T10:00:00",
-                      "results": [{"test": "UT-0001", "verdict": "passed", "evidence": "build/out.txt"}]}, {}),
+                      "results": [{"test": "UT-0001", "verdict": "passed", "evidence": "build/out.txt"}],
+                      "coverage": [{"unit": "UNT-0001", "file": "src/unit.c", "statement_percent": 100.0,
+                                    "branch_percent": 100.0}]}, {}),
         "SAR-0001": ({"type": "static-analysis-run", "status": "final", "item_under_test": "abc123",
                       "tool": "analyser 1.0", "executed_at": "2026-01-02T10:00:00",
                       "results": [{"unit": "UNT-0001", "open_findings": 0}]}, {}),
@@ -88,7 +98,7 @@ class Fixture:
         self.tmp = tempfile.TemporaryDirectory()
         self.root = Path(self.tmp.name)
         self.schema = yaml.safe_load((Path(__file__).resolve().parents[2] / "schema" / "items.yaml").read_text(encoding="utf-8"))
-        cfg = {"scope": {"processes": scope}, "paths": {"items": ["spec", "verification", "records"], "source_roots": ["src"]}}
+        cfg = {"scope": {"processes": scope}, "paths": {"items": ["plans", "spec", "verification", "records"], "source_roots": ["src"]}}
         cfg.update(config or {})
         (self.root / "project.yaml").write_text(yaml.safe_dump(cfg), encoding="utf-8")
         for name, text in {"src/unit.c": CODE, "src/unit.h": "void Unit_Step(void);\n", **(files or {})}.items():
@@ -294,7 +304,7 @@ class Coverage(Case):
         self.expect("COV-11", "src/extra.c", base_items(), files={"src/extra.c": "int x;\n"})
 
     def test_generated_files_need_no_owner(self):
-        config = {"paths": {"items": ["spec", "verification", "records"], "source_roots": ["src"], "generated": ["src/gen/**"]}}
+        config = {"paths": {"items": ["plans", "spec", "verification", "records"], "source_roots": ["src"], "generated": ["src/gen/**"]}}
         fixture = self.make(files={"src/gen/Rte.c": "int x;\n"}, config=config)
         self.assertEqual(fixture.rules(), [])
 
@@ -396,6 +406,46 @@ class Coverage(Case):
         del items["VIEW-0004"]
         fixture = self.make(items, config={"trace": {"views_not_applicable": {"resource-summary": "budget owned by the customer"}}})
         self.assertNotIn(("COV-25", "project"), fixture.rules())
+
+    def test_coverage_below_the_target_of_the_plan(self):
+        items = base_items()
+        items["RUN-0001"][0]["coverage"][0]["branch_percent"] = 92.5
+        messages = [f["message"] for f in self.make(items).findings("error") if f["rule"] == "COV-28"]
+        self.assertEqual(messages, ["branch_percent is 92.5 in RUN-0001, target for ASIL B is 100"])
+
+    def test_coverage_below_target_with_a_recorded_deviation(self):
+        items = base_items()
+        items["RUN-0001"][0]["coverage"][0].update(branch_percent=92.5, deviation="defensive default branch, reviewed")
+        self.assertNotIn(("COV-28", "UNT-0001"), self.make(items).rules())
+
+    def test_coverage_not_measured(self):
+        items = base_items()
+        items["RUN-0001"][0]["coverage"] = "not measured: coverage needs gcc with gcov"
+        messages = [f["message"] for f in self.make(items).findings("error") if f["rule"] == "COV-28"]
+        self.assertTrue(messages and "not measured" in messages[0], messages)
+
+    def test_no_target_for_the_asil_means_no_coverage_demand(self):
+        items = changed(base_items(), "PLN-0001", coverage_targets={"D": {"statement_percent": 100}})
+        del items["RUN-0001"][0]["coverage"]
+        self.assertNotIn(("COV-28", "UNT-0001"), self.make(items).rules())
+
+    def test_plan_without_targets_is_reported_as_not_assessed(self):
+        items = base_items()
+        del items["PLN-0001"][0]["coverage_targets"]
+        self.assertIn(("COV-28", "PLN-0001"), self.make(items).rules("warning"))
+
+    def test_strategy_of_a_process_in_scope_is_missing(self):
+        items = base_items()
+        del items["PLN-0001"]
+        messages = [f["message"] for f in self.make(items).findings("error") if f["rule"] == "COV-27"]
+        self.assertEqual(messages, ["no approved plan of kind unit-verification"])
+
+    def test_no_plan_is_asked_for_processes_out_of_scope(self):
+        items = base_items()
+        for gone in ("PLN-0001", "PLN-0002", "UT-0001", "RUN-0001", "SAR-0001", "CDS-0001", "UNT-0001"):
+            del items[gone]
+        rules = {rule for rule, _ in self.make(items, scope=["SWE.1", "SWE.2"], files={}).rules()}
+        self.assertNotIn("COV-27", rules)
 
     def test_baseline_without_communication_record(self):
         items = base_items()

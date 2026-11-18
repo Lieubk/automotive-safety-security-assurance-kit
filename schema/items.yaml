@@ -304,6 +304,22 @@ types:
       Dynamic behavior: before-review   # or "not applicable" with the reason
       Design notes: optional
 
+  plan:                            # strategies and plans: how a process is going to be performed
+    prefix: PLN
+    folder: plans
+    lifecycle: engineering
+    supports: [SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1, SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1, "08-52", "08-04", "08-13", "08-27", "08-28"]
+    attributes:
+      use: [common]
+      kind: {values: [unit-verification, software-integration, software-qualification-test, system-integration, system-qualification-test, configuration-management, quality-assurance, problem-resolution, change-request-management], required: always}
+      coverage_targets: {required: optional, note: "unit-verification plans: structural coverage a unit must reach, per ASIL, as {<ASIL>: {statement_percent, branch_percent}}; an ASIL without an entry has no target"}
+    sections:
+      Scope: before-review         # what the plan covers and what it leaves to others
+      Approach: before-review      # methods, their order, and how they depend on ASIL
+      Criteria: before-review      # entry, exit and pass criteria, coverage targets, regression selection
+      Environment and tools: before-approval
+      Responsibilities: before-approval
+
   unit-test:
     prefix: UT
     folder: verification/unit
@@ -358,7 +374,7 @@ types:
       environment: {required: always}
       executed_at: {required: always}
       results: {required: always, note: "list of {test: <test case ID>, verdict: passed | failed | blocked | not-run, evidence: <report path>, reason: <why blocked or not run>}"}
-      coverage: {required: optional, note: "statement, branch and MC/DC percentages for unit level, taken from the coverage report"}
+      coverage: {required: optional, note: "unit level: list of {unit, file, statement_percent, branch_percent, deviation} taken from the coverage report, or a text saying why coverage was not measured; deviation carries the accepted reason for a figure below target"}
 
   static-analysis-run:             # written by tooling from analyser reports
     prefix: SAR
@@ -445,6 +461,21 @@ types:
       tag: {required: always, note: "version control tag the baseline is anchored to"}
       purpose: {required: always, note: "for example requirements freeze, release candidate, delivery"}
       items: {required: always, note: "list of {item: <ID>, hash: <content hash>, status}; generated"}
+
+# ---------------------------------------------------------------------------
+# Plan kinds and the strategy practices they answer. A process in scope needs an
+# approved plan of every kind that names one of its base practices (COV-27).
+# ---------------------------------------------------------------------------
+plan_kinds:
+  unit-verification: [SWE.4.BP1]
+  software-integration: [SWE.5.BP1, SWE.5.BP2]
+  software-qualification-test: [SWE.6.BP1]
+  system-integration: [SYS.4.BP1, SYS.4.BP2]
+  system-qualification-test: [SYS.5.BP1]
+  configuration-management: [SUP.8.BP1]
+  quality-assurance: [SUP.1.BP1]
+  problem-resolution: [SUP.9.BP1]
+  change-request-management: [SUP.10.BP1]
 
 # ---------------------------------------------------------------------------
 # Conditional requirements: attributes or sections that become mandatory when
@@ -571,6 +602,8 @@ coverage:
   - {id: COV-23, subject: any-engineering-item, expect: "ASIL not lower than that of any item it is derived from or implements; a unit not lower than its component; a component or interface not lower than any requirement allocated to it", waiver: "an approved design-decision that documents the decomposition concerns the item", supports: [SWE.2.BP8, SWE.3.BP6]}
   - {id: COV-24, subject: architecture-view, expect: "at least one shows link, and every shown item exists and is not rejected or obsolete", waiver: "none", supports: [SWE.2.BP4, SYS.3.BP4]}
   - {id: COV-25, subject: project, expect: "at software level one approved architecture-view exists for each of the kinds structure, execution-model and resource-summary, and at least one of kind state-machine or sequence", waiver: "a kind declared not applicable in the project configuration, with the reason", supports: [SWE.2.BP1, SWE.2.BP4, SWE.2.BP5]}
+  - {id: COV-27, subject: project, expect: "for every process in scope, an approved plan exists of each kind that plan_kinds maps to one of its base practices", waiver: "none", supports: [SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1, SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1]}
+  - {id: COV-28, subject: software-unit, expect: "the latest final unit test run reports structural coverage of the unit that reaches the targets the approved unit-verification plan sets for the unit's ASIL", waiver: "origin generated or third-party; or a deviation recorded with the coverage entry", supports: [SWE.4.BP2, SWE.4.BP4]}
   - {id: COV-26, subject: baseline, expect: "at least one final communication-record names the baseline as subject", waiver: "baseline purpose marked internal in the project configuration", supports: [SYS.2.BP8, SYS.3.BP8, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7]}
 
 # ---------------------------------------------------------------------------

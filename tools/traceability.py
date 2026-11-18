@@ -126,7 +126,7 @@ class Project:
     # ---- loading
 
     def load(self):
-        folders = (self.config.get("paths") or {}).get("items") or ["spec", "verification", "records"]
+        folders = (self.config.get("paths") or {}).get("items") or ["plans", "spec", "verification", "records"]
         for folder in folders:
             for path in sorted((self.root / folder).rglob("*.md")):
                 rel = path.relative_to(self.root).as_posix()
@@ -674,6 +674,38 @@ class Project:
             if base.status == "final" and base.front.get("purpose") not in internal and base.id not in told:
                 self.add("error", rule, base.id, "no final communication record names this baseline",
                          self.rules[rule]["supports"])
+
+    def cov_27(self, rule):
+        have = {p.front.get("kind") for p in self.of_type("plan") if p.status == "approved"}
+        for kind, practices in self.schema["plan_kinds"].items():
+            needed = [bp for bp in practices if self.scope is None or bp.split(".BP")[0] in self.scope]
+            if needed and kind not in have:
+                self.add("error", rule, "project", "no approved plan of kind %s" % kind, needed)
+
+    def cov_28(self, rule):
+        plans = [p for p in self.of_type("plan") if p.status == "approved" and p.front.get("kind") == "unit-verification"]
+        targets = (plans[0].front.get("coverage_targets") or {}) if plans else {}
+        if plans and not targets:
+            self.add("warning", rule, plans[0].id, "the plan sets no coverage_targets: structural coverage is not assessed",
+                     self.rules[rule]["supports"])
+        run = self.latest_run("test-run", level="unit")
+        measured = (run.front.get("coverage") if run else None) or []
+        by_unit = {c.get("unit"): c for c in measured if isinstance(c, dict)} if isinstance(measured, list) else {}
+        for unit in self.of_type("software-unit"):
+            target = targets.get(str(unit.front.get("asil")))
+            if not self.live(unit) or not target or unit.front.get("origin") in ("generated", "third-party"):
+                continue
+            entry = by_unit.get(unit.id)
+            if entry is None:
+                why = measured if isinstance(measured, str) else "no entry for the unit"
+                self.gap(rule, unit, "structural coverage not measured in %s (%s)" % (run.id, why)
+                         if run else "no final unit test run exists, so structural coverage is not measured")
+                continue
+            for metric, wanted in sorted(target.items()):
+                got = entry.get(metric)
+                if (got is None or got < wanted) and not entry.get("deviation"):
+                    self.gap(rule, unit, "%s is %s in %s, target for ASIL %s is %s"
+                             % (metric, "not reported" if got is None else got, run.id, unit.front.get("asil"), wanted))
 
     def check_consistency_evidence(self):
         """Suspect links and missing consistency evidence, from the references of approving reviews."""

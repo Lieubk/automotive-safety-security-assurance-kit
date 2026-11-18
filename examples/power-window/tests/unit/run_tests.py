@@ -13,12 +13,19 @@ errors in both cases.
 Output, all under build/ in the example root:
     <test>.exe / <test>         the test executable
     <test>.log                  compiler output and test output
-    unit-test-results.json      {"compiler", "executed_at", "results": [{"test", "verdict", "evidence"}]}
+    unit-test-results.json      {"compiler", "executed_at", "results": [{"test", "verdict", "evidence"}],
+                                 "coverage": [{"file", "statement_percent", "branch_percent", "lines", "branches"}]}
+
+With `--coverage` the unit under test is built with coverage instrumentation
+and gcov reports statement coverage (lines executed) and branch coverage
+(branches taken at least once) of the unit source. This needs gcc and gcov;
+with any other compiler the tests still run and "coverage" says why it was
+not measured.
 
 A test case that appears in a test file but prints no PASS line counts as
 failed, so a build error or a crash cannot hide a test case.
 
-Usage:  python tests/unit/run_tests.py
+Usage:  python tests/unit/run_tests.py [--coverage]
 Exit code 0 = every test case passed, 1 = at least one failed, 2 = nothing could be run.
 Standard library only.
 """
@@ -112,11 +119,26 @@ def relative(path):
     return Path(path).relative_to(ROOT).as_posix()
 
 
-def build(compiler, test_file, unit_file, name):
+def build(compiler, test_file, unit_file, name, coverage=False):
     """Compile one test executable. Returns (executable path, exit code, compiler output)."""
     includes = [relative(folder) for folder in include_directories()]
     sources = [relative(test_file), relative(unit_file)]
-    if compiler["kind"] == "gnu":
+    if compiler["kind"] == "gnu" and coverage:
+        # only the unit is instrumented: its object, notes and counts go to build/cov/
+        executable = BUILD / name
+        objects = BUILD / "cov"
+        objects.mkdir(parents=True, exist_ok=True)
+        for stale in objects.glob(unit_file.stem + ".gc*"):
+            stale.unlink()
+        unit_object = objects / (unit_file.stem + ".o")
+        flags = GNU_FLAGS + ["-I" + folder for folder in includes]
+        code, output = run([compiler["path"]] + flags + ["-O0", "--coverage", "-c", relative(unit_file),
+                                                        "-o", relative(unit_object)], cwd=str(ROOT))
+        if code == 0:
+            code, more = run([compiler["path"]] + flags + [relative(test_file), relative(unit_object),
+                                                          "--coverage", "-o", relative(executable)], cwd=str(ROOT))
+            output += more
+    elif compiler["kind"] == "gnu":
         executable = BUILD / name
         command = [compiler["path"]] + GNU_FLAGS + ["-I" + folder for folder in includes]
         command += sources + ["-o", relative(executable)]
@@ -132,7 +154,23 @@ def build(compiler, test_file, unit_file, name):
     return executable, code, output
 
 
+def measure_coverage(unit_file):
+    """Statement and branch coverage of one unit source from gcov: (entry or None, tool output)."""
+    gcov = shutil.which("gcov")
+    if not gcov:
+        return None, "gcov not found\n"
+    code, output = run([gcov, "-b", "-c", "-n", "-o", relative(BUILD / "cov"), relative(unit_file)], cwd=str(ROOT))
+    lines = re.search(r"Lines executed:([\d.]+)% of (\d+)", output)
+    taken = re.search(r"Taken at least once:([\d.]+)% of (\d+)", output)
+    if code != 0 or not lines:
+        return None, output
+    entry = {"file": relative(unit_file), "statement_percent": float(lines.group(1)), "lines": int(lines.group(2)),
+             "branch_percent": float(taken.group(1)) if taken else 100.0, "branches": int(taken.group(2)) if taken else 0}
+    return entry, output
+
+
 def main():
+    want_coverage = "--coverage" in sys.argv[1:]
     test_files = sorted(UNIT_TESTS.glob("test_*.c"))
     if not test_files:
         print("no test files in %s" % UNIT_TESTS)
@@ -143,6 +181,10 @@ def main():
         return 2
     print("compiler: %s" % compiler["name"])
     BUILD.mkdir(exist_ok=True)
+    coverage, coverage_note = [], None
+    if want_coverage and (compiler["kind"] != "gnu" or not shutil.which("gcov")):
+        coverage_note = "not measured: coverage needs gcc with gcov, found %s" % compiler["name"]
+        want_coverage = False
 
     results = []
     for test_file in test_files:
@@ -158,7 +200,7 @@ def main():
             log.append("expected exactly one %s.c under %s, found %d\n" % (unit, SOURCES, len(unit_files)))
             code = 1
         else:
-            executable, code, output = build(compiler, test_file, unit_files[0], name)
+            executable, code, output = build(compiler, test_file, unit_files[0], name, want_coverage)
             log.append("== build: %s + %s\n%s" % (test_file.relative_to(ROOT).as_posix(),
                                                   unit_files[0].relative_to(ROOT).as_posix(), output))
         verdicts = {}
@@ -171,6 +213,13 @@ def main():
                 match = VERDICT_LINE.match(line.strip())
                 if match:
                     verdicts[match.group(1)] = match.group(2)
+            if want_coverage:
+                entry, output = measure_coverage(unit_files[0])
+                log.append("== coverage\n%s" % output)
+                if entry:
+                    coverage.append(entry)
+                else:
+                    coverage_note = "not measured for %s: gcov gave no figures, see %s" % (unit, evidence)
         with open(str(log_file), "w", encoding="utf-8", newline="\n") as handle:
             handle.write("".join(log))
 
@@ -187,6 +236,10 @@ def main():
         "executed_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
         "results": results,
     }
+    if coverage_note:
+        report["coverage"] = coverage_note
+    elif want_coverage:
+        report["coverage"] = coverage
     report_file = BUILD / "unit-test-results.json"
     with open(str(report_file), "w", encoding="utf-8", newline="\n") as handle:
         handle.write(json.dumps(report, indent=2) + "\n")
@@ -195,6 +248,11 @@ def main():
     print("%d test cases executed: %d passed, %d failed" % (len(results), len(results) - len(failed), len(failed)))
     if failed:
         print("failed: %s" % ", ".join(failed))
+    for entry in coverage:
+        print("coverage %-28s statement %5.1f %% of %d lines, branch %5.1f %% of %d branches"
+              % (entry["file"], entry["statement_percent"], entry["lines"], entry["branch_percent"], entry["branches"]))
+    if coverage_note:
+        print("coverage %s" % coverage_note)
     print("results: %s" % report_file.relative_to(ROOT).as_posix())
     return 1 if failed or not results else 0
 

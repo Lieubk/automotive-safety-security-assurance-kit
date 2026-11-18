@@ -148,6 +148,12 @@ def main():
                 if section not in (types[target].get("sections") or {}):
                     errors.append("%s: type %s has no section '%s'" % (where, target, section))
 
+    plan_values = schema["types"]["plan"]["attributes"]["kind"]["values"]
+    if sorted(plan_values) != sorted(schema["plan_kinds"]):
+        errors.append("plan_kinds and the allowed values of plan.kind differ")
+    for kind, refs in schema["plan_kinds"].items():
+        supports("plan kind " + kind, refs)
+
     pairs = 0
     for role, link in schema["links"].items():
         for pair in link["pairs"]:

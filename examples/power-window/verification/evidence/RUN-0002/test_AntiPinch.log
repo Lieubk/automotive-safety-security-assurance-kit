@@ -1,0 +1,17 @@
+== build: tests/unit/test_AntiPinch.c + src/antipinch/AntiPinch.c
+== run: exit code 0
+UT-0013 PASS
+UT-0014 PASS
+UT-0015 PASS
+UT-0016 PASS
+UT-0017 PASS
+UT-0018 PASS
+UT-0019 PASS
+UT-0020 PASS
+== coverage
+File 'src/antipinch/AntiPinch.c'
+Lines executed:100.00% of 110
+Branches executed:100.00% of 52
+Taken at least once:100.00% of 52
+Calls executed:100.00% of 14
+Lines executed:100.00% of 110
