@@ -1,0 +1,10 @@
+== build: tests/unit/test_HallCapture.c + src/windowpos/HallCapture.c
+test_HallCapture.c
+HallCapture.c
+Generating Code...
+== run: exit code 0
+UT-0001 PASS
+UT-0002 PASS
+UT-0003 PASS
+UT-0004 PASS
+UT-0005 PASS

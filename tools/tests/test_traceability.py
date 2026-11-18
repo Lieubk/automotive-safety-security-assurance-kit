@@ -108,11 +108,15 @@ class Fixture:
         body = "".join("\n## %s\n\n%s\n" % (name, text) for name, text in sections.items())
         (folder / (item_id + ".md")).write_text("---\n" + yaml.safe_dump(front, sort_keys=False) + "---\n" + body, encoding="utf-8")
 
-    def review(self, rev_id="REV-0001", findings=None, skip_references=()):
-        """Write a final review record that approves every engineering item at its current content."""
+    def review(self, rev_id="REV-0001", findings=None, skip_references=(), only=None, without=()):
+        """Write a final review record that approves engineering items at their current content.
+
+        By default every approved engineering item is the subject; `only` and `without` narrow that.
+        """
         project = Project(self.root)
         engineering = [i for i in project.items.values()
-                       if project.types[i.type]["lifecycle"] == "engineering" and i.status == "approved"]
+                       if project.types[i.type]["lifecycle"] == "engineering" and i.status == "approved"
+                       and (only is None or i.id in only) and i.id not in without]
         self.write(rev_id, {
             "type": "review-record", "status": "final", "checklist": "test checklist v1", "reviewers": ["A. Reviewer"],
             "verdict": "approved",
@@ -332,9 +336,24 @@ class Coverage(Case):
         self.assertNotIn(("SUSPECT", "UT-0001"), fixture.rules())   # the test verifies the unit, which did not change
 
     def test_reference_missing_from_the_review_is_a_warning(self):
+        inputs = ["SYE-0001", "SYR-0001"]
         fixture = self.make(review=False)
-        fixture.review(skip_references=["SYR-0001"])
-        self.assertIn(("CONSISTENCY", "SWR-0001"), fixture.rules("warning"))
+        fixture.review("REV-0001", only=inputs)                                    # input acceptance
+        fixture.review("REV-0002", without=inputs, skip_references=["SYR-0001"])  # never compared with SYR-0001
+        self.assertEqual(fixture.rules("warning"), [("CONSISTENCY", "SWR-0001")])
+        self.assertEqual(fixture.rules("error"), [])
+
+    def test_items_reviewed_together_need_no_separate_reference(self):
+        fixture = self.make(review=False)
+        everything = list(base_items())
+        fixture.review(skip_references=everything)          # subject lists all items, references none
+        self.assertEqual(fixture.rules("warning"), [])
+
+    def test_suspect_link_is_found_for_items_reviewed_together(self):
+        fixture = self.make(review=False)
+        fixture.review(skip_references=list(base_items()))
+        fixture.edit("CMP-0002", title="Detection, renamed")
+        self.assertIn(("SUSPECT", "UNT-0001"), fixture.rules())   # the unit is part of the changed component
 
     def test_open_review_finding_blocks_the_approval(self):
         fixture = self.make(review=False)

@@ -683,7 +683,10 @@ class Project:
             review = self.approving_review(item)
             if review is None:
                 continue                                  # already reported by COV-19
-            seen = {e.get("item"): str(e.get("hash")) for e in as_list(review.front.get("references")) if isinstance(e, dict)}
+            # items reviewed together in the same record were compared with each other as well
+            seen = {e.get("item"): str(e.get("hash"))
+                    for name in ("references", "subject")
+                    for e in as_list(review.front.get(name)) if isinstance(e, dict)}
             for role, link in self.schema["links"].items():
                 pairs = [p for p in link["pairs"] if p["from"] == item.type]
                 if not pairs or not self.in_scope([s for p in pairs for s in p["supports"]]):

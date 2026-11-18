@@ -1,0 +1,12 @@
+== build: tests/unit/test_WindowPos.c + src/windowpos/WindowPos.c
+test_WindowPos.c
+WindowPos.c
+Generating Code...
+== run: exit code 0
+UT-0006 PASS
+UT-0007 PASS
+UT-0008 PASS
+UT-0009 PASS
+UT-0010 PASS
+UT-0011 PASS
+UT-0012 PASS

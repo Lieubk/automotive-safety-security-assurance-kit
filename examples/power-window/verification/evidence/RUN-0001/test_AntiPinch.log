@@ -1,0 +1,13 @@
+== build: tests/unit/test_AntiPinch.c + src/antipinch/AntiPinch.c
+test_AntiPinch.c
+AntiPinch.c
+Generating Code...
+== run: exit code 0
+UT-0013 PASS
+UT-0014 PASS
+UT-0015 PASS
+UT-0016 PASS
+UT-0017 PASS
+UT-0018 PASS
+UT-0019 PASS
+UT-0020 PASS
