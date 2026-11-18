@@ -253,7 +253,7 @@ class Project:
                 for name, role in INTERFACE_ROLES.items():
                     if item.id in map(str, as_list(interface.front.get(name))):
                         found.append((interface.id, role))
-        return found
+        return list(dict.fromkeys(found))                 # several links to parts of one target count once
 
     def supports_of(self, item, role):
         """The base practices a dependency of this kind is evidence for."""

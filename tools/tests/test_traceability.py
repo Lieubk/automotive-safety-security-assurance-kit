@@ -671,6 +671,16 @@ class Impact(Case):
         suspects = {item for rule, item in fixture.rules() if rule == "SUSPECT"}
         self.assertLessEqual({"CMP-0001", "CMP-0002"}, suspects)
 
+    def test_several_links_to_functions_of_one_unit_are_reported_once(self):
+        project = Project(self.make().root)
+        for item in project.items.values():
+            found = project.dependencies(item)
+            self.assertEqual(len(found), len(set(found)), item.id)
+        tests = [i for i in project.of_type("unit-test") if len(i.targets("verifies")) > 1]
+        if tests:
+            self.assertEqual(len([d for d in project.dependencies(tests[0]) if d[1] == "verifies"]),
+                             len({target for target, _ in tests[0].targets("verifies")}))
+
     def test_component_approved_above_a_draft_interface(self):
         fixture = self.make(changed(base_items(), "IFC-0001", status="draft"))
         self.assertIn(("UPSTREAM", "CMP-0002"), fixture.rules())
