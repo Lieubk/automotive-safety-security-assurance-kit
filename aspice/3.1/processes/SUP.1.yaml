@@ -1,0 +1,143 @@
+id: SUP.1
+name: Quality Assurance
+group: SUP
+scope: vda
+purpose: >-
+  Give independent, objective evidence that processes and the work products
+  they yield conform to the provisions and plans set for them, and make sure
+  deviations are resolved and do not recur.
+outcomes:
+  - n: 1
+    text: A quality assurance strategy is created, applied and kept current.
+  - n: 2
+    text: Quality assurance is carried out independently and objectively, free of conflicts of interest.
+  - n: 3
+    text: Where a work product, process or activity does not meet the requirements that apply to it, the deviation is recorded, made known to those concerned, followed until resolved, and its recurrence is prevented.
+  - n: 4
+    text: It is checked and documented that work products, processes and activities do meet their applicable requirements, and the result is shared with those concerned.
+  - n: 5
+    text: Quality assurance is empowered to raise non-conformances to suitable management levels.
+  - n: 6
+    text: Management makes sure that escalated non-conformances get resolved.
+base_practices:
+  - id: SUP.1.BP1
+    name: Develop a project quality assurance strategy
+    intent: A project-level strategy states how quality assurance of work products and processes is carried out with independence and objectivity and without conflict of interest.
+    outcomes: [1, 2]
+    evidence:
+      - Quality assurance strategy or quality plan naming scope, methods, cadence, independence arrangement, reporting and escalation path
+    rule_ids: [SAP.RL.1, SAP.RL.2, SAP.RL.3, SAP.RL.4, AGE.RC.10, SUP.1.RL.1, SUP.1.RL.2, SUP.1.RL.3, SUP.1.RL.4, SUP.1.RL.5, SUP.1.RC.1, SUP.1.RC.2, CL2.RC.12]
+  - id: SUP.1.BP2
+    name: Assure quality of work products
+    intent: Following the strategy and the project schedule, work products are checked against their defined requirements and the result is documented.
+    outcomes: [2, 3, 4]
+    evidence:
+      - Work product quality records and completed checklists
+      - Non-conformance entries raised from the checks
+    rule_ids: [AGE.RC.11, APA.RL.7, SUP.1.RL.6, SUP.1.RL.7, SUP.1.RC.3, SUP.1.RC.6, SUP.1.RC.9, CL2.RC.17]
+  - id: SUP.1.BP3
+    name: Assure quality of process activities
+    intent: Following the strategy and the schedule, it is checked that processes reach their defined goals, and the result is documented.
+    outcomes: [2, 3, 4]
+    evidence:
+      - Process audit records and process compliance checklists
+      - Findings raised from process checks
+    rule_ids: [SUP.1.RL.6, SUP.1.RL.7, SUP.1.RC.3, SUP.1.RC.7]
+  - id: SUP.1.BP4
+    name: Summarize and communicate quality assurance activities and results
+    intent: How quality assurance is performing, which deviations it found and how they trend is reported regularly, as the strategy defines, to those who need to know or act.
+    outcomes: [3, 4]
+    evidence:
+      - Periodic quality assurance reports with trend data
+      - Distribution evidence for the reports
+    rule_ids: [SAC.RC.1, SAC.RC.2, SUP.1.RC.4, SUP.1.RC.5]
+  - id: SUP.1.BP5
+    name: Ensure resolution of non-conformances
+    intent: Deviations found by product and process quality assurance are analysed, followed, corrected and kept from recurring.
+    outcomes: [3, 6]
+    evidence:
+      - Non-conformance records with cause, action, status and closure evidence
+    rule_ids: [SUP.1.RL.8, SUP.1.RL.9, SUP.1.RC.4, SUP.1.RC.5, SUP.1.RC.8]
+  - id: SUP.1.BP6
+    name: Implement an escalation mechanism
+    intent: An escalation path defined in the strategy lets quality assurance bring problems to suitable management levels and other stakeholders for resolution; the path is kept working.
+    outcomes: [5, 6]
+    evidence:
+      - Documented escalation path
+      - Escalation records with management response
+    rule_ids: [DID.RL.9, SUP.1.RC.4, SUP.1.RC.5, SUP.1.RC.8]
+output_work_products:
+  - id: "08-13"
+    name: Quality plan
+    outcomes: [1, 2]
+  - id: "13-04"
+    name: Communication record
+    outcomes: [3, 4, 5]
+  - id: "13-07"
+    name: Problem record
+    outcomes: [3, 5]
+  - id: "13-18"
+    name: Quality record
+    outcomes: [2, 3, 4]
+  - id: "13-19"
+    name: Review record
+    outcomes: [2, 3, 4]
+  - id: "14-02"
+    name: Corrective action register
+    outcomes: [3, 5, 6]
+  - id: "18-07"
+    name: Quality criteria
+    outcomes: [1]
+# depends_on: "from" is the practice whose rating depends on "to".
+# The governing guideline ID is given as a trailing comment.
+# Mutual relations are listed once per direction.
+depends_on:
+  - from: SUP.1.BP2
+    to: SUP.1.BP1
+    kind: recommendation  # SUP.1.RC.6
+  - from: SUP.1.BP3
+    to: SUP.1.BP1
+    kind: recommendation  # SUP.1.RC.7
+  - from: SUP.1.BP4
+    to: SUP.1.BP1
+    kind: recommendation  # ID not established
+  - from: SUP.1.BP6
+    to: SUP.1.BP1
+    kind: recommendation  # ID not established
+  - from: SUP.1.BP4
+    to: SUP.1.BP2
+    kind: recommendation  # SUP.1.RC.4
+  - from: SUP.1.BP4
+    to: SUP.1.BP3
+    kind: recommendation  # SUP.1.RC.5
+  - from: SUP.1.BP5
+    to: SUP.1.BP2
+    kind: recommendation  # SUP.1.RC.4
+  - from: SUP.1.BP5
+    to: SUP.1.BP3
+    kind: recommendation  # SUP.1.RC.5
+  - from: SUP.1.BP6
+    to: SUP.1.BP2
+    kind: recommendation  # SUP.1.RC.4
+  - from: SUP.1.BP6
+    to: SUP.1.BP3
+    kind: recommendation  # SUP.1.RC.5
+  # SUP.1.RC.8: mutual relation with SUP.9 process performance (PA 1.1)
+  - from: SUP.1.BP5
+    to: SUP.9
+    kind: recommendation  # SUP.1.RC.8
+  - from: SUP.9
+    to: SUP.1.BP5
+    kind: recommendation  # SUP.1.RC.8
+  - from: SUP.1.BP6
+    to: SUP.9
+    kind: recommendation  # SUP.1.RC.8
+  - from: SUP.9
+    to: SUP.1.BP6
+    kind: recommendation  # SUP.1.RC.8
+  - from: SUP.1.BP2
+    to: SUP.8.BP8
+    kind: recommendation  # SUP.1.RC.9
+  - from: SUP.8.BP8
+    to: SUP.1.BP2
+    kind: recommendation  # SUP.1.RC.9

@@ -1,0 +1,114 @@
+id: REU.2
+name: Reuse Program Management
+group: REU
+scope: other
+purpose: >-
+  Run reuse in the organization as a planned, controlled and monitored
+  programme and take up reuse opportunities systematically.
+outcomes:
+  - n: 1
+    text: A reuse strategy exists that states why, where and to what end the organization reuses.
+  - n: 2
+    text: Every domain has been examined for how much reuse it can offer.
+  - n: 3
+    text: The domains where reuse will be explored or practised are selected.
+  - n: 4
+    text: The ability of the organization to reuse systematically has been assessed.
+  - n: 5
+    text: Proposed reuse is evaluated to confirm the reused product fits the application it is intended for.
+  - n: 6
+    text: Reuse is carried out in line with the strategy.
+  - n: 7
+    text: Channels for feedback, communication and notification between the parties involved are set up and working.
+  - n: 8
+    text: The reuse programme is monitored and evaluated.
+base_practices:
+  - id: REU.2.BP1
+    name: Define organizational reuse strategy
+    intent: The reuse programme and the infrastructure it needs are defined for the organization.
+    outcomes: [1]
+    evidence:
+      - Reuse strategy and reuse policy
+      - Description of the asset repository and its governance
+    rule_ids: []
+  - id: REU.2.BP2
+    name: Identify domains for potential reuse
+    intent: Groups of systems and components that share properties are identified, such that reusable assets could be collected for building systems in that domain.
+    outcomes: [2]
+    evidence:
+      - Domain list with domain model and domain architecture
+    rule_ids: []
+  - id: REU.2.BP3
+    name: Assess domains for potential reuse
+    intent: Each domain is examined for where reusable components and products could be used and applied.
+    outcomes: [3]
+    evidence:
+      - Domain assessment report naming reuse candidates
+    rule_ids: []
+  - id: REU.2.BP4
+    name: Assess reuse maturity
+    intent: The readiness of the organization for reuse is understood, giving a starting baseline and success criteria for running the programme.
+    outcomes: [4]
+    evidence:
+      - Reuse maturity assessment with baseline metrics and targets
+    rule_ids: []
+  - id: REU.2.BP5
+    name: Evaluate reuse proposals
+    intent: Offered reusable components and products are evaluated for fitness for the use that is proposed.
+    outcomes: [5]
+    evidence:
+      - Reuse proposal with evaluation result and decision
+    rule_ids: []
+  - id: REU.2.BP6
+    name: Implement the reuse program
+    intent: The activities the programme defines are carried out.
+    outcomes: [6]
+    evidence:
+      - Reuse plan with completed activities
+      - Assets published in the repository and consumed by projects
+    rule_ids: []
+  - id: REU.2.BP7
+    name: Get feedback from reuse
+    intent: Mechanisms for feedback, assessment, communication and notification between the parties involved exist and are used to steer the programme.
+    outcomes: [7, 8]
+    evidence:
+      - Feedback records from consuming projects
+      - Notifications about asset changes or defects
+    rule_ids: []
+  - id: REU.2.BP8
+    name: Monitor reuse
+    intent: Programme implementation is checked periodically and judged against actual needs.
+    outcomes: [6, 8]
+    evidence:
+      - Reuse evaluation reports
+      - Reuse metrics over time
+    rule_ids: []
+output_work_products:
+  - id: "04-02"
+    name: Domain architecture
+    outcomes: [2]
+  - id: "04-03"
+    name: Domain model
+    outcomes: [2]
+  - id: "08-17"
+    name: Reuse plan
+    outcomes: [5, 6]
+  - id: "09-03"
+    name: Reuse policy
+    outcomes: [1]
+  - id: "12-03"
+    name: Reuse proposal
+    outcomes: [4]
+  - id: "13-04"
+    name: Communication record
+    outcomes: [7]
+  - id: "15-07"
+    name: Reuse evaluation report
+    outcomes: [5, 6, 8]
+  - id: "15-13"
+    name: Assessment/audit report
+    outcomes: [3, 4]
+  - id: "19-05"
+    name: Reuse strategy
+    outcomes: [1]
+depends_on: []

@@ -1,0 +1,138 @@
+id: SYS.3
+name: System Architectural Design
+group: SYS
+scope: vda
+purpose: >-
+  Define the elements of the system, assign every system requirement to them, describe their
+  interfaces and interaction, and judge the resulting design against explicit criteria.
+outcomes:
+  - n: 1
+    text: A system architectural design exists that names the elements the system is made of.
+  - n: 2
+    text: Each system requirement is assigned to system elements.
+  - n: 3
+    text: For every system element the interfaces are specified.
+  - n: 4
+    text: How the system elements behave dynamically is specified.
+  - n: 5
+    text: System requirements and the architectural design agree in content and are linked in both directions.
+  - n: 6
+    text: The architectural design is agreed and has been made known to every affected party.
+base_practices:
+  - id: SYS.3.BP1
+    name: Develop system architectural design
+    intent: Produce a documented architecture that identifies the system's elements and shows how they answer the functional and the non-functional system requirements.
+    outcomes: [1]
+    evidence:
+      - Architecture description with uniquely identified elements over one or more hierarchy levels
+      - Stated responsibility for each element
+    rule_ids: [SYS.3.RL.1, SYS.3.RL.2, SYS.3.RC.2]
+  - id: SYS.3.BP2
+    name: Allocate system requirements
+    intent: Assign every system requirement to the architecture element or elements that have to fulfil it.
+    outcomes: [2]
+    evidence:
+      - Allocation attribute or link per system requirement
+      - List of allocated requirements per element
+    rule_ids: [SYS.3.RL.3, SYS.3.RL.7]
+  - id: SYS.3.BP3
+    name: Define interfaces of system elements
+    intent: Identify, work out and write down the interfaces of each system element.
+    outcomes: [3]
+    evidence:
+      - Interface definitions naming both end points
+      - Exchanged signals, energy or media with electrical, timing and protocol properties
+    rule_ids: [SYS.3.RL.4, SYS.3.RL.7]
+  - id: SYS.3.BP4
+    name: Describe dynamic behavior
+    intent: Evaluate and document how the system elements interact over time, across the operating modes of the system.
+    outcomes: [4]
+    evidence:
+      - Sequence, state or timing descriptions per operating mode
+      - Descriptions of mode transitions
+    rule_ids: [SYS.3.RL.5, SYS.3.RL.7]
+  - id: SYS.3.BP5
+    name: Evaluate alternative system architectures
+    intent: Define evaluation criteria, compare alternative designs against them and record why the selected design was chosen.
+    outcomes: [1]
+    evidence:
+      - Decision record listing criteria and the alternatives considered
+      - Assessment per alternative and rationale for the choice
+    rule_ids: [SYS.3.RL.6, SYS.3.RL.7, SYS.3.RC.1]
+  - id: SYS.3.BP6
+    name: Establish bidirectional traceability
+    intent: Link system requirements and architecture elements so the relation can be followed from either side.
+    outcomes: [5]
+    evidence:
+      - Link data or trace matrix between requirements and elements
+      - Coverage figures in both directions
+    rule_ids: [TAC.RC.1, TAC.RC.2, TAC.RC.3, TAC.RC.4, TAC.RL.2, TAC.RL.3, SYS.3.RL.7, SYS.3.RL.8, SYS.3.RC.3]
+  - id: SYS.3.BP7
+    name: Ensure consistency
+    intent: Check the content of the architecture against the system requirements so the design neither contradicts nor omits what is required.
+    outcomes: [1, 2, 5, 6]
+    evidence:
+      - Review record of the architecture against the system requirements
+      - Findings and their closure
+    rule_ids: [TAC.RL.1, TAC.RC.4, TAC.RL.2, TAC.RL.3, SYS.3.RL.7, SYS.3.RC.4, CL2.RC.18]
+  - id: SYS.3.BP8
+    name: Communicate agreed system architectural design
+    intent: Make sure the agreed design and each later update reaches all parties who need it.
+    outcomes: [6]
+    evidence:
+      - Release note or notification per architecture baseline
+      - Distribution list of affected parties
+      - Acknowledgement from the receiving disciplines
+    rule_ids: [SAC.RL.1, SAC.RC.4, SAC.RC.5, SAC.RC.6, SYS.3.RL.7, CL2.RC.9]
+output_work_products:
+  - id: "04-06"
+    name: System architectural design
+    outcomes: [1, 2, 3, 4, 5]
+  - id: "13-04"
+    name: Communication record
+    outcomes: [6]
+  - id: "13-19"
+    name: Review record
+    outcomes: [5]
+  - id: "13-22"
+    name: Traceability record
+    outcomes: [5]
+  - id: "17-08"
+    name: Interface requirements specification
+    outcomes: [3]
+# Dependencies from the rating-consistency diagram. "from" is always a practice of this process.
+# A bare process ID as "to" means the process as a whole (its PA 1.1 rating).
+depends_on:
+  - from: SYS.3.BP2
+    to: SYS.3.BP1
+    kind: rule             # SYS.3.RL.7
+  - from: SYS.3.BP3
+    to: SYS.3.BP1
+    kind: rule             # SYS.3.RL.7
+  - from: SYS.3.BP4
+    to: SYS.3.BP1
+    kind: rule             # SYS.3.RL.7
+  - from: SYS.3.BP5
+    to: SYS.3.BP1
+    kind: rule             # SYS.3.RL.7
+  - from: SYS.3.BP6
+    to: SYS.3.BP1
+    kind: rule             # SYS.3.RL.7
+  - from: SYS.3.BP7
+    to: SYS.3.BP1
+    kind: rule             # SYS.3.RL.7
+  - from: SYS.3.BP8
+    to: SYS.3.BP1
+    kind: rule             # SYS.3.RL.7
+  - from: SYS.3.BP6
+    to: SYS.3.BP2
+    kind: rule             # solid line, no rule ID printed on it
+  - from: SYS.3.BP1
+    to: SYS.2
+    kind: recommendation   # SYS.3.RC.2, arrowhead at both ends
+  - from: SYS.3.BP6
+    to: SYS.2
+    kind: recommendation   # SYS.3.RC.3, arrowhead at both ends
+  - from: SYS.3.BP7
+    to: SYS.2
+    kind: recommendation   # SYS.3.RC.4, arrowhead at both ends

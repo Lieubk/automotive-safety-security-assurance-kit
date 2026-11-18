@@ -1,0 +1,147 @@
+id: SYS.5
+name: System Qualification Test
+group: SYS
+scope: vda
+purpose: >-
+  Test the fully integrated system against the system requirements so that there is evidence it
+  complies with them and can be handed over for delivery.
+outcomes:
+  - n: 1
+    text: A system qualification test strategy, covering regression testing as well and fitting both the release plan and the project plan, exists for testing the integrated system.
+  - n: 2
+    text: A system qualification test specification has been derived from that strategy and is capable of showing that the integrated system complies with the system requirements.
+  - n: 3
+    text: Test cases are chosen from the specification as the release plan and the test strategy require.
+  - n: 4
+    text: The chosen cases are run against the integrated system and the results are recorded.
+  - n: 5
+    text: System requirements and qualification test cases agree in content and are linked in both directions, and test cases are linked in both directions to their results.
+  - n: 6
+    text: The qualification test results are summarised and have been made known to every affected party.
+base_practices:
+  - id: SYS.5.BP1
+    name: Develop system qualification test strategy including regression test strategy
+    intent: Define how qualification testing is done in line with project plan and release plan, including how the integrated system is re-tested when a system item changes.
+    outcomes: [1]
+    evidence:
+      - Test strategy stating scope, methods, environments and entry and exit criteria
+      - Selection criteria per release
+      - Regression rules for changed system items
+    rule_ids: [SAP.RL.1, SAP.RL.2, SAP.RL.3, SAP.RL.4, APA.RL.8, SYS.5.RL.1, SYS.5.RL.2, SYS.5.RC.2, SWE.1.RC.5, SWE.1.RC.6]
+  - id: SYS.5.BP2
+    name: Develop specification for system qualification test
+    intent: Write test cases that build on the verification criteria, follow the test strategy and are able to demonstrate that the integrated system complies with the system requirements.
+    outcomes: [2]
+    evidence:
+      - Test cases with ID, covered requirement and underlying verification criterion
+      - Preconditions, stimulus and expected result per test case
+    rule_ids: [SYS.5.RL.3, SYS.5.RL.9, SYS.5.RC.3]
+  - id: SYS.5.BP3
+    name: Select test cases
+    intent: Pick test cases from the specification so that coverage is adequate for what the release plan and the test strategy demand.
+    outcomes: [3]
+    evidence:
+      - Selection list per release with selection criterion and achieved requirement coverage
+      - Regression set for changed items
+    rule_ids: [SYS.5.RL.4, SYS.5.RC.1, SYS.5.RL.10, SYS.5.RL.11, SYS.5.RC.4]
+  - id: SYS.5.BP4
+    name: Test integrated system
+    intent: Execute the selected test cases on the integrated system and record both results and logs.
+    outcomes: [4]
+    evidence:
+      - Result per executed case with verdict, tested configuration, environment, date and tester
+      - Raw test logs
+      - Problem reports for failed cases
+    rule_ids: [SYS.5.RL.5, SYS.5.RL.6, SYS.5.RL.7, SYS.5.RL.8, SYS.5.RL.12]
+  - id: SYS.5.BP5
+    name: Establish bidirectional traceability
+    intent: Link system requirements and qualification test cases in both directions, and likewise test cases and their results.
+    outcomes: [5]
+    evidence:
+      - Link data from system requirements to test cases
+      - Link data from test cases to results
+      - Coverage figures derived from the links
+    rule_ids: [TAC.RC.1, TAC.RC.2, TAC.RC.3, TAC.RC.4, SYS.5.RC.5]
+  - id: SYS.5.BP6
+    name: Ensure consistency
+    intent: Check the content of the qualification test cases against the system requirements they claim to cover.
+    outcomes: [5]
+    evidence:
+      - Review record of the test specification against the system requirements
+      - Findings and their closure
+    rule_ids: [TAC.RL.1, TAC.RC.4, SYS.5.RC.6, CL2.RC.18]
+  - id: SYS.5.BP7
+    name: Summarize and communicate results
+    intent: Condense the qualification test results into a summary and get it to all affected parties.
+    outcomes: [6]
+    evidence:
+      - Test summary report per release with counts, open problems and requirement coverage
+      - Distribution record for the summary
+    rule_ids: [SAC.RC.1, SAC.RC.2, SAC.RC.3, SAC.RC.4, SAC.RC.5, SAC.RC.6, CL2.RC.10]
+output_work_products:
+  - id: "08-50"
+    name: Test specification
+    outcomes: [2, 3]
+  - id: "08-52"
+    name: Test plan
+    outcomes: [1]
+  - id: "13-04"
+    name: Communication record
+    outcomes: [6]
+  - id: "13-19"
+    name: Review record
+    outcomes: [5]
+  - id: "13-22"
+    name: Traceability record
+    outcomes: [5]
+  - id: "13-50"
+    name: Test result
+    outcomes: [4, 6]
+# Dependencies from the rating-consistency diagram. "from" is always a practice of this process.
+# A bare process ID as "to" means the process as a whole (its PA 1.1 rating).
+depends_on:
+  - from: SYS.5.BP2
+    to: SYS.5.BP1
+    kind: rule             # SYS.5.RL.8, SYS.5.RL.9
+  - from: SYS.5.BP3
+    to: SYS.5.BP1
+    kind: rule             # SYS.5.RL.8, SYS.5.RL.11
+  - from: SYS.5.BP3
+    to: SYS.5.BP2
+    kind: rule             # SYS.5.RL.10
+  - from: SYS.5.BP4
+    to: SYS.5.BP3
+    kind: rule             # SYS.5.RL.12
+  - from: SYS.5.BP7
+    to: SYS.5.BP4
+    kind: rule             # solid line, no rule ID printed
+  - from: SYS.5.BP5
+    to: SYS.5.BP2
+    kind: recommendation   # dashed line, no ID printed; a second dashed line marked "no RC" joins the same pair
+  - from: SYS.5.BP5
+    to: SYS.5.BP4
+    kind: recommendation   # dashed line, no ID printed
+  - from: SYS.5.BP1
+    to: MAN.3
+    kind: recommendation   # SYS.5.RC.2, line without arrowhead to the MAN.3 / SPL.2 group
+  - from: SYS.5.BP1
+    to: SPL.2
+    kind: recommendation   # SYS.5.RC.2, line without arrowhead to the MAN.3 / SPL.2 group
+  - from: SYS.5.BP3
+    to: MAN.3
+    kind: recommendation   # SYS.5.RC.4, line without arrowhead to the MAN.3 / SPL.2 group
+  - from: SYS.5.BP3
+    to: SPL.2
+    kind: recommendation   # SYS.5.RC.4, line without arrowhead to the MAN.3 / SPL.2 group
+  - from: SYS.5.BP2
+    to: SYS.2
+    kind: recommendation   # printed as RC.5 on the diagram, arrowhead at both ends
+  - from: SYS.5.BP5
+    to: SYS.2
+    kind: recommendation   # SYS.5.RC.5, arrowhead at both ends
+  - from: SYS.5.BP6
+    to: SYS.2
+    kind: recommendation   # SYS.5.RC.6, arrowhead at both ends
+  - from: SYS.5.BP6
+    to: SYS.5.BP2
+    kind: recommendation   # branch of the SYS.5.RC.6 line, arrowhead at BP2

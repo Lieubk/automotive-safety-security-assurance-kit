@@ -1,0 +1,170 @@
+id: SWE.1
+name: Software Requirements Analysis
+group: SWE
+scope: vda            # marked as VDA scope, with rating-consistency guidance
+purpose: >-
+  Derive a structured, analysed and verifiable set of software requirements from the
+  software-relevant parts of the system requirements and the system architecture, keep it
+  traceable and consistent with those inputs, and get it agreed and distributed.
+outcomes:
+  - n: 1
+    text: "The requirements the software elements of the system must fulfil, and the software's interfaces, are defined."
+  - n: 2
+    text: "Requirements are categorised and have been checked for correctness and verifiability."
+  - n: 3
+    text: "The effect of the software requirements on the environment the software runs in is understood."
+  - n: 4
+    text: "An implementation priority exists for the requirements."
+  - n: 5
+    text: "The requirement set is revised whenever a change makes that necessary."
+  - n: 6
+    text: "Software requirements are consistent with the system requirements and with the system architectural design, and traceable to each of them both ways."
+  - n: 7
+    text: "Cost, schedule and technical consequences of the requirements have been assessed."
+  - n: 8
+    text: "The requirements are agreed and all affected parties have been informed."
+base_practices:
+  - id: SWE.1.BP1
+    name: Specify software requirements
+    intent: "Derive functional and non-functional software requirements from system requirements, system architecture and their changes, and record them as items in a software requirements specification."
+    outcomes: [1, 5, 7]
+    evidence:
+      - "Requirement items with unique ID, one shall-statement, type attribute and ASIL / QM attribute"
+      - "Interface requirement items for the hardware-software interface, bus signals, diagnostic services, non-volatile data and calibration parameters"
+      - "Item history showing updates that follow upstream change requests"
+    # SWE.1.RC.5 and SWE.1.RC.6 appear only on the rating-consistency diagram (BP1 to SYS.2 / SYS.3)
+    rule_ids: [PLS.RC.4, PLS.RC.5, APA.RL.1, APA.RL.3, SWE.1.RL.1, SWE.1.RL.2, SWE.1.RL.3, SWE.1.RC.5, SWE.1.RC.6]
+  - id: SWE.1.BP2
+    name: Structure software requirements
+    intent: "Organise the specification by clustering, ordering, categorising and prioritising the items; prioritising normally assigns each item to a planned release."
+    outcomes: [2, 4]
+    evidence:
+      - "Specification structure by feature or function group"
+      - "Category attribute with a defined value list on every item"
+      - "Priority and target-release attribute on every item, and a release-content view generated from it"
+    rule_ids: [SWE.1.RL.4, SWE.1.RL.5, SWE.1.RC.1, SWE.1.RL.10]
+  - id: SWE.1.BP3
+    name: Analyze software requirements
+    intent: "Examine the items and their interdependencies for correctness, feasibility and verifiability, feed risk identification, and assess cost, schedule and technical impact."
+    outcomes: [2, 7]
+    evidence:
+      - "Requirement analysis or review record with a quality checklist per item or item group"
+      - "Feasibility notes such as timing or memory estimates or prototype results"
+      - "Impact analysis per change request with effort and schedule effect"
+      - "Risk list entries that reference the triggering requirement"
+    rule_ids: [AGE.RC.3, SWE.1.RL.6, SWE.1.RC.2, SWE.1.RL.10]
+  - id: SWE.1.BP4
+    name: Analyze the impact on the operating environment
+    intent: "Analyse what the requirements mean for interfaces of other system elements and for the hardware and basic software the software executes on."
+    outcomes: [3, 7]
+    evidence:
+      - "Analysis notes on microcontroller resources, peripherals, hardware-software interface, basic software configuration and bus load"
+      - "Open points raised to system or hardware architecture with their resolution"
+      - "Interface requirement items updated as a result of the analysis"
+    rule_ids: [SWE.1.RC.3, SWE.1.RC.4, SWE.1.RL.10]
+  - id: SWE.1.BP5
+    name: Develop verification criteria
+    intent: "Give every requirement qualitative and quantitative criteria that define how its fulfilment is judged and that later test cases and any other verification measure build on."
+    outcomes: [2, 7]
+    evidence:
+      - "Verification-criteria attribute per item with measurable pass / fail conditions"
+      - "Verification-method attribute per item (test, analysis, review, inspection)"
+      - "List of items not verifiable by test with the alternative measure named"
+    rule_ids: [VEC.RL.1, VEC.RL.2, PLS.RC.8, SWE.1.RL.7, SWE.1.RL.10]
+  - id: SWE.1.BP6
+    name: Establish bidirectional traceability
+    intent: "Maintain links, navigable both ways, from software requirements to system requirements and to system architecture, without redundant linking."
+    outcomes: [6]
+    evidence:
+      - "Link records from each software requirement to system requirement or system architecture element IDs"
+      - "Generated coverage report in both directions listing orphans"
+      - "Justification attribute on software requirements that have no parent"
+    rule_ids: [TAC.RC.1, TAC.RC.2, TAC.RC.3, TAC.RC.4, TAC.RL.2, TAC.RL.3, SWE.1.RL.8, SWE.1.RL.9, SWE.1.RL.10, SWE.1.RC.9, SWE.1.RC.10]
+  - id: SWE.1.BP7
+    name: Ensure consistency
+    intent: "Make sure the content of the software requirements agrees with system requirements and system architecture, and demonstrate it by review."
+    outcomes: [6]
+    evidence:
+      - "Review record of software requirements against their system-level parents with findings and closure"
+      - "Suspect-link list raised after upstream changes and worked off"
+      - "Re-review entries after change requests"
+    # The per-practice ID list gives the range SWE.1.RL.8-12 for this practice; the diagram labels the
+    # same dependencies RC.11 and RC.12. SWE.1.RL.11 / SWE.1.RL.12 are kept but unconfirmed; they may
+    # stand for SWE.1.RC.11 / SWE.1.RC.12 (the last two entries, taken from the diagram).
+    rule_ids: [TAC.RL.1, TAC.RL.4, TAC.RL.2, TAC.RL.3, SWE.1.RL.8, SWE.1.RL.9, SWE.1.RL.10, SWE.1.RL.11, SWE.1.RL.12, CL2.RC.18, SWE.1.RC.11, SWE.1.RC.12]
+  - id: SWE.1.BP8
+    name: Communicate agreed software requirements
+    intent: "Make the agreed requirement set and every later update known to all parties that need them."
+    outcomes: [8]
+    evidence:
+      - "Approved baseline tag of the specification"
+      - "Release note or notification naming the baseline and the recipients"
+      - "Minutes or sign-off showing agreement, and change notifications for updates"
+    rule_ids: [SAC.RL.1, SAC.RC.4, SAC.RC.5, SAC.RC.6, TPS.RC.2, TPS.RC.3, SWE.1.RL.10, CL2.RC.9]
+output_work_products:
+  - id: "13-04"
+    name: Communication record
+    outcomes: [8]
+  - id: "13-19"
+    name: Review record
+    outcomes: [6]
+  - id: "13-21"
+    name: Change control record
+    outcomes: [5, 7]
+  - id: "13-22"
+    name: Traceability record
+    outcomes: [1, 6]
+  - id: "15-01"
+    name: Analysis report
+    outcomes: [2, 3, 4, 7]
+  - id: "17-08"
+    name: Interface requirements specification
+    outcomes: [1, 3]
+  - id: "17-11"
+    name: Software requirements specification
+    outcomes: [1]
+  - id: "17-50"
+    name: Verification criteria
+    outcomes: [2]
+# depends_on: "from" is the practice whose rating depends on "to".
+# A "to" that is a bare process ID means the PA 1.1 (process performance) rating of that process.
+depends_on:
+  - from: SWE.1.BP2
+    to: SWE.1.BP1
+    kind: rule            # SWE.1.RL.10
+  - from: SWE.1.BP3
+    to: SWE.1.BP1
+    kind: rule            # SWE.1.RL.10
+  - from: SWE.1.BP4
+    to: SWE.1.BP1
+    kind: rule            # SWE.1.RL.10
+  - from: SWE.1.BP5
+    to: SWE.1.BP1
+    kind: rule            # SWE.1.RL.10
+  - from: SWE.1.BP6
+    to: SWE.1.BP1
+    kind: rule            # SWE.1.RL.10
+  - from: SWE.1.BP7
+    to: SWE.1.BP1
+    kind: rule            # SWE.1.RL.10
+  - from: SWE.1.BP8
+    to: SWE.1.BP1
+    kind: rule            # SWE.1.RL.10
+  - from: SWE.1.BP1
+    to: SYS.2
+    kind: recommendation  # SWE.1.RC.5 / SWE.1.RC.6 (one line to the SYS.2 + SYS.3 group; ID-to-process split not shown)
+  - from: SWE.1.BP1
+    to: SYS.3
+    kind: recommendation  # SWE.1.RC.5 / SWE.1.RC.6 (see above)
+  - from: SWE.1.BP6
+    to: SYS.2
+    kind: recommendation  # SWE.1.RC.9
+  - from: SWE.1.BP6
+    to: SYS.3
+    kind: recommendation  # SWE.1.RC.10
+  - from: SWE.1.BP7
+    to: SYS.2
+    kind: recommendation  # SWE.1.RC.11
+  - from: SWE.1.BP7
+    to: SYS.3
+    kind: recommendation  # SWE.1.RC.12

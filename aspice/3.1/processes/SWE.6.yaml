@@ -1,0 +1,147 @@
+id: SWE.6
+name: Software Qualification Test
+group: SWE
+scope: vda            # marked as VDA scope, with rating-consistency guidance
+purpose: >-
+  Test the integrated software so that there is evidence it complies with the software
+  requirements.
+outcomes:
+  - n: 1
+    text: "A qualification test strategy for the integrated software exists, includes regression testing, and fits project and release planning."
+  - n: 2
+    text: "A qualification test specification derived from the strategy exists and is fit to show that the integrated software meets the software requirements."
+  - n: 3
+    text: "Test cases have been chosen from the specification as the strategy and the release plan require."
+  - n: 4
+    text: "The integrated software has been tested with the chosen test cases and the results are on record."
+  - n: 5
+    text: "Software requirements and qualification test cases, and test cases and their results, are consistent and linked in both directions."
+  - n: 6
+    text: "Qualification test results have been summarised and passed to all affected parties."
+base_practices:
+  - id: SWE.6.BP1
+    name: Develop software qualification test strategy including regression test strategy
+    intent: "Define how the integrated software is qualification-tested in line with project and release planning, and what is re-tested when an item changes."
+    outcomes: [1]
+    evidence:
+      - "Qualification test strategy with scope per release, methods, test design techniques and environments"
+      - "Entry, exit and pass / fail criteria, regression rules and schedule tied to the release plan"
+      - "Roles, tester independence and defect handling"
+    rule_ids: [SAP.RL.1, SAP.RL.2, SAP.RL.3, SAP.RL.4, AGE.RC.9, PLS.RC.7, APA.RL.8, SWE.6.RL.1, SWE.6.RL.2, SWE.6.RC.2]
+  - id: SWE.6.BP2
+    name: Develop specification for software qualification test
+    intent: "Specify test cases derived from the requirements' verification criteria, following the test strategy, that can show the integrated software complies with the software requirements."
+    outcomes: [2]
+    evidence:
+      - "Test cases with ID, linked requirement, reference to verification criteria, preconditions, steps and expected results with tolerances"
+      - "Test cases for non-functional requirements such as timing, memory, robustness, fault reaction and diagnostics"
+    rule_ids: [SWE.6.RL.3, SWE.6.RL.8, SWE.6.RL.9, SWE.6.RC.3]
+  - id: SWE.6.BP3
+    name: Select test cases
+    intent: "Pick test cases from the specification so that coverage is sufficient for the test strategy and the release plan."
+    outcomes: [3]
+    evidence:
+      - "Test selection list per release with coverage rationale (release content, changed functions, regression set)"
+      - "Statement of what is deliberately not tested and why"
+    rule_ids: [SWE.6.RL.4, SWE.6.RC.1, SWE.6.RL.8, SWE.6.RL.10, SWE.6.RL.11, SWE.6.RC.4]
+  - id: SWE.6.BP4
+    name: Test integrated software
+    intent: "Execute the selected test cases on the integrated software and record results and logs."
+    outcomes: [4]
+    evidence:
+      - "Test log and result per test case with verdict and identification of the tested software (version, checksum)"
+      - "Hardware sample revision, environment and tool versions, tester and date"
+      - "Problem records for failures"
+    rule_ids: [SWE.6.RL.5, SWE.6.RL.6, SWE.6.RL.7, SWE.6.RL.12]
+  - id: SWE.6.BP5
+    name: Establish bidirectional traceability
+    intent: "Maintain two-way links between software requirements and qualification test cases and between test cases and their results."
+    outcomes: [5]
+    evidence:
+      - "Test cases referencing requirement IDs"
+      - "Results keyed by test case ID and software version"
+      - "Generated coverage report with a verdict roll-up per requirement"
+    rule_ids: [TAC.RC.1, TAC.RC.2, TAC.RC.3, TAC.RC.4, SWE.6.RC.5]
+  - id: SWE.6.BP6
+    name: Ensure consistency
+    intent: "Make sure the qualification test cases agree in content with the software requirements they verify and demonstrate it by review."
+    outcomes: [5]
+    evidence:
+      - "Review record of the test specification against the requirements with findings and closure"
+      - "Re-review entries after requirement changes"
+    rule_ids: [TAC.RL.1, TAC.RC.4, SWE.6.RC.6, CL2.RC.18]
+  - id: SWE.6.BP7
+    name: Summarize and communicate results
+    intent: "Condense the qualification test results into a summary that lets recipients judge the consequences, and pass it to all affected parties."
+    outcomes: [6]
+    evidence:
+      - "Qualification test report per release with requirement coverage, passed / failed / not tested counts, open defects and recommendation"
+      - "Distribution record naming the recipients"
+    rule_ids: [SAC.RC.1, SAC.RC.2, SAC.RC.3, SAC.RC.4, SAC.RC.5, SAC.RC.6, CL2.RC.10]
+output_work_products:
+  - id: "08-50"
+    name: Test specification
+    outcomes: [2, 3]
+  - id: "08-52"
+    name: Test plan
+    outcomes: [1]
+  - id: "13-04"
+    name: Communication record
+    outcomes: [6]
+  - id: "13-19"
+    name: Review record
+    outcomes: [5]
+  - id: "13-22"
+    name: Traceability record
+    outcomes: [5]
+  - id: "13-50"
+    name: Test result
+    outcomes: [4, 6]
+# depends_on: "from" is the practice whose rating depends on "to".
+# A "to" that is a bare process ID means the PA 1.1 (process performance) rating of that process.
+depends_on:
+  - from: SWE.6.BP2
+    to: SWE.6.BP1
+    kind: rule            # SWE.6.RL.8, SWE.6.RL.9
+  - from: SWE.6.BP3
+    to: SWE.6.BP1
+    kind: rule            # SWE.6.RL.8, SWE.6.RL.11
+  - from: SWE.6.BP3
+    to: SWE.6.BP2
+    kind: rule            # SWE.6.RL.10
+  - from: SWE.6.BP4
+    to: SWE.6.BP3
+    kind: rule            # SWE.6.RL.12
+  - from: SWE.6.BP7
+    to: SWE.6.BP4
+    kind: rule            # solid line, no rule ID shown
+  - from: SWE.6.BP1
+    to: MAN.3
+    kind: recommendation  # SWE.6.RC.2 (line to the MAN.3 + SPL.2 group)
+  - from: SWE.6.BP1
+    to: SPL.2
+    kind: recommendation  # SWE.6.RC.2 (line to the MAN.3 + SPL.2 group)
+  - from: SWE.6.BP2
+    to: SWE.1
+    kind: recommendation  # SWE.6.RC.3 per the per-practice ID list; the line itself is labelled only "based on"
+  - from: SWE.6.BP3
+    to: MAN.3
+    kind: recommendation  # SWE.6.RC.4 (line to the MAN.3 + SPL.2 group; practice text names only the release plan)
+  - from: SWE.6.BP3
+    to: SPL.2
+    kind: recommendation  # SWE.6.RC.4
+  - from: SWE.6.BP5
+    to: SWE.1
+    kind: recommendation  # SWE.6.RC.5
+  - from: SWE.6.BP6
+    to: SWE.1
+    kind: recommendation  # SWE.6.RC.6
+  - from: SWE.6.BP6
+    to: SWE.6.BP2
+    kind: recommendation  # dashed branch of the BP6 line; the label "RC.3: ensure between" sits next to it (placement ambiguous)
+  - from: SWE.6.BP5
+    to: SWE.6.BP2
+    kind: recommendation  # dashed, no ID shown
+  - from: SWE.6.BP5
+    to: SWE.6.BP4
+    kind: recommendation  # dashed, no ID shown

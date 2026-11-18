@@ -1,0 +1,190 @@
+id: SWE.5
+name: Software Integration and Integration Test
+group: SWE
+scope: vda            # marked as VDA scope, with rating-consistency guidance
+purpose: >-
+  Combine software units step by step into the complete integrated software in line with
+  the architecture, and test the integrated items to show they comply with the
+  architecture, in particular at the interfaces between units and between items.
+outcomes:
+  - n: 1
+    text: "An integration strategy for the software items exists and is aligned with project planning, release planning and the architecture."
+  - n: 2
+    text: "A strategy for integration testing, regression testing included, exists and targets the interactions between units and between items."
+  - n: 3
+    text: "An integration test specification derived from the test strategy exists and is fit to show that integrated items comply with the architecture, including unit-to-unit and item-to-item interfaces."
+  - n: 4
+    text: "Units and items have been integrated step by step, as the integration strategy prescribes, until the complete integrated software exists."
+  - n: 5
+    text: "Test cases have been chosen from the specification as the test strategy and the release plan require."
+  - n: 6
+    text: "Integrated items have been tested with the chosen test cases and the results are on record."
+  - n: 7
+    text: "Architecture elements and integration test cases, and test cases and their results, are consistent and linked in both directions."
+  - n: 8
+    text: "Integration test results have been summarised and passed to all affected parties."
+base_practices:
+  - id: SWE.5.BP1
+    name: Develop software integration strategy
+    intent: "Define how the software items, identified from the architecture, are integrated and in which order, in line with project and release planning."
+    outcomes: [1]
+    evidence:
+      - "Integration strategy listing the software items derived from the architecture and the integration steps in order"
+      - "Mapping of integration steps to releases and entry criteria for items"
+      - "Rules for supplier deliveries, generated configuration and the build environment"
+    rule_ids: [SAP.RL.1, SAP.RL.2, SAP.RL.3, SAP.RL.4, AGE.RC.8, DID.RL.10, SWE.5.RL.1, SWE.5.RC.2, SWE.5.RC.3]
+  - id: SWE.5.BP2
+    name: Develop software integration test strategy including regression test strategy
+    intent: "Define how the integrated items are tested along the integration strategy, and what is re-tested when an item changes."
+    outcomes: [2]
+    evidence:
+      - "Integration test strategy with test steps aligned to the integration order, methods and environments"
+      - "Coverage goals for interfaces and calls, entry and exit criteria"
+      - "Regression rules"
+    # SWE.5.RL.10 is attached to BP2 only on the rating-consistency diagram
+    rule_ids: [SAP.RL.1, SAP.RL.2, SAP.RL.3, SAP.RL.4, APA.RL.8, SWE.5.RL.2, SWE.5.RL.3, SWE.5.RL.10]
+  - id: SWE.5.BP3
+    name: Develop specification for software integration test
+    intent: "Specify, per integrated item, test cases that follow the test strategy and can prove that interfaces between units and between items behave as the architecture specifies."
+    outcomes: [3]
+    evidence:
+      - "Integration test cases per integrated item with linked architecture element, preconditions, stimulation, expected result and environment"
+      - "Cases for data flow, scaling and invalid values across interfaces, call sequences and timing"
+      - "Cases for start-up and shutdown interplay and for memory and stack budgets"
+    rule_ids: [TPS.RC.11, SWE.5.RL.4, SWE.5.RL.9, SWE.5.RL.11, SWE.5.RC.4]
+  - id: SWE.5.BP4
+    name: Integrate software units and software items
+    intent: "Combine units into items and items into the integrated software in the way the integration strategy lays down."
+    outcomes: [4]
+    evidence:
+      - "Build per integration step (binary, map file) from a reproducible build, with build log"
+      - "Build list naming every item with its version"
+      - "Baseline tag of the integrated software and integration log with problems met"
+    rule_ids: [SWE.5.RL.12]
+  - id: SWE.5.BP5
+    name: Select test cases
+    intent: "Pick test cases from the integration test specification so that coverage is sufficient for the test strategy and the release plan."
+    outcomes: [5]
+    evidence:
+      - "Test selection list per integration step or release with reasons (new, changed, regression)"
+      - "Coverage statement of the selection against the strategy"
+    rule_ids: [SWE.5.RL.5, SWE.5.RC.1, SWE.5.RL.9, SWE.5.RL.13, SWE.5.RL.14, SWE.5.RC.5]
+  - id: SWE.5.BP6
+    name: Perform software integration test
+    intent: "Execute the selected test cases and record results and logs."
+    outcomes: [6]
+    evidence:
+      - "Test log and result per test case with verdict, build identification, environment and tool versions"
+      - "Measurement traces for timing and stack usage"
+      - "Problem records for failures"
+    rule_ids: [TPS.RC.12, SWE.5.RL.6, SWE.5.RL.7, SWE.5.RL.8, SWE.5.RL.15]
+  - id: SWE.5.BP7
+    name: Establish bidirectional traceability
+    intent: "Maintain two-way links between architecture elements and integration test cases and between test cases and their results."
+    outcomes: [7]
+    evidence:
+      - "Test cases referencing architecture element IDs"
+      - "Results keyed by test case ID and build"
+      - "Generated coverage report listing interfaces without test case and test cases without result"
+    rule_ids: [TAC.RC.1, TAC.RC.2, TAC.RC.3, TAC.RC.4, SWE.5.RC.6]
+  - id: SWE.5.BP8
+    name: Ensure consistency
+    intent: "Make sure the integration test cases agree in content with the architecture elements they address and demonstrate it by review."
+    outcomes: [7]
+    evidence:
+      - "Review record of the integration test specification against the architecture with findings and closure"
+      - "Re-review entries after architecture changes"
+    rule_ids: [TAC.RL.1, TAC.RC.4, SWE.5.RC.7, CL2.RC.18]
+  - id: SWE.5.BP9
+    name: Summarize and communicate results
+    intent: "Condense the integration test results into a summary that lets recipients judge the consequences, and pass it to all affected parties."
+    outcomes: [8]
+    evidence:
+      - "Integration test summary per release with scope, build, executed / passed / failed / blocked counts, interface coverage and open problems"
+      - "Distribution record naming the recipients"
+    rule_ids: [SAC.RC.1, SAC.RC.2, SAC.RC.3, SAC.RC.4, SAC.RC.5, SAC.RC.6, SAC.RL.2, CL2.RC.10]
+output_work_products:
+  - id: "01-03"
+    name: Software item
+    outcomes: [4]
+  - id: "01-50"
+    name: Integrated software
+    outcomes: [4]
+  - id: "08-50"
+    name: Test specification
+    outcomes: [3, 5]
+  - id: "08-52"
+    name: Test plan
+    outcomes: [1, 2]
+  - id: "13-04"
+    name: Communication record
+    outcomes: [8]
+  - id: "13-19"
+    name: Review record
+    outcomes: [7]
+  - id: "13-22"
+    name: Traceability record
+    outcomes: [7]
+  - id: "13-50"
+    name: Test result
+    outcomes: [6, 8]
+  - id: "17-02"
+    name: Build list
+    outcomes: [4, 7]
+# depends_on: "from" is the practice whose rating depends on "to".
+# A "to" that is a bare process ID means the PA 1.1 (process performance) rating of that process.
+depends_on:
+  - from: SWE.5.BP4
+    to: SWE.5.BP1
+    kind: rule            # SWE.5.RL.12
+  - from: SWE.5.BP2
+    to: SWE.5.BP1
+    kind: rule            # SWE.5.RL.10
+  - from: SWE.5.BP3
+    to: SWE.5.BP2
+    kind: rule            # SWE.5.RL.9, SWE.5.RL.11
+  - from: SWE.5.BP5
+    to: SWE.5.BP2
+    kind: rule            # SWE.5.RL.9, SWE.5.RL.14
+  - from: SWE.5.BP5
+    to: SWE.5.BP3
+    kind: rule            # SWE.5.RL.13, SWE.5.RL.14
+  - from: SWE.5.BP6
+    to: SWE.5.BP5
+    kind: rule            # SWE.5.RL.15
+  - from: SWE.5.BP9
+    to: SWE.5.BP6
+    kind: rule            # solid line, no rule ID shown
+  - from: SWE.5.BP7
+    to: SWE.5.BP6
+    kind: rule            # solid line, no rule ID shown
+  - from: SWE.5.BP7
+    to: SWE.5.BP3
+    kind: rule            # solid line, no rule ID shown; a dashed SWE.5.RC.6 branch also reaches BP3
+  - from: SWE.5.BP1
+    to: MAN.3
+    kind: recommendation  # SWE.5.RC.2 (line to the MAN.3 + SPL.2 group)
+  - from: SWE.5.BP1
+    to: SPL.2
+    kind: recommendation  # SWE.5.RC.2 (line to the MAN.3 + SPL.2 group)
+  - from: SWE.5.BP1
+    to: SWE.2
+    kind: recommendation  # SWE.5.RC.3
+  - from: SWE.5.BP3
+    to: SWE.2
+    kind: recommendation  # SWE.5.RC.4
+  - from: SWE.5.BP5
+    to: MAN.3
+    kind: recommendation  # SWE.5.RC.5 (line to the MAN.3 + SPL.2 group; practice text names only the release plan)
+  - from: SWE.5.BP5
+    to: SPL.2
+    kind: recommendation  # SWE.5.RC.5
+  - from: SWE.5.BP7
+    to: SWE.2
+    kind: recommendation  # SWE.5.RC.6
+  - from: SWE.5.BP8
+    to: SWE.2
+    kind: recommendation  # SWE.5.RC.7
+  - from: SWE.5.BP8
+    to: SWE.5.BP3
+    kind: recommendation  # SWE.5.RC.7

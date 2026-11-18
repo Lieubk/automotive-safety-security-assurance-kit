@@ -1,0 +1,151 @@
+id: SWE.3
+name: Software Detailed Design and Unit Construction
+group: SWE
+scope: vda            # marked as VDA scope, with rating-consistency guidance
+purpose: >-
+  Give every software component an evaluated detailed design that defines its software
+  units, and implement those units as designed.
+outcomes:
+  - n: 1
+    text: "A detailed design exists in which the software units are described."
+  - n: 2
+    text: "Every software unit has its interfaces specified."
+  - n: 3
+    text: "How the software units behave at runtime is specified."
+  - n: 4
+    text: "Consistency and two-way traceability hold for three relations: software requirements to units, architecture to detailed design, and detailed design to units."
+  - n: 5
+    text: "The detailed design and how it relates to the architecture has been agreed and made known to all affected parties."
+  - n: 6
+    text: "The units described by the detailed design have been built."
+base_practices:
+  - id: SWE.3.BP1
+    name: Develop software detailed design
+    intent: "Give each architecture component a detailed design that specifies all its units with regard to functional and non-functional requirements."
+    outcomes: [1]
+    evidence:
+      - "Per-component design file listing units with ID, purpose and source files"
+      - "Description of algorithms, state machines, data structures, calibration parameters and error handling"
+      - "For model-based units the model plus an explanatory description"
+    rule_ids: [APA.RL.2, SWE.3.RL.1, SWE.3.RL.2, SWE.3.RC.2, SWE.3.RC.3]
+  - id: SWE.3.BP2
+    name: Define interfaces of software units
+    intent: "Determine, for every software unit, the interfaces it offers and uses, and specify them in writing."
+    outcomes: [2]
+    evidence:
+      - "Function prototypes with parameter and return descriptions (type, unit, range, resolution)"
+      - "Definitions of shared data with access rules, pre- and postconditions"
+      - "Header files with structured comments that match the design"
+    rule_ids: [SWE.3.RL.3, SWE.3.RL.7]
+  - id: SWE.3.BP3
+    name: Describe dynamic behavior
+    intent: "Evaluate and document runtime behaviour and interaction of the units for which this is relevant."
+    outcomes: [3]
+    evidence:
+      - "State charts, sequence or activity diagrams, call graph"
+      - "Statement of call context, re-entrancy and shared-data protection"
+      - "Explicit not-applicable mark with reason for stateless units"
+    rule_ids: [SWE.3.RL.4, SWE.3.RL.7]
+  - id: SWE.3.BP4
+    name: Evaluate software detailed design
+    intent: "Assess the design against six aspects (interaction, interoperability, criticality, technical complexity, testability, risks); the result can steer unit verification."
+    outcomes: [1, 2, 3, 4]
+    evidence:
+      - "Design evaluation record or checklist addressing the six aspects"
+      - "Complexity metrics per unit against agreed limits"
+      - "Criticality classification per unit and list of risks and testability problems with actions"
+    rule_ids: [SWE.3.RL.5, SWE.3.RC.1, SWE.3.RL.7]
+  - id: SWE.3.BP5
+    name: Establish bidirectional traceability
+    intent: "Maintain two-way links for requirements to units, architecture to detailed design and detailed design to units, without redundant linking."
+    outcomes: [4]
+    evidence:
+      - "Trace references in design elements to component and requirement IDs"
+      - "Trace tags in source comments pointing to design element IDs"
+      - "Generated trace matrix with coverage in both directions"
+    rule_ids: [TAC.RC.1, TAC.RC.2, TAC.RC.3, TAC.RC.4, TAC.RL.2, TAC.RL.3, SWE.3.RL.7, SWE.3.RC.4, SWE.3.RC.5]
+  - id: SWE.3.BP6
+    name: Ensure consistency
+    intent: "Make sure units agree with the software requirements and that architecture, detailed design and units agree with each other; demonstrate it by review."
+    outcomes: [4]
+    evidence:
+      - "Design review record against architecture and requirements with findings and closure"
+      - "Code review record against the design with findings and closure"
+      - "Automated report comparing designed and implemented function signatures"
+    rule_ids: [TAC.RL.1, TAC.RC.4, TAC.RL.2, TAC.RL.3, MBD.RL.6, SWE.3.RL.7, SWE.3.RC.6, SWE.3.RC.7, CL2.RC.18]
+  - id: SWE.3.BP7
+    name: Communicate agreed software detailed design
+    intent: "Make the agreed detailed design and every later update known to all parties that need them."
+    outcomes: [5]
+    evidence:
+      - "Baselined design tag"
+      - "Notification to developers, verification engineers, testers and the integrator"
+      - "Minutes of the design review in which the design was agreed"
+    rule_ids: [SAC.RL.1, SAC.RC.4, SAC.RC.5, SAC.RC.6, SWE.3.RL.7, CL2.RC.9]
+  - id: SWE.3.BP8
+    name: Develop software units
+    intent: "Produce and document the executable form of every unit in line with the detailed design."
+    outcomes: [6]
+    evidence:
+      - "C source and header files under version control that build without warnings"
+      - "Generator version and configuration for generated code"
+      - "Commits linked to the work item or change request that caused them"
+    rule_ids: [SWE.3.RL.6, SWE.3.RL.7]
+output_work_products:
+  - id: "04-05"
+    name: Software detailed design
+    outcomes: [1, 2, 3]
+  - id: "11-05"
+    name: Software unit
+    outcomes: [6]
+  - id: "13-04"
+    name: Communication record
+    outcomes: [5]
+  - id: "13-19"
+    name: Review record
+    outcomes: [4]
+  - id: "13-22"
+    name: Traceability record
+    outcomes: [4]
+# depends_on: "from" is the practice whose rating depends on "to".
+# A "to" that is a bare process ID means the PA 1.1 (process performance) rating of that process.
+depends_on:
+  - from: SWE.3.BP2
+    to: SWE.3.BP1
+    kind: rule            # SWE.3.RL.7
+  - from: SWE.3.BP3
+    to: SWE.3.BP1
+    kind: rule            # SWE.3.RL.7
+  - from: SWE.3.BP4
+    to: SWE.3.BP1
+    kind: rule            # SWE.3.RL.7
+  - from: SWE.3.BP5
+    to: SWE.3.BP1
+    kind: rule            # SWE.3.RL.7
+  - from: SWE.3.BP6
+    to: SWE.3.BP1
+    kind: rule            # SWE.3.RL.7
+  - from: SWE.3.BP7
+    to: SWE.3.BP1
+    kind: rule            # SWE.3.RL.7
+  - from: SWE.3.BP8
+    to: SWE.3.BP1
+    kind: rule            # SWE.3.RL.7
+  - from: SWE.3.BP1
+    to: SWE.1
+    kind: recommendation  # SWE.3.RC.2 / SWE.3.RC.3 (one line to the SWE.1 + SWE.2 group; ID-to-process split not shown)
+  - from: SWE.3.BP1
+    to: SWE.2
+    kind: recommendation  # SWE.3.RC.2 / SWE.3.RC.3 (see above)
+  - from: SWE.3.BP5
+    to: SWE.1
+    kind: recommendation  # SWE.3.RC.4
+  - from: SWE.3.BP5
+    to: SWE.2
+    kind: recommendation  # SWE.3.RC.5
+  - from: SWE.3.BP6
+    to: SWE.1
+    kind: recommendation  # SWE.3.RC.6
+  - from: SWE.3.BP6
+    to: SWE.2
+    kind: recommendation  # SWE.3.RC.7

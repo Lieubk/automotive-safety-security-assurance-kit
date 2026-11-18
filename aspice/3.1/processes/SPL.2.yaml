@@ -1,0 +1,147 @@
+id: SPL.2
+name: Product Release
+group: SPL
+scope: extended
+purpose: >-
+  Control how a product release is put together, approved and handed over to
+  the customer it is meant for.
+outcomes:
+  - n: 1
+    text: It is decided what a product release contains.
+  - n: 2
+    text: The release is put together from configuration-controlled items.
+  - n: 3
+    text: Release documentation is defined and produced.
+  - n: 4
+    text: The way the release is delivered, and on what medium, is decided.
+  - n: 5
+    text: The release is approved against defined criteria.
+  - n: 6
+    text: The release reaches the intended customer.
+  - n: 7
+    text: Receipt of the release is confirmed.
+base_practices:
+  - id: SPL.2.BP1
+    name: Define the functional content of releases
+    intent: A release plan states which functionality goes into which release.
+    outcomes: [1, 3]
+    evidence:
+      - Release plan mapping features or requirements to releases, including the application parameters effective per release
+    rule_ids: []
+  - id: SPL.2.BP2
+    name: Define release products
+    intent: The products that make up a release are defined.
+    outcomes: [1]
+    evidence:
+      - Release content definition covering software, documentation and accompanying tools
+    rule_ids: []
+  - id: SPL.2.BP3
+    name: Establish a product release classification and numbering scheme
+    intent: Releases are classified and numbered by a scheme that reflects their purpose and what recipients may expect from them.
+    outcomes: [2]
+    evidence:
+      - Versioning scheme description
+      - Release identifiers that follow the scheme
+    rule_ids: []
+  - id: SPL.2.BP4
+    name: Define the build activities and build environment
+    intent: A consistent build process is defined and kept up to date.
+    outcomes: [2]
+    evidence:
+      - Build procedure or build scripts
+      - Build environment definition under configuration control
+    rule_ids: []
+  - id: SPL.2.BP5
+    name: Build the release from configured items
+    intent: The release is built only from configuration-controlled items, which safeguards its integrity.
+    outcomes: [2]
+    evidence:
+      - Build log referencing a baseline
+      - Build manifest listing inputs
+    rule_ids: []
+  - id: SPL.2.BP6
+    name: Communicate the type, service level and duration of support for a release
+    intent: The kind of support, its service level and how long it lasts are determined for a release and made known.
+    outcomes: [3]
+    evidence:
+      - Support statement in the release documentation or the agreement
+    rule_ids: []
+  - id: SPL.2.BP7
+    name: Determine the delivery media type for the release
+    intent: The delivery medium is chosen according to what the customer needs.
+    outcomes: [4]
+    evidence:
+      - Delivery method stated in the release plan or the agreement
+    rule_ids: []
+  - id: SPL.2.BP8
+    name: Identify the packaging for the release media
+    intent: The packaging for each kind of medium is defined.
+    outcomes: [4]
+    evidence:
+      - Packaging and protection specification
+    rule_ids: []
+  - id: SPL.2.BP9
+    name: Define and produce the product release documentation/release notes
+    intent: All documentation supporting the release is written, reviewed, approved and at hand.
+    outcomes: [3]
+    evidence:
+      - Release documentation set with review and approval status
+    rule_ids: []
+  - id: SPL.2.BP10
+    name: Ensure product release approval before delivery
+    intent: The release criteria are met before the release goes out.
+    outcomes: [5]
+    evidence:
+      - Release criteria checklist with results
+      - Approval record dated before delivery
+    rule_ids: []
+  - id: SPL.2.BP11
+    name: Ensure consistency
+    intent: The software release number agrees with the paper label and, where one exists, the label on the memory device.
+    outcomes: [5]
+    evidence:
+      - Identifier cross-check record
+    rule_ids: []
+  - id: SPL.2.BP12
+    name: Provide a release note
+    intent: Information describing the key characteristics of the release accompanies it.
+    outcomes: [6]
+    evidence:
+      - Release note delivered with the release
+    rule_ids: []
+  - id: SPL.2.BP13
+    name: Deliver the release to the intended customer
+    intent: The product is handed to the intended customer and receipt is positively confirmed.
+    outcomes: [6, 7]
+    evidence:
+      - Delivery record
+      - Acknowledgement of receipt from the customer
+    rule_ids: []
+output_work_products:
+  - id: "08-16"
+    name: Release plan
+    outcomes: [1, 3]
+  - id: "11-03"
+    name: Product release information
+    outcomes: [1, 3, 4, 6]
+  - id: "11-04"
+    name: Product release package
+    outcomes: [2, 3, 6]
+  - id: "11-07"
+    name: Temporary solution
+    outcomes: [6]
+  - id: "13-06"
+    name: Delivery record
+    outcomes: [6, 7]
+  - id: "13-13"
+    name: Product release approval record
+    outcomes: [5]
+  - id: "15-03"
+    name: Configuration status report
+    outcomes: [2]
+  - id: "18-06"
+    name: Product release criteria
+    outcomes: [5, 7]
+# Relations touching SPL.2.BP3 and SPL.2.BP13 are recorded in the SUP.8 fragment
+# (SUP.8.RC.7, SUP.8.RC.8).
+depends_on: []

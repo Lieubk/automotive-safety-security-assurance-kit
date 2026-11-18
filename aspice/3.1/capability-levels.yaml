@@ -1,0 +1,751 @@
+# Capability dimension of Automotive SPICE 3.1 as data.
+# Rule and recommendation IDs refer to the VDA Automotive SPICE Guidelines, 1st edition 2017.
+# Only IDs are recorded; the rule texts are not part of this file.
+# Descriptive texts are paraphrases. Names of process attributes and generic practices are official.
+
+model: Automotive SPICE
+version: "3.1"
+
+capability_levels:
+  - level: 0
+    name: Incomplete
+    process_attributes: []
+    summary: Results of the process are missing or not adequate.
+  - level: 1
+    name: Performed
+    process_attributes: ["PA 1.1"]
+    summary: The process achieves its outcomes.
+  - level: 2
+    name: Managed
+    process_attributes: ["PA 2.1", "PA 2.2"]
+    summary: >-
+      Execution is planned, monitored and adjusted, responsibilities are defined, and work
+      products are quality-checked and kept under control.
+  - level: 3
+    name: Established
+    process_attributes: ["PA 3.1", "PA 3.2"]
+    summary: >-
+      The process runs as a defined process derived from an organizational standard process,
+      and the organization improves that standard.
+  - level: 4
+    name: Predictable
+    process_attributes: ["PA 4.1", "PA 4.2"]
+    summary: Process performance is measured and controlled statistically within defined limits.
+  - level: 5
+    name: Innovating
+    process_attributes: ["PA 5.1", "PA 5.2"]
+    summary: The process is improved continually, driven by quantitative feedback and organizational goals.
+
+process_attributes:
+  - id: "PA 1.1"
+    name: Process performance
+    level: 1
+    intent: >-
+      Measures how far the process achieves its purpose; fully achieved when the process
+      produces its defined outcomes.
+    achievements:
+      - id: a
+        text: The process achieves its defined outcomes.
+    generic_resources:
+      - Resources actually used to carry out the base practices of the process.
+    generic_practices:
+      - id: "GP 1.1.1"
+        name: Achieve the process outcomes
+        achievements: [a]
+        intent: >-
+          The intent of every base practice is met and work products exist that demonstrate
+          the outcomes.
+        evidence:
+          - Output work products of the process with the expected content
+          - Statements of the people doing the work that match those work products
+        rule_ids: []
+        related_processes: []
+        related_practices: []
+
+  - id: "PA 2.1"
+    name: Performance management
+    level: 2
+    intent: Measures how far the execution of the process is managed.
+    achievements:
+      - id: a
+        text: Objectives for performing the process are identified.
+      - id: b
+        text: Performance of the process is planned.
+      - id: c
+        text: Performance of the process is monitored.
+      - id: d
+        text: Performance is adjusted so that plans are met.
+      - id: e
+        text: Responsibilities and authorities are defined, assigned and communicated.
+      - id: f
+        text: The people performing the process are prepared for their responsibilities.
+      - id: g
+        text: Needed resources and information are identified, provided, allocated and used.
+      - id: h
+        text: >-
+          Interfaces between the parties involved are managed so that communication works
+          and responsibility is clearly assigned.
+    generic_practices:
+      - id: "GP 2.1.1"
+        name: Identify the objectives for the performance of the process
+        achievements: [a]
+        intent: >-
+          Performance objectives for this process are derived from the process requirements,
+          with scope, assumptions and constraints stated; at least resources, effort and
+          schedule are covered.
+        evidence:
+          - Per-process planning record stating due dates or cadence, effort and resource budget
+          - Quality targets for the outputs of the process
+          - Stated scope, assumptions and constraints
+        rule_ids: [CL2.RL.1, CL2.RL.2, CL2.RL.3, CL2.RL.4]
+        related_processes: []
+        related_practices: []
+      - id: "GP 2.1.2"
+        name: Plan the performance of the process to fulfill the identified objectives
+        achievements: [b]
+        intent: >-
+          A plan exists with performance cycle, key milestones, maintained estimates,
+          activities and tasks, a schedule that fits the approach, and planned work product
+          reviews.
+        evidence:
+          - Schedule or backlog entries for the activities of this process with owner, effort and dates
+          - Milestone or iteration plan
+          - Estimate records including their updates
+          - Planned review dates per work product
+        rule_ids: [CL2.RL.5, CL2.RL.6, CL2.RL.7, CL2.RL.8, CL2.RL.9, CL2.RL.22, CL2.RC.4]
+        related_processes: [MAN.3]
+        related_practices: [MAN.3.BP4, MAN.3.BP5, MAN.3.BP8]
+      - id: "GP 2.1.3"
+        name: Monitor the performance of the process against the plans
+        achievements: [c]
+        intent: >-
+          The process is carried out as planned and is monitored so that planned results are
+          reached and deviations become visible.
+        evidence:
+          - Plan-versus-actual comparison for the tasks of this process
+          - Status reports and progress metrics
+          - Recorded deviations
+        rule_ids: [CL2.RL.10, CL2.RL.11, CL2.RL.12, CL2.RL.23, CL2.RC.5]
+        related_processes: [MAN.3]
+        related_practices: [MAN.3.BP4, MAN.3.BP5, MAN.3.BP8]
+      - id: "GP 2.1.4"
+        name: Adjust the performance of the process
+        achievements: [d]
+        intent: >-
+          Performance issues are identified, action is taken when planned results or
+          objectives are missed, and plans and schedule are adjusted where needed.
+        evidence:
+          - Issue and action list with owners and closure
+          - Re-planned schedule versions with the reason for the change
+          - Escalation records
+        rule_ids: [CL2.RL.13, CL2.RL.14, CL2.RL.24, CL2.RL.25, CL2.RL.26, CL2.RC.6]
+        related_processes: [MAN.3]
+        related_practices: [MAN.3.BP4, MAN.3.BP5, MAN.3.BP8]
+      - id: "GP 2.1.5"
+        name: Define responsibilities and authorities for performing the process
+        achievements: [e]
+        intent: >-
+          Responsibilities, commitments and authorities are defined, assigned and
+          communicated, including who verifies the work products; needed experience,
+          knowledge and skills are defined.
+        evidence:
+          - Role assignment for this process, for example a responsibility matrix
+          - Named reviewers and approvers per work product type
+          - Skill requirements per role
+          - Proof that the assignment was communicated
+        rule_ids: [DID.RL.4, CL2.RL.15, CL2.RL.16, CL2.RL.17]
+        related_processes: []
+        related_practices: []
+      - id: "GP 2.1.6"
+        name: Identify, prepare, and make available resources to perform the process according to plan
+        achievements: [f, g]
+        intent: >-
+          Human and infrastructure resources are identified, provided, allocated and used;
+          people are prepared by training, mentoring or coaching; needed information is
+          identified and accessible.
+        evidence:
+          - Resource plan for people, tools, licences and test equipment, with evidence of availability
+          - Training, mentoring or coaching records for the assigned people
+          - Access of the team to the input information it needs
+        rule_ids: [DID.RL.5, CL2.RL.18, CL2.RL.19, CL2.RL.27, CL2.RL.28, CL2.RC.7]
+        related_processes: [MAN.3]
+        related_practices: [MAN.3.BP6]
+      - id: "GP 2.1.7"
+        name: Manage the interfaces between involved parties
+        achievements: [h]
+        intent: >-
+          The individuals and groups involved are determined, their responsibilities are
+          assigned, the interfaces are managed, and communication between them is ensured
+          and effective.
+        evidence:
+          - Stakeholder and interface list for the process
+          - Agreed communication channels and cadence
+          - Minutes and action items
+          - Confirmations or sign-offs exchanged between the parties
+        rule_ids: [SAC.RC.1, DID.RL.7, CL2.RL.20, CL2.RL.21, CL2.RC.3, CL2.RC.8, CL2.RC.9, CL2.RC.10]
+        related_processes: [MAN.3, SYS.2, SYS.3, SYS.4, SYS.5, SWE.1, SWE.2, SWE.3, SWE.4, SWE.5, SWE.6]
+        related_practices:
+          - MAN.3.BP7
+          - SYS.2.BP8
+          - SYS.3.BP8
+          - SWE.1.BP8
+          - SWE.2.BP9
+          - SWE.3.BP7
+          - SYS.4.BP9
+          - SYS.5.BP7
+          - SWE.4.BP7
+          - SWE.5.BP9
+          - SWE.6.BP7
+
+  - id: "PA 2.2"
+    name: Work product management
+    level: 2
+    intent: >-
+      Measures how well the work products that the process produces are managed.
+      The work products meant are those that result from achieving the process purpose.
+    achievements:
+      - id: a
+        text: What each work product must contain and satisfy is specified.
+      - id: b
+        text: How work products are to be documented and kept under control is specified.
+      - id: c
+        text: Each work product is identifiable, documented and under control.
+      - id: d
+        text: Reviews happen as planned and work products are corrected until they satisfy what was specified.
+    generic_practices:
+      - id: "GP 2.2.1"
+        name: Define the requirements for the work products
+        achievements: [a]
+        intent: >-
+          Requirements for the work products are defined (possibly content and structure),
+          quality criteria are identified, and review and approval criteria are defined.
+        evidence:
+          - Templates or content definitions per work product type
+          - Quality criteria and review checklists
+          - Stated approval criteria
+        rule_ids: [DID.RL.8, CL2.RL.29, CL2.RL.30, CL2.RL.31, CL2.RL.32, CL2.RL.33, CL2.RC.12]
+        related_processes: [SUP.1]
+        related_practices: [SUP.1.BP1]
+      - id: "GP 2.2.2"
+        name: Define the requirements for documentation and control of the work products
+        achievements: [b]
+        intent: >-
+          Rules for documenting and controlling work products are defined (for example
+          distribution, identification, traceability), dependencies between work products are
+          understood, and approval requirements are defined.
+        evidence:
+          - Rules for naming, identification, versioning, storage, status model, approval and distribution
+          - Map of dependencies between work products
+        rule_ids: [DID.RL.6, CL2.RL.34, CL2.RC.13, CL2.RC.14]
+        related_processes: [SUP.8, SUP.10]
+        related_practices: [SUP.8.BP1, SUP.8.BP2, SUP.10.BP1]
+      - id: "GP 2.2.3"
+        name: Identify, document and control the work products
+        achievements: [c]
+        intent: >-
+          Controlled work products are identified, under change control, documented as
+          required, assigned to product configurations, accessible, and their revision status
+          is easy to find out.
+        evidence:
+          - Configuration item list and repository history
+          - Change records
+          - Baselines that tie work product versions to a product configuration
+          - Access rights and visible version and status in each work product
+        rule_ids: [CL2.RL.40, CL2.RC.15, CL2.RC.16]
+        related_processes: [SUP.8, SUP.10]
+        related_practices: [SUP.8.BP3, SUP.8.BP5, SUP.8.BP6, SUP.10.BP2, SUP.10.BP3, SUP.10.BP7]
+      - id: "GP 2.2.4"
+        name: Review and adjust work products to meet the defined requirements
+        achievements: [d]
+        intent: >-
+          Reviews take place as planned and check the work products against the requirements
+          defined for them, and the issues raised are resolved.
+        evidence:
+          - Review records per work product version that reference the criteria used
+          - Findings tracked to closure
+          - Evidence of rework and approval
+        rule_ids: [CL2.RC.17, CL2.RC.18]
+        rule_ids_note: >-
+          No rule ID is attached directly to this practice here. One rule relates it to
+          GP 2.2.1; its ID is unconfirmed and therefore not listed.
+        related_processes: [SUP.1, SUP.8, SYS.2, SYS.3, SYS.4, SYS.5, SWE.1, SWE.2, SWE.3, SWE.4, SWE.5, SWE.6]
+        related_practices:
+          - SUP.1.BP2
+          - SUP.8.BP8
+          - SYS.2.BP7
+          - SYS.3.BP7
+          - SYS.4.BP8
+          - SYS.5.BP6
+          - SWE.1.BP7
+          - SWE.2.BP8
+          - SWE.3.BP6
+          - SWE.4.BP6
+          - SWE.5.BP8
+          - SWE.6.BP6
+
+  - id: "PA 3.1"
+    name: Process definition
+    level: 3
+    intent: >-
+      Measures how far a standard process is maintained that supports the deployment of the
+      defined process.
+    achievements:
+      - id: a
+        text: >-
+          A standard process with suitable tailoring guidelines is defined and maintained; it
+          describes the fundamental elements every defined process must contain.
+      - id: b
+        text: It is determined in which order the standard process runs relative to other processes and how it interacts with them.
+      - id: c
+        text: The standard process identifies the competencies and roles it needs.
+      - id: d
+        text: The standard process identifies the infrastructure and work environment it needs.
+      - id: e
+        text: Suitable methods and measures for monitoring effectiveness and suitability are determined.
+    generic_practices:
+      - id: "GP 3.1.1"
+        name: Define and maintain the standard process that will support the deployment of the defined process
+        achievements: [a]
+        intent: >-
+          A standard process with the fundamental elements is developed and maintained, states
+          its deployment needs and context, and comes with guidance and tailoring guidelines
+          where needed.
+        evidence:
+          - Organization-level process description with activities, inputs, outputs and roles
+          - Supporting guidance and templates
+          - Tailoring guideline
+          - Maintenance history of the description
+        rule_ids: [CL3.RL.1, CL3.RL.2, CL3.RL.3, CL3.RL.4, CL3.RL.5, CL3.RC.3, CL3.RC.4, CL3.RC.5]
+        related_processes: []
+        related_practices: []
+      - id: "GP 3.1.2"
+        name: Determine the sequence and interaction between processes so that they work as an integrated system of processes
+        achievements: [b]
+        intent: >-
+          It is determined in which order the standard process runs relative to other
+          processes and how it interacts with them, and deployment keeps the processes intact
+          as a whole.
+        evidence:
+          - Process landscape or interface description showing order, hand-overs and exchanged work products
+        rule_ids: [CL3.RL.6, CL3.RC.3, CL3.RC.4, CL3.RC.5]
+        related_processes: []
+        related_practices: []
+      - id: "GP 3.1.3"
+        name: Identify the roles and competencies, responsibilities, and authorities for performing the standard process
+        achievements: [c]
+        intent: >-
+          Roles, the competencies they need and the authorities required for their
+          responsibilities are identified.
+        evidence:
+          - Role descriptions in the standard process with competencies, responsibilities and authorities
+        rule_ids: [CL3.RL.7, CL3.RC.3, CL3.RC.4, CL3.RC.5]
+        related_processes: []
+        related_practices: []
+      - id: "GP 3.1.4"
+        name: Identify the required infrastructure and work environment for performing the standard process
+        achievements: [d]
+        intent: >-
+          Infrastructure components such as facilities, tools, networks and methods, and the
+          requirements on the work environment, are identified.
+        evidence:
+          - Standard tool chain and environment definition attached to the standard process
+        rule_ids: [CL3.RL.8, CL3.RC.3, CL3.RC.4, CL3.RC.5]
+        related_processes: []
+        related_practices: []
+      - id: "GP 3.1.5"
+        name: Determine suitable methods and measures to monitor the effectiveness and suitability of the standard process
+        achievements: [e]
+        intent: >-
+          Monitoring methods, measures, criteria and data are defined, the need for internal
+          audit and management review is established, and changes keep the standard process
+          maintained.
+        evidence:
+          - Defined process measures and feedback channels
+          - Audit and management review scheme
+          - Change history of the standard process
+        rule_ids: [CL3.RL.9, CL3.RC.4]
+        related_processes: []
+        related_practices: []
+
+  - id: "PA 3.2"
+    name: Process deployment
+    level: 3
+    intent: >-
+      Measures how far a defined process, derived from the standard process, is in use and
+      achieves its outcomes.
+    achievements:
+      - id: a
+        text: The process in use is a defined one, taken from the standard process by appropriate selection or tailoring.
+      - id: b
+        text: Who holds which role, responsibility and authority in the defined process is assigned and made known.
+      - id: c
+        text: Those who perform the defined process have the competence for it, by education, training and experience.
+      - id: d
+        text: The necessary resources and information are made available, assigned and actually used.
+      - id: e
+        text: The necessary infrastructure and work environment are in place, managed and kept up.
+      - id: f
+        text: >-
+          Suitable data is collected and analysed to understand process behaviour, show
+          suitability and effectiveness, and find where continual improvement is possible.
+    generic_practices:
+      - id: "GP 3.2.1"
+        name: Deploy a defined process that satisfies the context specific requirements of the use of the standard process
+        achievements: [a]
+        intent: >-
+          The defined process is selected or tailored from the standard process and its
+          conformance with the standard process requirements is verified.
+        evidence:
+          - Project tailoring record with justification
+          - Result of a conformance check of the project process against the standard
+        rule_ids: [CL3.RL.10, CL3.RC.5]
+        related_processes: []
+        related_practices: []
+      - id: "GP 3.2.2"
+        name: Assign and communicate roles, responsibilities and authorities for performing the defined process
+        achievements: [b]
+        intent: Who holds which role, responsibility and authority in the defined process is assigned and made known.
+        evidence:
+          - Project staffing against the standard role definitions, communicated to the team
+        rule_ids: [CL3.RL.11, CL3.RC.1, CL3.RL.17, CL3.RL.22]
+        related_processes: []
+        related_practices: []
+      - id: "GP 3.2.3"
+        name: Ensure necessary competencies for performing the defined process
+        achievements: [c]
+        intent: >-
+          Competencies needed by the assigned people are identified and suitable training is
+          available to them.
+        evidence:
+          - Comparison of people's skills with the role requirements
+          - Training offered and attended
+        rule_ids: [CL3.RL.12, CL3.RL.13, CL3.RL.18]
+        related_processes: []
+        related_practices: []
+      - id: "GP 3.2.4"
+        name: Provide resources and information to support the performance of the defined process
+        achievements: [d]
+        intent: >-
+          Needed human resources and needed information are provided, allocated and used.
+        evidence:
+          - Staffing per defined role
+          - Access of the team to the required information
+        rule_ids: [CL3.RL.14, CL3.RL.19, CL3.RC.6]
+        related_processes: []
+        related_practices: []
+      - id: "GP 3.2.5"
+        name: Provide adequate process infrastructure to support the performance of the defined process
+        achievements: [e]
+        intent: >-
+          Required infrastructure and work environment are available, supported by the
+          organization, used and maintained.
+        evidence:
+          - Standard tools and environments installed and in use in the project
+          - Maintenance and support arrangements
+        rule_ids: [CL3.RL.15, CL3.RL.20, CL3.RC.7]
+        related_processes: []
+        related_practices: []
+      - id: "GP 3.2.6"
+        name: Collect and analyze data about performance of the process to demonstrate its suitability and effectiveness
+        achievements: [f]
+        intent: >-
+          Data on behaviour, suitability and effectiveness of the defined process is
+          identified, collected and analysed, and used to find improvements; it may be
+          qualitative or quantitative.
+        evidence:
+          - Collected process data and feedback from the project
+          - Analysis results
+          - Improvement proposals passed to the owner of the standard process
+        rule_ids: [CL3.RL.16, CL3.RC.2, CL3.RL.21]
+        related_processes: []
+        related_practices: []
+
+  - id: "PA 4.1"
+    name: Quantitative analysis
+    level: 4
+    detail: summary
+    intent: >-
+      Measures how far information needs are defined, relations between process elements are
+      identified and data is collected.
+    achievements:
+      - id: a
+        text: Quantitative business goals exist and the process is aligned with them.
+      - id: b
+        text: Process information needs that support those goals are established.
+      - id: c
+        text: Measurement objectives are derived from the information needs.
+      - id: d
+        text: Measurable relations between process elements that contribute to performance are identified.
+      - id: e
+        text: Quantitative objectives for process performance are established.
+      - id: f
+        text: Measures and measurement frequency are defined in line with the objectives.
+      - id: g
+        text: Measurement results are collected, validated and reported to monitor how far the objectives are met.
+    generic_practices:
+      - {id: "GP 4.1.1", name: Identify business goals, achievements: [a], evidence: [], rule_ids: [], related_processes: []}
+      - {id: "GP 4.1.2", name: Establish process information needs, achievements: [a, b], evidence: [], rule_ids: [], related_processes: []}
+      - {id: "GP 4.1.3", name: Derive process measurement objectives from process information needs, achievements: [a, c], evidence: [], rule_ids: [], related_processes: []}
+      - {id: "GP 4.1.4", name: Identify measurable relationships between process elements, achievements: [a, d], evidence: [], rule_ids: [], related_processes: []}
+      - {id: "GP 4.1.5", name: Establish quantitative objectives, achievements: [a, e], evidence: [], rule_ids: [], related_processes: []}
+      - {id: "GP 4.1.6", name: Identify process measures that support the achievement of the quantitative objectives, achievements: [a, f], evidence: [], rule_ids: [], related_processes: []}
+      - {id: "GP 4.1.7", name: Collect product and process measurement results through performing the defined process, achievements: [a, g], evidence: [], rule_ids: [], related_processes: []}
+
+  - id: "PA 4.2"
+    name: Quantitative control
+    level: 4
+    detail: summary
+    intent: Measures how far objective data is used to manage process performance so that it is predictable.
+    achievements:
+      - id: a
+        text: Techniques for analysing the collected data are selected.
+      - id: b
+        text: Assignable causes of process variation are determined by analysing the data.
+      - id: c
+        text: Distributions that characterize process performance are established.
+      - id: d
+        text: Corrective actions address assignable causes of variation.
+      - id: e
+        text: Separate distributions are established where needed to analyse the process under assignable causes.
+    generic_practices:
+      - {id: "GP 4.2.1", name: Select analysis techniques, achievements: [a], evidence: [], rule_ids: [], related_processes: []}
+      - {id: "GP 4.2.2", name: Establish distributions that characterize the process performance, achievements: [c], evidence: [], rule_ids: [], related_processes: []}
+      - {id: "GP 4.2.3", name: Determine assignable causes of process variation, achievements: [b], evidence: [], rule_ids: [], related_processes: []}
+      - {id: "GP 4.2.4", name: Identify and implement corrective actions to address assignable causes, achievements: [d], evidence: [], rule_ids: [], related_processes: []}
+      - {id: "GP 4.2.5", name: Establish separate distributions for analyzing the process, achievements: [e], evidence: [], rule_ids: [], related_processes: []}
+
+  - id: "PA 5.1"
+    name: Process innovation
+    level: 5
+    detail: summary
+    intent: >-
+      Measures how far changes to the process are identified by investigating innovative
+      approaches to its definition and deployment.
+    achievements:
+      - id: a
+        text: Process innovation objectives that support the business goals are defined.
+      - id: b
+        text: Data is analysed to identify opportunities for innovation.
+      - id: c
+        text: New technologies and process concepts are examined for innovation opportunities.
+      - id: d
+        text: An implementation strategy for reaching the innovation objectives is established.
+    generic_practices:
+      - {id: "GP 5.1.1", name: Define the process innovation objectives for the process that support the relevant business goals, achievements: [a], evidence: [], rule_ids: [], related_processes: []}
+      - {id: "GP 5.1.2", name: Analyze data of the process to identify opportunities for innovation, achievements: [b], evidence: [], rule_ids: [], related_processes: []}
+      - {id: "GP 5.1.3", name: Analyze new technologies and process concepts to identify opportunities for innovation, achievements: [c], evidence: [], rule_ids: [], related_processes: []}
+      - {id: "GP 5.1.4", name: Define and maintain an implementation strategy based on innovation vision and objectives, achievements: [d], evidence: [], rule_ids: [], related_processes: []}
+
+  - id: "PA 5.2"
+    name: Process innovation implementation
+    level: 5
+    detail: summary
+    intent: >-
+      Measures how far changes to definition, management and performance of the process
+      achieve the innovation objectives.
+    achievements:
+      - id: a
+        text: Every proposed change is evaluated for its impact on the objectives of both the defined and the standard process.
+      - id: b
+        text: Implementation of agreed changes is managed so that disruption of process performance is understood and handled.
+      - id: c
+        text: Effectiveness of a change is evaluated from actual performance against product requirements and process objectives.
+    generic_practices:
+      - {id: "GP 5.2.1", name: Assess the impact of each proposed change against the objectives of the defined and standard process, achievements: [a], evidence: [], rule_ids: [], related_processes: []}
+      - {id: "GP 5.2.2", name: Manage the implementation of agreed changes, achievements: [b], evidence: [], rule_ids: [], related_processes: []}
+      - {id: "GP 5.2.3", name: Evaluate the effectiveness of process change, achievements: [c], evidence: [], rule_ids: [], related_processes: []}
+
+# Rating scale for practices and process attributes (degree of achievement).
+rating_scale:
+  - symbol: "N"
+    name: Not achieved
+    range: "0% to 15%"
+    lower: 0
+    lower_inclusive: true
+    upper: 15
+    upper_inclusive: true
+    meaning: >-
+      Little or no evidence that the attribute is achieved; the result is absent or its
+      content is not acceptable.
+  - symbol: "P"
+    name: Partially achieved
+    range: ">15% to 50%"
+    lower: 15
+    lower_inclusive: false
+    upper: 50
+    upper_inclusive: true
+    meaning: >-
+      Some evidence of an approach and of some achievement, parts of it unpredictable; the
+      project still cannot be relied on to meet quality, schedule or budget targets.
+  - symbol: "L"
+    name: Largely achieved
+    range: ">50% to 85%"
+    lower: 50
+    lower_inclusive: false
+    upper: 85
+    upper_inclusive: true
+    meaning: >-
+      Evidence of a systematic approach and significant achievement, with some weaknesses;
+      meeting quality, schedule and budget targets is likely but not assured.
+  - symbol: "F"
+    name: Fully achieved
+    range: ">85% to 100%"
+    lower: 85
+    lower_inclusive: false
+    upper: 100
+    upper_inclusive: true
+    meaning: >-
+      Evidence of a complete and systematic approach and full achievement, without
+      significant weaknesses; no process-related risk to quality, schedule or budget even if
+      small imperfections remain.
+
+# Refinement of P and L used when ratings of several process instances are aggregated.
+# The split points are 32.5% and 67.5%; which side a split point itself belongs to is
+# assumed to follow the main scale (upper bound inclusive).
+rating_scale_refined:
+  - {symbol: "N", range: "0% to 15%", value: 0}
+  - {symbol: "P-", range: ">15% to 32.5%", value: 1}
+  - {symbol: "P+", range: ">32.5% to 50%", value: 2}
+  - {symbol: "L-", range: ">50% to 67.5%", value: 3}
+  - {symbol: "L+", range: ">67.5% to 85%", value: 4}
+  - {symbol: "F", range: ">85% to 100%", value: 5}
+
+aggregation:
+  applies_to: process attribute ratings of several instances of the same process
+  never_across: different processes
+  steps:
+    - map each instance rating to its value from rating_scale_refined
+    - apply the weighting defined for the assessment to each value
+    - take the arithmetic mean and round it
+    - convert the rounded value back to a rating
+  weights: defined per assessment (not fixed by the model)
+
+# How process attribute ratings combine into a capability level.
+level_rules:
+  procedure: >-
+    Start at level 1 and climb one level at a time. A level is reached when every process
+    attribute of that level is rated L or F and every process attribute of all lower levels
+    is rated F. The capability level is the highest level reached.
+  target_level_accepted_ratings: ["L", "F"]
+  lower_level_required_ratings: ["F"]
+  levels:
+    - level: 0
+      name: Incomplete
+      requires: []
+      note: Result when the condition for level 1 is not met.
+    - level: 1
+      name: Performed
+      requires:
+        - {pa: "PA 1.1", accepted: ["L", "F"]}
+    - level: 2
+      name: Managed
+      requires:
+        - {pa: "PA 1.1", accepted: ["F"]}
+        - {pa: "PA 2.1", accepted: ["L", "F"]}
+        - {pa: "PA 2.2", accepted: ["L", "F"]}
+    - level: 3
+      name: Established
+      requires:
+        - {pa: "PA 1.1", accepted: ["F"]}
+        - {pa: "PA 2.1", accepted: ["F"]}
+        - {pa: "PA 2.2", accepted: ["F"]}
+        - {pa: "PA 3.1", accepted: ["L", "F"]}
+        - {pa: "PA 3.2", accepted: ["L", "F"]}
+    - level: 4
+      name: Predictable
+      basis: general rule applied (levels 1 to 3 are the explicitly tabulated cases)
+      requires:
+        - {pa: "PA 1.1", accepted: ["F"]}
+        - {pa: "PA 2.1", accepted: ["F"]}
+        - {pa: "PA 2.2", accepted: ["F"]}
+        - {pa: "PA 3.1", accepted: ["F"]}
+        - {pa: "PA 3.2", accepted: ["F"]}
+        - {pa: "PA 4.1", accepted: ["L", "F"]}
+        - {pa: "PA 4.2", accepted: ["L", "F"]}
+    - level: 5
+      name: Innovating
+      basis: general rule applied (levels 1 to 3 are the explicitly tabulated cases)
+      requires:
+        - {pa: "PA 1.1", accepted: ["F"]}
+        - {pa: "PA 2.1", accepted: ["F"]}
+        - {pa: "PA 2.2", accepted: ["F"]}
+        - {pa: "PA 3.1", accepted: ["F"]}
+        - {pa: "PA 3.2", accepted: ["F"]}
+        - {pa: "PA 4.1", accepted: ["F"]}
+        - {pa: "PA 4.2", accepted: ["F"]}
+        - {pa: "PA 5.1", accepted: ["L", "F"]}
+        - {pa: "PA 5.2", accepted: ["L", "F"]}
+
+# Rating-consistency dependencies of the generic practices.
+# kind rule: the rating of `from` depends on `to` (a weakness in `to` limits `from`).
+# kind recommendation with mutual true: the ratings should be considered together.
+dependencies:
+  - {id: CL2.RL.22, kind: rule, from: "GP 2.1.2", to: ["GP 2.1.1"], mutual: false, subject: plan serves the identified objectives}
+  - {id: CL2.RL.23, kind: rule, from: "GP 2.1.3", to: ["GP 2.1.2"], mutual: false, subject: monitoring is done against the plans}
+  - {id: CL2.RL.24, kind: rule, from: "GP 2.1.4", to: ["GP 2.1.1"], mutual: false, subject: adjustment when planned objectives are missed}
+  - {id: CL2.RL.25, kind: rule, from: "GP 2.1.4", to: ["GP 2.1.2"], mutual: false, subject: adjustment includes updating the plans}
+  - {id: CL2.RL.26, kind: rule, from: "GP 2.1.4", to: ["GP 2.1.3"], mutual: false, subject: adjustment when monitored results fall short of the plan}
+  - {id: CL2.RL.27, kind: rule, from: "GP 2.1.6", to: ["GP 2.1.2"], mutual: false, subject: resources provided as the plan requires}
+  - {id: CL2.RL.28, kind: rule, from: "GP 2.1.6", to: ["GP 2.1.5"], mutual: false, subject: resources made available as defined}
+  - {id: CL2.RC.3, kind: recommendation, from: "GP 2.1.7", to: ["GP 2.1.5"], mutual: false, subject: interfaces managed along the defined responsibilities}
+  - {id: CL2.RC.4, kind: recommendation, from: "GP 2.1.2", to: [MAN.3.BP4, MAN.3.BP5, MAN.3.BP8], mutual: true, subject: "defining activities, estimates and resources, schedule", confidence: "BP5 certain; BP4 and BP8 by group reading"}
+  - {id: CL2.RC.5, kind: recommendation, from: "GP 2.1.3", to: [MAN.3.BP4, MAN.3.BP5, MAN.3.BP8], mutual: true, subject: "monitoring activities, estimates and resources, schedule", confidence: "BP5 certain; BP4 and BP8 by group reading"}
+  - {id: CL2.RC.6, kind: recommendation, from: "GP 2.1.4", to: [MAN.3.BP4, MAN.3.BP5, MAN.3.BP8], mutual: true, subject: "adjusting activities, estimates and resources, schedule", confidence: "BP5 certain; BP4 and BP8 by group reading"}
+  - {id: CL2.RC.7, kind: recommendation, from: "GP 2.1.6", to: [MAN.3.BP6], mutual: true, subject: "ensuring skills, knowledge and experience"}
+  - {id: CL2.RC.8, kind: recommendation, from: "GP 2.1.7", to: [MAN.3.BP7], mutual: true, subject: project interfaces and agreed commitments}
+  - {id: CL2.RC.9, kind: recommendation, from: "GP 2.1.7", to: [SYS.2.BP8, SYS.3.BP8, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7], mutual: true, subject: the communicate-agreed practice of the same process}
+  - {id: CL2.RC.10, kind: recommendation, from: "GP 2.1.7", to: [SYS.4.BP9, SYS.5.BP7, SWE.4.BP7, SWE.5.BP9, SWE.6.BP7], mutual: true, subject: the summarize-and-communicate practice of the same process}
+  - {id: CL2.RL.40, kind: rule, from: "GP 2.2.3", to: ["GP 2.2.2"], mutual: false, subject: control according to the defined control requirements}
+  - {id: null, kind: rule, from: "GP 2.2.4", to: ["GP 2.2.1"], mutual: false, subject: review against the defined work product requirements, confidence: "relation certain; rule ID unconfirmed"}
+  - {id: CL2.RC.12, kind: recommendation, from: "GP 2.2.1", to: [SUP.1.BP1], mutual: true, subject: quality criteria in the quality assurance strategy}
+  - {id: CL2.RC.13, kind: recommendation, from: "GP 2.2.2", to: [SUP.8.BP1, SUP.8.BP2], mutual: true, subject: configuration management strategy and configuration item identification}
+  - {id: CL2.RC.14, kind: recommendation, from: "GP 2.2.2", to: [SUP.10.BP1], mutual: true, subject: change request management strategy}
+  - {id: CL2.RC.15, kind: recommendation, from: "GP 2.2.3", to: [SUP.8.BP3, SUP.8.BP5, SUP.8.BP6], mutual: true, subject: performing configuration management}
+  - {id: CL2.RC.16, kind: recommendation, from: "GP 2.2.3", to: [SUP.10.BP2, SUP.10.BP3, SUP.10.BP7], mutual: true, subject: managing changes}
+  - {id: CL2.RC.17, kind: recommendation, from: "GP 2.2.4", to: [SUP.1.BP2], mutual: true, subject: quality assurance of work products}
+  - id: CL2.RC.18
+    kind: recommendation
+    from: "GP 2.2.4"
+    to: [SUP.8.BP8, SYS.2.BP7, SYS.3.BP7, SYS.4.BP8, SYS.5.BP6, SWE.1.BP7, SWE.2.BP8, SWE.3.BP6, SWE.4.BP6, SWE.5.BP8, SWE.6.BP6]
+    mutual: true
+    subject: verification of configured items and the ensure-consistency practice of each engineering process
+  - {id: CL3.RC.3, kind: recommendation, from: "GP 3.1.1", to: ["GP 3.1.2", "GP 3.1.3", "GP 3.1.4"], mutual: true, subject: "standard process includes interaction, roles and infrastructure"}
+  - {id: CL3.RC.4, kind: recommendation, from: "GP 3.1.5", to: ["GP 3.1.1", "GP 3.1.2", "GP 3.1.3", "GP 3.1.4"], mutual: true, subject: effectiveness monitoring of the standard process}
+  - {id: CL3.RC.5, kind: recommendation, from: "GP 3.2.1", to: ["GP 3.1.1", "GP 3.1.2", "GP 3.1.3", "GP 3.1.4"], mutual: false, subject: defined process based on the standard process}
+  - {id: CL3.RL.17, kind: rule, from: "GP 3.2.2", to: ["GP 3.1.3"], mutual: false, subject: role assignment based on the standard process, confidence: target practice by most plausible reading}
+  - {id: CL3.RL.18, kind: rule, from: "GP 3.2.3", to: ["GP 3.1.3"], mutual: false, subject: competencies based on the standard process, confidence: target practice by most plausible reading}
+  - {id: CL3.RL.19, kind: rule, from: "GP 3.2.4", to: ["GP 3.1.3"], mutual: false, subject: resources and information based on the standard process, confidence: target practice to be confirmed}
+  - {id: CL3.RL.20, kind: rule, from: "GP 3.2.5", to: ["GP 3.1.4"], mutual: false, subject: infrastructure based on the standard process, confidence: target practice by most plausible reading}
+  - {id: CL3.RL.21, kind: rule, from: "GP 3.2.6", to: ["GP 3.1.5"], mutual: false, subject: data collection based on the determined measures}
+
+# A weak `process` usually goes together with a weak `pa` (for the processes assessed).
+# strength: strong (++) or normal (+).
+process_pa_dependencies:
+  - {process: MAN.3, pa: "PA 2.1", strength: strong}
+  - {process: MAN.5, pa: "PA 2.1", strength: normal}
+  - {process: MAN.5, pa: "PA 3.2", strength: normal}
+  - {process: REU.2, pa: "PA 2.2", strength: normal}
+  - {process: REU.2, pa: "PA 3.1", strength: normal}
+  - {process: ACQ.4, pa: "PA 2.1", strength: normal}
+  - {process: ACQ.4, pa: "PA 2.2", strength: normal}
+  - {process: SUP.1, pa: "PA 2.2", strength: strong}
+  - {process: SUP.1, pa: "PA 3.2", strength: normal}
+  - {process: SUP.2, pa: "PA 2.2", strength: strong}
+  - {process: SUP.2, pa: "PA 3.2", strength: normal}
+  - {process: SUP.4, pa: "PA 2.2", strength: normal}
+  - {process: SUP.7, pa: "PA 2.2", strength: normal}
+  - {process: SUP.7, pa: "PA 3.1", strength: normal}
+  - {process: SUP.8, pa: "PA 2.2", strength: strong}
+  - {process: SUP.8, pa: "PA 3.1", strength: normal}
+  - {process: SUP.9, pa: "PA 2.1", strength: normal}
+  - {process: SUP.9, pa: "PA 2.2", strength: normal}
+  - {process: SUP.9, pa: "PA 3.2", strength: normal}
+  - {process: SUP.10, pa: "PA 2.2", strength: normal}
+  - {process: SUP.10, pa: "PA 3.2", strength: normal}
+  - {process: SPL.2, pa: "PA 2.2", strength: normal}
+
+open_points:
+  - The ID of the rule relating GP 2.2.4 to GP 2.2.1 is unconfirmed.
+  - CL2.RL.35 to CL2.RL.39, CL2.RC.1, CL2.RC.2 and CL2.RC.11 are not mapped to a practice.
+  - No rule IDs are recorded for PA 1.1, PA 4.1, PA 4.2, PA 5.1 and PA 5.2.
+  - Target practices of CL3.RL.17 to CL3.RL.20 inside PA 3.1 should be confirmed, CL3.RL.19 first.

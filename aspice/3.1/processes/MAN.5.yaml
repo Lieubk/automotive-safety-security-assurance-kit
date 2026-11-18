@@ -1,0 +1,104 @@
+id: MAN.5
+name: Risk Management
+group: MAN
+scope: extended
+purpose: >-
+  Find, analyse, treat and monitor risks continuously for as long as the
+  project runs.
+outcomes:
+  - n: 1
+    text: It is decided what risk management has to cover.
+  - n: 2
+    text: Fitting strategies for managing risk are defined and put into practice.
+  - n: 3
+    text: Risks are spotted as they emerge over the course of the project.
+  - n: 4
+    text: Risks are analysed and ranked so that treatment effort goes where it matters most.
+  - n: 5
+    text: Measures for risks are defined, applied and evaluated, showing how risk status changes and how far treatment has come.
+  - n: 6
+    text: Risks are treated according to their priority, likelihood and consequence, or another defined threshold, so that their impact is corrected or avoided.
+base_practices:
+  - id: MAN.5.BP1
+    name: Establish risk management scope
+    intent: It is decided which kinds of risk the project manages, in line with the risk policy of the organization.
+    outcomes: [1]
+    evidence:
+      - Scope section of the risk management plan
+      - Reference to the organizational risk policy
+    rule_ids: []
+  - id: MAN.5.BP2
+    name: Define risk management strategies
+    intent: How risks are found and mitigated is defined, together with the level at which a risk or group of risks is acceptable, for project and organization.
+    outcomes: [2]
+    evidence:
+      - Risk management plan with identification method, rating scales, acceptance thresholds and review cadence
+    rule_ids: []
+  - id: MAN.5.BP3
+    name: Identify risks
+    intent: Risks are collected when the project strategy is set up and again whenever technical or managerial decisions are taken; the search never stops.
+    outcomes: [2, 3]
+    evidence:
+      - Risk register entries created throughout the project
+      - Risk review minutes
+    rule_ids: []
+  - id: MAN.5.BP4
+    name: Analyze risks
+    intent: Each risk is rated so that mitigation resources can be assigned in order of priority.
+    outcomes: [4]
+    evidence:
+      - Rated and ranked risk register
+      - Risk analysis report
+    rule_ids: []
+  - id: MAN.5.BP5
+    name: Define risk treatment actions
+    intent: For every risk or group of risks, actions that hold it at or bring it down to an acceptable level are chosen, carried out and tracked.
+    outcomes: [5, 6]
+    evidence:
+      - Mitigation actions with owner, due date and status, each linked to a risk
+    rule_ids: []
+  - id: MAN.5.BP6
+    name: Monitor risks
+    intent: Indicators are defined per risk or group of risks, applied and evaluated to see whether risk status changes and mitigation advances.
+    outcomes: [5, 6]
+    evidence:
+      - Risk status reports with trend
+      - Indicator values recorded over time
+    rule_ids: []
+  - id: MAN.5.BP7
+    name: Take corrective action
+    intent: When mitigation does not progress as expected, further action is taken to shrink or avoid the impact.
+    outcomes: [6]
+    evidence:
+      - Corrective action entries linked to risks
+      - Revised mitigation plan
+    rule_ids: []
+output_work_products:
+  - id: "07-07"
+    name: Risk measure
+    outcomes: [5]
+  - id: "08-14"
+    name: Recovery plan
+    outcomes: [4, 6]
+  - id: "08-19"
+    name: Risk management plan
+    outcomes: [1, 2, 3, 4, 5, 6]   # mapped to all outcomes
+  - id: "08-20"
+    name: Risk mitigation plan
+    outcomes: [3, 4, 5, 6]
+  - id: "13-20"
+    name: Risk action request
+    outcomes: [1, 2, 6]
+  - id: "14-02"
+    name: Corrective action register
+    outcomes: [6]
+  - id: "14-08"
+    name: Tracking system
+    outcomes: [5, 6]
+  - id: "15-08"
+    name: Risk analysis report
+    outcomes: [4]
+  - id: "15-09"
+    name: Risk status report
+    outcomes: [4, 5]
+depends_on: []

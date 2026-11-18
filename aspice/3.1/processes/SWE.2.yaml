@@ -1,0 +1,157 @@
+id: SWE.2
+name: Software Architectural Design
+group: SWE
+scope: vda            # marked as VDA scope, with rating-consistency guidance
+purpose: >-
+  Define the software's structure down to component level, assign every software requirement
+  to the elements that realise it, and judge the resulting architecture against explicit
+  criteria.
+outcomes:
+  - n: 1
+    text: "An architecture for the software exists and names the elements the software is made of."
+  - n: 2
+    text: "Each software requirement has been assigned to software elements."
+  - n: 3
+    text: "For every software element the interfaces are specified."
+  - n: 4
+    text: "Runtime behaviour of the elements and targets for their resource usage are specified."
+  - n: 5
+    text: "Requirements and architecture are consistent with each other and linked in both directions."
+  - n: 6
+    text: "The architecture has been agreed and all affected parties know it."
+base_practices:
+  - id: SWE.2.BP1
+    name: Develop software architectural design
+    intent: "Document an architecture that identifies the software elements over suitable hierarchy levels down to components and addresses functional and non-functional requirements."
+    outcomes: [1]
+    evidence:
+      - "Layer and component diagram with a component list (ID, responsibility, ASIL, origin)"
+      - "AUTOSAR software component descriptions under version control"
+      - "Description of the mechanisms that answer non-functional requirements (partitioning, monitoring, diagnostics, non-volatile memory)"
+    rule_ids: [AGE.RC.5, AGE.RC.6, TPS.RC.4, TPS.RC.6, PLS.RC.2, SWE.2.RL.1, SWE.2.RL.2, SWE.2.RC.3]
+  - id: SWE.2.BP2
+    name: Allocate software requirements
+    intent: "Assign each software requirement to the architecture element or elements responsible for fulfilling it."
+    outcomes: [2]
+    evidence:
+      - "Allocation link or attribute on every requirement naming component IDs"
+      - "Allocation matrix generated from the links"
+      - "Empty list of unallocated requirements at baseline"
+    rule_ids: [SWE.2.RL.3, SWE.2.RL.8]
+  - id: SWE.2.BP3
+    name: Define interfaces of software elements
+    intent: "Determine the interfaces of every software element and describe them fully."
+    outcomes: [3]
+    evidence:
+      - "Component interface table (name, direction, data type, unit, range, resolution, initial and invalid value, update rate, provider, consumers)"
+      - "Port interface definitions in the AUTOSAR description and C headers for non-AUTOSAR modules"
+      - "Conventions for error signalling and return codes"
+    rule_ids: [TPS.RC.5, SWE.2.RL.4, SWE.2.RL.8]
+  - id: SWE.2.BP4
+    name: Describe dynamic behavior
+    intent: "Evaluate and document timing and runtime interplay of the elements across operating modes, tasks and interrupts, considering the target platform and its load."
+    outcomes: [4]
+    evidence:
+      - "Task and runnable mapping table with period, priority and execution order"
+      - "Sequence diagrams for main signal chains and for start-up, shutdown, sleep and wake-up"
+      - "Mode or state machine description and interrupt list"
+      - "Timing analysis with latency budgets, execution time estimates and CPU load calculation"
+    rule_ids: [SWE.2.RL.5, SWE.2.RL.8]
+  - id: SWE.2.BP5
+    name: Define resource consumption objectives
+    intent: "Set and document targets for memory, CPU load and similar resources for all relevant elements at a sensible hierarchy level."
+    outcomes: [4]
+    evidence:
+      - "Resource budget table per component or partition (flash, RAM, stack, non-volatile memory, CPU share) with ECU totals and reserve"
+      - "Budget table later filled with measured values from map file and runtime measurement"
+    rule_ids: [SWE.2.RL.6, SWE.2.RL.8]
+  - id: SWE.2.BP6
+    name: Evaluate alternative software architectures
+    intent: "Define evaluation criteria, assess alternative designs against them and record why the chosen architecture was selected."
+    outcomes: [1, 2, 3, 4, 5]
+    evidence:
+      - "Architecture decision records with options, criteria, assessment and rationale"
+      - "Trade study for major choices such as task model, partitioning or platform reuse"
+    rule_ids: [SWE.2.RC.1, SWE.2.RL.8]
+  - id: SWE.2.BP7
+    name: Establish bidirectional traceability
+    intent: "Maintain links, navigable both ways, between software requirements and architecture elements, including the allocation."
+    outcomes: [5]
+    evidence:
+      - "Typed links between requirement IDs and element IDs"
+      - "Generated report of requirements without element and elements without requirement, the latter with justification"
+    rule_ids: [TAC.RC.1, TAC.RC.2, TAC.RC.3, TAC.RC.4, TAC.RL.2, TAC.RL.3, SWE.2.RL.8, SWE.2.RL.9, SWE.2.RC.4]
+  - id: SWE.2.BP8
+    name: Ensure consistency
+    intent: "Make sure the architecture agrees in content with the software requirements and demonstrate it by review."
+    outcomes: [1, 2, 5, 6]
+    evidence:
+      - "Architecture review record with checklist, reviewed version, findings and closure"
+      - "Re-review entries after requirement changes"
+      - "Automated comparison of architecture description, AUTOSAR model and code interfaces"
+    rule_ids: [TAC.RL.1, TAC.RC.4, TAC.RL.2, TAC.RL.3, SWE.2.RL.8, SWE.2.RC.5, CL2.RC.18]
+  - id: SWE.2.BP9
+    name: Communicate agreed software architectural design
+    intent: "Make the agreed architecture and every later update known to all parties that need them."
+    outcomes: [6]
+    evidence:
+      - "Approved baseline tag of the architecture"
+      - "Notification naming the baseline and the recipients"
+      - "Minutes of the walkthrough in which the architecture was agreed"
+    # SWE.2.RL.8 is attached to BP9 only on the rating-consistency diagram
+    rule_ids: [SAC.RL.1, SAC.RC.4, SAC.RC.5, SAC.RC.6, CL2.RC.9, SWE.2.RL.8]
+output_work_products:
+  - id: "04-04"
+    name: Software architectural design
+    outcomes: [1, 2, 3, 4, 5]
+  - id: "13-04"
+    name: Communication record
+    outcomes: [6]
+  - id: "13-19"
+    name: Review record
+    outcomes: [5]
+  - id: "13-22"
+    name: Traceability record
+    outcomes: [5]
+  - id: "17-08"
+    name: Interface requirements specification
+    outcomes: [3]
+# depends_on: "from" is the practice whose rating depends on "to".
+# A "to" that is a bare process ID means the PA 1.1 (process performance) rating of that process.
+depends_on:
+  - from: SWE.2.BP2
+    to: SWE.2.BP1
+    kind: rule            # SWE.2.RL.8
+  - from: SWE.2.BP3
+    to: SWE.2.BP1
+    kind: rule            # SWE.2.RL.8
+  - from: SWE.2.BP4
+    to: SWE.2.BP1
+    kind: rule            # SWE.2.RL.8
+  - from: SWE.2.BP5
+    to: SWE.2.BP1
+    kind: rule            # SWE.2.RL.8
+  - from: SWE.2.BP6
+    to: SWE.2.BP1
+    kind: rule            # SWE.2.RL.8
+  - from: SWE.2.BP7
+    to: SWE.2.BP1
+    kind: rule            # SWE.2.RL.8
+  - from: SWE.2.BP8
+    to: SWE.2.BP1
+    kind: rule            # SWE.2.RL.8
+  - from: SWE.2.BP9
+    to: SWE.2.BP1
+    kind: rule            # SWE.2.RL.8
+  - from: SWE.2.BP7
+    to: SWE.2.BP2
+    kind: rule            # SWE.2.RL.9
+  - from: SWE.2.BP1
+    to: SWE.1
+    kind: recommendation  # SWE.2.RC.3
+  - from: SWE.2.BP7
+    to: SWE.1
+    kind: recommendation  # SWE.2.RC.4
+  - from: SWE.2.BP8
+    to: SWE.1
+    kind: recommendation  # SWE.2.RC.5

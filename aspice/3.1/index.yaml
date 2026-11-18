@@ -1,0 +1,140 @@
+version: '3.1'
+processes:
+- id: ACQ.4
+  name: Supplier Monitoring
+  group: ACQ
+  scope: vda
+  base_practices: 5
+  file: processes/ACQ.4.yaml
+- id: MAN.3
+  name: Project Management
+  group: MAN
+  scope: vda
+  base_practices: 10
+  file: processes/MAN.3.yaml
+- id: MAN.5
+  name: Risk Management
+  group: MAN
+  scope: extended
+  base_practices: 7
+  file: processes/MAN.5.yaml
+- id: REU.2
+  name: Reuse Program Management
+  group: REU
+  scope: other
+  base_practices: 8
+  file: processes/REU.2.yaml
+- id: SPL.2
+  name: Product Release
+  group: SPL
+  scope: extended
+  base_practices: 13
+  file: processes/SPL.2.yaml
+- id: SUP.1
+  name: Quality Assurance
+  group: SUP
+  scope: vda
+  base_practices: 6
+  file: processes/SUP.1.yaml
+- id: SUP.2
+  name: Verification
+  group: SUP
+  scope: extended
+  base_practices: 5
+  file: processes/SUP.2.yaml
+- id: SUP.4
+  name: Joint Review
+  group: SUP
+  scope: extended
+  base_practices: 8
+  file: processes/SUP.4.yaml
+- id: SUP.7
+  name: Documentation
+  group: SUP
+  scope: extended
+  base_practices: 8
+  file: processes/SUP.7.yaml
+- id: SUP.8
+  name: Configuration Management
+  group: SUP
+  scope: vda
+  base_practices: 9
+  file: processes/SUP.8.yaml
+- id: SUP.9
+  name: Problem Resolution Management
+  group: SUP
+  scope: vda
+  base_practices: 9
+  file: processes/SUP.9.yaml
+- id: SUP.10
+  name: Change Request Management
+  group: SUP
+  scope: vda
+  base_practices: 8
+  file: processes/SUP.10.yaml
+- id: SWE.1
+  name: Software Requirements Analysis
+  group: SWE
+  scope: vda
+  base_practices: 8
+  file: processes/SWE.1.yaml
+- id: SWE.2
+  name: Software Architectural Design
+  group: SWE
+  scope: vda
+  base_practices: 9
+  file: processes/SWE.2.yaml
+- id: SWE.3
+  name: Software Detailed Design and Unit Construction
+  group: SWE
+  scope: vda
+  base_practices: 8
+  file: processes/SWE.3.yaml
+- id: SWE.4
+  name: Software Unit Verification
+  group: SWE
+  scope: vda
+  base_practices: 7
+  file: processes/SWE.4.yaml
+- id: SWE.5
+  name: Software Integration and Integration Test
+  group: SWE
+  scope: vda
+  base_practices: 9
+  file: processes/SWE.5.yaml
+- id: SWE.6
+  name: Software Qualification Test
+  group: SWE
+  scope: vda
+  base_practices: 7
+  file: processes/SWE.6.yaml
+- id: SYS.1
+  name: Requirements Elicitation
+  group: SYS
+  scope: extended
+  base_practices: 6
+  file: processes/SYS.1.yaml
+- id: SYS.2
+  name: System Requirements Analysis
+  group: SYS
+  scope: vda
+  base_practices: 8
+  file: processes/SYS.2.yaml
+- id: SYS.3
+  name: System Architectural Design
+  group: SYS
+  scope: vda
+  base_practices: 8
+  file: processes/SYS.3.yaml
+- id: SYS.4
+  name: System Integration and Integration Test
+  group: SYS
+  scope: vda
+  base_practices: 9
+  file: processes/SYS.4.yaml
+- id: SYS.5
+  name: System Qualification Test
+  group: SYS
+  scope: vda
+  base_practices: 7
+  file: processes/SYS.5.yaml

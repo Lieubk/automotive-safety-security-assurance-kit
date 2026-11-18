@@ -1,0 +1,97 @@
+id: SYS.1
+name: Requirements Elicitation
+group: SYS
+scope: extended
+purpose: >-
+  Collect, clarify and keep track of stakeholder needs and requests over the whole life of the
+  product, so that an agreed requirements baseline exists as the starting point for engineering
+  work and every later change to it is controlled.
+outcomes:
+  - n: 1
+    text: A standing communication channel with the stakeholders exists and is in use.
+  - n: 2
+    text: Stakeholder requirements have been agreed with the parties concerned, written down and baselined.
+  - n: 3
+    text: A change mechanism assesses changes driven by shifting stakeholder needs and folds accepted ones into the baselined requirement set.
+  - n: 4
+    text: Stakeholder needs are watched continuously through a defined mechanism.
+  - n: 5
+    text: A customer can find out with little effort where each of its requests stands and what was decided about it.
+  - n: 6
+    text: Changes caused by new technology or evolving stakeholder needs are detected, their risks evaluated and their effects kept under control.
+base_practices:
+  - id: SYS.1.BP1
+    name: Obtain stakeholder requirements and requests
+    intent: Actively gather requirements and requests by asking the customer and by working through every document that shapes them, and record where each item came from.
+    outcomes: [1, 4]
+    evidence:
+      - Imported customer specifications with one ID per item and a source reference
+      - Intake log of stakeholder requests
+      - Minutes of elicitation sessions
+    rule_ids: []
+  - id: SYS.1.BP2
+    name: Understand stakeholder expectations
+    intent: Make sure customer and supplier interpret every requirement identically, clarifying unclear items together and recording the result.
+    outcomes: [2]
+    evidence:
+      - Clarification or question-and-answer list with recorded answers
+      - Joint review record with the customer
+    rule_ids: []
+  - id: SYS.1.BP3
+    name: Agree on requirements
+    intent: Get explicit consent from every party concerned to the requirement set the project will work to.
+    outcomes: [2]
+    evidence:
+      - Acceptance status per requirement
+      - Attributable agreement or sign-off record
+    rule_ids: []
+  - id: SYS.1.BP4
+    name: Establish stakeholder requirements baseline
+    intent: Freeze the agreed requirements as the project reference, after adding requirements the stakeholder did not voice but the intended use demands.
+    outcomes: [2, 3]
+    evidence:
+      - Tagged or labelled baseline of the stakeholder requirements
+      - List of supplier-added implicit requirements with rationale
+    rule_ids: []
+  - id: SYS.1.BP5
+    name: Manage stakeholder requirements changes
+    intent: Handle every change relative to the baseline, so that affected people can judge impact and risk and start change control and mitigation.
+    outcomes: [3, 6]
+    evidence:
+      - Change requests naming the affected baseline items
+      - Impact and risk assessment per change with a decision record
+      - Successor baseline containing the accepted changes
+    rule_ids: []
+  - id: SYS.1.BP6
+    name: Establish customer-supplier query communication mechanism
+    intent: Give the customer a way to see state and outcome of its requested changes, and deliver information in the language and format the customer asked for.
+    outcomes: [5]
+    evidence:
+      - Shared request tracker showing status and decision per entry
+      - Agreed data exchange formats
+      - Minutes of status meetings with the customer
+    rule_ids: []
+output_work_products:
+  - id: "08-19"
+    name: Risk management plan
+    outcomes: [6]
+  - id: "08-20"
+    name: Risk mitigation plan
+    outcomes: [6]
+  - id: "13-04"
+    name: Communication record
+    outcomes: [1, 4]
+  - id: "13-19"
+    name: Review record
+    outcomes: [4, 5]
+  - id: "13-21"
+    name: Change control record
+    outcomes: [3, 4]
+  - id: "15-01"
+    name: Analysis report
+    outcomes: [2, 3, 6]
+  - id: "17-03"
+    name: Stakeholder Requirements
+    outcomes: [1, 2]
+# No rating-consistency diagram and no rule IDs are published for this process.
+depends_on: []

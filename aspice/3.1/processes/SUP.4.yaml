@@ -1,0 +1,110 @@
+id: SUP.4
+name: Joint Review
+group: SUP
+scope: extended
+purpose: >-
+  Keep project and stakeholders aligned, through recurring management and
+  technical reviews, on progress against the agreed objectives and on what
+  remains to be done for the product to satisfy the stakeholders.
+outcomes:
+  - n: 1
+    text: Management reviews and technical reviews take place as the project needs them.
+  - n: 2
+    text: Stakeholders jointly assess the status and the results of process activities in these reviews.
+  - n: 3
+    text: Everyone affected learns the review results.
+  - n: 4
+    text: Action items from reviews are followed until closed.
+  - n: 5
+    text: Problems that surface are captured in a record.
+base_practices:
+  - id: SUP.4.BP1
+    name: Define review elements
+    intent: From project needs it is settled when management reviews and technical reviews happen, what they cover and who takes part; resources are agreed and criteria for finding and resolving problems are set.
+    outcomes: [1]
+    evidence:
+      - Review plan or calendar with participants
+      - Review criteria
+    rule_ids: []
+  - id: SUP.4.BP2
+    name: Establish a mechanism to handle review outcomes
+    intent: A defined mechanism makes sure results reach all affected parties, detected problems are recorded, and action items are logged for follow-up.
+    outcomes: [3]
+    evidence:
+      - Minutes template and distribution rule
+      - Action and problem tracking set-up
+    rule_ids: []
+  - id: SUP.4.BP3
+    name: Prepare joint review
+    intent: Review material is collected, planned, prepared and sent out ahead of the review as appropriate.
+    outcomes: [1]
+    evidence:
+      - Invitation with agenda and material sent in advance
+    rule_ids: []
+  - id: SUP.4.BP4
+    name: Conduct joint reviews
+    intent: Reviews at management level and at technical level take place as planned, and what they yield is recorded.
+    outcomes: [1, 2]
+    evidence:
+      - Review records or minutes with attendance
+    rule_ids: []
+  - id: SUP.4.BP5
+    name: Distribute the results
+    intent: Results are documented and sent to all affected parties.
+    outcomes: [3]
+    evidence:
+      - Evidence that minutes went to the distribution list
+    rule_ids: []
+  - id: SUP.4.BP6
+    name: Determine actions for review results
+    intent: Results are analysed, resolution actions are proposed and their priority is set.
+    outcomes: [4]
+    evidence:
+      - Action list with priority and owner
+    rule_ids: []
+  - id: SUP.4.BP7
+    name: Track actions for review results
+    intent: Actions that resolve problems found in a review are followed until closed.
+    outcomes: [4]
+    evidence:
+      - Action status history with closure evidence
+    rule_ids: []
+  - id: SUP.4.BP8
+    name: Identify and record problems
+    intent: Problems detected in reviews are identified and recorded through the established mechanism.
+    outcomes: [5]
+    evidence:
+      - Problem records that reference the review
+    rule_ids: []
+output_work_products:
+  - id: "13-04"
+    name: Communication record
+    outcomes: [3]
+  - id: "13-05"
+    name: Contract review record
+    outcomes: [1, 2, 3]
+  - id: "13-07"
+    name: Problem record
+    outcomes: [3, 5]
+  - id: "13-09"
+    name: Meeting support record
+    outcomes: [1, 2]
+  - id: "13-19"
+    name: Review record
+    outcomes: [1, 2, 3, 4, 5]   # mapped to all outcomes
+  - id: "14-02"
+    name: Corrective action register
+    outcomes: [3, 4, 5]
+  - id: "14-08"
+    name: Tracking system
+    outcomes: [3, 4, 5]
+  - id: "15-01"
+    name: Analysis report
+    outcomes: [3, 5]
+  - id: "15-13"
+    name: Assessment/audit report
+    outcomes: [1, 2]
+  - id: "15-16"
+    name: Improvement opportunity
+    outcomes: [3, 4]
+depends_on: []

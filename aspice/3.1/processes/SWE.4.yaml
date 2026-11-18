@@ -1,0 +1,155 @@
+id: SWE.4
+name: Software Unit Verification
+group: SWE
+scope: vda            # marked as VDA scope, with rating-consistency guidance
+purpose: >-
+  Verify the software units, by static verification and unit testing, so that there is
+  evidence they conform to the detailed design and meet the non-functional software
+  requirements.
+outcomes:
+  - n: 1
+    text: "A strategy for verifying the units exists and says how changed units are re-verified."
+  - n: 2
+    text: "Verification criteria have been derived from the strategy and are fit to show that units comply with the detailed design and the non-functional software requirements."
+  - n: 3
+    text: "Units have been verified as strategy and criteria prescribe, and the results are on record."
+  - n: 4
+    text: "Units, verification criteria and verification results are consistent and linked to each other in both directions."
+  - n: 5
+    text: "A summary of the unit verification results has been given to all affected parties."
+base_practices:
+  - id: SWE.4.BP1
+    name: Develop software unit verification strategy including regression strategy
+    intent: "State how compliance of units with detailed design and non-functional requirements will be shown, with which techniques, and what is re-verified when a unit changes."
+    outcomes: [1]
+    evidence:
+      - "Unit verification strategy with methods per unit class or ASIL, coverage metric and targets, static rule set and review rules"
+      - "Entry, exit and pass / fail criteria and the test environment definition"
+      - "Regression rules and treatment of generated and third-party code"
+    rule_ids: [SAP.RL.1, SAP.RL.2, SAP.RL.3, SAP.RL.4, AGE.RC.7, APA.RL.8, SWE.4.RL.1, SWE.4.RL.2]
+  - id: SWE.4.BP2
+    name: Develop criteria for unit verification
+    intent: "Define criteria that can prove compliance of units and their interplay inside the component; unit test criteria go into a unit test specification, possibly as executable scripts."
+    outcomes: [2]
+    evidence:
+      - "Unit test specification with test cases linked to design elements, inputs, expected results and test data"
+      - "Coverage goal per unit"
+      - "Selected coding standard with rule classification, static analysis configuration and code review checklist"
+    rule_ids: [SWE.4.RL.7, SWE.4.RC.1, SWE.4.RC.2]
+  - id: SWE.4.BP3
+    name: Perform static verification of software units
+    intent: "Check units for correctness by static analysis, code review and coding-standard checks against the defined criteria, and record the results."
+    outcomes: [3]
+    evidence:
+      - "Static analysis report for the verified revision with rule violations and metrics"
+      - "Deviation records with rule number, rationale and approver"
+      - "Code review records with findings and closure, compiler warning log"
+      - "Problem records for confirmed defects"
+    rule_ids: [MBD.RL.7, MBD.RL.8, MBD.RL.10, AGE.RC.11, SWE.4.RL.3, SWE.4.RL.4, SWE.4.RL.5, SWE.4.RL.6, SWE.4.RL.8]
+  - id: SWE.4.BP4
+    name: Test software units
+    intent: "Run the unit test specification as the strategy prescribes and record results and logs."
+    outcomes: [3]
+    evidence:
+      - "Unit test report and log per unit with verdict per test case, unit revision, environment and tool versions"
+      - "Structural coverage report with figures per unit and justification for uncovered code"
+      - "Problem records for failed tests"
+    rule_ids: [MBD.RL.9, MBD.RL.11, SWE.4.RL.3, SWE.4.RL.4, SWE.4.RL.5, SWE.4.RL.6, SWE.4.RL.7, SWE.4.RL.9]
+  - id: SWE.4.BP5
+    name: Establish bidirectional traceability
+    intent: "Maintain two-way links for units to static verification results, detailed design to unit test specification, and unit test specification to unit test results."
+    outcomes: [4]
+    evidence:
+      - "Test cases that reference design element IDs"
+      - "Result files keyed by test case ID and unit revision"
+      - "Static analysis and review results keyed by unit and revision, and a generated trace report"
+    rule_ids: [TAC.RC.1, TAC.RC.2, TAC.RC.3, TAC.RC.4, SWE.4.RC.3]
+  - id: SWE.4.BP6
+    name: Ensure consistency
+    intent: "Make sure the unit test specification agrees in content with the detailed design and demonstrate it by review."
+    outcomes: [4]
+    evidence:
+      - "Review record of the unit test specification against the detailed design with findings and closure"
+      - "Re-review entries after design changes"
+    rule_ids: [TAC.RL.1, TAC.RC.4, SWE.4.RC.4, CL2.RC.18]
+  - id: SWE.4.BP7
+    name: Summarize and communicate results
+    intent: "Condense unit test and static verification results into a summary that lets recipients judge the consequences, and pass it to all affected parties."
+    outcomes: [5]
+    evidence:
+      - "Unit verification summary per release with pass / fail counts, coverage against target, open findings, deviations and open problems"
+      - "Distribution record naming the recipients"
+    rule_ids: [SAC.RC.1, SAC.RC.2, SAC.RC.3, SAC.RC.4, SAC.RC.5, SAC.RC.6, SWE.4.RL.10, SWE.4.RL.11, CL2.RC.10]
+output_work_products:
+  - id: "08-50"
+    name: Test specification
+    outcomes: [2]
+  - id: "08-52"
+    name: Test plan
+    outcomes: [1]
+  - id: "13-04"
+    name: Communication record
+    outcomes: [5]
+  - id: "13-19"
+    name: Review record
+    outcomes: [3, 4]
+  - id: "13-22"
+    name: Traceability record
+    outcomes: [4]
+  - id: "13-25"
+    name: Verification results
+    outcomes: [3, 5]
+  - id: "13-50"
+    name: Test result
+    outcomes: [3, 5]
+  - id: "15-01"
+    name: Analysis report
+    outcomes: [3]
+# depends_on: "from" is the practice whose rating depends on "to".
+# A "to" that is a bare process ID means the PA 1.1 (process performance) rating of that process.
+depends_on:
+  - from: SWE.4.BP2
+    to: SWE.4.BP1
+    kind: rule            # SWE.4.RL.7
+  - from: SWE.4.BP4
+    to: SWE.4.BP1
+    kind: rule            # SWE.4.RL.7
+  - from: SWE.4.BP3
+    to: SWE.4.BP2
+    kind: rule            # SWE.4.RL.8
+  - from: SWE.4.BP4
+    to: SWE.4.BP2
+    kind: rule            # SWE.4.RL.9
+  - from: SWE.4.BP7
+    to: SWE.4.BP3
+    kind: rule            # SWE.4.RL.10
+  - from: SWE.4.BP7
+    to: SWE.4.BP4
+    kind: rule            # SWE.4.RL.11
+  - from: SWE.4.BP2
+    to: SWE.1
+    kind: recommendation  # SWE.4.RC.1 (non-functional requirements)
+  - from: SWE.4.BP2
+    to: SWE.3
+    kind: recommendation  # SWE.4.RC.2
+  - from: SWE.4.BP5
+    to: SWE.3
+    kind: recommendation  # SWE.4.RC.3
+  - from: SWE.4.BP6
+    to: SWE.3
+    kind: recommendation  # SWE.4.RC.4
+  # The next four are dashed lines that the diagram explicitly marks as having NO recommendation ID.
+  # They are stored as "recommendation" only because the format has two kinds; treat them as
+  # logical dependencies without a guideline ID.
+  - from: SWE.4.BP5
+    to: SWE.4.BP3
+    kind: recommendation  # dashed, no ID
+  - from: SWE.4.BP5
+    to: SWE.4.BP2
+    kind: recommendation  # dashed, no ID
+  - from: SWE.4.BP5
+    to: SWE.4.BP4
+    kind: recommendation  # dashed, no ID
+  - from: SWE.4.BP6
+    to: SWE.4.BP2
+    kind: recommendation  # dashed, no ID

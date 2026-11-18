@@ -1,0 +1,33 @@
+# Official identifiers that may appear verbatim although they are not in the
+# process catalog under aspice/. One phrase per line. Names only - never
+# descriptive text.
+
+# Automotive SPICE 3.1 processes outside the catalog
+ACQ.3 Contract Agreement
+ACQ.11 Technical Requirements
+ACQ.12 Legal and Administrative Requirements
+ACQ.13 Project Requirements
+ACQ.14 Request for Proposals
+ACQ.15 Supplier Qualification
+SPL.1 Supplier Tendering
+MAN.6 Measurement
+PIM.3 Process Improvement
+
+# Process groups and plug-in domains
+ACQ Acquisition
+SPL Supply
+SYS System Engineering
+SWE Software Engineering
+SUP Supporting
+MAN Management
+PIM Process Improvement
+REU Reuse
+HWE Hardware Engineering
+MSE Mechanical System Engineering
+MCE Mechanical Component Engineering
+
+# Organizational maturity extension
+ORG.1 Process Establishment
+ORG.4 Skill development
+QNT.1 Quantitative Performance Management
+QNT.2 Quantitative Process Improvement

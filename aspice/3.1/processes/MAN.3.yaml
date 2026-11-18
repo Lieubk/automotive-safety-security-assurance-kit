@@ -1,0 +1,189 @@
+id: MAN.3
+name: Project Management
+group: MAN
+scope: vda
+purpose: >-
+  Keep the project steerable by bounding its scope, planning the activities and
+  resources needed to build the product, and controlling progress against that
+  plan under the requirements and constraints that apply to the project.
+outcomes:
+  - n: 1
+    text: The boundaries of what the project has to deliver are stated.
+  - n: 2
+    text: It has been checked whether the project objectives can be reached with the resources at hand and under the given constraints.
+  - n: 3
+    text: The work to be done and the resources it requires have been sized and estimated.
+  - n: 4
+    text: The project knows its internal interfaces and those to neighbouring projects and organizational units, and keeps an eye on them.
+  - n: 5
+    text: Plans for carrying out the project exist, are followed and are kept up to date.
+  - n: 6
+    text: Progress is tracked and reported.
+  - n: 7
+    text: Missed objectives trigger corrective action, and problems found in the project are kept from coming back.
+base_practices:
+  - id: MAN.3.BP1
+    name: Define the scope of work
+    intent: Goals, the reason for the project and its limits are written down and agreed.
+    outcomes: [1]
+    evidence:
+      - Scope statement in the project plan listing deliverables and exclusions
+      - Reference from the scope to the customer agreement or requirements baseline
+    rule_ids: [DID.RL.1, PLS.RC.1, MAN.3.RL.1, MAN.3.RL.2, MAN.3.RL.3, MAN.3.RC.1, MAN.3.RC.2]
+  - id: MAN.3.BP2
+    name: Define project life cycle
+    intent: A life cycle is chosen that suits the size, context and complexity of the project and matches the development process of the customer.
+    outcomes: [2]
+    evidence:
+      - Life cycle description with phases, milestones and release stages
+      - Mapping of project milestones to customer milestones
+    rule_ids: [AGE.RC.2, MAN.3.RC.11, MAN.3.RC.12, MAN.3.RC.18]
+  - id: MAN.3.BP3
+    name: Evaluate feasibility of the project
+    intent: It is assessed whether the goals are technically reachable in the available time, with the estimated effort and the resources that can be provided.
+    outcomes: [2]
+    evidence:
+      - Feasibility assessment record with assumptions, open risks and decision
+    rule_ids: [MAN.3.RC.2, MAN.3.RL.3, MAN.3.RC.15, MAN.3.RC.16, MAN.3.RC.17, MAN.3.RC.19, MAN.3.RC.30]
+  - id: MAN.3.BP4
+    name: Define, monitor and adjust project activities
+    intent: Work is broken into trackable activities with dependencies, derived from the life cycle and the estimates, followed up and revised when needed.
+    outcomes: [3, 5, 7]
+    evidence:
+      - Work breakdown structure or backlog with dependencies
+      - Status history of work packages
+    rule_ids: [AGE.RC.1, DID.RL.3, MAN.3.RC.3, MAN.3.RC.4, MAN.3.RC.5, MAN.3.RC.11, MAN.3.RC.12, MAN.3.RC.13, MAN.3.RL.4, MAN.3.RL.5, MAN.3.RL.6, MAN.3.RL.7, MAN.3.RL.8, MAN.3.RL.9, MAN.3.RL.11, MAN.3.RL.12, MAN.3.RL.13, MAN.3.RL.14, MAN.3.RL.15, MAN.3.RC.20]
+  - id: MAN.3.BP5
+    name: Define, monitor and adjust project estimates and resources
+    intent: Effort and resource needs are estimated with a stated method from goals, boundaries and risks, compared with actuals and re-estimated when they drift.
+    outcomes: [2, 3, 7]
+    evidence:
+      - Estimation records stating method and basis
+      - Resource plan
+      - Planned-versus-actual comparison over time
+    rule_ids: [AGE.RC.4, DID.RL.3, TPS.RC.1, TPS.RC.7, SYS.2.RC.6, SWE.1.RC.7, MAN.3.RC.2, MAN.3.RL.3, MAN.3.RC.6, MAN.3.RC.7, MAN.3.RC.8, MAN.3.RC.9, MAN.3.RC.10, MAN.3.RC.11, MAN.3.RC.12, MAN.3.RC.13, MAN.3.RL.4, MAN.3.RL.5, MAN.3.RL.6, MAN.3.RL.7, MAN.3.RL.8, MAN.3.RL.9, MAN.3.RC.15, MAN.3.RC.16, MAN.3.RC.17, MAN.3.RC.21, MAN.3.RC.22, MAN.3.RC.23, MAN.3.RC.24, MAN.3.RC.28, CL2.RC.4, CL2.RC.5, CL2.RC.6]
+  - id: MAN.3.BP6
+    name: Ensure required skills, knowledge, and experience
+    intent: The competencies the estimated work needs are identified, compared with those of the assigned people and teams, and gaps are closed in time.
+    outcomes: [3, 7]
+    evidence:
+      - Skill matrix per role
+      - Training plan and completion records
+    rule_ids: [MAN.3.RC.15, MAN.3.RC.16, MAN.3.RC.17, CL2.RC.7]
+  - id: MAN.3.BP7
+    name: Identify, monitor and adjust project interfaces and agreed commitments
+    intent: Interfaces to other projects, organizational units and stakeholders are identified and agreed, and the commitments made across them are tracked.
+    outcomes: [4, 7]
+    evidence:
+      - Stakeholder and interface list
+      - Commitment log
+      - Minutes of interface meetings with open-item follow-up
+    rule_ids: [TPS.RC.13, PLS.RC.3, APA.RC.1, MAN.3.RC.13, MAN.3.RL.4, MAN.3.RL.5, MAN.3.RL.6, MAN.3.RL.7, MAN.3.RL.8, MAN.3.RL.9, MAN.3.RL.11, MAN.3.RL.12, MAN.3.RL.13, MAN.3.RL.14, MAN.3.RL.15, MAN.3.RC.29, CL2.RC.8]
+  - id: MAN.3.BP8
+    name: Define, monitor and adjust project schedule
+    intent: Every activity has resources and dates assigned; the schedule spans the whole project and is updated continuously until the project ends.
+    outcomes: [3, 5, 7]
+    evidence:
+      - Schedule with owners, dates and dependencies
+      - Schedule revisions and milestone trend
+    rule_ids: [MAN.3.RC.2, MAN.3.RL.3, MAN.3.RC.3, MAN.3.RC.4, MAN.3.RC.5, MAN.3.RC.11, MAN.3.RC.12, MAN.3.RC.13, MAN.3.RL.4, MAN.3.RL.5, MAN.3.RL.6, MAN.3.RL.7, MAN.3.RL.8, MAN.3.RL.9, MAN.3.RL.11, MAN.3.RL.12, MAN.3.RL.13, MAN.3.RL.14, MAN.3.RL.15, MAN.3.RL.17, MAN.3.RC.25]
+  - id: MAN.3.BP9
+    name: Ensure consistency
+    intent: Schedule, activities, estimates, skills, interfaces, commitments and plans agree with each other and are understood the same way by everyone involved.
+    outcomes: [3, 4, 5, 7]
+    evidence:
+      - Plan consistency review record
+      - Cross-check of schedule against work packages and resource plan
+    # MAN.3.RC.14 and MAN.3.RC.15 are an interpretation of an ambiguous range; confirm against the guideline
+    rule_ids: [TAC.RL.1, AGE.RC.1, DID.RL.2, MAN.3.RC.13, MAN.3.RL.4, MAN.3.RL.5, MAN.3.RL.6, MAN.3.RL.7, MAN.3.RL.8, MAN.3.RL.9, MAN.3.RC.14, MAN.3.RC.15]
+  - id: MAN.3.BP10
+    name: Review and report progress of the project
+    intent: Status and completion of activities are regularly compared with estimated effort and duration and reported to everyone concerned; problem causes are removed.
+    outcomes: [6, 7]
+    evidence:
+      - Periodic project status reports
+      - Project review minutes and corrective action list
+      - Lessons-learned record at project end
+    rule_ids: [SAC.RC.1, SAC.RC.2, SUP.8.RC.9, MAN.3.RC.13, MAN.3.RL.4, MAN.3.RL.5, MAN.3.RL.6, MAN.3.RL.7, MAN.3.RL.8, MAN.3.RL.9, MAN.3.RL.10, MAN.3.RC.26, MAN.3.RC.27, MAN.3.RC.31]
+output_work_products:
+  - id: "08-12"
+    name: Project plan
+    outcomes: [1, 3, 4, 5]
+  - id: "13-04"
+    name: Communication record
+    outcomes: [4, 6]
+  - id: "13-16"
+    name: Change request
+    outcomes: [7]
+  - id: "13-19"
+    name: Review record
+    outcomes: [2, 7]
+  - id: "14-02"
+    name: Corrective action register
+    outcomes: [7]
+  - id: "14-06"
+    name: Schedule
+    outcomes: [3, 5]
+  - id: "14-09"
+    name: Work breakdown structure
+    outcomes: [3, 4, 5]
+  - id: "14-50"
+    name: Stakeholder groups list
+    outcomes: [4]
+  - id: "15-06"
+    name: Project status report
+    outcomes: [4, 6]
+# depends_on: "from" is the practice whose rating depends on "to".
+# The governing guideline ID is given as a trailing comment.
+depends_on:
+  - from: MAN.3.BP8
+    to: MAN.3.BP5
+    kind: rule            # MAN.3.RL.17
+  - from: MAN.3.BP9
+    to: MAN.3.BP4
+    kind: rule            # ID not established
+  - from: MAN.3.BP9
+    to: MAN.3.BP5
+    kind: rule            # ID not established
+  - from: MAN.3.BP9
+    to: MAN.3.BP7
+    kind: rule            # ID not established
+  - from: MAN.3.BP9
+    to: MAN.3.BP8
+    kind: rule            # ID not established
+  - from: MAN.3.BP2
+    to: MAN.3.BP1
+    kind: recommendation  # MAN.3.RC.18 (direction assumed)
+  - from: MAN.3.BP3
+    to: MAN.3.BP1
+    kind: recommendation  # MAN.3.RC.19
+  - from: MAN.3.BP3
+    to: MAN.3.BP5
+    kind: recommendation  # MAN.3.RC.22
+  - from: MAN.3.BP4
+    to: MAN.3.BP2
+    kind: recommendation  # MAN.3.RC.20
+  - from: MAN.3.BP4
+    to: MAN.3.BP5
+    kind: recommendation  # MAN.3.RC.20, MAN.3.RC.23
+  - from: MAN.3.BP5
+    to: MAN.3.BP4
+    kind: recommendation  # MAN.3.RC.23 (mutual)
+  - from: MAN.3.BP5
+    to: MAN.3.BP1
+    kind: recommendation  # MAN.3.RC.21
+  - from: MAN.3.BP6
+    to: MAN.3.BP5
+    kind: recommendation  # MAN.3.RC.24
+  - from: MAN.3.BP8
+    to: MAN.3.BP4
+    kind: recommendation  # MAN.3.RC.25
+  - from: MAN.3.BP10
+    to: MAN.3.BP4
+    kind: recommendation  # MAN.3.RC.26
+  - from: MAN.3.BP10
+    to: MAN.3.BP5
+    kind: recommendation  # MAN.3.RC.27
+  - from: MAN.3.BP5
+    to: other-processes
+    kind: recommendation  # ID not established; estimates rely on other processes in scope

@@ -1,0 +1,11 @@
+# Confidential source material and the data used to scan for leaks of it.
+# These must never be committed. See tools/confidentiality_scan.py.
+/input/
+/.confidential/
+
+# Local Claude Code settings
+.claude/settings.local.json
+
+# Python
+__pycache__/
+*.pyc

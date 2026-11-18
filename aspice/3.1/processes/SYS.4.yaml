@@ -1,0 +1,181 @@
+id: SYS.4
+name: System Integration and Integration Test
+group: SYS
+scope: vda
+purpose: >-
+  Assemble the system items into the complete system as the system architecture lays out, and
+  test their interaction so that there is evidence the integrated items and their interfaces
+  behave as the architecture specifies.
+outcomes:
+  - n: 1
+    text: A system integration strategy exists that matches the system architecture, the release plan and the project plan.
+  - n: 2
+    text: A system integration test strategy, covering regression testing as well, exists for testing how the system items interact.
+  - n: 3
+    text: A system integration test specification has been derived from that test strategy and is capable of showing that the integrated items comply with the architecture, interfaces included.
+  - n: 4
+    text: The system items are integrated, following the integration strategy, until the complete system exists.
+  - n: 5
+    text: Test cases are chosen from the specification as the release plan and the test strategy require.
+  - n: 6
+    text: The interactions between system items are tested with the chosen cases and the results are recorded.
+  - n: 7
+    text: Architecture elements and integration test cases agree in content and are linked in both directions, and test cases are linked in both directions to their results.
+  - n: 8
+    text: The integration test results are summarised and have been made known to every affected party.
+base_practices:
+  - id: SYS.4.BP1
+    name: Develop system integration strategy
+    intent: Define how the system items are put together in line with project plan and release plan, identifying the items from the architecture and fixing the order of integration.
+    outcomes: [1]
+    evidence:
+      - Integration strategy listing the items, the integration steps and their order
+      - Preconditions per integration step
+      - Link between integration steps and release content
+    rule_ids: [SAP.RL.1, SAP.RL.2, SAP.RL.3, SAP.RL.4, DID.RL.10, SYS.4.RL.1, SYS.4.RC.2, SYS.4.RC.3]
+  - id: SYS.4.BP2
+    name: Develop system integration test strategy including regression test strategy
+    intent: Define how the integrated items are tested along the integration strategy, including how re-testing is done when a system item changes.
+    outcomes: [2]
+    evidence:
+      - Test strategy naming test objects per integration step, methods and environments
+      - Entry and exit criteria
+      - Regression rules for changed items
+    rule_ids: [SAP.RL.1, SAP.RL.2, SAP.RL.3, SAP.RL.4, APA.RL.8, SYS.4.RL.2, SYS.4.RL.3]
+  - id: SYS.4.BP3
+    name: Develop specification for system integration test
+    intent: Write test cases for every integration step according to the test strategy, able to demonstrate that the integrated items comply with the architecture.
+    outcomes: [3]
+    evidence:
+      - Test cases with ID, integration step and addressed interface or interaction
+      - Preconditions, stimulus and expected result per test case
+    rule_ids: [SYS.4.RL.4, SYS.4.RL.9, SYS.4.RL.11, SYS.4.RC.4]
+  - id: SYS.4.BP4
+    name: Integrate system items
+    intent: Assemble the items into an integrated system in the way the integration strategy prescribes.
+    outcomes: [4]
+    evidence:
+      - Build and assembly record per integration step
+      - Versions of hardware samples, software and data in the integrated configuration
+    rule_ids: [SYS.4.RL.12]
+  - id: SYS.4.BP5
+    name: Select test cases
+    intent: Pick test cases from the specification so that coverage is adequate for what the release plan and the test strategy demand.
+    outcomes: [5]
+    evidence:
+      - Selection list per release with selection criterion and achieved coverage
+      - Regression set for changed items
+    rule_ids: [SYS.4.RL.5, SYS.4.RC.1, SYS.4.RL.9, SYS.4.RL.13, SYS.4.RL.14, SYS.4.RC.5]
+  - id: SYS.4.BP6
+    name: Perform system integration test
+    intent: Execute the selected test cases and record both results and logs.
+    outcomes: [6]
+    evidence:
+      - Result per executed case with verdict, tested configuration, environment, date and tester
+      - Raw test logs
+      - Problem reports for failed cases
+    rule_ids: [SYS.4.RL.6, SYS.4.RL.7, SYS.4.RL.8, SYS.4.RL.15]
+  - id: SYS.4.BP7
+    name: Establish bidirectional traceability
+    intent: Link architecture elements and integration test cases in both directions, and likewise test cases and their results.
+    outcomes: [7]
+    evidence:
+      - Link data from architecture elements and interfaces to test cases
+      - Link data from test cases to results
+      - Coverage figures derived from the links
+    rule_ids: [TAC.RC.1, TAC.RC.2, TAC.RC.3, TAC.RC.4, SYS.4.RC.6]
+  - id: SYS.4.BP8
+    name: Ensure consistency
+    intent: Check the content of the integration test cases against the architecture elements they claim to cover.
+    outcomes: [7]
+    evidence:
+      - Review record of the test specification against the architecture
+      - Findings and their closure
+    rule_ids: [TAC.RL.1, TAC.RC.4, SYS.4.RC.7, CL2.RC.18]
+  - id: SYS.4.BP9
+    name: Summarize and communicate results
+    intent: Condense the integration test results into a summary and get it to all affected parties.
+    outcomes: [8]
+    evidence:
+      - Test summary report per release with counts, open problems and coverage
+      - Distribution record for the summary
+    rule_ids: [SAC.RC.1, SAC.RC.2, SAC.RC.3, SAC.RC.4, SAC.RC.5, SAC.RC.6, CL2.RC.10]
+output_work_products:
+  - id: "08-50"
+    name: Test specification
+    outcomes: [3, 5]
+  - id: "08-52"
+    name: Test plan
+    outcomes: [1, 2]
+  - id: "11-06"
+    name: System
+    outcomes: [4]
+  - id: "13-04"
+    name: Communication record
+    outcomes: [8]
+  - id: "13-19"
+    name: Review record
+    outcomes: [7]
+  - id: "13-22"
+    name: Traceability record
+    outcomes: [7]
+  - id: "13-50"
+    name: Test result
+    outcomes: [6, 8]
+# Dependencies from the rating-consistency diagram. "from" is always a practice of this process.
+# A bare process ID as "to" means the process as a whole (its PA 1.1 rating).
+depends_on:
+  - from: SYS.4.BP2
+    to: SYS.4.BP1
+    kind: rule             # SYS.4.RL.10
+  - from: SYS.4.BP3
+    to: SYS.4.BP2
+    kind: rule             # SYS.4.RL.9, SYS.4.RL.11
+  - from: SYS.4.BP4
+    to: SYS.4.BP1
+    kind: rule             # SYS.4.RL.12
+  - from: SYS.4.BP5
+    to: SYS.4.BP2
+    kind: rule             # SYS.4.RL.9, SYS.4.RL.14
+  - from: SYS.4.BP5
+    to: SYS.4.BP3
+    kind: rule             # SYS.4.RL.13
+  - from: SYS.4.BP6
+    to: SYS.4.BP5
+    kind: rule             # SYS.4.RL.15
+  - from: SYS.4.BP7
+    to: SYS.4.BP3
+    kind: rule             # solid line, no rule ID printed; a second dashed line marked "no RC" joins the same pair
+  - from: SYS.4.BP7
+    to: SYS.4.BP6
+    kind: rule             # solid line, no rule ID printed
+  - from: SYS.4.BP9
+    to: SYS.4.BP6
+    kind: rule             # solid line, no rule ID printed
+  - from: SYS.4.BP1
+    to: MAN.3
+    kind: recommendation   # SYS.4.RC.2, line without arrowhead to the MAN.3 / SPL.2 group
+  - from: SYS.4.BP1
+    to: SPL.2
+    kind: recommendation   # SYS.4.RC.2, line without arrowhead to the MAN.3 / SPL.2 group
+  - from: SYS.4.BP5
+    to: MAN.3
+    kind: recommendation   # SYS.4.RC.5, line without arrowhead to the MAN.3 / SPL.2 group
+  - from: SYS.4.BP5
+    to: SPL.2
+    kind: recommendation   # SYS.4.RC.5, line without arrowhead to the MAN.3 / SPL.2 group
+  - from: SYS.4.BP1
+    to: SYS.3
+    kind: recommendation   # SYS.4.RC.3, arrowhead at both ends
+  - from: SYS.4.BP3
+    to: SYS.3
+    kind: recommendation   # SYS.4.RC.4, arrowhead at both ends
+  - from: SYS.4.BP7
+    to: SYS.3
+    kind: recommendation   # SYS.4.RC.6, arrowhead at both ends
+  - from: SYS.4.BP8
+    to: SYS.3
+    kind: recommendation   # SYS.4.RC.7, arrowhead at both ends
+  - from: SYS.4.BP8
+    to: SYS.4.BP3
+    kind: recommendation   # dashed line marked "no RC", arrowhead at both ends

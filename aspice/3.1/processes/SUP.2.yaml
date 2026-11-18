@@ -1,0 +1,75 @@
+id: SUP.2
+name: Verification
+group: SUP
+scope: extended
+purpose: >-
+  Establish, work product by work product, that what a process or project
+  produced matches the requirements specified for it.
+outcomes:
+  - n: 1
+    text: A verification strategy is created, applied and kept current.
+  - n: 2
+    text: Verification criteria exist for every work product that has to be verified.
+  - n: 3
+    text: The verification activities that are required are carried out.
+  - n: 4
+    text: Defects are found, recorded and followed up.
+  - n: 5
+    text: The customer and the other parties involved have access to the verification results.
+base_practices:
+  - id: SUP.2.BP1
+    name: Develop a verification strategy
+    intent: A strategy, put into effect through a plan, names verification activities with methods, techniques and tools, the objects verified, the required independence and the timing.
+    outcomes: [1]
+    evidence:
+      - Verification strategy and plan
+      - Schedule entries for verification activities
+    rule_ids: []
+  - id: SUP.2.BP2
+    name: Develop criteria for verification
+    intent: For each technical work product that must be verified, criteria state what counts as verified.
+    outcomes: [2]
+    evidence:
+      - Checklists, review criteria and pass/fail criteria per work product type
+    rule_ids: []
+  - id: SUP.2.BP3
+    name: Conduct verification
+    intent: The identified work products are verified following the strategy and against the criteria, and the results are recorded.
+    outcomes: [3]
+    evidence:
+      - Verification results, review records and analysis reports per item version
+    rule_ids: []
+  - id: SUP.2.BP4
+    name: Determine and track actions for verification results
+    intent: Findings from verification are handed to problem resolution management (SUP.9) and followed there until closed.
+    outcomes: [4]
+    evidence:
+      - Problem records linked to verification findings, with closure evidence
+    rule_ids: []
+  - id: SUP.2.BP5
+    name: Report verification results
+    intent: Everyone affected receives the verification results.
+    outcomes: [5]
+    evidence:
+      - Verification report with distribution evidence
+    rule_ids: []
+output_work_products:
+  - id: "13-04"
+    name: Communication record
+    outcomes: [5]
+  - id: "13-07"
+    name: Problem record
+    outcomes: [3, 4, 5]
+  - id: "13-25"
+    name: Verification results
+    outcomes: [2, 3, 4, 5]
+  - id: "14-02"
+    name: Corrective action register
+    outcomes: [4]
+  - id: "18-07"
+    name: Quality criteria
+    outcomes: [2]
+  - id: "19-10"
+    name: Verification strategy
+    outcomes: [1]
+depends_on: []

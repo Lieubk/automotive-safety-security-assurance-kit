@@ -1,0 +1,154 @@
+id: SUP.9
+name: Problem Resolution Management
+group: SUP
+scope: vda
+purpose: >-
+  Make sure every problem is captured, understood, acted on and kept under
+  control until it is resolved.
+outcomes:
+  - n: 1
+    text: A strategy for managing problem resolution exists.
+  - n: 2
+    text: Problems are recorded, each with a unique identifier, and classified.
+  - n: 3
+    text: Problems are analysed and assessed so that a suitable solution can be chosen.
+  - n: 4
+    text: Resolution of problems is started.
+  - n: 5
+    text: Problems are followed until they are closed.
+  - n: 6
+    text: Problem status and trends are known.
+base_practices:
+  - id: SUP.9.BP1
+    name: Develop a problem resolution management strategy
+    intent: A strategy defines resolution activities, a status model, alert notification, responsibilities, the handling of urgent cases and interfaces to affected parties, and is kept current.
+    outcomes: [1]
+    evidence:
+      - Problem management plan with status model and classification scheme
+      - Rules for urgent handling, notification and escalation
+    rule_ids: [SAP.RL.1, SAP.RL.2, SAP.RL.3, SAP.RL.4, SUP.9.RL.1, SUP.9.RL.2, SUP.9.RL.7, SUP.9.RL.8, SUP.9.RC.1]
+  - id: SUP.9.BP2
+    name: Identify and record the problem
+    intent: Every problem gets a unique identifier, a description and a record, with enough supporting information to reproduce and diagnose it.
+    outcomes: [2]
+    evidence:
+      - Problem records with identifier, description, reproduction steps, environment, origin and reporter
+    rule_ids: []   # no rule and no recommendation assigned
+  - id: SUP.9.BP3
+    name: Record the status of problems
+    intent: Each problem carries a status taken from the status model so that it can be tracked.
+    outcomes: [6]
+    evidence:
+      - Status field and status history per problem
+    rule_ids: [SUP.9.RL.7, SUP.9.RL.8, SUP.9.RC.1, SUP.9.RL.9, SUP.9.RC.2]
+  - id: SUP.9.BP4
+    name: Diagnose the cause and determine the impact of the problem
+    intent: The problem is investigated for cause and impact so that it can be categorized and suitable actions chosen.
+    outcomes: [2, 3]
+    evidence:
+      - Cause and impact analysis in the problem record
+      - Category or severity assignment
+    rule_ids: [SUP.9.RL.3, SUP.9.RL.4, SUP.9.RL.5, SUP.9.RL.6, SUP.9.RC.3]
+  - id: SUP.9.BP5
+    name: Authorize urgent resolution action
+    intent: Where the strategy classes a problem as urgent, authorization for immediate action is obtained in the way the strategy prescribes.
+    outcomes: [4]
+    evidence:
+      - Authorization record for urgent fixes with approver and time
+    rule_ids: [SUP.9.RL.9, SUP.9.RL.10]
+  - id: SUP.9.BP6
+    name: Raise alert notifications
+    intent: Where the strategy classes a problem as strongly affecting other systems or other parties, an alert is issued in the way the strategy prescribes.
+    outcomes: [4]
+    evidence:
+      - Alert notifications with recipients and date, linked to the problem
+    rule_ids: [SUP.9.RL.3, SUP.9.RL.4, SUP.9.RL.5, SUP.9.RL.6, SUP.9.RL.9, SUP.9.RC.4]
+  - id: SUP.9.BP7
+    name: Initiate problem resolution
+    intent: Actions that resolve the problem are started as the strategy defines and are themselves reviewed, or a change request is raised.
+    outcomes: [4]
+    evidence:
+      - Resolution actions or linked change requests
+      - Review of the proposed actions
+    rule_ids: [SUP.9.RL.9, SUP.9.RC.5, SUP.10.RC.16]
+  - id: SUP.9.BP8
+    name: Track problems to closure
+    intent: Problem status, including that of linked change requests, is followed to closure, and a problem is closed only after an authorized formal acceptance.
+    outcomes: [5, 6]
+    evidence:
+      - Status history through to closed
+      - Closure approval record and status of linked change requests
+    rule_ids: [SUP.9.RL.7, SUP.9.RL.8, SUP.9.RC.1, SUP.9.RL.11]
+  - id: SUP.9.BP9
+    name: Analyze problem trends
+    intent: Problem data are collected and analysed, trends are identified, and project-level actions are started as the strategy defines.
+    outcomes: [6]
+    evidence:
+      - Trend reports by category, origin, detection phase and age
+      - Actions derived from trends
+    rule_ids: [SUP.9.RL.9]
+output_work_products:
+  - id: "08-27"
+    name: Problem management plan
+    outcomes: [1]
+  - id: "13-07"
+    name: Problem record
+    outcomes: [2, 3, 4, 5]
+  - id: "15-01"
+    name: Analysis report
+    outcomes: [3]
+  - id: "15-05"
+    name: Evaluation report
+    outcomes: [3]
+  - id: "15-12"
+    name: Problem status report
+    outcomes: [6]
+# depends_on: "from" is the practice whose rating depends on "to".
+# The governing guideline ID is given as a trailing comment.
+# Mutual relations are listed once per direction.
+depends_on:
+  - from: SUP.9.BP3
+    to: SUP.9.BP1
+    kind: rule            # SUP.9.RL.9
+  - from: SUP.9.BP5
+    to: SUP.9.BP1
+    kind: rule            # SUP.9.RL.9
+  - from: SUP.9.BP6
+    to: SUP.9.BP1
+    kind: rule            # SUP.9.RL.9
+  - from: SUP.9.BP7
+    to: SUP.9.BP1
+    kind: rule            # SUP.9.RL.9
+  - from: SUP.9.BP9
+    to: SUP.9.BP1
+    kind: rule            # SUP.9.RL.9
+  - from: SUP.9.BP5
+    to: SUP.9.BP4
+    kind: rule            # SUP.9.RL.10
+  - from: SUP.9.BP8
+    to: SUP.9.BP3
+    kind: rule            # SUP.9.RL.11 (classified by its RL identifier; confirm against the guideline)
+  - from: SUP.9.BP3
+    to: SUP.9.BP2
+    kind: recommendation  # SUP.9.RC.2
+  - from: SUP.9.BP4
+    to: SUP.9.BP2
+    kind: recommendation  # SUP.9.RC.3
+  - from: SUP.9.BP6
+    to: SUP.9.BP4
+    kind: recommendation  # SUP.9.RC.4
+  - from: SUP.9.BP7
+    to: SUP.9.BP4
+    kind: recommendation  # SUP.9.RC.5
+  - from: SUP.9.BP7
+    to: SUP.10.BP2
+    kind: recommendation  # SUP.9.RC.6
+  - from: SUP.10.BP2
+    to: SUP.9.BP7
+    kind: recommendation  # SUP.9.RC.6
+  - from: SUP.9.BP8
+    to: SUP.10.BP7
+    kind: recommendation  # SUP.9.RC.7
+  - from: SUP.10.BP7
+    to: SUP.9.BP8
+    kind: recommendation  # SUP.9.RC.7

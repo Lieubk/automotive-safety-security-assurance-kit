@@ -1,0 +1,141 @@
+id: ACQ.4
+name: Supplier Monitoring
+group: ACQ
+scope: vda
+purpose: >-
+  Follow and judge how the supplier performs against what was agreed. Here
+  "customer" is the assessed party and "supplier" is that party's supplier.
+outcomes:
+  - n: 1
+    text: Activities that customer and supplier agreed to perform together take place as needed.
+  - n: 2
+    text: The information both sides agreed to exchange flows regularly between them.
+  - n: 3
+    text: The performance of the supplier is checked against what was agreed.
+  - n: 4
+    text: Necessary changes to the agreement are negotiated by both parties and written into it.
+base_practices:
+  - id: ACQ.4.BP1
+    name: Agree on and maintain joint processes, joint interfaces, and information to be exchanged
+    intent: A current agreement covers shared processes and interfaces, responsibilities, the information exchanged, and the kind and rhythm of meetings, reviews, status reporting and other joint activities.
+    outcomes: [1, 2, 4]
+    evidence:
+      - Collaboration or interface agreement under version control
+      - Responsibility matrix and meeting and reporting calendar
+      - List of work products to exchange
+    rule_ids: [TPS.RC.8, TPS.RC.9, TPS.RC.10, TPS.RC.11, TPS.RC.13, ACQ.4.RL.2, ACQ.4.RC.1, ACQ.4.RC.3]
+  - id: ACQ.4.BP2
+    name: Exchange all agreed information
+    intent: The agreed interfaces are actually used to pass on everything that was agreed, including the relevant work products.
+    outcomes: [1, 2, 3]
+    evidence:
+      - Delivery and receipt records
+      - Exchanged status reports
+    rule_ids: [SAC.RC.1, SAC.RC.2, TPS.RC.2, TPS.RC.3, ACQ.4.RL.3]
+  - id: ACQ.4.BP3
+    name: Review technical development with the supplier
+    intent: Technical reviews with the supplier happen at the agreed rhythm, deal with technical matters, problems and risks, and open items are followed until closed.
+    outcomes: [1, 3, 4]
+    evidence:
+      - Technical review minutes
+      - Open-item list with status history
+    rule_ids: [ACQ.4.RL.3, ACQ.4.RL.4]
+  - id: ACQ.4.BP4
+    name: Review progress of the supplier
+    intent: Supplier progress on schedule, quality and cost is reviewed at the agreed rhythm; open items are closed out and risk mitigation is carried out.
+    outcomes: [1, 3, 4]
+    evidence:
+      - Progress review minutes
+      - Supplier status reports compared with plan
+      - Supplier risk list
+    rule_ids: [TPS.RC.12, ACQ.4.RL.3, ACQ.4.RL.5]
+  - id: ACQ.4.BP5
+    name: Act to correct deviations
+    intent: When agreed objectives are missed, action brings the work back to plan and stops recurrence; changed objectives are negotiated and written into the agreement.
+    outcomes: [4]
+    evidence:
+      - Corrective action entries for supplier deviations
+      - Change requests against the agreement and the updated agreement version
+    rule_ids: [ACQ.4.RC.2]
+output_work_products:
+  - id: "02-01"
+    name: Commitment/agreement
+    outcomes: [4]
+  - id: "13-01"
+    name: Acceptance record
+    outcomes: [3]
+  - id: "13-04"
+    name: Communication record
+    outcomes: [1, 2]
+  - id: "13-09"
+    name: Meeting support record
+    outcomes: [1]
+  - id: "13-14"
+    name: Progress status record
+    outcomes: [2]
+  - id: "13-16"
+    name: Change request
+    outcomes: [4]
+  - id: "13-19"
+    name: Review record
+    outcomes: [2]
+  - id: "14-02"
+    name: Corrective action register
+    outcomes: [4]
+  - id: "15-01"
+    name: Analysis report
+    outcomes: [3]
+# depends_on: "from" is the practice whose rating depends on "to".
+# The governing guideline ID is given as a trailing comment.
+# Mutual relations are listed once per direction.
+depends_on:
+  - from: ACQ.4.BP2
+    to: ACQ.4.BP1
+    kind: rule            # ACQ.4.RL.3
+  - from: ACQ.4.BP3
+    to: ACQ.4.BP1
+    kind: rule            # ACQ.4.RL.3
+  - from: ACQ.4.BP4
+    to: ACQ.4.BP1
+    kind: rule            # ACQ.4.RL.3
+  - from: ACQ.4.BP3
+    to: ACQ.4.BP2
+    kind: rule            # ACQ.4.RL.4
+  - from: ACQ.4.BP4
+    to: ACQ.4.BP2
+    kind: rule            # ACQ.4.RL.5
+  - from: ACQ.4.BP5
+    to: ACQ.4.BP2
+    kind: recommendation  # ACQ.4.RC.2
+  - from: ACQ.4.BP5
+    to: ACQ.4.BP3
+    kind: recommendation  # ACQ.4.RC.2
+  - from: ACQ.4.BP5
+    to: ACQ.4.BP4
+    kind: recommendation  # ACQ.4.RC.2
+  # ACQ.4.RC.3: mutual consistency with every process in scope; three are named
+  - from: ACQ.4.BP1
+    to: SUP.10
+    kind: recommendation  # ACQ.4.RC.3
+  - from: SUP.10
+    to: ACQ.4.BP1
+    kind: recommendation  # ACQ.4.RC.3
+  - from: ACQ.4.BP1
+    to: SYS.1
+    kind: recommendation  # ACQ.4.RC.3
+  - from: SYS.1
+    to: ACQ.4.BP1
+    kind: recommendation  # ACQ.4.RC.3
+  - from: ACQ.4.BP1
+    to: MAN.3
+    kind: recommendation  # ACQ.4.RC.3
+  - from: MAN.3
+    to: ACQ.4.BP1
+    kind: recommendation  # ACQ.4.RC.3
+  # ACQ.4.RC.4: mutual consistency with SUP.9 process performance (PA 1.1)
+  - from: ACQ.4.BP5
+    to: SUP.9
+    kind: recommendation  # ACQ.4.RC.4
+  - from: SUP.9
+    to: ACQ.4.BP5
+    kind: recommendation  # ACQ.4.RC.4

@@ -1,0 +1,168 @@
+id: SUP.10
+name: Change Request Management
+group: SUP
+scope: vda
+purpose: >-
+  Make sure every change request is recorded, decided, implemented and kept
+  under control until it is closed.
+outcomes:
+  - n: 1
+    text: A strategy for managing change requests exists.
+  - n: 2
+    text: Requests for change are recorded and can be identified.
+  - n: 3
+    text: Relationships and dependencies between change requests are known.
+  - n: 4
+    text: Criteria that confirm a change request has been implemented are set.
+  - n: 5
+    text: Change requests are analysed and the resources they need are estimated.
+  - n: 6
+    text: Approval and priority of changes rest on the analysis results and the resources available.
+  - n: 7
+    text: Changes that were approved get implemented and are followed until closed.
+  - n: 8
+    text: The status of every change request is known.
+  - n: 9
+    text: Change requests and the work products they affect are linked in both directions.
+base_practices:
+  - id: SUP.10.BP1
+    name: Develop a change request management strategy
+    intent: A strategy defines the change request activities, a status model, the criteria used in analysis, responsibilities and the interfaces to affected parties, and is kept current.
+    outcomes: [1]
+    evidence:
+      - Change management plan with status model and analysis criteria
+      - Definition of the deciding body and its members
+    rule_ids: [SAP.RL.1, SAP.RL.2, SAP.RL.3, SAP.RL.4, APA.RL.6, SUP.10.RL.1]
+  - id: SUP.10.BP2
+    name: Identify and record the change requests
+    intent: Every change request gets a unique identifier, a description and a record as the strategy defines, naming who raised it and why.
+    outcomes: [2, 3]
+    evidence:
+      - Change request records with identifier, initiator, reason and description
+    rule_ids: [SUP.9.RC.6, SUP.10.RL.8, CL2.RC.16]
+  - id: SUP.10.BP3
+    name: Record the status of change requests
+    intent: Each change request carries a status taken from the status model so that it can be tracked.
+    outcomes: [8]
+    evidence:
+      - Status field and status history per change request
+    # SUP.10.RL.6 to SUP.10.RL.8 is an interpretation of an ambiguous range; confirm against the guideline
+    rule_ids: [SUP.10.RL.6, SUP.10.RL.7, SUP.10.RL.8, SUP.10.RC.7, SUP.10.RC.8, SUP.10.RC.9, SUP.10.RC.10, CL2.RC.16]
+  - id: SUP.10.BP4
+    name: Analyze and assess change requests
+    intent: Each request is analysed as the strategy defines, including dependencies on affected work products and other requests; impact is assessed and confirmation criteria are defined.
+    outcomes: [3, 4, 5, 9]
+    evidence:
+      - Impact analysis with affected items, effort estimate, risks and dependencies
+      - Confirmation criteria stated in the change request
+    rule_ids: [PLS.RC.6, APA.RL.5, SUP.10.RL.4, SUP.10.RL.5, SUP.10.RC.5, SUP.10.RC.6, SUP.10.RL.8, SUP.10.RC.11, SUP.10.RC.12]
+  - id: SUP.10.BP5
+    name: Approve change requests before implementation
+    intent: Before implementation starts, requests are prioritized from the analysis results and resource availability and approved as the strategy defines.
+    outcomes: [6]
+    evidence:
+      - Decision record of the Change Control Board with date, priority and target release
+    rule_ids: [SUP.10.RL.3, SUP.10.RC.4, SUP.10.RL.8, SUP.10.RL.9]
+  - id: SUP.10.BP6
+    name: Review the implementation of change requests
+    intent: Before a request is closed, its implementation is reviewed to confirm that the confirmation criteria are met and every relevant process was applied.
+    outcomes: [7, 8]
+    evidence:
+      - Review record per change request
+      - Evidence that affected work products were updated and verified again
+    rule_ids: [SUP.10.RL.4, SUP.10.RL.5, SUP.10.RC.5, SUP.10.RC.6, SUP.10.RC.13]
+  - id: SUP.10.BP7
+    name: Track change requests to closure
+    intent: Requests are followed until closed and the initiator is told the result.
+    outcomes: [7, 8]
+    evidence:
+      - Status history through to closed
+      - Feedback sent to the initiator
+    rule_ids: [SUP.9.RC.7, SUP.10.RL.6, SUP.10.RL.7, SUP.10.RC.7, SUP.10.RL.10, CL2.RC.16]
+  - id: SUP.10.BP8
+    name: Establish bidirectional traceability
+    intent: Links exist in both directions between a change request and the work products it affects and, where a problem was the trigger, the corresponding problem reports.
+    outcomes: [9]
+    evidence:
+      - Trace links from change request to changed items and back
+      - Links between change requests and problem records
+    rule_ids: [TAC.RC.1, TAC.RC.2, TAC.RC.3, SUP.10.RL.11]
+output_work_products:
+  - id: "08-28"
+    name: Change management plan
+    outcomes: [1]
+  - id: "13-16"
+    name: Change request
+    outcomes: [2, 3, 4, 5, 6, 7]
+  - id: "13-19"
+    name: Review record
+    outcomes: [7]
+  - id: "13-21"
+    name: Change control record
+    outcomes: [8, 9]
+# depends_on: "from" is the practice whose rating depends on "to".
+# The governing guideline ID is given as a trailing comment.
+# Mutual relations are listed once per direction.
+# "PA 1.1" stands for process performance of the processes that own the
+# affected work products (RC.14, RC.17) or of all relevant processes (RC.15).
+depends_on:
+  - from: SUP.10.BP2
+    to: SUP.10.BP1
+    kind: rule            # SUP.10.RL.8
+  - from: SUP.10.BP3
+    to: SUP.10.BP1
+    kind: rule            # SUP.10.RL.8
+  - from: SUP.10.BP4
+    to: SUP.10.BP1
+    kind: rule            # SUP.10.RL.8
+  - from: SUP.10.BP5
+    to: SUP.10.BP1
+    kind: rule            # SUP.10.RL.8
+  - from: SUP.10.BP5
+    to: SUP.10.BP4
+    kind: rule            # SUP.10.RL.9
+  - from: SUP.10.BP7
+    to: SUP.10.BP3
+    kind: rule            # SUP.10.RL.10
+  - from: SUP.10.BP8
+    to: SUP.10.BP2
+    kind: rule            # SUP.10.RL.11
+  - from: SUP.10.BP3
+    to: SUP.10.BP1
+    kind: recommendation  # SUP.10.RC.8
+  - from: SUP.10.BP3
+    to: SUP.10.BP2
+    kind: recommendation  # SUP.10.RC.9
+  - from: SUP.10.BP4
+    to: SUP.10.BP3
+    kind: recommendation  # SUP.10.RC.11
+  - from: SUP.10.BP4
+    to: SUP.10.BP8
+    kind: recommendation  # SUP.10.RC.12
+  - from: SUP.10.BP4
+    to: SUP.10.BP2
+    kind: recommendation  # ID not established
+  - from: SUP.10.BP6
+    to: SUP.10.BP4
+    kind: recommendation  # SUP.10.RC.13
+  - from: SUP.10.BP4
+    to: "PA 1.1"
+    kind: recommendation  # SUP.10.RC.14
+  - from: "PA 1.1"
+    to: SUP.10.BP4
+    kind: recommendation  # SUP.10.RC.14
+  - from: SUP.10.BP6
+    to: "PA 1.1"
+    kind: recommendation  # SUP.10.RC.15
+  - from: "PA 1.1"
+    to: SUP.10.BP6
+    kind: recommendation  # SUP.10.RC.15
+  - from: SUP.10.BP8
+    to: SUP.9.BP7
+    kind: recommendation  # SUP.10.RC.16
+  - from: SUP.9.BP7
+    to: SUP.10.BP8
+    kind: recommendation  # SUP.10.RC.16
+  - from: SUP.10.BP8
+    to: "PA 1.1"
+    kind: recommendation  # SUP.10.RC.17

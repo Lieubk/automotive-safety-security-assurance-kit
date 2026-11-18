@@ -1,0 +1,94 @@
+id: SUP.7
+name: Documentation
+group: SUP
+scope: extended
+purpose: >-
+  Plan, write, check, distribute and keep current the recorded information
+  that a process produces.
+outcomes:
+  - n: 1
+    text: A strategy states which documentation is to be produced throughout the product or service life cycle.
+  - n: 2
+    text: The standards to follow when writing documentation are identified.
+  - n: 3
+    text: The documentation that the process or project has to produce is identified.
+  - n: 4
+    text: Content and purpose of every document are specified, reviewed and approved.
+  - n: 5
+    text: Documentation is written and made available in line with the identified standards.
+  - n: 6
+    text: Documentation is maintained according to defined criteria.
+base_practices:
+  - id: SUP.7.BP1
+    name: Develop a documentation management strategy
+    intent: A strategy says what gets documented, at which point of the product or service life cycle, and where it is kept.
+    outcomes: [1]
+    evidence:
+      - Documentation plan or documentation strategy
+    rule_ids: []
+  - id: SUP.7.BP2
+    name: Establish standards for documentation
+    intent: Standards for writing, changing and maintaining documents are in place.
+    outcomes: [2]
+    evidence:
+      - Templates and rules for structure, style and naming
+    rule_ids: []
+  - id: SUP.7.BP3
+    name: Specify documentation requirements
+    intent: The attributes a document must carry are specified, such as identifier, title, date, author, reviewer, approver, version history, purpose, outline and distribution list.
+    outcomes: [2]
+    evidence:
+      - Template header or metadata schema for documents
+    rule_ids: []
+  - id: SUP.7.BP4
+    name: Identify the relevant documentation to be produced
+    intent: The documents that have to be written are listed for whichever development life cycle is in use.
+    outcomes: [3]
+    evidence:
+      - Document list or work product list per life cycle phase
+    rule_ids: []
+  - id: SUP.7.BP5
+    name: Develop documentation
+    intent: Documents are written at the defined process points following standards and policy, and their content and purpose are reviewed and approved as appropriate.
+    outcomes: [4, 5]
+    evidence:
+      - Documents carrying review and approval status
+    rule_ids: []
+  - id: SUP.7.BP6
+    name: Check documentation
+    intent: A document is reviewed before it is distributed and, where required, authorized before distribution or release.
+    outcomes: [5]
+    evidence:
+      - Review records and authorization records for documents
+    rule_ids: []
+  - id: SUP.7.BP7
+    name: Distribute documentation
+    intent: Documents reach all affected parties through the defined channels and media, and delivery is confirmed where that is necessary.
+    outcomes: [5]
+    evidence:
+      - Distribution records and receipt confirmations
+    rule_ids: []
+  - id: SUP.7.BP8
+    name: Maintain documentation
+    intent: Documents are kept current as the documentation strategy requires.
+    outcomes: [6]
+    evidence:
+      - Change history per document with superseded versions marked
+    rule_ids: []
+output_work_products:
+  - id: "08-26"
+    name: Documentation plan
+    outcomes: [1, 2]
+  - id: "13-01"
+    name: Acceptance record
+    outcomes: [4, 5]
+  - id: "13-19"
+    name: Review record
+    outcomes: [4, 5]
+  - id: "14-01"
+    name: Change history
+    outcomes: [5, 6]
+  - id: "14-11"
+    name: Work product list
+    outcomes: [3]
+depends_on: []
