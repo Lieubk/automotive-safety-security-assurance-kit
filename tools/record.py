@@ -113,6 +113,7 @@ from pathlib import Path
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import traceability as trace  # noqa: E402
 from traceability import TEST_TYPES, VERDICTS, Project, file_hash  # noqa: E402
 
 
@@ -122,11 +123,11 @@ def next_id(project, type_name):
     return "%s-%04d" % (prefix, max(numbers, default=0) + 1)
 
 
-def write_item(project, type_name, front):
+def write_item(project, type_name, front, body=""):
     folder = project.root / project.types[type_name]["folder"]
     folder.mkdir(parents=True, exist_ok=True)
     path = folder / (front["id"] + ".md")
-    text = "---\n" + yaml.safe_dump(front, sort_keys=False, allow_unicode=True, width=120) + "---\n"
+    text = "---\n" + yaml.safe_dump(front, sort_keys=False, allow_unicode=True, width=120) + "---\n" + body
     path.write_text(text, encoding="utf-8", newline="\n")
     return path.relative_to(project.root).as_posix()
 
@@ -497,6 +498,41 @@ def cmd_review(project, args):
     return 0
 
 
+def cmd_status_report(project, args):
+    as_of = trace.as_date(args.as_of) if args.as_of else datetime.date.today()
+    problems = [] if as_of else ["--as-of must be a date YYYY-MM-DD"]
+    text = Path(args.assessment).read_text(encoding="utf-8").strip() if args.assessment and Path(args.assessment).is_file() else ""
+    if not text:
+        problems.append("--assessment names no file with text: the report carries the reporter's reading of the "
+                        "figures, in their words")
+    if problems:
+        return stop(problems)
+    data = trace.progress(project, as_of)
+    findings = project.check()
+    front = {
+        "id": next_id(project, "project-status-report"),
+        "type": "project-status-report",
+        "status": "final",
+        "title": "Project status as of %s" % as_of,
+        "as_of": str(as_of),
+        "period": args.period,
+        "reported_by": args.reported_by,
+        "work_packages": [{k: p[k] for k in ("item", "state", "planned_finish", "late", "estimate", "actual_effort",
+                                             "delivered", "settled")} for p in data["work_packages"]],
+        "milestones": [{k: m[k] for k in ("name", "date", "state")} for m in data["milestones"]],
+        "corrective_actions": [{k: a[k] for k in ("item", "state", "due", "overdue")} for a in data["corrective_actions"]],
+        "check": {"errors": sum(1 for f in findings if f["level"] == "error"),
+                  "warnings": sum(1 for f in findings if f["level"] == "warning")},
+    }
+    if not args.period:
+        del front["period"]
+    path = write_item(project, "project-status-report", front, "\n## Assessment\n\n%s\n" % text)
+    print("wrote %s: %d work packages, %d late; %d milestones; %d corrective actions open"
+          % (path, len(data["work_packages"]), sum(1 for p in data["work_packages"] if p["late"]),
+             len(data["milestones"]), len(data["corrective_actions"])))
+    return 0
+
+
 def cmd_baseline(project, args):
     internal = (project.config.get("trace") or {}).get("internal_baselines") or []
     errors = [f for f in project.check() if f["level"] == "error"]
@@ -577,6 +613,11 @@ def main():
     review.add_argument("--reconfirm", action="store_true",
                         help="the items are unchanged and are confirmed against new versions of what they build on")
     review.add_argument("ids", nargs="+")
+    status = sub.add_parser("status-report")
+    status.add_argument("--reported-by", required=True)
+    status.add_argument("--assessment", required=True, help="text file with the reporter's assessment")
+    status.add_argument("--as-of", help="date the figures are measured against (default: today)")
+    status.add_argument("--period")
     baseline = sub.add_parser("baseline")
     baseline.add_argument("--tag", required=True)
     baseline.add_argument("--purpose", required=True)
@@ -589,7 +630,8 @@ def main():
     args = ap.parse_args()
     project = Project(args.project)
     commands = {"next-id": cmd_next_id, "test-run": cmd_test_run, "analysis-run": cmd_analysis_run,
-                "review": cmd_review, "baseline": cmd_baseline, "communication": cmd_communication}
+                "review": cmd_review, "baseline": cmd_baseline, "communication": cmd_communication,
+                "status-report": cmd_status_report}
     return commands[args.command](project, args)
 
 

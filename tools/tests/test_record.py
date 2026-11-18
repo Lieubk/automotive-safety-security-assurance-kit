@@ -267,6 +267,29 @@ class Runs(RecordCase):
         self.assertIn("matches no finding", out)
 
 
+class StatusReports(RecordCase):
+    def test_a_report_needs_the_reporters_assessment(self):
+        code, out = self.record("status-report", "--reported-by", "P. Lead", "--assessment", str(Path(self.tmp.name) / "none.txt"))
+        self.assertEqual(code, 1)
+        self.assertIn("reporter's reading", out)
+
+    def test_a_report_carries_the_figures_and_the_assessment(self):
+        package = self.project / "plans" / "work-packages" / "WP-0001.md"
+        package.parent.mkdir(parents=True, exist_ok=True)
+        package.write_text("---\nid: WP-0001\ntype: work-package\ntitle: Feature\nstatus: draft\nowner: Project lead\n"
+                           "category: engineering\nplanned_finish: '2026-01-31'\nlinks:\n  delivers: [SWR-0001]\n---\n\n"
+                           "## Description\n\nThe work.\n", encoding="utf-8")
+        text = Path(self.tmp.name) / "assessment.txt"
+        text.write_text("On track except the feature package, which is late by two weeks.", encoding="utf-8")
+        code, out = self.record("status-report", "--reported-by", "P. Lead", "--assessment", text, "--as-of", "2026-02-15")
+        self.assertEqual(code, 0, out)
+        record_text = (self.project / "records" / "status" / "PSR-0001.md").read_text(encoding="utf-8")
+        record = yaml.safe_load(record_text.split("---")[1])
+        self.assertEqual(record["work_packages"][0]["item"], "WP-0001")
+        self.assertTrue(record["work_packages"][0]["late"])
+        self.assertIn("## Assessment", record_text)
+
+
 class Baselines(RecordCase):
     def test_baseline_lists_approved_engineering_items_only(self):
         code, out = self.record("baseline", "--tag", "design-1", "--purpose", "design freeze")

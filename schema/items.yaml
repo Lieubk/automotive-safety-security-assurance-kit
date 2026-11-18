@@ -70,6 +70,14 @@ lifecycles:
       - {from: open, to: answered, when: "the answer and who gave it are recorded"}
       - {from: answered, to: closed, when: "the items the query is about have been brought in line with the answer"}
       - {from: answered, to: open, when: "the answer does not settle the question"}
+  action:                          # corrective actions of project management
+    states: [open, done, closed, cancelled]
+    stages: {before-review: [done, closed], before-approval: [closed]}
+    transitions:
+      - {from: open, to: done, when: "the action was carried out, as its owner states"}
+      - {from: done, to: closed, when: "its effect on the deviation it addresses is shown, in a later status report or review"}
+      - {from: done, to: open, when: "the effect did not come about"}
+      - {from: [open, done], to: cancelled, when: "the reason is recorded"}
   record:                          # review records, test runs, baselines, communication records
     states: [open, final]
     stages: {before-review: [final], before-approval: [final]}
@@ -112,6 +120,22 @@ attribute_sets:
 # check them. Keys under `mandatory` must be present in every record.
 # ---------------------------------------------------------------------------
 structures:
+  milestones:                      # plan.milestones when kind is project
+    mandatory: [name, date]
+    keys: [baseline_purpose, release, description]
+    dates: [date]
+    note: "baseline_purpose names the purpose of the baseline that marks the milestone as reached, as the configuration management plan writes it"
+  activities:                      # work-package.activities
+    mandatory: [name, owner]
+    keys: [estimate, planned_finish, skill, description]
+    dates: [planned_finish]
+    note: "estimate in person-days; skill names what the activity needs that the owner must bring (MAN.3.BP6)"
+  progress:                        # work-package.progress - tracking, not plan: excluded from the content hash
+    shape: mapping
+    mandatory: []
+    keys: [actual_start, actual_effort, completed_on, as_of, note]
+    dates: [actual_start, completed_on, as_of]
+    note: "stated by the owner of the work package; actual_effort in person-days up to as_of"
   data-elements:                   # software-interface.elements
     mandatory: [name, direction, type]
     keys: [unit, min, max, resolution, initial, invalid, period_ms, timeout_ms, description]
@@ -315,10 +339,11 @@ types:
     prefix: PLN
     folder: plans
     lifecycle: engineering
-    supports: [SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1, SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1, "08-52", "08-04", "08-13", "08-27", "08-28"]
+    supports: [MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6, MAN.3.BP7, SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1, SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1, "08-12", "08-52", "08-04", "08-13", "08-27", "08-28"]
     attributes:
       use: [common]
-      kind: {values: [unit-verification, software-integration, software-qualification-test, system-integration, system-qualification-test, configuration-management, quality-assurance, problem-resolution, change-request-management], required: always}
+      kind: {values: [project, unit-verification, software-integration, software-qualification-test, system-integration, system-qualification-test, configuration-management, quality-assurance, problem-resolution, change-request-management], required: always}
+      milestones: {structure: milestones, required: optional, note: "project plans: the milestones of the life cycle, each with its date and the baseline purpose that marks it"}
       coverage_targets: {required: optional, note: "unit-verification plans: structural coverage a unit must reach, per ASIL, as {<ASIL>: {statement_percent, branch_percent, mcdc_percent}} with any subset of the metrics; an ASIL without an entry has no target"}
     sections:
       Scope: before-review         # what the plan covers and what it leaves to others
@@ -326,6 +351,30 @@ types:
       Criteria: before-review      # entry, exit and pass criteria, coverage targets, regression selection
       Environment and tools: before-approval
       Responsibilities: before-approval
+      Feasibility: optional        # project plans: mandatory before review (conditions)
+      Interfaces and commitments: optional
+      Reporting: optional
+
+  work-package:                    # a part of the work breakdown structure, with its schedule
+    prefix: WP
+    folder: plans/work-packages
+    lifecycle: engineering
+    supports: [MAN.3.BP4, MAN.3.BP5, MAN.3.BP8, "14-09", "14-06"]
+    attributes:
+      use: [common]
+      owner: {required: always, note: "who answers for the work package, by role or name"}
+      category: {values: [engineering, management, support], required: always}
+      process: {required: optional, note: "process ID the work serves, for example SWE.3"}
+      release: {required: optional}
+      estimate: {required: before-review, note: "effort in person-days; how it was reached goes into the section Estimate basis"}
+      planned_start: {format: date, required: before-review}
+      planned_finish: {format: date, required: before-review}
+      activities: {structure: activities, required: optional}
+      progress: {structure: progress, required: optional, note: "tracking stated by the owner; not part of the content hash, so it does not make the approved plan stale"}
+    sections:
+      Description: always          # the work and its boundaries
+      Deliverables: before-review  # what it produces; `delivers` links name the items once they exist
+      Estimate basis: before-review
 
   unit-test:
     prefix: UT
@@ -478,6 +527,41 @@ types:
       Cause and impact: before-review
       Resolution: before-approval
 
+  corrective-action:
+    prefix: CA
+    folder: records/actions
+    lifecycle: action
+    supports: [MAN.3.BP10, "14-02"]
+    attributes:
+      use: [common]
+      owner: {required: always}
+      due: {format: date, required: always}
+      raised_in: {required: always, note: "the status report, review or meeting that showed the deviation"}
+    sections:
+      Deviation: always            # what differs from the plan, with the figures
+      Action: always               # what is done about it, and how the cause is kept from coming back
+      Effect: before-approval      # what showed that it worked
+
+  project-status-report:
+    prefix: PSR
+    folder: records/status
+    lifecycle: record
+    supports: [MAN.3.BP10, "15-06"]
+    attributes:
+      id: {required: always}
+      type: {required: always}
+      status: {required: always}
+      title: {required: optional}
+      as_of: {format: date, required: always}
+      period: {required: optional}
+      reported_by: {required: always, note: "the person who stands behind the assessment"}
+      work_packages: {required: always, may_be_empty: true, note: "generated from `traceability.py progress`"}
+      milestones: {required: optional, note: "generated"}
+      corrective_actions: {required: optional, note: "generated"}
+      check: {required: optional, note: "summary of the trace check at the time of the report; generated"}
+    sections:
+      Assessment: always           # the reporter's reading of the figures, risks and what is decided
+
   baseline:
     prefix: BL
     folder: records/baselines
@@ -497,6 +581,7 @@ types:
 # approved plan of every kind that names one of its base practices (COV-27).
 # ---------------------------------------------------------------------------
 plan_kinds:
+  project: [MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6, MAN.3.BP7]
   unit-verification: [SWE.4.BP1]
   software-integration: [SWE.5.BP1, SWE.5.BP2]
   software-qualification-test: [SWE.6.BP1]
@@ -516,6 +601,7 @@ conditions:
   - {types: [system-requirement, software-requirement], when: {origin: [internal]}, sections: [Rationale], stage: before-review}
   - {types: [stakeholder-requirement], when: {assessment: [accepted-with-deviation, rejected, needs-clarification]}, attributes: [agreement], stage: before-approval}
   - {types: [software-component], when: {origin: [supplied, reused]}, attributes: [supplier], stage: before-review}
+  - {types: [plan], when: {kind: [project]}, attributes: [milestones], structure: milestones, sections: [Feasibility, Interfaces and commitments, Reporting], stage: before-review}
   - {types: [software-interface], when: {kind: [sender-receiver, mode-switch, parameter, non-volatile-data]}, attributes: [elements], stage: before-review}
   - {types: [software-interface], when: {kind: [client-server, function-call]}, attributes: [operations], stage: before-review}
   - {types: [architecture-view], when: {kind: [context, structure, state-machine, sequence]}, sections: [Diagram], stage: before-review}
@@ -549,6 +635,7 @@ links:
     pairs:
       - {from: software-component, to: [software-component], supports: [SWE.2.BP1]}
       - {from: software-unit, to: [software-component], supports: [SWE.3.BP5, SWE.3.BP6]}
+      - {from: work-package, to: [work-package], supports: [MAN.3.BP4], evidence: none}
   relies_on:
     meaning: "the requirement uses a term, a value or a behaviour that the target requirement defines; a change of the target makes it suspect"
     pairs:
@@ -596,6 +683,18 @@ links:
     pairs:
       - {from: change-request, to: any, supports: [SUP.10.BP8]}
       - {from: problem-report, to: any, supports: [SUP.9.BP4]}
+  delivers:
+    meaning: "the work package produces the target; its progress is read from the target's state"
+    pairs:
+      - {from: work-package, to: any, supports: [MAN.3.BP4, MAN.3.BP9], evidence: none}
+  depends_on:
+    meaning: "the work package can start only when the target has finished"
+    pairs:
+      - {from: work-package, to: [work-package], supports: [MAN.3.BP4, MAN.3.BP8], evidence: none}
+  addresses:
+    meaning: "the corrective action deals with a deviation in the target"
+    pairs:
+      - {from: corrective-action, to: any, supports: [MAN.3.BP10], evidence: none}
   resolves:
     meaning: "the change request carries the resolution of the problem"
     pairs:
@@ -648,6 +747,10 @@ coverage:
   - {id: COV-28, subject: software-unit, expect: "the latest final unit test run reports structural coverage of the unit that reaches the targets the approved unit-verification plan sets for the unit's ASIL", waiver: "origin generated or third-party; or a deviation recorded with the coverage entry", supports: [SWE.4.BP2, SWE.4.BP4]}
   - {id: COV-29, subject: software-unit, expect: "every designed function of category public, scheduled or callback is named by at least one unit test (verifies <unit>#<function>)", waiver: "origin generated or third-party", supports: [SWE.4.BP2, SWE.4.BP5]}
   - {id: COV-30, subject: software-unit, expect: "the unit's source files and the test files of its test cases are unchanged since the latest final unit test run and the latest final static analysis run recorded them", waiver: "none", supports: [SWE.4.BP3, SWE.4.BP4]}
+  - {id: COV-31, subject: work-package, expect: "part of at most one work package; part_of and depends_on links form no cycle", waiver: "none", supports: [MAN.3.BP4, MAN.3.BP8]}
+  - {id: COV-32, subject: any-engineering-item, expect: "every live engineering item of a process in scope, other than imported items and work packages, is delivered by a live work package", waiver: "none", supports: [MAN.3.BP4, MAN.3.BP9]}
+  - {id: COV-33, subject: project, expect: "live work packages exist for engineering, for management and for support work", waiver: "none", supports: [MAN.3.BP4]}
+  - {id: COV-34, subject: work-package, expect: "planned finish not before planned start, not after the finish of the package it is part of, and not before the finish of a package it depends on plus nothing; activities finish within the package", waiver: "none", supports: [MAN.3.BP8, MAN.3.BP9]}
   - {id: COV-26, subject: baseline, expect: "at least one final communication-record names the baseline as subject", waiver: "baseline purpose marked internal in the project configuration", supports: [SYS.2.BP8, SYS.3.BP8, SYS.4.BP9, SYS.5.BP7, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7, SWE.4.BP7, SWE.5.BP9, SWE.6.BP7]}
 
 # ---------------------------------------------------------------------------

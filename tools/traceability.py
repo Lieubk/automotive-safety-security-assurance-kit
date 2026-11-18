@@ -15,6 +15,8 @@ Commands
     status             items per type and state, and the latest verification runs
     list               IDs with state and title; --type, --status and --imported narrow it
     audit ID           compare a baseline record with the items as they are now
+    progress           work packages, milestones and corrective actions against the
+                       plan as of a date (--as-of; default today); --json
     diff ID            what changed in an item since a review saw it (--since REV-ID;
                        default: its newest review), from the version-control history
     practices [PROC]   per base practice of the processes in scope (or of one
@@ -30,6 +32,7 @@ File layout and hash definition: schema/item-format.md. Rules: schema/items.yaml
 Requires PyYAML. Exit code of `check`: 0 = no errors, 1 = errors.
 """
 import argparse
+import datetime
 import difflib
 import fnmatch
 import hashlib
@@ -103,7 +106,7 @@ def split_sections(body):
     return sections
 
 
-HASH_EXCLUDED = ("status", "source_files")     # state, and the pointer from a unit design to its code
+HASH_EXCLUDED = ("status", "source_files", "progress")   # state, the pointer from a unit design to its code, tracking
 # What a component is to an interface that names it. The names differ from every link role
 # on purpose: `uses` is a link of software units.
 INTERFACE_ROLES = {"provided_by": "provider of", "used_by": "user of"}
@@ -149,6 +152,25 @@ def c_signatures(code):
                 types.append(c_type(named.group(1) + ("*" if named.group(3) else "")) if named else c_type(parameter))
         found.setdefault(name, (returns, types))
     return found
+
+
+DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+SETTLED = {"engineering": ("approved",), "record": ("final",), "query": ("closed",), "change-request": ("closed",),
+           "problem-report": ("closed",), "action": ("closed",)}
+
+
+def as_date(value):
+    """A date from an attribute value (YAML may already have read it as one), or None."""
+    if isinstance(value, datetime.datetime):
+        return value.date()
+    if isinstance(value, datetime.date):
+        return value
+    if isinstance(value, str) and DATE.match(value.strip()):
+        try:
+            return datetime.date.fromisoformat(value.strip())
+        except ValueError:
+            return None
+    return None
 
 
 def as_list(value):
@@ -257,13 +279,19 @@ class Project:
     def dependencies(self, item):
         """(target id, role) of everything the item builds on: its links and, for a component,
         the interfaces it provides or uses (which are stated on the interface)."""
-        found = [(target, role) for role in (item.front.get("links") or {}) for target, _ in item.targets(role)]
+        found = [(target, role) for role in (item.front.get("links") or {}) if self.evidence(item.type, role)
+                 for target, _ in item.targets(role)]
         if item.type == "software-component":
             for interface in self.of_type("software-interface"):
                 for name, role in INTERFACE_ROLES.items():
                     if item.id in map(str, as_list(interface.front.get(name))):
                         found.append((interface.id, role))
         return list(dict.fromkeys(found))                 # several links to parts of one target count once
+
+    def evidence(self, type_name, role):
+        """False for links that plan or track work: they need no review against their targets."""
+        pairs = [p for p in (self.schema["links"].get(role) or {}).get("pairs", []) if p["from"] == type_name]
+        return not any(p.get("evidence") == "none" for p in pairs)
 
     def supports_of(self, item, role):
         """The base practices a dependency of this kind is evidence for."""
@@ -384,6 +412,8 @@ class Project:
                 continue
             if "values" in spec and value not in spec["values"]:
                 self.add("error", "SCHEMA", item.id, "attribute '%s' is %r, allowed: %s" % (name, value, spec["values"]))
+            if spec.get("format") == "date" and as_date(value) is None:
+                self.add("error", "SCHEMA", item.id, "attribute '%s' is %r: expected a date YYYY-MM-DD" % (name, value))
             if "structure" in spec:
                 self.check_structured(item, name, value, spec["structure"])
         if not item.imported:
@@ -439,6 +469,10 @@ class Project:
             for key in record:
                 if key not in known:
                     self.add("warning", "SCHEMA", item.id, "'%s' entry %s has unknown key '%s'" % (name, label, key))
+            for key in structure.get("dates") or []:
+                if record.get(key) not in (None, "") and as_date(record[key]) is None:
+                    self.add("error", "SCHEMA", item.id, "'%s' entry %s: %s is %r, expected a date YYYY-MM-DD"
+                             % (name, label, key, record[key]))
 
     def check_links(self, item):
         allowed = defaultdict(set)      # role -> target types this item type may link to
@@ -852,6 +886,66 @@ class Project:
                 self.add("error", rule, "project", "no approved software-level architecture view of kind %s"
                          % " or ".join(group), self.rules[rule]["supports"])
 
+    def cov_31(self, rule):
+        supports = self.rules[rule]["supports"]
+        packages = [p for p in self.of_type("work-package") if self.live(p)]
+        for package in packages:
+            if len(package.targets("part_of")) > 1:
+                self.add("error", rule, package.id, "part of more than one work package", supports)
+        for role in ("part_of", "depends_on"):
+            graph = {p.id: [t for t, _ in p.targets(role) if t in self.items] for p in packages}
+            for start in graph:
+                seen, stack = set(), list(graph[start])
+                while stack:
+                    current = stack.pop()
+                    if current == start:
+                        self.add("error", rule, start, "its %s links lead back to it" % role, supports)
+                        break
+                    if current not in seen:
+                        seen.add(current)
+                        stack.extend(graph.get(current, []))
+
+    def cov_32(self, rule):
+        delivered = {t for p in self.of_type("work-package") if self.live(p) for t, _ in p.targets("delivers")}
+        for item in self.items.values():
+            if self.types.get(item.type, {}).get("lifecycle") != "engineering" or item.type == "work-package" \
+                    or item.imported or not self.live(item):
+                continue
+            refs = self.schema["plan_kinds"].get(item.front.get("kind"), []) if item.type == "plan" \
+                else self.types[item.type].get("supports") or []
+            if self.in_scope(refs) and item.id not in delivered:
+                self.gap(rule, item, "no work package delivers it")
+
+    def cov_33(self, rule):
+        have = {p.front.get("category") for p in self.of_type("work-package") if self.live(p)}
+        missing = [c for c in ("engineering", "management", "support") if c not in have]
+        if missing:
+            self.add("error", rule, "project", "no work package of category %s" % ", ".join(missing),
+                     self.rules[rule]["supports"])
+
+    def cov_34(self, rule):
+        for package in self.of_type("work-package"):
+            if not self.live(package):
+                continue
+            start, finish = as_date(package.front.get("planned_start")), as_date(package.front.get("planned_finish"))
+            if start and finish and finish < start:
+                self.gap(rule, package, "planned finish %s is before planned start %s" % (finish, start))
+            for parent_id, _ in package.targets("part_of"):
+                parent = self.items.get(parent_id)
+                end = as_date(parent.front.get("planned_finish")) if parent else None
+                if finish and end and finish > end:
+                    self.gap(rule, package, "planned to finish %s, after %s, which it is part of (%s)" % (finish, parent_id, end))
+            for before_id, _ in package.targets("depends_on"):
+                before = self.items.get(before_id)
+                end = as_date(before.front.get("planned_finish")) if before else None
+                if start and end and end > start:
+                    self.gap(rule, package, "planned to start %s, before %s it depends on finishes (%s)" % (start, before_id, end))
+            for activity in as_list(package.front.get("activities")):
+                end = as_date(activity.get("planned_finish")) if isinstance(activity, dict) else None
+                if end and finish and end > finish:
+                    self.gap(rule, package, "activity '%s' finishes %s, after the work package (%s)"
+                             % (activity.get("name"), end, finish))
+
     def cov_26(self, rule):
         internal = as_list((self.config.get("trace") or {}).get("internal_baselines"))
         told = set()
@@ -1115,6 +1209,114 @@ def cmd_hash(project, args):
     return 0
 
 
+def progress(project, as_of):
+    """Work packages, milestones and corrective actions as of a date: what the plan says against what the items show."""
+    states = {}
+
+    def state_of(package):
+        if package.id in states:
+            return states[package.id]
+        states[package.id] = None                        # a cycle (COV-31) ends here
+        delivered = [project.items[t] for t, _ in package.targets("delivers")
+                     if t in project.items and project.live(project.items[t])]
+        unsettled = [d.id for d in delivered if d.status not in SETTLED.get(project.types[d.type]["lifecycle"], ())]
+        children = [c for c in project.sources(package.id, "part_of", ["work-package"])]
+        child_states = [state_of(c) for c in children]
+        track = package.front.get("progress") if isinstance(package.front.get("progress"), dict) else {}
+        stated = as_date(track.get("completed_on"))
+        open_children = [c.id for c, s in zip(children, child_states) if s and s["state"] != "done"]
+        if stated and not unsettled and not open_children:
+            state = "done"
+        elif stated:
+            state = "done as stated, contradicted"
+        elif delivered or as_date(track.get("actual_start")) or any(s and s["state"] != "not started" for s in child_states):
+            state = "in progress"
+        else:
+            state = "not started"
+        start, finish = as_date(package.front.get("planned_start")), as_date(package.front.get("planned_finish"))
+        result = {"item": package.id, "title": package.title, "owner": package.front.get("owner"), "state": state,
+                  "planned_start": str(start) if start else None, "planned_finish": str(finish) if finish else None,
+                  "estimate": package.front.get("estimate"), "actual_effort": track.get("actual_effort"),
+                  "delivered": len(delivered), "settled": len(delivered) - len(unsettled), "unsettled": unsettled,
+                  "open_parts": open_children,
+                  "late": bool(finish and finish < as_of and state != "done"),
+                  "late_to_start": bool(start and start < as_of and state == "not started"),
+                  "parent": next((t for t, _ in package.targets("part_of")), None)}
+        states[package.id] = result
+        return result
+
+    packages = [state_of(p) for p in sorted(project.of_type("work-package"), key=lambda p: record_number(p.id))
+                if project.live(p)]
+    baselines = [b for b in project.of_type("baseline") if b.status == "final"]
+    milestones = []
+    for plan in project.of_type("plan"):
+        if plan.front.get("kind") != "project" or not project.live(plan):
+            continue
+        for stone in as_list(plan.front.get("milestones")):
+            if not isinstance(stone, dict):
+                continue
+            date, purpose = as_date(stone.get("date")), stone.get("baseline_purpose")
+            reached = sorted(str(b.front.get("created_at", ""))[:10] for b in baselines if purpose and b.front.get("purpose") == purpose)
+            if reached:
+                state = "reached %s%s" % (reached[0], " (late)" if date and as_date(reached[0]) and as_date(reached[0]) > date else "")
+            elif not purpose:
+                state = "not assessed: no baseline purpose named"
+            elif date and date < as_of:
+                state = "missed"
+            else:
+                state = "due in %d days" % (date - as_of).days if date else "no date"
+            milestones.append({"plan": plan.id, "name": stone.get("name"), "date": str(date) if date else None,
+                               "baseline_purpose": purpose, "state": state})
+    actions = []
+    for action in project.of_type("corrective-action"):
+        if action.status in ("closed", "cancelled"):
+            continue
+        due = as_date(action.front.get("due"))
+        actions.append({"item": action.id, "title": action.title, "owner": action.front.get("owner"), "state": action.status,
+                        "due": str(due) if due else None, "overdue": bool(due and due < as_of and action.status == "open")})
+    return {"as_of": str(as_of), "work_packages": packages, "milestones": milestones, "corrective_actions": actions}
+
+
+def cmd_progress(project, args):
+    as_of = as_date(args.as_of) if args.as_of else datetime.date.today()
+    if as_of is None:
+        print("--as-of must be a date YYYY-MM-DD")
+        return 1
+    data = progress(project, as_of)
+    if args.json:
+        print(json.dumps(data, indent=2))
+        return 0
+    print("Progress as of %s" % data["as_of"])
+    depth = {}
+    for p in data["work_packages"]:
+        depth[p["item"]] = depth.get(p["parent"], -1) + 1 if p["parent"] in depth else 0
+        flags = [f for f, on in (("LATE", p["late"]), ("LATE TO START", p["late_to_start"])) if on]
+        print("%s%-8s %-28s finish %-10s estimate %-5s actual %-5s delivered %d/%d settled  %s%s"
+              % ("  " * depth[p["item"]], p["item"], p["state"], p["planned_finish"] or "-", p["estimate"] or "-",
+                 p["actual_effort"] if p["actual_effort"] is not None else "-", p["settled"], p["delivered"],
+                 p["owner"] or "-", ("  " + ", ".join(flags)) if flags else ""))
+        if p["state"] == "done as stated, contradicted":
+            print("%s         not settled: %s" % ("  " * depth[p["item"]], ", ".join(p["unsettled"] + p["open_parts"])))
+    if data["milestones"]:
+        print("Milestones")
+        for m in data["milestones"]:
+            print("  %-24s %-10s %s" % (m["name"], m["date"] or "-", m["state"]))
+    if data["corrective_actions"]:
+        print("Corrective actions")
+        for a in data["corrective_actions"]:
+            print("  %-8s %-6s due %-10s %s%s" % (a["item"], a["state"], a["due"] or "-", a["owner"] or "-",
+                                                  "  OVERDUE" if a["overdue"] else ""))
+    packages = data["work_packages"]
+    count = lambda key, value: sum(1 for p in packages if p[key] == value)   # noqa: E731
+    print("%d work packages: %d done, %d in progress (%d late), %d not started (%d late to start); "
+          "%d milestones missed; %d corrective actions open (%d overdue)"
+          % (len(packages), count("state", "done"), count("state", "in progress"),
+             sum(1 for p in packages if p["state"] != "done" and p["late"]), count("state", "not started"),
+             count("late_to_start", True), sum(1 for m in data["milestones"] if m["state"] == "missed"),
+             len(data["corrective_actions"]), sum(1 for a in data["corrective_actions"] if a["overdue"])))
+    return 0
+
+
 def reviewed_text(item, reviewed_hash):
     """(text, commit) of the item file as it was when it had the given content hash, from git; or (None, reason)."""
     folder, name = item.path.parent, item.path.name
@@ -1312,6 +1514,9 @@ def main():
     hashes.add_argument("--upstream", action="store_true")
     sub.add_parser("status")
     sub.add_parser("audit").add_argument("id")
+    progress_parser = sub.add_parser("progress")
+    progress_parser.add_argument("--as-of", help="the date to measure against (default: today)")
+    progress_parser.add_argument("--json", action="store_true")
     diff = sub.add_parser("diff")
     diff.add_argument("id")
     diff.add_argument("--since", help="the review record to compare with (default: the newest that has the item as subject)")
@@ -1326,7 +1531,7 @@ def main():
     project = Project(args.project)
     return {"check": cmd_check, "matrix": cmd_matrix, "show": cmd_show, "impact": cmd_impact,
             "hash": cmd_hash, "status": cmd_status, "list": cmd_list, "audit": cmd_audit, "practices": cmd_practices,
-            "diff": cmd_diff}[args.command](project, args)
+            "diff": cmd_diff, "progress": cmd_progress}[args.command](project, args)
 
 
 if __name__ == "__main__":

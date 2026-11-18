@@ -16,7 +16,7 @@ from pathlib import Path
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from traceability import Project, content_hash, file_hash  # noqa: E402
+from traceability import Project, as_date, content_hash, file_hash, progress  # noqa: E402
 
 SCOPE = ["SWE.1", "SWE.2", "SWE.3", "SWE.4", "SUP.8"]
 CODE = "#include \"unit.h\"\n\n/* one step */\nvoid Unit_Step(void)\n{\n}\n"
@@ -699,6 +699,94 @@ class OpenPoints(Case):
         self.assertIn(("PROBLEM", "VIEW-0003"), fixture.rules("warning"))
         fixture.edit("PRB-0001", status="rejected")
         self.assertNotIn(("PROBLEM", "VIEW-0003"), fixture.rules("warning"))
+
+
+def planned_items():
+    """The base items with a project plan and work packages that deliver every engineering item."""
+    items = base_items()
+    engineering = [i for i, (front, _) in items.items()
+                   if front["type"] not in ("test-run", "static-analysis-run") and not front.get("imported")]
+    items["PLN-0003"] = ({"type": "plan", "title": "Project plan", "status": "approved", "kind": "project",
+                          "milestones": [{"name": "Release candidate", "date": "2026-03-01",
+                                          "baseline_purpose": "release candidate"}]},
+                         {"Scope": "One feature.", "Approach": "V model, two milestones.", "Criteria": "All approved.",
+                          "Environment and tools": "Git.", "Responsibilities": "Project lead.",
+                          "Feasibility": "Feasible with two people.", "Interfaces and commitments": "Customer.",
+                          "Reporting": "Monthly."})
+    package = {"type": "work-package", "status": "approved", "estimate": 10, "owner": "Project lead"}
+    sections = {"Description": "The work.", "Deliverables": "The items.", "Estimate basis": "Expert judgement."}
+    items["WP-0001"] = ({**package, "title": "Feature", "category": "engineering", "planned_start": "2026-01-05",
+                         "planned_finish": "2026-02-27",
+                         "links": {"delivers": [i for i in engineering if not i.startswith("PLN")]}}, sections)
+    items["WP-0002"] = ({**package, "title": "Planning", "category": "management", "planned_start": "2026-01-05",
+                         "planned_finish": "2026-01-09",
+                         "links": {"delivers": ["PLN-0001", "PLN-0002", "PLN-0003"]}}, sections)
+    items["WP-0003"] = ({**package, "title": "Configuration management", "category": "support",
+                         "planned_start": "2026-01-05", "planned_finish": "2026-02-27"}, sections)
+    return items
+
+
+class ProjectManagement(Case):
+    def plan(self, items=None):
+        return self.make(planned_items() if items is None else items, scope=SCOPE + ["MAN.3"])
+
+    def test_a_complete_plan_has_no_findings(self):
+        self.assertEqual(self.plan().findings(), [])
+
+    def test_an_item_no_work_package_delivers(self):
+        items = planned_items()
+        items["WP-0001"][0]["links"]["delivers"].remove("CMP-0002")
+        self.assertIn(("COV-32", "CMP-0002"), self.plan(items).rules())
+
+    def test_a_missing_category(self):
+        items = planned_items()
+        del items["WP-0003"]
+        self.assertIn(("COV-33", "project"), self.plan(items).rules())
+
+    def test_a_dependency_cycle(self):
+        items = planned_items()
+        items["WP-0002"][0]["links"]["depends_on"] = ["WP-0003"]
+        items["WP-0003"][0]["links"] = {"depends_on": ["WP-0002"]}
+        self.assertIn(("COV-31", "WP-0002"), self.plan(items).rules())
+
+    def test_dates_that_do_not_fit(self):
+        items = planned_items()
+        items["WP-0002"][0]["planned_finish"] = "2026-01-02"
+        self.assertIn(("COV-34", "WP-0002"), self.plan(items).rules())
+
+    def test_a_date_must_be_a_date(self):
+        items = planned_items()
+        items["WP-0002"][0]["planned_start"] = "next week"
+        messages = [f["message"] for f in self.plan(items).findings("error") if f["item"] == "WP-0002"]
+        self.assertTrue(any("expected a date" in m for m in messages), messages)
+
+    def test_tracking_does_not_make_the_plan_stale(self):
+        fixture = self.plan()
+        before = Project(fixture.root).items["WP-0001"].hash
+        fixture.edit("WP-0001", progress={"actual_effort": 4, "as_of": "2026-01-20"})
+        self.assertEqual(Project(fixture.root).items["WP-0001"].hash, before)
+        self.assertEqual(fixture.findings("error"), [])
+
+    def test_a_changed_deliverable_does_not_make_the_package_suspect(self):
+        fixture = self.plan()
+        fixture.edit("SWR-0001", title="Detect obstacle, reworded", status="draft")
+        rules = {rule for rule, item in fixture.rules() if item.startswith("WP-")}
+        self.assertEqual(rules, set())
+
+    def test_progress_is_read_from_the_deliverables(self):
+        fixture = self.plan()
+        fixture.edit("WP-0001", progress={"completed_on": "2026-02-20"})
+        fixture.edit("WP-0002", progress={"completed_on": "2026-01-09"})
+        data = progress(Project(fixture.root), as_date("2026-03-02"))
+        state = {p["item"]: p for p in data["work_packages"]}
+        self.assertEqual(state["WP-0001"]["state"], "done")
+        self.assertEqual(state["WP-0003"]["state"], "not started")
+        self.assertTrue(state["WP-0003"]["late"])
+        self.assertEqual(data["milestones"][0]["state"], "missed")
+        fixture.edit("SWR-0001", status="draft")
+        state = {p["item"]: p for p in progress(Project(fixture.root), as_date("2026-03-02"))["work_packages"]}
+        self.assertEqual(state["WP-0001"]["state"], "done as stated, contradicted")
+        self.assertIn("SWR-0001", state["WP-0001"]["unsettled"])
 
 
 class Impact(Case):
