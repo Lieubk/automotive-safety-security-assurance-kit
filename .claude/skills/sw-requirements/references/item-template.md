@@ -42,7 +42,8 @@ one cycle for the command.
 Notes:
 
 - `title` is a short name for lists and matrices; the obligation is in `Statement`.
-- `release` is required before approval; `allocated_to` is added by `/sw-architecture`.
+- `release` is required before approval. The allocation to components is recorded by
+  `/sw-architecture` on the architecture side.
 - Add `## Rationale` when `origin` is `internal`, or when a constraint needs its reason.
 - `Analysis` is optional; write it when there is a feasibility, environment, cost or
   risk point, and leave it out otherwise rather than writing "none".

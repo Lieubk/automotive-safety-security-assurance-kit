@@ -19,7 +19,7 @@ ready for `/review`.
 | SWE.1.BP3 Analyze software requirements | checks correctness, feasibility and verifiability; notes cost and schedule effects | `Analysis` section; findings reported to the user |
 | SWE.1.BP4 Analyze the impact on the operating environment | examines what each requirement asks of hardware, basic software and other elements | `Analysis` section; queries to the source of the inputs |
 | SWE.1.BP5 Develop verification criteria | writes measurable criteria and sets `verification_method` | `Verification criteria` section |
-| SWE.1.BP6 Establish bidirectional traceability | sets `derived_from` links; `allocated_to` follows in `/sw-architecture` | links; `matrix` output |
+| SWE.1.BP6 Establish bidirectional traceability | sets `derived_from` links; the allocation follows in `/sw-architecture` | links; `matrix` output |
 | SWE.1.BP7 Ensure consistency | self-checks against the checklist; the evidence itself comes from `/review` | proposed findings; review record written by `/review` |
 | SWE.1.BP8 Communicate agreed software requirements | not done here: `/baseline` records the baseline and who was informed | - |
 
@@ -62,8 +62,8 @@ ready for `/review`.
 - Software-internal needs that have no parent (defensive measures, diagnostics the
   architecture will need) get `origin: internal` and a `Rationale` section.
 - `asil` and `security_relevant` are inherited from the parent. A lower ASIL than the
-  parent is a decomposition and needs an approved `design-decision`; do not lower it
-  on your own.
+  parent is a decomposition and needs an approved `design-decision` that `concerns` the
+  requirement; do not lower it on your own.
 
 ### 4. Structure
 - `kind`: functional, non-functional, interface or constraint.
@@ -89,8 +89,8 @@ Report conflicts and risks to the user as a list; they decide what happens with 
 ### 7. Trace
 - `links.derived_from`: every parent, by ID. Check each link in both directions:
   the child follows from the parent, and together the children cover the parent.
-- Leave `allocated_to` empty unless the architecture already exists; `/sw-architecture`
-  sets it.
+- Do not allocate here. `/sw-architecture` records the allocation on the architecture
+  side (`fulfils`), so that it does not change requirements that are already approved.
 
 ### 8. Self-check
 Apply `.claude/docs/checklists/software-requirements.md` to the drafts. Show the

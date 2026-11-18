@@ -1,0 +1,131 @@
+# Reviewing again
+
+A final record is never edited. Whatever happens after a review - corrections, changed
+code, a change further up - is answered by a new review whose record describes the new
+state. The newest final review record of an item's present content decides what the
+trace check reports.
+
+## After a `rework` verdict
+
+1. The author corrects with the authoring skill. Run
+   `python tools/traceability.py hash <ID> ...` and compare with `subject` of the
+   earlier record. A different hash: the item was corrected. The same hash: the item
+   was not touched - as after a code review whose findings were all against the code.
+2. Run `/review` for the items. In step 5 hand the reviewing agent the ID of the
+   earlier record as well. It first decides for each open finding whether the present
+   text or code resolves it, then applies the whole checklist again, because a
+   correction can break something else.
+3. In the new findings file every finding of the earlier record appears again: with a
+   new `id` of this record, `closes` naming the earlier finding, its origin at the start
+   of `text`, and the state a reviewer confirmed - `closed` when it is resolved, `open`
+   when it is not. New findings follow.
+4. The new record is the evidence that the findings were closed. The earlier record
+   keeps saying `rework` with open findings, and that stays true for what it describes.
+
+`closes` is what the tool looks at when the content is the same as in the earlier
+review: it refuses an approved verdict, and the check reports `COV-19`, until every
+open finding of an earlier review of that content is named by a closed entry. Set it
+for corrected content as well; it then simply makes the trail searchable.
+
+```json
+[
+  {"id": "F1", "item": "SWR-0010", "severity": "major", "state": "closed", "closes": "REV-0010#F1",
+   "text": "REV-0010#F1 (SWR-09, closing speeds not given): resolved, the criteria now name 80 mm/s and 250 mm/s."},
+  {"id": "F2", "item": "SWR-0011", "severity": "minor", "state": "closed", "closes": "REV-0010#F2",
+   "text": "REV-0010#F2 (SWR-04, two needs): resolved, storing the event is now SWR-0012."}
+]
+```
+
+SWR-0012 is new and is a subject of this review as well.
+
+## After code changed
+
+`check` prints `SUSPECT ... <file> changed after review <record>: the code is no longer
+the code that was reviewed` on the unit. The unit item is unchanged and stays
+`approved`.
+
+1. Review of the code: code checklist, the unit as subject, `--item-under-test` with
+   the commit that holds the changed code (`scoping.md`, "Units and their code").
+2. If the earlier review of this code left open findings, close them as above.
+3. Because the commit was named, the record stores the hashes of the present source
+   files; the `SUSPECT` line is gone.
+
+`COV-30` lines on the same unit say that the latest test run and analysis run describe
+the old code. They are not cleared by a review: `/sw-unit-verify` runs and records again.
+A review of code that has not been built, analysed and tested in this form is
+possible but weak; say so, and ask whether to wait for the runs.
+
+## After an upstream item changed
+
+### Facts first
+
+- `python tools/traceability.py check` prints one `SUSPECT` line per affected link:
+  `suspect link: <changed item> (<role>) changed after review <record>`. The changed
+  item itself shows `COV-19 ... stale approval`.
+- `python tools/traceability.py impact <ID>` lists everything that depends on the
+  changed item, by distance. For SWR-0003 of the power window project:
+
+```
+1  UNT-0002   software-unit                WindowPos - window position and speed  (implements SWR-0003)
+2  UT-0006    unit-test                    WindowPos - state after initialisation  (verifies UNT-0002)
+...
+8 items depend on SWR-0003
+```
+
+Only the items at distance 1 link to the changed item, and only they are reported as
+suspect. An item further away becomes suspect when the item between them changes in
+turn.
+
+### Order
+
+1. The changed item, at its new content. Until it is approved again (or, for an
+   imported item, until `/import-inputs` has registered the new version and it has
+   passed its input acceptance review), a comparison with it will not last.
+2. The items at distance 1.
+3. Further items only if step 2 changed the item they link to. Run `check` again to see.
+
+### Comparing with the new version
+
+- Find out what changed. The earlier record lists the old hash under `references`; the
+  text of the old version is in version control. Ask the user for the difference or for
+  the change request that caused it. If neither is available, compare the whole subject
+  with the whole new version.
+- Hand the reviewing agent the ID of the changed item in addition to the usual input.
+- Scope of the checks: if the subject's own hash is the one its last approving record
+  lists (`hash <ID>` against `subject` of that record), the checks that compare the
+  subject with upstream items are enough. Enter the other checks in the checks file as
+  `pass` with the note "unchanged since <record>, not applied again", and say in the
+  hand-over that the review was limited to the comparison. If the subject changed as
+  well, it is a full review.
+
+### Outcome
+
+| The people find | Verdict | Then |
+|---|---|---|
+| the subject still agrees with the new version | `approved` | the status stays `approved`; the new record lists the upstream item with its new hash |
+| the subject has to follow the change | `rework` | set it to `draft`; the authoring skill corrects it; then a full review |
+
+Example: SYR-0001 arrives in a new version with a lower force limit. SWR-0003 and
+SWR-0004 link to it and are reported as suspect. The reviewers find that SWR-0003
+(window speed) does not depend on the limit: a new review of SWR-0003, verdict
+approved. SWR-0004 states the speed drop at which an obstacle is detected, and that
+value follows from the limit: verdict rework, back to `/sw-requirements`. Once SWR-0004
+has changed and is approved again, `check` reports UNT-0003, the unit that implements
+it, as suspect, and the same steps repeat one level down. UNT-0003 has code: whatever
+the outcome of its comparison, the review of its code is recorded last, and if the unit
+has to change, its code and the runs follow.
+
+### After recording
+
+Run `check`. The `SUSPECT` lines on the reviewed items are gone, because the newest
+record lists the upstream item at its present hash. A line that is still there names
+something this review did not cover: read it again, do not work around it.
+
+## Comparison never recorded (`CONSISTENCY`)
+
+The item is approved, but its newest approving record does not list one of the items it
+links to, or - for a unit - names no code revision. For an item: compare it with the
+one named in the line, record a new review, and let `record.py review` fill in the
+references. For code: a review of the code with `--item-under-test`; this is the normal
+state between the approval of a design and the review of its code. Adding the missing
+item to some other review as a subject is not a comparison.
