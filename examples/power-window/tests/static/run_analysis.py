@@ -31,7 +31,8 @@ GNU_LINE = re.compile(r"^(?P<file>[^:\n]+):(?P<line>\d+):(?:\d+:)?\s*(?P<severit
 def analyse(compiler, source):
     includes = [relative(folder) for folder in include_directories()]
     if compiler["kind"] == "msvc":
-        arguments = ["/nologo", "/std:c11", "/W4", "/analyze", "/analyze:only"]
+        # autolog- keeps the analyser from dropping an XML file per source into the working directory
+        arguments = ["/nologo", "/std:c11", "/W4", "/analyze", "/analyze:only", "/analyze:autolog-"]
         arguments += ['/I"%s"' % folder for folder in includes] + ['"%s"' % relative(source)]
         return msvc(compiler["vcvars"], arguments)
     flag = ["--analyze"] if "clang" in compiler["name"].lower() else ["-fanalyzer", "-fsyntax-only"]
