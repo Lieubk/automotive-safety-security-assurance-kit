@@ -416,7 +416,7 @@ types:
       findings: {required: always, may_be_empty: true, note: "list of {id, item, text, severity: major | minor, state: open | closed, closes: <REV-ID>#<finding id>}; an empty list states that there were none; closes marks an entry that settles an open finding of an earlier review of the same content"}
       reviewed_at: {required: optional}
       checks: {required: optional, note: "list of {check: <checklist ID>, result: pass | finding | not-applicable | not-assessed, note}: what each check of the checklist gave, including the answers to accountable checks"}
-      checklist_source: {values: [toolkit, external], required: optional, note: "toolkit: a checklist under .claude/docs/checklists at the cited version; external: criteria from outside the toolkit, named in `checklist`"}
+      checklist_source: {values: [toolkit, external, reconfirmation], required: optional, note: "toolkit: a checklist under .claude/docs/checklists at the cited version; external: criteria from outside the toolkit, named in `checklist`; reconfirmation: unchanged items confirmed against new versions of what they build on"}
       item_under_test: {required: optional, note: "commit, tag or baseline ID of the code that was reviewed"}
       sources: {required: optional, note: "list of {file, hash} of the source files of the units reviewed; written by tooling"}
 

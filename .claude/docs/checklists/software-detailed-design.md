@@ -7,6 +7,11 @@ SWE.3.BP5, SWE.3.BP6.
 Kinds: `script` - a tool answers it; `semantic` - needs reading and judgement, a model
 may propose and a person confirms; `accountable` - only a person can state it.
 
+An accountable check is answered by the person it concerns, and the note names who
+answered: `pass` when that person states the fact, `not-assessed` while nobody can state
+it yet, `finding` when the answer is no. Such a finding is not closed by a reviewer's
+decision: the verdict is `rework` until the fact exists.
+
 Review a component design together with its units and with the items they link to:
 `python tools/traceability.py hash --upstream <ID>...` lists them. A unit is reviewed
 with this checklist as a design, before it has code or when its design changes. Its
@@ -18,9 +23,13 @@ The record cites this checklist as `software-detailed-design v1`, or by its titl
 check: `pass`, `finding`, or `not-applicable` with a note that says why (SDD-41 for a
 unit without an ASIL, SDD-55 when no decision concerns the subjects, the checks of a
 component design when only a unit is reviewed again). A check that cannot be answered
-yet is `not-assessed`. This is normal for an accountable check that waits for someone
-outside the session, such as the agreement of those who build on the design: the
-items stay in review, and the review is completed when the answer exists.
+yet is `not-assessed`: the items stay in review, and the review is completed when the
+answer exists.
+
+The review ends with the verdict of its reviewers. Making the approved design known to
+those who implement, verify and integrate the units, and an agreement reached with
+them, is not a condition of the approval: it follows it and is recorded with the
+baseline that carries the design (`/baseline`, communication record; SWE.3.BP7).
 
 ## Each component design
 
@@ -80,4 +89,3 @@ items stay in review, and the review is completed when the answer exists.
 | SDD-56 | The project's evaluation criteria and limits were decided by the person entitled to do so | ask who decided, and when | accountable |
 | SDD-57 | Open questions about architecture and requirements are recorded - as `query` items for imported inputs, with their owner for items the project wrote - and none of them invalidates a design item under review | `list --type query --status open`; ask the author | accountable |
 | SDD-59 | Every item the subjects link to is approved, or is itself a subject of this review | `hash --upstream <ID>...` lists the targets; `list --status draft` and `list --status in-review` name none of them | script |
-| SDD-58 | Those who implement, verify and integrate the units have agreed to the design | ask who agreed, and when | accountable |

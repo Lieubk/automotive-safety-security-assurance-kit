@@ -162,8 +162,8 @@ Question 3:
 | `CONSISTENCY` | `review ... does not record <file>: a review of the code ...` | the unit has code that no review compared with its design: `/review` with the unit as subject |
 
 The newest final review of an item's current content decides. A dependent that is
-still right after its upstream changed needs no rework: a new `/review` that records
-the new upstream version clears the `SUSPECT` line.
+still right after its upstream changed needs no rework: `/review` records a
+reconfirmation against the new upstream version, which clears the `SUSPECT` line.
 
 "By hand" means: the toolkit has the item type, the rules and the review, but no skill
 that drafts. The item is written following `schema/items.yaml`, `schema/item-format.md`

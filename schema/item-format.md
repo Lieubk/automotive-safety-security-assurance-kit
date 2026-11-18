@@ -109,7 +109,17 @@ findings:
 `subject` is what makes an approval valid; `references` is the consistency evidence.
 When a referenced item changes afterwards, every link to it from the subject is
 reported as suspect until a new review records the new hash.
-`python tools/traceability.py hash --upstream <ID>...` prints both blocks ready to paste.
+`python tools/traceability.py hash --upstream <ID>...` prints both blocks.
+
+An item builds on the items it links to. A software component also builds on every
+interface that names it under `provided_by` or `used_by`; these two relations are
+stated on the interface and are treated like links of the component.
+
+`checklist_source` says what the verdict rests on: `toolkit` (a checklist of the
+toolkit at the cited version, with a result per check), `external` (criteria from
+outside the toolkit, named in `checklist`), or `reconfirmation` (the subjects did not
+change since their last approving review and were compared with new versions of what
+they build on).
 
 ## Imported items
 

@@ -662,8 +662,18 @@ class Impact(Case):
     def test_an_interface_change_reaches_the_components_that_use_it(self):
         self.assertIn("CMP-0001", self.downstream(self.make(), "IFC-0001"))
 
-    def test_a_component_change_reaches_the_interface_it_provides(self):
-        self.assertIn("IFC-0001", self.downstream(self.make(), "CMP-0002"))
+    def test_an_interface_change_reaches_the_component_that_provides_it(self):
+        self.assertIn("CMP-0002", self.downstream(self.make(), "IFC-0001"))
+
+    def test_a_changed_interface_makes_provider_and_users_suspect(self):
+        fixture = self.make()
+        fixture.edit("IFC-0001", title="Obstacle state, renamed")
+        suspects = {item for rule, item in fixture.rules() if rule == "SUSPECT"}
+        self.assertLessEqual({"CMP-0001", "CMP-0002"}, suspects)
+
+    def test_component_approved_above_a_draft_interface(self):
+        fixture = self.make(changed(base_items(), "IFC-0001", status="draft"))
+        self.assertIn(("UPSTREAM", "CMP-0002"), fixture.rules())
 
 
 class Scope(Case):

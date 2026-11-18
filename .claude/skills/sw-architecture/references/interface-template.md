@@ -102,9 +102,18 @@ CMP-0006.
 
 `provided_by` and `used_by` are attributes of the interface, and the trace commands
 follow them. `python tools/traceability.py show <interface ID>` lists the components
-that use the interface, and `impact <interface ID>` adds the units and views that depend
-on it. `show <component ID>` lists the interfaces a component provides (`provided_by`)
-and the interfaces it uses (`uses`).
+that provide and use the interface, and `impact <interface ID>` adds the units and
+views that depend on it. `show <component ID>` lists the interfaces a component
+provides (`provider of`) and the interfaces it uses (`user of`).
+
+The interface is the agreement, and the components build on it:
+
+- Changing an approved interface makes its provider and every user suspect. They are
+  compared with the new version in `/review`, even where their own text stays as it is.
+- A new interface in draft that names an approved component makes `check` report
+  `UPSTREAM` on that component until the interface is approved, and `CONSISTENCY`
+  until the component has been compared with it.
+- Adding a user to `used_by` changes the interface, not the component.
 
 ## Choosing `kind`
 

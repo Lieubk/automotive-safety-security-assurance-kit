@@ -70,10 +70,15 @@ ready for `/review`.
 - Read `references/writing-requirements.md` before drafting.
 - One need per item. A parent may need several children; several parents may share one.
 - Software-internal needs that have no parent (defensive measures, diagnostics the
-  architecture will need) get `origin: internal` and a `Rationale` section.
+  architecture will need) get `origin: internal` and a `Rationale` section. Before
+  drafting one, read the existing requirements on the same behaviour
+  (`python tools/traceability.py list --type software-requirement`, then by ID): it must
+  neither repeat nor contradict one of them. Name the ones you compared it with.
 - `asil` and `security_relevant` are inherited from the parent. A lower ASIL than the
   parent is a decomposition and needs an approved `design-decision` that `concerns` the
-  requirement; do not lower it on your own.
+  requirement; do not lower it on your own. An internal requirement inherits nothing:
+  propose the ASIL of the most critical requirement that relies on it (QM if none
+  does), give the reasoning in `Rationale`, and have the user decide.
 
 ### 4. Structure
 - `kind`: functional, non-functional, interface or constraint.
@@ -113,7 +118,8 @@ findings to the user as proposals, grouped by item, and correct what they accept
 - IDs: `python tools/record.py next-id software-requirement`, then count upwards.
 - File layout: `references/item-template.md`. Status `draft`.
 - When changing an existing approved item, say first that its approval becomes stale
-  and that `python tools/traceability.py impact <ID>` lists what depends on it.
+  and that `python tools/traceability.py impact <ID>` lists what depends on it. Write
+  the changed item with `status: draft`.
 
 ## Checks before you finish
 

@@ -6,9 +6,18 @@ SWE.1.BP3, SWE.1.BP4, SWE.1.BP5, SWE.1.BP6, SWE.1.BP7.
 Kinds: `script` - a tool answers it; `semantic` - needs reading and judgement, a model
 may propose and a person confirms; `accountable` - only a person can state it.
 
+An accountable check is answered by the person it concerns, and the note names who
+answered: `pass` when that person states the fact, `not-assessed` while nobody can state
+it yet, `finding` when the answer is no. Such a finding is not closed by a reviewer's
+decision: the verdict is `rework` until the fact exists.
+
 A check that does not apply to the item under review is recorded as `not-applicable`
-with the reason. An accountable check whose answer does not exist yet (an agreement that
-is still to be reached) stays `not-assessed`: the item remains in review until it does.
+with the reason.
+
+The review ends with the verdict of its reviewers. Making the approved requirements
+known to those who build on them, and an agreement reached with them or with the
+customer, is not a condition of the approval: it follows it and is recorded with the
+baseline that carries the requirements (`/baseline`, communication record; SWE.1.BP8).
 
 ## Each requirement
 
@@ -39,4 +48,3 @@ is still to be reached) stays `not-assessed`: the item remains in review until i
 | SWR-23 | Start-up, shutdown, every operating mode, loss or invalidity of every input, and the limits of every value are covered or deliberately left out | walk the list against the set | semantic |
 | SWR-24 | Each requirement is assigned to a release, and the release content is achievable | read `release`; ask the project lead | accountable |
 | SWR-25 | No open query is about a requirement under review or about one of its parents; or the reviewers have decided that the open query does not affect it | `check`: no `QUERY` finding on the subject or its parents; otherwise ask the reviewers and note the decision | accountable |
-| SWR-26 | The parties that depend on these requirements have agreed to them | ask who agreed, and when | accountable |

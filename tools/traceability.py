@@ -100,6 +100,9 @@ def split_sections(body):
 
 
 HASH_EXCLUDED = ("status", "source_files")     # state, and the pointer from a unit design to its code
+# What a component is to an interface that names it. The names differ from every link role
+# on purpose: `uses` is a link of software units.
+INTERFACE_ROLES = {"provided_by": "provider of", "used_by": "user of"}
 
 
 def content_hash(front, body):
@@ -196,12 +199,11 @@ class Project:
                 for target, _ in item.targets(role):
                     self.incoming[target][role].append(item.id)
             if item.type == "software-interface":
-                # a change of the provider can change the interface; a change of the interface
-                # reaches the components that use it
-                for target in as_list(item.front.get("provided_by")):
-                    self.incoming[str(target)]["provided_by"].append(item.id)
-                for user in as_list(item.front.get("used_by")):
-                    self.incoming[item.id]["used_by"].append(str(user))
+                # the component that provides an interface and the components that use it all
+                # build on it: a change of the interface reaches them
+                for name in ("provided_by", "used_by"):
+                    for component in as_list(item.front.get(name)):
+                        self.incoming[item.id][name].append(str(component))
 
     # ---- helpers
 
@@ -241,6 +243,23 @@ class Project:
     def sources(self, target_id, role, types=None):
         found = [self.items[s] for s in self.incoming[target_id][role] if s in self.items]
         return [s for s in found if self.live(s) and (types is None or s.type in types)]
+
+    def dependencies(self, item):
+        """(target id, role) of everything the item builds on: its links and, for a component,
+        the interfaces it provides or uses (which are stated on the interface)."""
+        found = [(target, role) for role in (item.front.get("links") or {}) for target, _ in item.targets(role)]
+        if item.type == "software-component":
+            for interface in self.of_type("software-interface"):
+                for name, role in INTERFACE_ROLES.items():
+                    if item.id in map(str, as_list(interface.front.get(name))):
+                        found.append((interface.id, role))
+        return found
+
+    def supports_of(self, item, role):
+        """The base practices a dependency of this kind is evidence for."""
+        if role in self.schema["links"]:
+            return [s for p in self.schema["links"][role]["pairs"] if p["from"] == item.type for s in p["supports"]]
+        return ["SWE.2.BP3", "SWE.2.BP8"]                 # provider of / user of an interface
 
     def allocation_targets(self, requirement):
         """Architectural elements a requirement is allocated to (the elements that fulfil it)."""
@@ -936,38 +955,30 @@ class Project:
                     elif covered[name] != file_hash(file):
                         self.add("error", "SUSPECT", item.id, "%s changed after review %s: the code is no longer the "
                                  "code that was reviewed" % (name, review.id), ["SWE.3.BP6"])
-            for role, link in self.schema["links"].items():
-                pairs = [p for p in link["pairs"] if p["from"] == item.type]
-                if not pairs or not self.in_scope([s for p in pairs for s in p["supports"]]):
+            for target_id, role in self.dependencies(item):
+                target, supports = self.items.get(target_id), self.supports_of(item, role)
+                if target is None or not self.in_scope(supports):
                     continue
-                for target_id, _ in item.targets(role):
-                    target = self.items.get(target_id)
-                    if target is None:
-                        continue
-                    supports = [s for p in pairs for s in p["supports"]]
-                    if target_id not in seen:
-                        self.add("warning", "CONSISTENCY", item.id, "review %s does not record %s (%s) as a reference: "
-                                 "consistency with it is not evidenced" % (review.id, target_id, role), supports)
-                    elif seen[target_id] != target.hash:
-                        self.add("error", "SUSPECT", item.id, "suspect link: %s (%s) changed after review %s"
-                                 % (target_id, role, review.id), supports)
+                if target_id not in seen:
+                    self.add("warning", "CONSISTENCY", item.id, "review %s does not record %s (%s) as a reference: "
+                             "consistency with it is not evidenced" % (review.id, target_id, role), supports)
+                elif seen[target_id] != target.hash:
+                    self.add("error", "SUSPECT", item.id, "suspect link: %s (%s) changed after review %s"
+                             % (target_id, role, review.id), supports)
 
     def check_upstream(self):
         """An approved item cannot be more settled than what it builds on; open queries stay visible."""
         for item in self.items.values():
             if self.types.get(item.type, {}).get("lifecycle") != "engineering" or item.status != "approved" or item.imported:
                 continue
-            for role, link in self.schema["links"].items():
-                pairs = [p for p in link["pairs"] if p["from"] == item.type]
-                supports = [s for p in pairs for s in p["supports"]]
-                if not pairs or not self.in_scope(supports):
+            for target_id, role in self.dependencies(item):
+                target, supports = self.items.get(target_id), self.supports_of(item, role)
+                if target is None or not self.in_scope(supports):
                     continue
-                for target_id, _ in item.targets(role):
-                    target = self.items.get(target_id)
-                    if target is not None and self.live(target) and target.status != "approved" \
-                            and self.types.get(target.type, {}).get("lifecycle") == "engineering":
-                        self.add("error", "UPSTREAM", item.id, "approved, but %s (%s) is in state %s"
-                                 % (target_id, role, target.status), supports)
+                if self.live(target) and target.status != "approved" \
+                        and self.types.get(target.type, {}).get("lifecycle") == "engineering":
+                    self.add("error", "UPSTREAM", item.id, "approved, but %s (%s) is in state %s"
+                             % (target_id, role, target.status), supports)
         for query in self.of_type("query"):
             if query.status != "open":
                 continue
@@ -1035,9 +1046,9 @@ def cmd_show(project, args):
         for source in sorted(sources):
             other = project.items.get(source)
             print("  %-13s <- %s  %s" % (role, source, other.title if other else "(missing)"))
-    for interface in project.of_type("software-interface"):
-        if item.id in map(str, as_list(interface.front.get("used_by"))):
-            print("  %-13s -> %s  %s" % ("uses", interface.id, interface.title))
+    for target, role in project.dependencies(item):
+        if role in INTERFACE_ROLES.values():              # stated on the interface, not a link of the component
+            print("  %-13s -> %s  %s" % (role, target, project.items[target].title))
     return 0
 
 
@@ -1072,10 +1083,9 @@ def cmd_hash(project, args):
         return 0
     references = {}
     for i in ids:
-        for role in (project.items[i].front.get("links") or {}):
-            for target, _ in project.items[i].targets(role):
-                if target in project.items and target not in ids:
-                    references[target] = project.items[target].hash
+        for target, _ in project.dependencies(project.items[i]):
+            if target in project.items and target not in ids:
+                references[target] = project.items[target].hash
     print("subject:")
     for i in ids:
         print("  - {item: %s, hash: %s}" % (i, project.items[i].hash))

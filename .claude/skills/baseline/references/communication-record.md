@@ -42,7 +42,10 @@ Ask for facts, in this order. Write down the answers in the user's words.
 4. When? Without `--sent-at` the tool writes today's date into `sent_at`. If the
    communication happened on another day, pass `--sent-at` with that date as
    YYYY-MM-DD. Anything else stops the command.
-5. Was anything agreed, and by whom? Only then pass `--agreement`.
+5. Was anything agreed, and by whom? Only then pass `--agreement`. This is the place
+   where the agreement of those who build on the items is put on record - developers,
+   test, integration, the customer. The review checklists of the items do not ask for
+   it: an item is approved by its reviewers, and made known afterwards.
 
 If the answer to 2 or 3 is "not yet", nothing is recorded. Give the user the notice
 below and stop.

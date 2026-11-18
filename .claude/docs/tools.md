@@ -13,7 +13,7 @@ example is `examples/power-window`). They need Python 3 and PyYAML.
 | `check --json` | process findings in a script | JSON |
 | `status` | see how many items of each type are in which state, and the latest runs | table |
 | `list [--type T] [--status S] [--imported]` | get the IDs of items by type and state, or of the imported inputs | `ID state type title` per line |
-| `show <ID>` | read one item's links in both directions | what it links to, what links to it; for a component also the interfaces it uses |
+| `show <ID>` | read one item's links in both directions | what it links to, what links to it; for a component also the interfaces it provides and uses |
 | `impact <ID>` | see what a change to an item affects | every item that depends on it, by distance |
 | `audit <BL-ID>` | compare a baseline record with the items as they are now | one line per difference; exit code 1 when there are any |
 | `matrix` | produce the traceability tables for the link pairs in scope | Markdown tables |
@@ -51,7 +51,8 @@ active. The summary line says how many.
 | `next-id <type>` | get the next free ID before creating an item |
 | `test-run --level L --results FILE --item-under-test REF --environment NAME [--deviation UNIT=TEXT]` | turn a test result file into a final test-run record, with coverage per unit and a hash of every source and test file. `--deviation` records why a person accepted a coverage figure below target |
 | `analysis-run --results FILE --item-under-test REF` | turn a static analysis result file into a final record, attributed to units; justified deviations in the file are recorded as such, not as open findings |
-| `review --checklist "NAME vN" --reviewer NAME --verdict approved\|rework [--findings FILE] [--checks FILE] [--item-under-test REF] [--external-criteria] ID ...` | record a review a person has given a verdict on; the checklist is cited as the file name under `.claude/docs/checklists` (or its title) and its version, and must exist unless `--external-criteria` is given; hashes and references are filled in. With `--item-under-test` it is a review of the code as well: the hashes of the units' source files are stored; without it the record covers the design only. `--checks` stores the result per checklist item (`pass`, `finding`, `not-applicable` with a note, `not-assessed`). Verdict approved is refused while a finding is open, while a check of the checklist has no result or is not assessed, while an item the subject links to is not approved, or while an open finding of an earlier review of the same content is not closed by an entry with `closes` |
+| `review --checklist "NAME vN" --reviewer NAME --verdict approved\|rework [--findings FILE] [--checks FILE] [--item-under-test REF] [--external-criteria] ID ...` | record a review a person has given a verdict on; the checklist is cited as the file name under `.claude/docs/checklists` (or its title) and its version, and must exist unless `--external-criteria` is given; hashes and references are filled in. With `--item-under-test` it is a review of the code as well: the hashes of the units' source files are stored; without it the record covers the design only. `--checks` stores the result per checklist item (`pass`, `finding`, `not-applicable` with a note, `not-assessed`). Verdict approved is refused while a finding is open, while a check of the checklist has no result or is not assessed, while an accountable check is answered with a finding, while an item the subject builds on is not approved, or while an open finding of an earlier review of the same content is not closed by an entry with `closes` |
+| `review --reconfirm --reviewer NAME --verdict approved\|rework [--findings FILE] ID ...` | record that items which did not change were compared with new versions of what they build on. No checklist and no check results; refused for an item whose present content has no approving review. The new versions are recorded as references. The code review of a unit is carried over as it was recorded, so code that changed since stays `SUSPECT`; it cannot be combined with `--item-under-test` |
 | `baseline --tag TAG --purpose TEXT` | write a baseline record: the approved plans and engineering items with hash and status (an internal purpose: all of them). Refused while the trace check reports errors, unless the purpose is an internal one |
 | `communication --subject ID --audience WHO --channel TEXT [--agreement TEXT] [--sent-at DATE]` | record what was made known to whom, and what was agreed; `--subject` and `--audience` may repeat |
 
@@ -61,7 +62,16 @@ module text). Records are final when written and are never edited afterwards.
 ## Things that follow from how the tools work
 
 - The newest final review record of an item's current content decides. A re-review
-  that records the upstream versions clears `SUSPECT` and `CONSISTENCY`.
+  that records the upstream versions clears `SUSPECT` and `CONSISTENCY`; for an item
+  that did not change itself that is `review --reconfirm`.
+- An item builds on the items it links to. A component also builds on every interface
+  that names it under `provided_by` or `used_by`: a changed interface makes these
+  components suspect, and an interface in draft or in review makes an approved component
+  it names report `UPSTREAM`. The messages call the two relations `provider of` and
+  `user of`.
+- An accountable check answered with a finding blocks approval for good: what a person
+  states is missing is not closed by a reviewer's decision. The agreement of those who
+  build on approved items is recorded after the approval, as a communication record.
 - An allocation is stated on the architectural element: it `fulfils` the requirement.
   The requirement itself is not touched, so allocating does not change requirements that
   are already approved, and a requirement that changes makes the element suspect.

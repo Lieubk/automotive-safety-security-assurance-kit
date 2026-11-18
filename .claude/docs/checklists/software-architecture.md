@@ -7,11 +7,20 @@ SWE.2.BP2, SWE.2.BP3, SWE.2.BP4, SWE.2.BP5, SWE.2.BP6, SWE.2.BP7, SWE.2.BP8.
 Kinds: `script` - a tool answers it; `semantic` - needs reading and judgement, a model
 may propose and a person confirms; `accountable` - only a person can state it.
 
+An accountable check is answered by the person it concerns, and the note names who
+answered: `pass` when that person states the fact, `not-assessed` while nobody can state
+it yet, `finding` when the answer is no. Such a finding is not closed by a reviewer's
+decision: the verdict is `rework` until the fact exists.
+
 A check that does not apply to the items under review - a check for another item type
 or view kind, or `ARC-32` before a detailed design exists - is recorded as
-`not-applicable` with the reason. An accountable check whose answer does not exist yet
-(an agreement still to be reached, a confirmation by the customer) stays `not-assessed`:
-the items remain in review until it does.
+`not-applicable` with the reason.
+
+The review ends with the verdict of its reviewers. Making the approved architecture
+known to those who build on it - developers, integration, test, the customer - and an
+agreement reached with them, is not a condition of the approval: it follows it and is
+recorded with the baseline that carries the architecture (`/baseline`, communication
+record; SWE.2.BP9).
 
 Review a component together with its interfaces and the views that show it, after the
 requirements it fulfils are approved. `python tools/traceability.py hash --upstream
@@ -104,7 +113,7 @@ requirements an element fulfils and the interfaces a component provides and uses
 | ARC-80 | Where elements of different ASIL coexist, it is stated for memory, timing and exchanged data what keeps the lower from disturbing the higher; otherwise all are at the highest ASIL | read structure view, `execution_context` and the decision | semantic |
 | ARC-81 | One term, one name and one value for one thing in all components, interfaces and views | read the items side by side | semantic |
 | ARC-82 | Every choice that shaped the structure has a decision item, including the adoption of a given platform or architecture | ask which alternatives were discussed; compare with the decisions | semantic |
-| ARC-83 | The architecture can be built on the target with the given team and time, and the developers who build on it agree | ask who was consulted, and when | accountable |
+| ARC-83 | The architecture can be built on the target with the given team and time | ask the software lead or the architect; the note names who states it | accountable |
 | ARC-84 | Capacities and reserves are the ones agreed with the owner of the hardware | ask who agreed, and when | accountable |
-| ARC-85 | Where safety requirements are allocated: the analyses the safety plan asks for at architecture level exist, and their results are reflected in requirements and elements | ask the person responsible for functional safety | accountable |
+| ARC-85 | Where safety requirements are allocated: the safety analyses that are due at architecture level by now exist, and their results are reflected in requirements and elements | ask the person responsible for functional safety which analyses are due at this point and whether they exist. `not-applicable` only when no subject carries an ASIL. Where nobody holds that role, the check cannot be answered: `not-assessed` | accountable |
 | ARC-86 | Open questions to the source of an input are `query` items, and no open one invalidates an item under review | `python tools/traceability.py list --type query --status open`; go through each with the author | accountable |

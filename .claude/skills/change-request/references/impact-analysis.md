@@ -14,11 +14,10 @@ nearest first. For SWR-0004 of the power window example it begins
 1  CMP-0004   software-component           AntiPinch - anti-pinch detection  (fulfils SWR-0004)
 1  UNT-0003   software-unit                AntiPinch - obstacle detection state machine  (implements SWR-0004)
 2  CDS-0002   component-design             Detailed design of AntiPinch  (refines CMP-0004)
-2  IFC-0003   software-interface           Detection status  (provided_by CMP-0004)
 2  UT-0013    unit-test                    AntiPinch - settling time and start of monitoring  (verifies UNT-0003)
 ```
 
-and ends with `44 items depend on SWR-0004`. The number is the distance in links. The
+and ends with `17 items depend on SWR-0004`. The number is the distance in links. The
 bracket names the link and the item through which the line was reached. A change request
 that already affects the item, and a query about it, appear here too.
 
@@ -108,7 +107,7 @@ turns up there was sorted wrongly.
 Request: the closing force limit of SYR-0001 is to apply from a window opening of more
 than 4 mm instead of more than 5 mm (new version of the customer's system requirements).
 
-- `impact SYR-0001` ends with `50 items depend on SYR-0001`. At distance 1 it names
+- `impact SYR-0001` ends with `39 items depend on SYR-0001`. At distance 1 it names
   SWR-0003 and SWR-0004 (derived from it) and the system elements SYE-0001 and SYE-0002
   (they fulfil it). Reading: SWR-0004 carries the limit and changes. SWR-0003 says
   nothing about the zone. The two system elements are inputs, unchanged in version 2.2.

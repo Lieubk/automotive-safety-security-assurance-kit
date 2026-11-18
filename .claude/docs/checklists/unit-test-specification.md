@@ -6,6 +6,11 @@ SWE.4.BP2, SWE.4.BP4, SWE.4.BP5, SWE.4.BP6.
 Kinds: `script` - a tool answers it; `semantic` - needs reading and judgement, a model
 may propose and a person confirms; `accountable` - only a person can state it.
 
+An accountable check is answered by the person it concerns, and the note names who
+answered: `pass` when that person states the fact, `not-assessed` while nobody can state
+it yet, `finding` when the answer is no. Such a finding is not closed by a reviewer's
+decision: the verdict is `rework` until the fact exists.
+
 Review the test cases with the unit design open beside them, not with the code. The
 code is opened for the part on test code only, and then next to the item, to see
 whether the test function does what the item says.

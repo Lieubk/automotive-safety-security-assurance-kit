@@ -6,6 +6,11 @@ SUP.10.BP5, SUP.10.BP6, SUP.10.BP7, SUP.10.BP8.
 Kinds: `script` - a tool answers it; `semantic` - needs reading and judgement, a model
 may propose and a person confirms; `accountable` - only a person can state it.
 
+An accountable check is answered by the person it concerns, and the note names who
+answered: `pass` when that person states the fact, `not-assessed` while nobody can state
+it yet, `finding` when the answer is no. Such a finding is not closed by a reviewer's
+decision: the verdict is `rework` until the fact exists.
+
 Part A is applied before a change request is put before the deciding body. Part B is
 the review of the implementation, applied before the change request is set to
 `verified`. `/change-request` applies both and records the review of the

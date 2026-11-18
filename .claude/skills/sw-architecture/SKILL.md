@@ -58,10 +58,11 @@ Every requirement is allocated. All items are written in state `draft`, ready fo
   timing, resources, safety or reuse, and add the project goals the user names.
 - Propose evaluation criteria from this list and ask the user to rank them before any
   structure is drawn. Every `design-decision` uses them (step 8).
-- A question the user cannot answer is not design input. About an imported item it
-  becomes a `query` item (`python tools/record.py next-id query`; folder
-  `records/queries`; `to`, `asked_at`, a `Question` section, `about` linking the item).
-  About a requirement the project wrote, it goes back to `/sw-requirements`.
+- A question the user cannot answer is not design input. About an imported item, or
+  about a supplied or reused component (to its supplier), it becomes a `query` item
+  (`python tools/record.py next-id query`; folder `records/queries`; `to`, `asked_at`,
+  a `Question` section, `about` linking the item). About a requirement the project
+  wrote, it goes back to `/sw-requirements`.
 
 ### 3. Decompose
 - Read `references/architecture-guidance.md` first. Propose the components, each with
@@ -147,7 +148,9 @@ proposals; correct what the user accepts.
   `interface-template.md`, `view-templates.md` and `decision-template.md` in `references/`.
 - The allocation is written as `links.fulfils` on the element; no requirement is edited.
 - Before changing an approved architecture item, say that its approval becomes stale
-  and run `python tools/traceability.py impact <ID>` to show what depends on it.
+  and run `python tools/traceability.py impact <ID>` to show what depends on it. Write
+  the changed item with `status: draft`; what depends on it stays as it is and is
+  reported as `UPSTREAM` and, once the item is approved again, as `SUSPECT`.
 - An element the user withdraws becomes `obsolete` with `superseded_by`, after every
   link to it has moved: `LINK` and `COV-24` report links to an obsolete item.
 - Inside a baseline, changing or withdrawing an item needs an approved change request

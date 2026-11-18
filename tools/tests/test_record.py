@@ -117,6 +117,63 @@ class Review(RecordCase):
         self.assertEqual(code, 1)
         self.assertIn("cannot be approved while %s" % parent_id, out)
 
+    def test_accountable_check_answered_with_a_finding_blocks_approval(self):
+        text = CHECKLIST.read_text(encoding="utf-8")
+        accountable = re.search(r"(?m)^\|\s*([A-Z]{2,5}-\d+)\s*\|.*\|\s*accountable\s*\|\s*$", text).group(1)
+        checks = json.loads(self.all_checks().read_text(encoding="utf-8"))
+        for entry in checks:
+            if entry["check"] == accountable:
+                entry["result"] = "finding"
+        closed = self.json_file("f.json", [{"id": "F1", "item": "SWR-0001", "text": "not agreed", "severity": "major",
+                                            "state": "closed"}])
+        code, out = self.review("--checks", self.json_file("c.json", checks), "--findings", closed)
+        self.assertEqual(code, 1)
+        self.assertIn("cannot be closed by decision", out)
+
+    def change(self, relative, old, new):
+        path = self.project / relative
+        text = path.read_text(encoding="utf-8")
+        self.assertIn(old, text)
+        path.write_text(text.replace(old, new, 1), encoding="utf-8")
+
+    def test_reconfirmation_of_unchanged_items_after_a_change_upstream(self):
+        parent_id = self.front("spec/software/requirements/SWR-0001.md")["links"]["derived_from"][0]
+        parent = next(self.project.glob("spec/**/%s.md" % parent_id)).relative_to(self.project).as_posix()
+        self.change(parent, "title: ", "title: Changed - ")
+        code, out = self.record("review", "--reconfirm", "--reviewer", REVIEWER, "--verdict", "approved", "SWR-0001")
+        self.assertEqual(code, 0, out)
+        record = self.front("records/reviews/" + self.records("records/reviews")[-1])
+        self.assertEqual(record["checklist_source"], "reconfirmation")
+        self.assertIn(parent_id, [r["item"] for r in record["references"]])
+
+    def test_reconfirmation_is_refused_for_an_item_that_changed_itself(self):
+        self.change("spec/software/requirements/SWR-0001.md", "title: ", "title: Changed - ")
+        code, out = self.record("review", "--reconfirm", "--reviewer", REVIEWER, "--verdict", "approved", "SWR-0001")
+        self.assertEqual(code, 1)
+        self.assertIn("nothing to reconfirm", out)
+
+    def test_reconfirmation_keeps_the_code_review_of_an_unchanged_unit(self):
+        code, out = self.record("review", "--reconfirm", "--reviewer", REVIEWER, "--verdict", "approved", "UNT-0003")
+        self.assertEqual(code, 0, out)
+        record = self.front("records/reviews/" + self.records("records/reviews")[-1])
+        self.assertEqual(sorted(s["file"] for s in record["sources"]), ["src/antipinch/AntiPinch.c", "src/antipinch/AntiPinch.h"])
+
+    def test_reconfirmation_does_not_hide_code_that_changed_after_its_review(self):
+        self.change("src/antipinch/AntiPinch.c", "\n", "\n/* changed after the review */\n")
+        code, out = self.record("review", "--reconfirm", "--reviewer", REVIEWER, "--verdict", "approved", "UNT-0003")
+        self.assertEqual(code, 0, out)
+        done = subprocess.run([sys.executable, str(ROOT / "tools" / "traceability.py"), "--project", str(self.project),
+                               "check"], capture_output=True, text=True)
+        suspect = [line for line in done.stdout.splitlines() if "SUSPECT" in line and "UNT-0003" in line]
+        self.assertTrue(suspect, done.stdout)
+        self.assertIn("AntiPinch.c changed after review", suspect[0])
+
+    def test_reconfirmation_is_not_a_review_of_code(self):
+        code, out = self.record("review", "--reconfirm", "--item-under-test", "abc123", "--reviewer", REVIEWER,
+                                "--verdict", "approved", "UNT-0003")
+        self.assertEqual(code, 1)
+        self.assertIn("cannot be combined", out)
+
     def test_code_is_recorded_only_when_the_revision_is_named(self):
         self.review("--external-criteria", checklist="x", ids=("UNT-0003",))
         without = self.front("records/reviews/" + self.records("records/reviews")[-1])

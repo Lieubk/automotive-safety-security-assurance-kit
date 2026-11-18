@@ -43,6 +43,8 @@ Commands
 
     review --checklist "NAME vN" --reviewer NAME [--reviewer NAME ...] --verdict approved|rework
            [--findings FILE] [--checks FILE] [--item-under-test REF] [--external-criteria] ID [ID ...]
+    review --reconfirm --reviewer NAME [--reviewer NAME ...] --verdict approved|rework
+           [--findings FILE] ID [ID ...]
         final review record for the named items at their current content. The
         subject and the references (every upstream item the subject links to)
         are filled in with content hashes. With --item-under-test the review
@@ -60,9 +62,18 @@ Commands
         outside the toolkit are recorded with --external-criteria.
         Verdict approved is refused while a finding is open; while a check of
         the checklist has no result or is not assessed; while an item the
-        subject links to is still in draft or in review; and while an open
-        finding of an earlier review of the same content is not closed by an
-        entry with `closes`.
+        subject links to is still in draft or in review; while an accountable
+        check is answered with a finding (what a person states is missing cannot
+        be closed by decision); and while an open finding of an earlier review of
+        the same content is not closed by an entry with `closes`.
+        --reconfirm is for items that have NOT changed but build on something
+        that has (the trace check reports SUSPECT): the reviewers compared them
+        with the new versions and confirm them. It needs no checklist results,
+        is refused for an item whose own content has no approving review, records
+        the new versions as references, and carries the code review of a unit over
+        as it was recorded: code that changed since then stays reported as changed.
+        It cannot be combined with --item-under-test or --external-criteria: a
+        review of code is a review against the code checklist.
         The reviewer names are the people accountable for the verdict: pass what
         the user states, never an invented name.
 
@@ -301,7 +312,7 @@ def plain(text):
 
 
 def find_checklist(citation):
-    """(file name, version, check IDs) of the toolkit checklist that '<name> v<N>' cites, or None.
+    """The toolkit checklist that '<name> v<N>' cites, as {file, version, cited, checks: {ID: kind}}, or None.
 
     <name> is the file name without extension or the title without the word "checklist";
     spaces and hyphens are interchangeable.
@@ -317,95 +328,135 @@ def find_checklist(citation):
             names.add(plain(re.sub(r"(?i)\bchecklist\b", " ", title.group(1))))
         if plain(cited.group(1)) in names:
             version = re.search(r"^Version (\d+)", text, re.M)
-            return path.name, version.group(1) if version else None, re.findall(r"(?m)^\|\s*([A-Z]{2,5}-\d+)\s*\|", text), cited.group(2)
+            rows = re.findall(r"(?m)^\|\s*([A-Z]{2,5}-\d+)\s*\|.*\|\s*(script|semantic|accountable)\s*\|\s*$", text)
+            return {"file": path.name, "version": version.group(1) if version else None, "cited": cited.group(2),
+                    "checks": dict(rows)}
     return None
 
 
 def cmd_review(project, args):
     problems = ["no such item: %s" % i for i in args.ids if i not in project.items]
+    if problems:
+        return stop(problems)
+    items = [project.items[i] for i in args.ids]
     findings = json.loads(Path(args.findings).read_text(encoding="utf-8")) if args.findings else []
     for finding in findings:
         if finding.get("state") not in ("open", "closed") or finding.get("severity") not in ("major", "minor"):
             problems.append("finding %s needs severity major|minor and state open|closed" % finding.get("id"))
-    if args.verdict == "approved" and any(f.get("state") == "open" for f in findings):
-        problems.append("verdict approved is not possible while a finding is open")
     checks = json.loads(Path(args.checks).read_text(encoding="utf-8")) if args.checks else []
     for entry in checks:
         if entry.get("result") not in RESULTS:
             problems.append("check %s needs result %s" % (entry.get("check"), "|".join(RESULTS)))
         elif entry["result"] == "not-applicable" and not entry.get("note"):
             problems.append("check %s is not-applicable: the note must say why" % entry.get("check"))
-    listed = None if args.external_criteria else find_checklist(args.checklist)
-    if listed is None and not args.external_criteria:
-        problems.append("'%s' cites no checklist of this toolkit: expected '<name> v<N>' for a file under "
-                        ".claude/docs/checklists. For criteria from outside the toolkit pass --external-criteria."
-                        % args.checklist)
-    elif listed:
-        file_name, version, known, cited_version = listed
-        if version != cited_version:
-            problems.append("%s is at version %s, the citation says v%s" % (file_name, version, cited_version))
-        given = [str(c.get("check")) for c in checks]
-        problems += ["check %s is not in %s" % (c, file_name) for c in given if c not in known]
-        if args.verdict == "approved":
-            missing = [c for c in known if c not in given]
-            if missing:
-                problems.append("verdict approved needs a result for every check of %s (--checks); none for: %s"
-                                % (file_name, ", ".join(missing)))
-    if args.verdict == "approved" and not any("no such item" in p for p in problems):
-        for item_id in args.ids:
-            item = project.items[item_id]
-            for role in (item.front.get("links") or {}):
-                for target_id, _ in item.targets(role):
-                    target = project.items.get(target_id)
-                    if target is not None and target_id not in args.ids and project.live(target) \
-                            and project.types[target.type]["lifecycle"] == "engineering" and target.status != "approved":
-                        problems.append("%s cannot be approved while %s (%s) is in state %s"
-                                        % (item_id, target_id, role, target.status))
-    unassessed = [str(c.get("check")) for c in checks if c.get("result") == "not-assessed"]
-    if args.verdict == "approved" and unassessed:
-        problems.append("verdict approved is not possible while checks are not assessed: %s" % ", ".join(unassessed))
-    if args.verdict == "approved" and not problems:
+    approving = args.verdict == "approved"
+
+    if args.reconfirm:
+        # nothing in the subject changed: it is confirmed against the new versions of what it builds on
+        source, citation = "reconfirmation", args.checklist or "reconfirmation after a change upstream"
+        if args.item_under_test or args.external_criteria:
+            problems.append("--reconfirm confirms unchanged items and cannot be combined with --item-under-test or "
+                            "--external-criteria: a review of code is recorded against the code checklist")
+        problems += ["%s: its current content has no approving review, so there is nothing to reconfirm; "
+                     "it needs a review against its checklist" % item.id
+                     for item in items if project.approving_review(item) is None]
+    elif args.external_criteria:
+        source, citation = "external", args.checklist
+        if not citation:
+            problems.append("--external-criteria needs --checklist to name the criteria that were used")
+    else:
+        source, citation = "toolkit", args.checklist
+        listed = find_checklist(citation) if citation else None
+        if not citation:
+            problems.append("--checklist is needed: '<name> v<N>' of a file under .claude/docs/checklists")
+        elif listed is None:
+            problems.append("'%s' cites no checklist of this toolkit: expected '<name> v<N>' for a file under "
+                            ".claude/docs/checklists. For criteria from outside the toolkit pass --external-criteria; "
+                            "to confirm unchanged items after a change upstream pass --reconfirm." % citation)
+        else:
+            if listed["version"] != listed["cited"]:
+                problems.append("%s is at version %s, the citation says v%s" % (listed["file"], listed["version"], listed["cited"]))
+            given = {str(c.get("check")): c for c in checks}
+            problems += ["check %s is not in %s" % (c, listed["file"]) for c in given if c not in listed["checks"]]
+            if approving:
+                missing = [c for c in listed["checks"] if c not in given]
+                if missing:
+                    problems.append("verdict approved needs a result for every check of %s (--checks); none for: %s"
+                                    % (listed["file"], ", ".join(missing)))
+                refused = [c for c, kind in listed["checks"].items()
+                           if kind == "accountable" and given.get(c, {}).get("result") == "finding"]
+                if refused:
+                    problems.append("accountable checks answered with a finding: %s. What a person states is missing "
+                                    "cannot be closed by decision; record the verdict rework, or record the check as "
+                                    "pass once the fact exists" % ", ".join(refused))
+
+    if approving:
+        if any(f.get("state") == "open" for f in findings):
+            problems.append("verdict approved is not possible while a finding is open")
+        unassessed = [str(c.get("check")) for c in checks if c.get("result") == "not-assessed"]
+        if unassessed:
+            problems.append("verdict approved is not possible while checks are not assessed: %s" % ", ".join(unassessed))
+        for item in items:
+            for target_id, role in project.dependencies(item):
+                target = project.items.get(target_id)
+                if target is not None and target_id not in args.ids and project.live(target) \
+                        and project.types[target.type]["lifecycle"] == "engineering" and target.status != "approved":
+                    problems.append("%s cannot be approved while %s (%s) is in state %s"
+                                    % (item.id, target_id, role, target.status))
         closing = {str(f.get("closes")) for f in findings if f.get("closes") and f.get("state") == "closed"}
-        for item_id in args.ids:
-            for earlier in project.reviews_of(project.items[item_id]):
+        for item in items:
+            for earlier in project.reviews_of(item):
                 for finding in earlier.front.get("findings") or []:
                     ref = "%s#%s" % (earlier.id, finding.get("id"))
-                    if finding.get("state") == "open" and finding.get("item") in (None, item_id) and ref not in closing:
+                    if finding.get("state") == "open" and finding.get("item") in (None, item.id) and ref not in closing:
                         problems.append("%s: finding %s of an earlier review of the same content is open; close it "
-                                        "with a finding entry that has \"closes\": \"%s\"" % (item_id, ref, ref))
+                                        "with a finding entry that has \"closes\": \"%s\"" % (item.id, ref, ref))
     if problems:
         return stop(problems)
+
     references = {}
-    for item_id in args.ids:
-        item = project.items[item_id]
-        for role in (item.front.get("links") or {}):
-            for target, _ in item.targets(role):
-                if target in project.items and target not in args.ids:
-                    references[target] = project.items[target].hash
+    for item in items:
+        for target, _ in project.dependencies(item):
+            if target in project.items and target not in args.ids:
+                references[target] = project.items[target].hash
     front = {
         "id": next_id(project, "review-record"),
         "type": "review-record",
         "status": "final",
-        "checklist": args.checklist,
-        "checklist_source": "external" if args.external_criteria else "toolkit",
+        "checklist": citation,
+        "checklist_source": source,
         "reviewers": args.reviewer,
         "verdict": args.verdict,
         "reviewed_at": datetime.date.today().isoformat(),
-        "subject": [{"item": i, "hash": project.items[i].hash} for i in args.ids],
+        "subject": [{"item": i.id, "hash": i.hash} for i in items],
         "references": [{"item": i, "hash": h} for i, h in sorted(references.items())],
         "findings": findings,
     }
     if checks:
         front["checks"] = checks
-    if args.item_under_test:
-        front["item_under_test"] = args.item_under_test
-    code = [f for i in args.ids if project.items[i].type == "software-unit"
-            for f in project.items[i].front.get("source_files") or []]
+    code = [f for i in items if i.type == "software-unit" for f in i.front.get("source_files") or []]
     if code and args.item_under_test:      # naming the code revision is what makes it a review of the code
+        front["item_under_test"] = args.item_under_test
         front["sources"] = source_hashes(project, code)
+    elif code and args.reconfirm:
+        # The code review of each unit is carried over exactly as it was recorded - the hashes of
+        # then, not of now - so code that changed since stays reported as changed after review.
+        kept, revisions = {}, set()
+        for item in items:
+            earlier = project.approving_review(item)
+            mine = {Path(str(f)).as_posix() for f in item.front.get("source_files") or []}
+            for entry in (earlier.front.get("sources") or []) if earlier else []:
+                if isinstance(entry, dict) and Path(str(entry.get("file"))).as_posix() in mine:
+                    kept[Path(str(entry["file"])).as_posix()] = str(entry.get("hash"))
+                    revisions.add(str(earlier.front.get("item_under_test")))
+        if kept:
+            front["sources"] = [{"file": name, "hash": value} for name, value in sorted(kept.items())]
+            front["item_under_test"] = ", ".join(sorted(revisions))
+    elif args.item_under_test:
+        front["item_under_test"] = args.item_under_test
     path = write_item(project, "review-record", front)
     print("wrote %s: %s, %d items, %d references, %d findings"
-          % (path, args.verdict, len(args.ids), len(references), len(findings)))
+          % (path, args.verdict, len(items), len(references), len(findings)))
     return 0
 
 
@@ -478,7 +529,7 @@ def main():
     analysis.add_argument("--results", required=True)
     analysis.add_argument("--item-under-test", required=True)
     review = sub.add_parser("review")
-    review.add_argument("--checklist", required=True)
+    review.add_argument("--checklist")
     review.add_argument("--reviewer", required=True, action="append")
     review.add_argument("--verdict", required=True, choices=["approved", "rework"])
     review.add_argument("--findings")
@@ -486,6 +537,8 @@ def main():
     review.add_argument("--item-under-test")
     review.add_argument("--external-criteria", action="store_true",
                         help="the review used criteria from outside the toolkit, named under --checklist")
+    review.add_argument("--reconfirm", action="store_true",
+                        help="the items are unchanged and are confirmed against new versions of what they build on")
     review.add_argument("ids", nargs="+")
     baseline = sub.add_parser("baseline")
     baseline.add_argument("--tag", required=True)

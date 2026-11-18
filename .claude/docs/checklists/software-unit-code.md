@@ -7,6 +7,11 @@ SWE.3.BP8.
 Kinds: `script` - a tool answers it; `semantic` - needs reading and judgement, a model
 may propose and a person confirms; `accountable` - only a person can state it.
 
+An accountable check is answered by the person it concerns, and the note names who
+answered: `pass` when that person states the fact, `not-assessed` while nobody can state
+it yet, `finding` when the answer is no. Such a finding is not closed by a reviewer's
+decision: the verdict is `rework` until the fact exists.
+
 The unit item is the subject of the review. The review counts as a review of the code
 only when it is recorded with the code revision (`--item-under-test`): then the record
 stores the hash of every file in `source_files` next to the content hash of the item.

@@ -72,12 +72,15 @@ possible but weak; say so, and ask whether to wait for the runs.
 1  UNT-0002   software-unit                WindowPos - window position and speed  (implements SWR-0003)
 2  CDS-0001   component-design             Detailed design of WindowPos  (refines CMP-0003)
 ...
-44 items depend on SWR-0003
+21 items depend on SWR-0003
 ```
 
-Only the items at distance 1 link to the changed item, and only they are reported as
+Only the items at distance 1 build on the changed item, and only they are reported as
 suspect: here the component that fulfils the requirement and the unit that implements
 it. An item further away becomes suspect when the item between them changes in turn.
+A changed interface reaches the component that provides it and the components that use
+it (`provided_by` and `used_by` of the interface), besides the units and views that
+link to it.
 
 ### Order
 
@@ -95,19 +98,24 @@ it. An item further away becomes suspect when the item between them changes in t
   the change request that caused it. If neither is available, compare the whole subject
   with the whole new version.
 - Hand the reviewing agent the ID of the changed item in addition to the usual input.
-- Scope of the checks: if the subject's own hash is the one its last approving record
-  lists (`hash <ID>` against `subject` of that record), the checks that compare the
-  subject with upstream items are enough. Enter the other checks in the checks file as
-  `pass` with the note "unchanged since <record>, not applied again", and say in the
-  hand-over that the review was limited to the comparison. If the subject changed as
-  well, it is a full review.
+- If the subject itself did not change, the comparison is all there is to do: the
+  reviewers read the subject against the new version and say whether it still agrees.
+  No checklist is applied again and no checks file is written. Record it with
+  `python tools/record.py review --reconfirm --reviewer "<name>" --verdict approved|rework
+  <ID> ...`. The tool refuses when the subject's present content has no approving
+  review: then the subject changed, and it is a full review with its checklist.
+- Several unchanged items that build on the same change may share one reconfirmation,
+  as long as the reviewers really compared each of them.
+- A reconfirmation rests on the earlier review of the same content. Where that review
+  was itself weak - recorded with outside criteria, or long ago - say so, and let the
+  reviewers choose a full review instead.
 
 ### Outcome
 
 | The people find | Verdict | Then |
 |---|---|---|
-| the subject still agrees with the new version | `approved` | the status stays `approved`; the new record lists the upstream item with its new hash |
-| the subject has to follow the change | `rework` | set it to `draft`; the authoring skill corrects it; then a full review |
+| the subject still agrees with the new version | `approved`, recorded with `--reconfirm` | the status stays `approved`; the new record lists the upstream item with its new hash, and for a unit it carries the code review over as recorded |
+| the subject has to follow the change | `rework`, with a finding that says what has to follow | set it to `draft`; the authoring skill corrects it; then a full review |
 
 Example: SYR-0001 arrives in a new version with a lower force limit. SWR-0003 and
 SWR-0004 link to it and are reported as suspect. The reviewers find that SWR-0003
@@ -129,8 +137,10 @@ something this review did not cover: read it again, do not work around it.
 ## Comparison never recorded (`CONSISTENCY`)
 
 The item is approved, but its newest approving record does not list one of the items it
-links to, or - for a unit - names no code revision. For an item: compare it with the
-one named in the line, record a new review, and let `record.py review` fill in the
-references. For code: a review of the code with `--item-under-test`; this is the normal
-state between the approval of a design and the review of its code. Adding the missing
-item to some other review as a subject is not a comparison.
+builds on, or - for a unit - names no code revision. For an item: compare it with the
+one named in the line and record a reconfirmation (`--reconfirm`), which fills in the
+references. This is also what a component needs after an interface that names it as
+provider or user was added and approved. For code: a review of the code with
+`--item-under-test`; this is the normal state between the approval of a design and the
+review of its code. Adding the missing item to some other review as a subject is not a
+comparison.

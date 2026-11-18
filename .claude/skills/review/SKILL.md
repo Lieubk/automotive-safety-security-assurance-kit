@@ -56,6 +56,7 @@ assurance plan says how independent that person must be. The agent is never that
   - `CONSISTENCY` findings: a review did not record what the item was compared with, or
     the code of a unit was never reviewed against its design;
   - `UPSTREAM` findings: the item named in the message, still in draft or in review.
+  For a component, the interfaces that name it as provider or user count as upstream.
 - Read `references/scoping.md` and group the items into reviews: one checklist per
   review, what must be read together in one review, small enough to read properly. It
   also says when a unit needs a design review, a review of its code, or both.
@@ -118,10 +119,10 @@ assurance plan says how independent that person must be. The agent is never that
   becomes a finding. A finding that only the source of an input can settle cites a
   `query` item by ID; if none exists, ask to write one (`references/recording.md`).
 - Ask every `accountable` check of the checklist as a question and note who answered.
-  "No" or "not yet" is a finding. An unanswered check is `not-assessed`. If the answer
-  needs something that has not happened yet (a confirmation by the customer), do not
-  press for it: the check stays `not-assessed`, the items stay `in-review`, nothing is
-  approved, and the review is completed when the answer exists.
+  "Yes" is `pass`. "No" is a `finding` that no reviewer's decision closes: the verdict
+  is `rework`. "Not yet", or nobody who could answer, is `not-assessed`: do not press
+  for it, the items stay `in-review`, nothing is approved, and the review is completed
+  when the answer exists. Never answer such a check for the person it concerns.
 
 ### 7. Reviewers and verdict
 - Ask who is accountable for the verdict. Offer the names under `people` in
@@ -129,17 +130,20 @@ assurance plan says how independent that person must be. The agent is never that
   wrote the items: at least one reviewer must be someone else. If there is none, stop
   before recording. A model, an agent or a tool is never a reviewer.
 - Say what stands against `approved`. The tool refuses it while a finding is open,
-  while a check has no result or is `not-assessed`, while an item the subject links to
-  is not approved, and while an open finding of an earlier review of the same content
-  is not closed; missing mandatory content (step 4) stands against it too. Then ask for
-  the verdict, `approved` or `rework`. Do not propose one.
+  while a check has no result or is `not-assessed`, while an accountable check is
+  answered with a finding, while an item the subject builds on is not approved, and
+  while an open finding of an earlier review of the same content is not closed; missing
+  mandatory content (step 4) stands against it too. Then ask for the verdict,
+  `approved` or `rework`. Do not propose one.
 
 ### 8. Record, and review again when needed
 Record the review and set the status as described under Writing.
 Read `references/re-review.md` when findings were corrected after a `rework` verdict,
 when code changed, or when an upstream item changed (`python tools/traceability.py
-impact <ID>` lists what depends on it). Findings are closed by a new review, with an
-entry that names the earlier finding under `closes`, never by editing the earlier record.
+impact <ID>` lists what depends on it). An item that did not change itself is confirmed
+against the new upstream version with `record.py review --reconfirm`, without the
+checklist. Findings are closed by a new review, with an entry that names the earlier
+finding under `closes`, never by editing the earlier record.
 
 ## Writing
 

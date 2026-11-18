@@ -6,6 +6,11 @@ SYS.4.BP1, SYS.4.BP2, SYS.5.BP1, SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1.
 Kinds: `script` - a tool answers it; `semantic` - needs reading and judgement, a model
 may propose and a person confirms; `accountable` - only a person can state it.
 
+An accountable check is answered by the person it concerns, and the note names who
+answered: `pass` when that person states the fact, `not-assessed` while nobody can state
+it yet, `finding` when the answer is no. Such a finding is not closed by a reviewer's
+decision: the verdict is `rework` until the fact exists.
+
 A plan says how a process is going to be performed in this project. Apply the part
 "Every plan" to each plan, then the part for its `kind`. The parts follow `plan_kinds`
 in `schema/items.yaml`. A kind whose process is not in `scope.processes` needs no plan.

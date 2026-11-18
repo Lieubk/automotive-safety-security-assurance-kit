@@ -9,6 +9,11 @@ the entry check of the first process in scope and supports no base practice of i
 Kinds: `script` - a tool answers it; `semantic` - needs reading and judgement, a model
 may propose and a person confirms; `accountable` - only a person can state it.
 
+An accountable check is answered by the person it concerns, and the note names who
+answered: `pass` when that person states the fact, `not-assessed` while nobody can state
+it yet, `finding` when the answer is no. Such a finding is not closed by a reviewer's
+decision: the verdict is `rework` until the fact exists.
+
 Accepting an input means that the team works from this version with the open points
 named. It does not mean that the input is correct. A problem found here is never
 repaired in the item: it becomes a query to the source or a finding of this review.
