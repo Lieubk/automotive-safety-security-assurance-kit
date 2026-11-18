@@ -1,0 +1,6 @@
+# Keep LF in the repository and in the working tree on every platform:
+# hook scripts and content hashes depend on it.
+* text=auto eol=lf
+*.bat text eol=crlf
+*.png binary
+*.pdf binary

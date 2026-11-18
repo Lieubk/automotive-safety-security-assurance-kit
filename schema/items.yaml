@@ -15,20 +15,28 @@
 #     while a final review record covers the item's current content hash.
 #   - Progress is derived, not typed in: "implemented" and "verified" follow from
 #     links, test runs and review records (see `derived`).
+#   - Documents are generated views over items. What a reader needs as one
+#     document (a requirements specification, an architecture description, a
+#     detailed design) is assembled from items; it is not a second source.
+#   - A design element inside an item is addressed as <ID>#<name>, for example a
+#     function of a unit: UNT-0012#Debounce_Step.
 #
 # `supports` names the base practices and work products of the process catalog
 # (aspice/3.1/) that an element of this schema provides evidence for.
 
-schema_version: 1
+schema_version: 2
 aspice_version: "3.1"
 id_format: "<PREFIX>-<NNNN>"       # prefix per type, zero-padded running number, never reused
 
 # ---------------------------------------------------------------------------
 # Lifecycles
+# `stages` says from which states on an attribute or section marked
+# before-review or before-approval must be present.
 # ---------------------------------------------------------------------------
 lifecycles:
   engineering:                     # requirements, architecture, design, test cases
     states: [draft, in-review, approved, rejected, obsolete]
+    stages: {before-review: [in-review, approved, obsolete], before-approval: [approved, obsolete]}
     transitions:
       - {from: draft, to: in-review, when: "mandatory attributes, sections and upstream links for this stage are present"}
       - {from: in-review, to: approved, when: "a final review record with verdict approved covers the current content hash and has no open finding"}
@@ -38,6 +46,7 @@ lifecycles:
       - {from: approved, to: obsolete, when: "a reason or a superseding item is recorded; inside a baseline this needs an approved change request"}
   change-request:
     states: [submitted, analysed, approved, rejected, implemented, verified, closed]
+    stages: {before-review: [analysed, approved, implemented, verified, closed], before-approval: [approved, implemented, verified, closed]}
     transitions:
       - {from: submitted, to: analysed, when: "affected items are linked and the impact analysis section is filled"}
       - {from: analysed, to: approved, when: "the change control board decision is recorded"}
@@ -47,14 +56,16 @@ lifecycles:
       - {from: verified, to: closed, when: "the requester is informed"}
   problem-report:
     states: [open, analysed, in-resolution, resolved, closed, rejected]
+    stages: {before-review: [analysed, in-resolution, resolved, closed], before-approval: [in-resolution, resolved, closed]}
     transitions:
       - {from: open, to: analysed, when: "cause, impact and severity are recorded"}
       - {from: analysed, to: in-resolution, when: "a resolution is chosen; a change to baselined items goes through a change request"}
       - {from: in-resolution, to: resolved, when: "the resolution is implemented"}
       - {from: resolved, to: closed, when: "effectiveness is shown by a retest or review that is linked"}
       - {from: [open, analysed], to: rejected, when: "the reason is recorded"}
-  record:                          # review records, test runs, baselines
+  record:                          # review records, test runs, baselines, communication records
     states: [open, final]
+    stages: {before-review: [final], before-approval: [final]}
     transitions:
       - {from: open, to: final, when: "the record is complete; a final record is never edited, only superseded"}
 
@@ -69,14 +80,17 @@ attribute_sets:
     type: {required: always}
     title: {required: always, note: "short name, not the normative text"}
     status: {required: always}
+    variants: {required: optional, note: "product variants the item applies to; absent means all"}
+    imported: {required: optional, note: "marks an input received from outside the project's process scope: source document or baseline, version, date received. Imported items are read-only; only `always` attributes are enforced, and an input acceptance review covers them"}
     rejection_reason: {required: optional, note: "mandatory in state rejected"}
     superseded_by: {required: optional, note: "item ID; reason text is acceptable in state obsolete when nothing replaces the item"}
+  criticality:
+    asil: {values: [QM, A, B, C, D], required: before-review}
+    security_relevant: {values: [true, false], required: before-review}
   requirement:
     kind: {values: [functional, non-functional, interface, constraint], required: before-review}
     priority: {values: [must, should], required: before-review}
     release: {required: before-approval, note: "planned release the requirement is assigned to"}
-    asil: {values: [QM, A, B, C, D], required: before-review}
-    security_relevant: {values: [true, false], required: before-review}
     verification_method: {values: [test, analysis, review, inspection], required: before-approval}
     origin: {values: [derived, internal], required: before-review, note: "internal = no upstream item exists; needs a rationale section"}
   test-case:
@@ -85,6 +99,47 @@ attribute_sets:
     environment: {required: before-approval, note: "host, software-in-the-loop, hardware-in-the-loop, target, or a project-defined name"}
     asil: {values: [QM, A, B, C, D], required: before-review, note: "highest ASIL of the items verified"}
     regression: {values: [true, false], required: before-approval, note: "belongs to the regression set"}
+
+# ---------------------------------------------------------------------------
+# Structured attributes: lists of records with fixed keys, so that a script can
+# check them. Keys under `mandatory` must be present in every record.
+# ---------------------------------------------------------------------------
+structures:
+  data-elements:                   # software-interface.elements
+    mandatory: [name, direction, type]
+    keys: [unit, min, max, resolution, initial, invalid, period_ms, timeout_ms, description]
+    note: "direction is in, out or inout as seen from the providing component; unit and range are expected for physical quantities"
+  operations:                      # software-interface.operations
+    mandatory: [name, returns]
+    keys: [arguments, call_context, reentrant, blocking, description]
+    note: "arguments is a list of data-element records; returns lists each value with its meaning; call_context is task, interrupt or both"
+  functions:                       # software-unit.functions
+    mandatory: [name, category]
+    keys: [arguments, returns, preconditions, postconditions, errors, trigger, period_ms, call_context, reentrant]
+    note: "category is public, scheduled, callback or local; trigger names the activating event of a scheduled function"
+  data:                            # software-unit.data
+    mandatory: [name, type, scope]
+    keys: [unit, min, max, initial, protection]
+    note: "scope is file or global; protection names what guards concurrent access"
+  resource-budget:                 # software-component.resource_budget, software-unit.resource_budget
+    shape: mapping                 # one record, not a list
+    mandatory: []
+    keys: [rom_bytes, ram_bytes, stack_bytes, cpu_load_percent, wcet_us, not_relevant]
+    note: "objectives, not measurements; not_relevant carries the reason when no objective applies"
+  tasks:                           # architecture-view.table when kind is execution-model
+    mandatory: [name, activation, priority, entries]
+    keys: [period_ms, budget_us, stack_bytes, preemptable, core]
+    note: "activation is periodic, event or interrupt; entries lists the component entry functions mapped to the task"
+  memory-regions:                  # architecture-view.table when kind is memory-layout
+    mandatory: [name, memory, size_bytes, content]
+    keys: [start, protection]
+    note: "memory is the kind of storage, for example program flash, data flash, RAM"
+  resource-totals:                 # architecture-view.table when kind is resource-summary
+    mandatory: [resource, capacity, objective]
+    keys: [reserve_percent, measured]
+  fault-reactions:                 # architecture-view.table when kind is fault-reaction
+    mandatory: [fault, detection, reaction]
+    keys: [storage, recovery, escalation]
 
 # ---------------------------------------------------------------------------
 # Item types
@@ -100,7 +155,7 @@ types:
       source_document: {required: always, note: "document the stakeholder delivered, with its version"}
       source_id: {required: optional, note: "identifier of the requirement in that document"}
       assessment: {values: [accepted, accepted-with-deviation, rejected, needs-clarification], required: before-approval}
-      agreement: {required: optional, note: "reference to the communication record; mandatory unless assessment is accepted"}
+      agreement: {required: optional, note: "communication record ID; mandatory unless assessment is accepted"}
     sections:
       Statement: before-review     # the requirement as received, unchanged
       Assessment notes: optional
@@ -110,12 +165,12 @@ types:
     folder: spec/system/requirements
     lifecycle: engineering
     supports: [SYS.2.BP1, SYS.2.BP2, SYS.2.BP3, SYS.2.BP4, SYS.2.BP5, "17-12", "17-50"]
-    attributes: {use: [common, requirement]}
+    attributes: {use: [common, criticality, requirement]}
     sections:
       Statement: before-review
-      Rationale: optional                # mandatory when origin is internal
+      Rationale: optional          # mandatory when origin is internal
       Verification criteria: before-approval
-      Analysis: optional                 # feasibility, cost and schedule impact, effect on the operating environment
+      Analysis: optional           # feasibility, cost and schedule impact, effect on the operating environment
 
   system-element:
     prefix: SYE
@@ -123,9 +178,8 @@ types:
     lifecycle: engineering
     supports: [SYS.3.BP1, SYS.3.BP4, "04-06"]
     attributes:
-      use: [common]
+      use: [common, criticality]
       kind: {values: [hardware, software, mechanical, external], required: before-review}
-      asil: {values: [QM, A, B, C, D], required: before-review}
     sections:
       Responsibility: before-review
       Dynamic behavior: before-approval
@@ -136,7 +190,7 @@ types:
     lifecycle: engineering
     supports: [SYS.3.BP3, "04-06", "17-08"]
     attributes:
-      use: [common]
+      use: [common, criticality]
       kind: {values: [hardware-software, bus, electrical, mechanical, diagnostic, external], required: before-review}
     sections:
       Definition: before-review    # signals, ranges, units, timing, protocol
@@ -147,7 +201,7 @@ types:
     folder: spec/software/requirements
     lifecycle: engineering
     supports: [SWE.1.BP1, SWE.1.BP2, SWE.1.BP3, SWE.1.BP4, SWE.1.BP5, "17-11", "17-50"]
-    attributes: {use: [common, requirement]}
+    attributes: {use: [common, criticality, requirement]}
     sections:
       Statement: before-review
       Rationale: optional
@@ -160,13 +214,18 @@ types:
     lifecycle: engineering
     supports: [SWE.2.BP1, SWE.2.BP4, SWE.2.BP5, "04-04"]
     attributes:
-      use: [common]
-      kind: {values: [application, complex-driver, basic-software, service, library, third-party], required: before-review}
-      asil: {values: [QM, A, B, C, D], required: before-review}
-      resource_budget: {required: before-approval, note: "ROM, RAM, stack and CPU-load objectives, or an explicit 'not relevant' with reason"}
+      use: [common, criticality]
+      kind: {values: [composition, application, sensor-actuator, service, complex-driver, ecu-abstraction, parameter, basic-software, library, other], required: before-review}
+      layer: {values: [application, runtime-environment, services, ecu-abstraction, microcontroller-abstraction, complex-drivers], required: before-review}
+      origin: {values: [developed, reused, supplied, generated], required: before-review}
+      supplier: {required: optional, note: "who delivers it and in which version and form; mandatory when origin is supplied or reused"}
+      execution_context: {required: optional, note: "core, partition or operating system application the component runs in"}
+      resource_budget: {structure: resource-budget, required: before-approval}
+      model: {required: optional, note: "path of the component description (for example an AUTOSAR XML file) this item documents; the model stays the source for ports and runnables"}
     sections:
-      Responsibility: before-review
-      Dynamic behavior: before-approval   # operating modes, tasks, timing, interaction; diagrams as code
+      Purpose: before-review       # why the component exists
+      Responsibility: before-review  # what it does and what it does not do
+      Dynamic behavior: before-approval   # the component's own modes and timing; cross-component behavior goes into architecture views
 
   software-interface:
     prefix: IFC
@@ -174,40 +233,75 @@ types:
     lifecycle: engineering
     supports: [SWE.2.BP3, "04-04", "17-08"]
     attributes:
-      use: [common]
-      kind: {values: [sender-receiver, client-server, mode-switch, parameter, memory, hardware-abstraction, other], required: before-review}
+      use: [common, criticality]
+      kind: {values: [sender-receiver, client-server, mode-switch, parameter, non-volatile-data, trigger, function-call, debug, other], required: before-review}
       provided_by: {required: before-review, note: "software component ID"}
       used_by: {required: before-approval, note: "software component IDs"}
+      elements: {structure: data-elements, required: optional, note: "mandatory before review for data-oriented kinds"}
+      operations: {structure: operations, required: optional, note: "mandatory before review for kinds client-server and function-call"}
     sections:
-      Definition: before-review    # data elements or operations, types, ranges, units, timing, error behavior
+      Description: before-review   # what the interface is for, error behavior, constraints on its use
+
+  architecture-view:               # anything that describes several elements together
+    prefix: VIEW
+    folder: spec/views
+    lifecycle: engineering
+    supports: [SYS.3.BP1, SYS.3.BP4, SWE.2.BP1, SWE.2.BP4, SWE.2.BP5, "04-04", "04-06"]
+    attributes:
+      use: [common]
+      level: {values: [system, software], required: always}
+      kind: {values: [context, structure, state-machine, sequence, execution-model, memory-layout, resource-summary, fault-reaction, communication, other], required: always}
+      table: {required: optional, note: "structured rows; mandatory before review for kinds execution-model (tasks), memory-layout (memory-regions), resource-summary (resource-totals) and fault-reaction (fault-reactions)"}
+    sections:
+      Description: before-review
+      Diagram: optional            # diagram as code; mandatory before review for kinds context, structure, state-machine and sequence
 
   design-decision:
     prefix: ADR
     folder: spec/decisions
     lifecycle: engineering
-    supports: [SYS.3.BP5, SWE.2.BP6]
+    supports: [SYS.3.BP5, SWE.2.BP6, SWE.3.BP4]
     attributes:
       use: [common]
-      level: {values: [system, software], required: always}
+      level: {values: [system, software, detailed-design], required: always}
     sections:
       Context: before-review
       Evaluation criteria: before-review
-      Alternatives: before-review
+      Alternatives: before-review  # each alternative assessed against each criterion
       Decision: before-approval
+      Consequences: before-approval
+
+  component-design:                # detailed design of one component as a whole
+    prefix: CDS
+    folder: spec/software/design
+    lifecycle: engineering
+    supports: [SWE.3.BP1, SWE.3.BP3, SWE.3.BP4, "04-05"]
+    attributes: {use: [common]}
+    sections:
+      Design concept: before-review
+      Static structure: before-review      # the units, their relations and visibility
+      Dynamic behavior: before-review      # how the units work together, or "not applicable" with the reason
+      Design evaluation: before-approval   # result per evaluation criterion of the project, with risks and their owners
 
   software-unit:
     prefix: UNT
     folder: spec/software/design
     lifecycle: engineering
-    supports: [SWE.3.BP1, SWE.3.BP2, SWE.3.BP3, SWE.3.BP4, SWE.3.BP8, "04-05", "11-05"]
+    supports: [SWE.3.BP1, SWE.3.BP2, SWE.3.BP3, SWE.3.BP8, "04-05", "11-05"]
     attributes:
-      use: [common]
-      asil: {values: [QM, A, B, C, D], required: before-review}
+      use: [common, criticality]
+      origin: {values: [handwritten, generated, reused, third-party], required: before-review}
+      generated_from: {required: optional, note: "model or configuration the unit is generated from; mandatory when origin is generated"}
       source_files: {required: before-approval, note: "repository paths of the files that implement the unit; each source file belongs to exactly one unit"}
-      origin: {values: [handwritten, generated, third-party], required: before-review}
+      functions: {structure: functions, required: before-review}
+      data: {structure: data, required: optional}
+      resource_budget: {structure: resource-budget, required: optional}
+      platform: {required: optional, note: "platform resources the unit touches: exclusive areas, diagnostic events, non-volatile blocks, calibration parameters, memory sections"}
     sections:
-      Interfaces: before-review    # functions, parameters, return values, data
-      Behavior: before-review      # algorithm, states, error handling
+      Purpose: before-review
+      Behavior: before-review      # algorithm and states
+      Error handling: before-review
+      Dynamic behavior: before-review   # or "not applicable" with the reason
       Design notes: optional
 
   unit-test:
@@ -263,7 +357,7 @@ types:
       item_under_test: {required: always, note: "commit, tag or baseline ID that was tested"}
       environment: {required: always}
       executed_at: {required: always}
-      results: {required: always, note: "list of {test: <test case ID>, verdict: passed | failed | blocked | not-run, evidence: <report path>}"}
+      results: {required: always, note: "list of {test: <test case ID>, verdict: passed | failed | blocked | not-run, evidence: <report path>, reason: <why blocked or not run>}"}
       coverage: {required: optional, note: "statement, branch and MC/DC percentages for unit level, taken from the coverage report"}
 
   static-analysis-run:             # written by tooling from analyser reports
@@ -278,7 +372,7 @@ types:
       item_under_test: {required: always}
       tool: {required: always, note: "analyser, version and rule set"}
       executed_at: {required: always}
-      results: {required: always, note: "per software unit: open findings by severity, justified deviations, evidence path"}
+      results: {required: always, note: "list of {unit: <software unit ID>, open_findings: <count by severity>, deviations: <justified deviations>, metrics: <values>, evidence: <report path>}"}
 
   review-record:
     prefix: REV
@@ -290,10 +384,26 @@ types:
       type: {required: always}
       status: {required: always}
       subject: {required: always, note: "list of {item: <ID>, hash: <content hash at review time>}"}
+      references: {required: optional, note: "list of {item: <ID>, hash: <content hash>}: the upstream items the subject was compared against. This is the consistency evidence; a link whose target has changed since is suspect"}
       checklist: {required: always, note: "checklist applied, with its version"}
       reviewers: {required: always, note: "people accountable for the verdict; at least one who did not author the subject"}
       verdict: {values: [approved, rework], required: always}
-      findings: {required: always, note: "list of {id, item, text, severity: major | minor, state: open | closed}; may be empty"}
+      findings: {required: always, may_be_empty: true, note: "list of {id, item, text, severity: major | minor, state: open | closed}; an empty list states that there were none"}
+
+  communication-record:
+    prefix: CMR
+    folder: records/communication
+    lifecycle: record
+    supports: [SYS.2.BP8, SYS.3.BP8, SYS.4.BP9, SYS.5.BP7, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7, SWE.4.BP7, SWE.5.BP9, SWE.6.BP7, "13-04"]
+    attributes:
+      id: {required: always}
+      type: {required: always}
+      status: {required: always}
+      subject: {required: always, note: "baseline ID, or the items and test runs that were communicated"}
+      audience: {required: always, note: "roles or parties informed"}
+      channel: {required: always, note: "how they were informed"}
+      sent_at: {required: always}
+      agreement: {required: optional, note: "what was agreed and by whom, when the record documents an agreement rather than a notification"}
 
   change-request:
     prefix: CR
@@ -306,7 +416,7 @@ types:
       decision: {required: optional, note: "who decided and when; mandatory from state approved or rejected on"}
     sections:
       Description: always
-      Impact analysis: before-approval   # affected items, effort, schedule, risk, regression scope
+      Impact analysis: before-review     # affected items, effort, schedule, risk, regression scope
 
   problem-report:
     prefix: PRB
@@ -320,7 +430,7 @@ types:
       urgent_action: {required: optional, note: "containment decided before the full resolution, with who authorised it"}
     sections:
       Description: always
-      Cause and impact: before-approval
+      Cause and impact: before-review
       Resolution: before-approval
 
   baseline:
@@ -337,6 +447,26 @@ types:
       items: {required: always, note: "list of {item: <ID>, hash: <content hash>, status}; generated"}
 
 # ---------------------------------------------------------------------------
+# Conditional requirements: attributes or sections that become mandatory when
+# another attribute has a given value. `stage` as for `required`.
+# `types: any` means every type that carries the attributes named.
+# ---------------------------------------------------------------------------
+conditions:
+  - {types: [system-requirement, software-requirement], when: {origin: [internal]}, sections: [Rationale], stage: before-review}
+  - {types: [stakeholder-requirement], when: {assessment: [accepted-with-deviation, rejected, needs-clarification]}, attributes: [agreement], stage: before-approval}
+  - {types: [software-component], when: {origin: [supplied, reused]}, attributes: [supplier], stage: before-review}
+  - {types: [software-interface], when: {kind: [sender-receiver, mode-switch, parameter, non-volatile-data]}, attributes: [elements], stage: before-review}
+  - {types: [software-interface], when: {kind: [client-server, function-call]}, attributes: [operations], stage: before-review}
+  - {types: [architecture-view], when: {kind: [context, structure, state-machine, sequence]}, sections: [Diagram], stage: before-review}
+  - {types: [architecture-view], when: {kind: [execution-model]}, attributes: [table], structure: tasks, stage: before-review}
+  - {types: [architecture-view], when: {kind: [memory-layout]}, attributes: [table], structure: memory-regions, stage: before-review}
+  - {types: [architecture-view], when: {kind: [resource-summary]}, attributes: [table], structure: resource-totals, stage: before-review}
+  - {types: [architecture-view], when: {kind: [fault-reaction]}, attributes: [table], structure: fault-reactions, stage: before-review}
+  - {types: [software-unit], when: {origin: [generated]}, attributes: [generated_from], stage: before-review}
+  - {types: [unit-test, software-integration-test, software-qualification-test, system-integration-test, system-qualification-test], when: {execution: [automated]}, attributes: [script], stage: before-approval}
+  - {types: any, when: {status: [rejected]}, attributes: [rejection_reason], stage: always}
+
+# ---------------------------------------------------------------------------
 # Link roles (stored on `from`, navigable both ways)
 # ---------------------------------------------------------------------------
 links:
@@ -351,25 +481,43 @@ links:
       - {from: system-requirement, to: [system-element, system-interface], supports: [SYS.3.BP2, SYS.3.BP6, SYS.3.BP7]}
       - {from: software-requirement, to: [software-component, software-interface], supports: [SWE.2.BP2, SWE.2.BP7, SWE.2.BP8]}
   part_of:
-    meaning: "the unit refines this component of the architecture"
+    meaning: "the item belongs to the target: a component to its composition, a unit to its component"
     pairs:
+      - {from: software-component, to: [software-component], supports: [SWE.2.BP1]}
       - {from: software-unit, to: [software-component], supports: [SWE.3.BP5, SWE.3.BP6]}
+  refines:
+    meaning: "the detailed design of the component"
+    pairs:
+      - {from: component-design, to: [software-component], supports: [SWE.3.BP5, SWE.3.BP6]}
+  realizes:
+    meaning: "the item implements the target interface"
+    pairs:
+      - {from: software-interface, to: [system-interface], supports: [SWE.2.BP3]}
+      - {from: software-unit, to: [software-interface], supports: [SWE.3.BP2, SWE.3.BP5]}
+  uses:
+    meaning: "the unit depends on the target at run time"
+    pairs:
+      - {from: software-unit, to: [software-interface, software-unit], supports: [SWE.3.BP2]}
   implements:
     meaning: "the unit realises this requirement directly; optional where the path through the component already covers it"
     pairs:
       - {from: software-unit, to: [software-requirement], supports: [SWE.3.BP5, SWE.3.BP6]}
+  shows:
+    meaning: "the view describes the target together with others; a change of the target makes the view suspect"
+    pairs:
+      - {from: architecture-view, to: [system-element, system-interface, software-component, software-interface], supports: [SYS.3.BP4, SWE.2.BP4]}
   verifies:
-    meaning: "the test case checks the target"
+    meaning: "the test case checks the target; a unit test may point at one function with <ID>#<name>"
     pairs:
       - {from: unit-test, to: [software-unit], supports: [SWE.4.BP5, SWE.4.BP6]}
-      - {from: software-integration-test, to: [software-component, software-interface], supports: [SWE.5.BP7, SWE.5.BP8]}
+      - {from: software-integration-test, to: [software-component, software-interface, architecture-view], supports: [SWE.5.BP7, SWE.5.BP8]}
       - {from: software-qualification-test, to: [software-requirement], supports: [SWE.6.BP5, SWE.6.BP6]}
-      - {from: system-integration-test, to: [system-element, system-interface], supports: [SYS.4.BP7, SYS.4.BP8]}
+      - {from: system-integration-test, to: [system-element, system-interface, architecture-view], supports: [SYS.4.BP7, SYS.4.BP8]}
       - {from: system-qualification-test, to: [system-requirement], supports: [SYS.5.BP5, SYS.5.BP6]}
   concerns:
     meaning: "the decision shapes the target"
     pairs:
-      - {from: design-decision, to: [system-element, system-interface, software-component, software-interface], supports: [SYS.3.BP5, SWE.2.BP6]}
+      - {from: design-decision, to: [system-element, system-interface, software-component, software-interface, architecture-view, component-design, software-unit], supports: [SYS.3.BP5, SWE.2.BP6, SWE.3.BP4]}
   affects:
     meaning: "the change or problem touches the target"
     pairs:
@@ -381,16 +529,21 @@ links:
       - {from: change-request, to: [problem-report], supports: [SUP.10.BP8]}
 
 # Links that live inside records rather than as link attributes:
-#   test-run.results[].test        test result -> test case
-#   static-analysis-run.results    verification result -> software unit
-#   review-record.subject[].item   review -> reviewed item at a content hash
-#   baseline.items[].item          baseline -> item at a content hash
-#   software-unit.source_files     detailed design -> code
+#   test-run.results[].test          test result -> test case
+#   static-analysis-run.results      verification result -> software unit
+#   review-record.subject[].item     review -> reviewed item at a content hash
+#   baseline.items[].item            baseline -> item at a content hash
+#   communication-record.subject     communication -> baseline or items
+#   software-unit.source_files       detailed design -> code
+#   software-interface.provided_by   interface -> providing component
 
 # ---------------------------------------------------------------------------
 # Coverage rules (each one a deterministic check)
 # `subject`: the items checked, in state approved unless stated otherwise.
 # `waiver`: what makes a missing link acceptable; a waiver is itself reviewed.
+# A rule is active only when at least one process named under `supports` is in
+# the scope the project declared; items imported from outside that scope are
+# inputs and are not themselves subject to the rules of the process that made them.
 # ---------------------------------------------------------------------------
 coverage:
   - {id: COV-01, subject: stakeholder-requirement, expect: "assessment accepted or accepted-with-deviation -> at least one system-requirement derived_from it", waiver: "assessment rejected, with agreement", supports: [SYS.2.BP6]}
@@ -400,8 +553,8 @@ coverage:
   - {id: COV-05, subject: system-requirement, expect: "allocated to an element of kind software -> at least one software-requirement derived_from the requirement or the element", waiver: "none", supports: [SWE.1.BP6]}
   - {id: COV-06, subject: software-requirement, expect: "at least one derived_from link", waiver: "origin internal with a Rationale section", supports: [SWE.1.BP6]}
   - {id: COV-07, subject: software-requirement, expect: "allocated_to at least one software-component or software-interface", waiver: "kind constraint with a Rationale section", supports: [SWE.2.BP2, SWE.2.BP7]}
-  - {id: COV-08, subject: software-component, expect: "at least one software-requirement allocated to it", waiver: "none", supports: [SWE.2.BP7]}
-  - {id: COV-09, subject: software-component, expect: "kind application or complex-driver -> at least one software-unit part_of it", waiver: "kind basic-software, service, library or third-party that is configured or integrated rather than designed", supports: [SWE.3.BP5]}
+  - {id: COV-08, subject: software-component, expect: "at least one software-requirement allocated to it or to a component that is part_of it", waiver: "origin supplied or generated, with the reason for its presence in the Purpose section", supports: [SWE.2.BP7]}
+  - {id: COV-09, subject: software-component, expect: "origin developed and kind other than composition -> one component-design refines it and at least one software-unit is part_of it", waiver: "none", supports: [SWE.3.BP5]}
   - {id: COV-10, subject: software-unit, expect: "exactly one part_of link, and every listed source file exists", waiver: "none", supports: [SWE.3.BP5]}
   - {id: COV-11, subject: source-file, expect: "every file under the configured source roots is listed by exactly one software-unit", waiver: "path matched by the project's generated or third-party patterns", supports: [SWE.3.BP5]}
   - {id: COV-12, subject: software-unit, expect: "at least one unit-test verifies it, and the latest static-analysis-run has an entry for it", waiver: "origin generated or third-party, with the alternative verification named in the unit verification strategy", supports: [SWE.4.BP5]}
@@ -411,15 +564,21 @@ coverage:
   - {id: COV-16, subject: system-requirement, expect: "verification_method test -> at least one system-qualification-test verifies it; otherwise a final review-record covers it", waiver: "none", supports: [SYS.5.BP5]}
   - {id: COV-17, subject: test-case, expect: "at least one verifies link, to an item that is not rejected or obsolete", waiver: "none", supports: [SWE.4.BP5, SWE.5.BP7, SWE.6.BP5, SYS.4.BP7, SYS.5.BP5]}
   - {id: COV-18, subject: test-case, expect: "a verdict in the latest final test-run of its level for the baseline under assessment", waiver: "recorded as not-run with a reason accepted in the test summary", supports: [SWE.4.BP5, SWE.5.BP7, SWE.6.BP5, SYS.4.BP7, SYS.5.BP5]}
-  - {id: COV-19, subject: any-engineering-item, expect: "a final review-record with verdict approved covers the current content hash and all its findings are closed", waiver: "none", supports: [SUP.1.BP2]}
+  - {id: COV-19, subject: any-engineering-item, expect: "a final review-record with verdict approved covers the current content hash and all its findings are closed", waiver: "none", supports: [SUP.1.BP2, SYS.2.BP7, SYS.3.BP7, SYS.4.BP8, SYS.5.BP6, SWE.1.BP7, SWE.2.BP8, SWE.3.BP6, SWE.4.BP6, SWE.5.BP8, SWE.6.BP6]}
   - {id: COV-20, subject: change-request, expect: "from state analysed on: at least one affects link", waiver: "none", supports: [SUP.10.BP8]}
+  - {id: COV-21, subject: software-interface, expect: "provided by a component with origin developed -> at least one software-unit of that component realizes it", waiver: "none", supports: [SWE.3.BP2, SWE.3.BP5]}
+  - {id: COV-22, subject: software-unit, expect: "every function of category public, scheduled or callback exists in the listed source files with the designed signature, and no such function exists in the code without a design entry", waiver: "origin generated or third-party", supports: [SWE.3.BP5, SWE.3.BP8]}
+  - {id: COV-23, subject: any-engineering-item, expect: "ASIL not lower than the highest ASIL of the items it is derived from, allocated, part of or implements", waiver: "an approved design-decision that documents the decomposition concerns the item", supports: [SWE.2.BP8, SWE.3.BP6]}
+  - {id: COV-24, subject: architecture-view, expect: "at least one shows link, and every shown item exists and is not rejected or obsolete", waiver: "none", supports: [SWE.2.BP4, SYS.3.BP4]}
+  - {id: COV-25, subject: project, expect: "at software level one approved architecture-view exists for each of the kinds structure, execution-model and resource-summary, and at least one of kind state-machine or sequence", waiver: "a kind declared not applicable in the project configuration, with the reason", supports: [SWE.2.BP1, SWE.2.BP4, SWE.2.BP5]}
+  - {id: COV-26, subject: baseline, expect: "at least one final communication-record names the baseline as subject", waiver: "baseline purpose marked internal in the project configuration", supports: [SYS.2.BP8, SYS.3.BP8, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7]}
 
 # ---------------------------------------------------------------------------
 # Derived facts (computed by the trace engine, never stored on the item)
 # ---------------------------------------------------------------------------
 derived:
   stale-approval: "status approved, but no final approving review record matches the current content hash"
-  suspect-link: "the target's content hash changed after the link was last confirmed by a consistency review"
+  suspect-link: "the target's current content hash differs from the one recorded under references in the review that approved the linking item"
   implemented: "requirement: every component it is allocated to has approved units whose source files exist in the item under test"
   verified: "requirement: every test case that verifies it passed in the latest final test run of the item under test, or its non-test verification record is final"
   orphan: "item with no upstream link and no waiver"
