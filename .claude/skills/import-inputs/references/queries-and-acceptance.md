@@ -131,7 +131,7 @@ records their verdict. This skill hands over, and suggests no verdict:
 |---|---|
 | Subject | the IDs of the registered items of the delivery; for a partial registration, which part of the document they cover |
 | Order | the requirements before the architecture that fulfils them: an element is approved only when every requirement in its `fulfils` is |
-| Checklist | `input-acceptance`, cited with its version as `input-acceptance v1` |
+| Checklist | `input-acceptance`, cited with its version as `input-acceptance v2` |
 | Script results | the lines of `python tools/traceability.py check --all` that concern these items, quoted; "none" if there are none |
 | Proposed findings | per finding: item ID, checklist ID, the passage it rests on, what was observed |
 | Queries | the IDs of the open queries and the inputs each is about |

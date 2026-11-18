@@ -1,6 +1,6 @@
 # Unit test specification review checklist
 
-Version 1. Applies to: `unit-test`, and the test code its `script` names. Supports:
+Version 2. Applies to: `unit-test`, and the test code its `script` names. Supports:
 SWE.4.BP2, SWE.4.BP4, SWE.4.BP5, SWE.4.BP6.
 
 Kinds: `script` - a tool answers it; `semantic` - needs reading and judgement, a model
@@ -24,7 +24,7 @@ Apply the parts that have something to look at:
 - "The results of a unit": once a test run and an analysis run of the unit's code are
   recorded.
 
-A review record cites this checklist as `unit-test-specification v1`, and a review that
+A review record cites this checklist as `unit-test-specification v2`, and a review that
 approves needs a result for every check. A check of a part that has nothing to look at
 yet is recorded as `not-applicable` with the reason - "no recorded run yet" for every
 check of "The results of a unit" - and never as passed. Those checks are applied in a
@@ -89,7 +89,7 @@ against the test cases: `COV-29`, a designed function that no test case names.
 | UT-45 | The unit is reached only through its designed functions: no access to file-scope data, no test-only code or switch in the unit's sources | read the test file; search the unit's sources for test switches | semantic |
 | UT-46 | Test doubles return prepared values and count calls; they contain no logic of the unit under test or of the unit they replace, and their signatures are those of the designed services | read the test doubles beside the interface or unit they stand for | semantic |
 | UT-47 | The test program reports one verdict per case, and a failed check cannot end in a pass (no check after an unconditional return, no verdict printed by hand) | read `main` and the use of the assertion macros | semantic |
-| UT-48 | Stand-in headers for the platform define only what the unit uses and agree with the platform's definitions | read the stand-ins beside the interface items | semantic |
+| UT-48 | Stand-in headers for the platform define only what the unit uses, and agree with what the interface items and the unit design state about those types and services | read the stand-ins beside the interface items and the unit's `uses`. Where the platform's own headers are at hand, compare with them too and say so in the note; their absence is no reason for `not-assessed` | semantic |
 
 ## The results of a unit
 

@@ -46,10 +46,10 @@ table says what to expect.
 | Anything else of the `engineering` lifecycle | for example `system-requirement` written by the project, `software-integration-test` | whichever checklist names the type; if none does, the semantic part is NOT ASSESSED |
 
 Cite a checklist as its file name without `.md`, followed by `v` and the number of its
-version line: `software-requirements v1`, `software-unit-code v1`, `plan v1`. The tool
+version line: `software-requirements v2`, `software-unit-code v2`, `plan v2`. The tool
 looks the file up and refuses a citation it cannot find or whose version is not the one
 in the file. It also accepts the title without the word "checklist"
-(`software requirements review v1`); use the file name, it cannot be mistyped as easily.
+(`software requirements review v2`); use the file name, it cannot be mistyped as easily.
 
 When the toolkit has no checklist for the type and the reviewers use criteria of their
 own, `--checklist` names those criteria as the user states them, and the command gets
@@ -154,9 +154,9 @@ Example for the power window project, software requirements just written:
 
 | Review | Items | Checklist | Upstream items |
 |---|---|---|---|
-| 1 | SWR-0001, SWR-0002, SWR-0003 (position and speed) | software-requirements v1 | from `hash --upstream SWR-0001 SWR-0002 SWR-0003` |
-| 2 | SWR-0004, SWR-0005, SWR-0006 (anti-pinch) | software-requirements v1 | from `hash --upstream SWR-0004 SWR-0005 SWR-0006` |
-| 3 | SWR-0007, SWR-0008, SWR-0009 (command and motor) | software-requirements v1 | from `hash --upstream SWR-0007 SWR-0008 SWR-0009` |
+| 1 | SWR-0001, SWR-0002, SWR-0003 (position and speed) | software-requirements v2 | from `hash --upstream SWR-0001 SWR-0002 SWR-0003` |
+| 2 | SWR-0004, SWR-0005, SWR-0006 (anti-pinch) | software-requirements v2 | from `hash --upstream SWR-0004 SWR-0005 SWR-0006` |
+| 3 | SWR-0007, SWR-0008, SWR-0009 (command and motor) | software-requirements v2 | from `hash --upstream SWR-0007 SWR-0008 SWR-0009` |
 
 The number in the last column is never estimated. For one requirement the command prints:
 

@@ -131,7 +131,7 @@ structure. `python tools/traceability.py practices SUP.8` says so, and
   never with Write or Edit, and only after the question of step 4 or step 7 was
   answered with yes.
 - A review record on a baseline record is written only on the verdict of a person the
-  user names, with the checklist cited as `baseline v1`.
+  user names, with the checklist cited as `baseline v2`.
 - Records are final when written. A record with a mistake is not edited: tell the user
   and supersede it with a new record.
 

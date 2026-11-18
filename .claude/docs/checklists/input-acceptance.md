@@ -1,6 +1,6 @@
 # Input acceptance review checklist
 
-Version 1. Applies to: every item that carries `imported`, whatever its type; and
+Version 2. Applies to: every item that carries `imported`, whatever its type; and
 `stakeholder-requirement` items registered without `imported` because SYS.1 is in
 scope. It does not apply to any other item the team writes itself. Supports:
 SYS.1.BP1, SYS.1.BP2, SYS.1.BP3 when SYS.1 is in scope. Without SYS.1 in scope it is

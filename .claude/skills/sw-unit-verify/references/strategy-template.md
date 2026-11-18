@@ -98,8 +98,9 @@ test case is corrected and reviewed again.
 
 ## Criteria
 
-Entry, per unit: the unit design is approved; the test cases of the unit are approved;
-the code is committed.
+Entry, per unit: the unit design is approved; the code is committed and builds without
+warning. The test cases may still be in review: a run counts for a test case once it is
+approved and its test code is the code the run recorded (COV-30 compares them).
 
 Pass criterion of a test case: every check in it holds. A test case that reports no
 verdict counts as failed.

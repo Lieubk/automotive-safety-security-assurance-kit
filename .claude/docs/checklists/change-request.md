@@ -1,6 +1,6 @@
 # Change request review checklist
 
-Version 1. Applies to: `change-request`. Supports: SUP.10.BP2, SUP.10.BP3, SUP.10.BP4,
+Version 2. Applies to: `change-request`. Supports: SUP.10.BP2, SUP.10.BP3, SUP.10.BP4,
 SUP.10.BP5, SUP.10.BP6, SUP.10.BP7, SUP.10.BP8.
 
 Kinds: `script` - a tool answers it; `semantic` - needs reading and judgement, a model
@@ -19,7 +19,7 @@ themselves are reviewed with the checklists of their types. `<ID>` is the ID of 
 change request. Where SUP.10 is out of scope, `COV-20` is not active: answer CRQ-02
 from `show <ID>`.
 
-In a review record this checklist is cited as `change-request v1`. The record of the
+In a review record this checklist is cited as `change-request v2`. The record of the
 implementation review carries a result for every check of both parts: part A is
 answered again on the present text of the change request, and a check that cannot
 apply any more or does not apply to this request (CRQ-15 after implementation, CRQ-40

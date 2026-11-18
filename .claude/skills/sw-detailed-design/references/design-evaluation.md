@@ -120,8 +120,8 @@ shared data is kept consistent, the cut between units, table against calculation
   fixed before the alternatives are assessed.
 - `Alternatives`: each one described so that it could be built, and assessed against
   every criterion in one table.
-- `Decision`, `Consequences`: what the user decided and why; what follows for units,
-  interfaces, configuration and verification.
+- `Decision`, `Consequences`: what was decided, why, by whom and when, as the user
+  states it; what follows for units, interfaces, configuration and verification.
 - `links.concerns`: the `component-design` and `software-unit` items the decision
   shapes.
 

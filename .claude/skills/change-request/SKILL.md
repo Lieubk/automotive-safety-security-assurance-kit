@@ -110,7 +110,7 @@ does not change the affected items itself.
   implementation" in `references/lifecycle.md`: semantic checks by the agent
   `aspice-reviewer`, findings confirmed by the user, verdict and reviewers stated by the
   user, record written by `python tools/record.py review` with the checklist cited as
-  `change-request v1` and a result for every one of its checks. On `approved` ask to
+  `change-request v2` and a result for every one of its checks. On `approved` ask to
   set `verified`.
 
 ### 7. Close

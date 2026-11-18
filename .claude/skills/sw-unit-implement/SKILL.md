@@ -165,7 +165,7 @@ Report, in this order:
 6. Next, after every change to the code, in the order the unit verification strategy
    gives: `/sw-unit-verify` for a test of every designed function and for test and
    analysis runs of the present code; `/review` with the unit as subject, the checklist
-   `.claude/docs/checklists/software-unit-code.md` (cited as `software-unit-code v1`)
+   `.claude/docs/checklists/software-unit-code.md` (cited as `software-unit-code v2`)
    and the commit named. Only a review recorded with the code revision counts as a
    review of the code: its record stores the hash of every source file. A person
    gives the verdict.

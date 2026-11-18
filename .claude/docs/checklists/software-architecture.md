@@ -1,6 +1,6 @@
 # Software architecture review checklist
 
-Version 1. Applies to: `software-component`, `software-interface`, `architecture-view`
+Version 2. Applies to: `software-component`, `software-interface`, `architecture-view`
 of level `software`, and `design-decision` of level `software`. Supports: SWE.2.BP1,
 SWE.2.BP2, SWE.2.BP3, SWE.2.BP4, SWE.2.BP5, SWE.2.BP6, SWE.2.BP7, SWE.2.BP8.
 

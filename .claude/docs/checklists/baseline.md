@@ -1,6 +1,6 @@
 # Baseline review checklist
 
-Version 1. Applies to: `baseline`, `communication-record`. Supports: SUP.8.BP5,
+Version 2. Applies to: `baseline`, `communication-record`. Supports: SUP.8.BP5,
 SUP.8.BP6, SUP.8.BP7, SUP.8.BP8, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7, SWE.4.BP7.
 
 Kinds: `script` - a tool answers it; `semantic` - needs reading and judgement, a model
@@ -17,7 +17,7 @@ itself is reviewed with `.claude/docs/checklists/plan.md`. "The plan" below is t
 approved plan of kind `configuration-management`. For a baseline with an internal
 purpose only BSL-04 and BSL-10 to BSL-12 apply before, and BSL-20 to BSL-22 after.
 
-Where a person puts these checks on record, the checklist is cited as `baseline v1`,
+Where a person puts these checks on record, the checklist is cited as `baseline v2`,
 and the record carries a result for every check. A check that does not apply to this
 baseline (BSL-13 for a requirements freeze, the audit where the plan asks for none) is
 `not-applicable` with that reason as its note. A check that waits for something that

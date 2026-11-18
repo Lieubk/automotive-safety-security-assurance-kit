@@ -1,6 +1,6 @@
 # Software requirements review checklist
 
-Version 1. Applies to: `software-requirement`. Supports: SWE.1.BP1, SWE.1.BP2,
+Version 2. Applies to: `software-requirement`. Supports: SWE.1.BP1, SWE.1.BP2,
 SWE.1.BP3, SWE.1.BP4, SWE.1.BP5, SWE.1.BP6, SWE.1.BP7.
 
 Kinds: `script` - a tool answers it; `semantic` - needs reading and judgement, a model

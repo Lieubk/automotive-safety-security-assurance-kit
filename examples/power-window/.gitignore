@@ -1,2 +1,4 @@
 # Output of tests/unit/run_tests.py
 build/
+# Written by Python when run_analysis.py imports run_tests.py
+__pycache__/

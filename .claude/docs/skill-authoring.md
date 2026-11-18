@@ -111,8 +111,10 @@ Applies to: <item types>    Supports: <BP IDs>
 `Kind` is `script` (the trace engine or another tool answers it - name the rule or
 command), `semantic` (needs reading and judgement; a model may propose, a person
 confirms) or `accountable` (only a person can state it). A checklist has a version
-line at the top; review records cite the checklist with its version. From the first
-release on, a check that is added, removed or changes its meaning raises the version.
+line at the top; review records cite the checklist with its version. A check that is
+added, removed or changes its meaning raises the version: the record tool refuses a
+citation of another version, and the record keeps the hash of the checklist file it
+was given, so that two records citing one version are known to mean one text.
 
 A check answers from what the project holds: items, tool output, `project.yaml`. A
 check that refers to a rule of the project names where it is found - normally under
@@ -121,6 +123,12 @@ check that can only be answered from a document the toolkit has no place for sto
 every review that meets it: give the document a place first.
 
 ## Agents
+
+A pattern in `tools`, such as `Bash(python tools/traceability.py *)`, is not enforced by
+Claude Code: it grants the whole shell. The toolkit's `pre-shell` hook enforces it -
+inside an agent whose `tools` name the shell only through patterns, every other
+command, and every command with a shell operator, is refused. An agent that must not
+write lists `disallowedTools: Write, Edit, NotebookEdit` as well.
 
 `.claude/agents/<name>.md` front matter: `name`, `description` (when to use it),
 `tools`. An agent is a role with a boundary:

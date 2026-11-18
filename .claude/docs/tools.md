@@ -17,7 +17,7 @@ example is `examples/power-window`). They need Python 3 and PyYAML.
 | `impact <ID>` | see what a change to an item affects | every item that depends on it, by distance |
 | `audit <BL-ID>` | compare a baseline record with the items as they are now | one line per difference; exit code 1 when there are any |
 | `progress [--as-of DATE] [--json]` | compare the plan with what the items show: per work package its state read from the items it delivers, lateness, effort against estimate; milestones against baselines; open corrective actions | a tree of work packages, milestones, corrective actions, a summary line |
-| `diff <ID> [--since REV-ID]` | see what changed in an item since a review saw it; the reviewed text is taken from the git history by its content hash | a unified diff; "unchanged"; or NOT ASSESSED with exit code 2 when the reviewed text is in no commit |
+| `diff <ID> [--since REV-ID]` | see what changed in an item since a review saw it, as subject or as reference (an upstream item since the review of what builds on it); the reviewed text is taken from the git history by its content hash | a unified diff; "unchanged"; or NOT ASSESSED with exit code 2 when the reviewed text is in no commit |
 | `matrix` | produce the traceability tables for the link pairs in scope | Markdown tables |
 | `hash [ID ...]` | get content hashes | `ID hash` per line |
 | `hash --upstream ID ...` | prepare a review | `subject` and `references` blocks |
@@ -58,7 +58,7 @@ active. The summary line says how many.
 | `review --reconfirm --reviewer NAME --verdict approved\|rework [--findings FILE] ID ...` | record that items which did not change were compared with new versions of what they build on. No checklist and no check results; refused for an item whose present content has no approving review. The new versions are recorded as references. The code review of a unit is carried over as it was recorded, so code that changed since stays `SUSPECT`; it cannot be combined with `--item-under-test` |
 | `baseline --tag TAG --purpose TEXT` | write a baseline record: the approved plans and engineering items with hash and status (an internal purpose: all of them). Refused while the trace check reports errors, unless the purpose is an internal one |
 | `status-report --reported-by NAME --assessment FILE [--as-of DATE] [--period TEXT]` | write a project status report: the figures of `progress` and `check` for the date, and the reporter's assessment from the file, in their words. Refused without an assessment |
-| `communication --subject ID --audience WHO --channel TEXT [--agreement TEXT] [--sent-at DATE]` | record what was made known to whom, and what was agreed; `--subject` and `--audience` may repeat |
+| `communication --subject ID --audience WHO --channel TEXT [--agreement TEXT] [--sent-at DATE] [--practice BP]` | record what was made known to whom, and what was agreed; `--subject`, `--audience` and `--practice` may repeat. `--practice` names the communicate practices the record serves; `practices` counts it for those only |
 
 Input file formats are in the tool's help (`python tools/record.py --help` and the
 module text). Records are final when written and are never edited afterwards.

@@ -99,7 +99,7 @@ content hash:
 id: REV-0004
 type: review-record
 status: final
-checklist: software-requirements-review v1
+checklist: software-requirements v2
 reviewers: [A. Reviewer]
 verdict: approved
 subject:                       # the items this review approves

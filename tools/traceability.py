@@ -17,8 +17,8 @@ Commands
     audit ID           compare a baseline record with the items as they are now
     progress           work packages, milestones and corrective actions against the
                        plan as of a date (--as-of; default today); --json
-    diff ID            what changed in an item since a review saw it (--since REV-ID;
-                       default: its newest review), from the version-control history
+    diff ID            what changed in an item since a review saw it, as subject or as
+                       reference (--since REV-ID; default: the newest), from git
     practices [PROC]   per base practice of the processes in scope (or of one
                        process): the evidence the project holds and the findings
                        still open. The deterministic input of a process gate
@@ -1353,19 +1353,21 @@ def cmd_diff(project, args):
     if item is None:
         print("no such item: %s" % args.id)
         return 1
-    reviews = [r for r in project.of_type("review-record") if r.status == "final"
-               and any(isinstance(e, dict) and e.get("item") == item.id for e in as_list(r.front.get("subject")))]
+    def seen_in(record):
+        return next((str(e.get("hash")) for name in ("subject", "references") for e in as_list(record.front.get(name))
+                     if isinstance(e, dict) and e.get("item") == item.id), None)
+
+    reviews = [r for r in project.of_type("review-record") if r.status == "final" and seen_in(r)]
     if args.since:
         reviews = [r for r in reviews if r.id == args.since]
         if not reviews:
-            print("%s is not a final review record with %s as subject" % (args.since, item.id))
+            print("%s is not a final review record that lists %s as subject or reference" % (args.since, item.id))
             return 1
     if not reviews:
         print("no final review record has %s as subject: there is nothing to compare with" % item.id)
         return 1
     review = max(reviews, key=lambda r: record_number(r.id))
-    reviewed = next(str(e.get("hash")) for e in as_list(review.front.get("subject"))
-                    if isinstance(e, dict) and e.get("item") == item.id)
+    reviewed = seen_in(review)
     if reviewed == item.hash:
         print("%s is unchanged since %s (hash %s)" % (item.id, review.id, item.hash))
         return 0
@@ -1455,7 +1457,9 @@ def practice_rows(project, process_id=None):
                             for pair in link["pairs"] if ref in pair["supports"]})
             rules = sorted(r["id"] for r in schema["coverage"] if ref in r["supports"])
             held = [i for i in project.items.values() if i.type in types and project.live(i)
-                    and (i.type != "plan" or i.front.get("kind") in kinds or not kinds)]
+                    and (i.type != "plan" or i.front.get("kind") in kinds or not kinds)
+                    and (i.type != "communication-record" or not i.front.get("practices")
+                         or ref in map(str, as_list(i.front.get("practices"))))]
             if not types:                                 # evidenced by links or rules only: count what carries them
                 carriers = {i.id: i for role, link in schema["links"].items() for pair in link["pairs"]
                             if ref in pair["supports"] for i in project.of_type(pair["from"])

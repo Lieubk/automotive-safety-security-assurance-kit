@@ -188,6 +188,28 @@ class PostWrite(HookCase):
         self.assertEqual(self.feedback("README.md"), "")
 
 
+class AgentCommands(unittest.TestCase):
+    def shell(self, agent, command):
+        payload = {"tool_name": "Bash", "tool_input": {"command": command}}
+        if agent:
+            payload["agent_type"] = agent
+        code, out, err = run_hook("pre-shell", payload)
+        self.assertEqual(code, 0, err)
+        return json.loads(out)["hookSpecificOutput"]["permissionDecision"] if out else None
+
+    def test_an_agent_runs_the_commands_its_file_allows(self):
+        self.assertIsNone(self.shell("aspice-reviewer", "python tools/traceability.py --project p show SWR-0001"))
+
+    def test_an_agent_cannot_run_anything_else(self):
+        self.assertEqual(self.shell("aspice-reviewer", "python -c \"open('x.py', 'w').write('')\""), "deny")
+        self.assertEqual(self.shell("aspice-reviewer", "python tools/traceability.py check && python x.py"), "deny")
+        self.assertEqual(self.shell("aspice-reviewer", "python tools/traceability.py check > out.txt"), "deny")
+
+    def test_the_main_conversation_and_unknown_agents_are_not_restricted(self):
+        self.assertIsNone(self.shell(None, "python x.py"))
+        self.assertIsNone(self.shell("general-purpose", "python x.py"))
+
+
 class OtherEvents(unittest.TestCase):
     def test_session_start_reports_the_state(self):
         code, out, _ = run_hook("session-start", {})

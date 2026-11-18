@@ -7,8 +7,9 @@
                     change request names
     post-write      after Write or Edit: check the item that was just written and
                     hand structural findings and a stale approval back to the model
-    pre-shell       before a shell command: before `git commit`, run the leak scan
-                    in a repository that holds confidential sources
+    pre-shell       before a shell command: inside an agent of this toolkit, refuse a
+                    command its file does not allow; before `git commit`, run the
+                    leak scan in a repository that holds confidential sources
 
 The payload arrives as JSON on stdin (see the Claude Code hooks documentation).
 A refusal is JSON on stdout with exit code 0; an advisory is JSON as well. Without
@@ -17,6 +18,7 @@ because a check that cannot report that it did not run is not a check.
 
 Wired up in .claude/settings.json. Test: python -m unittest discover -s tools/tests
 """
+import fnmatch
 import io
 import json
 import re
@@ -191,8 +193,36 @@ def post_write(payload):
     return 0
 
 
+SHELL_OPERATORS = re.compile(r"[;&|`<>\n]|\$\(")
+
+
+def agent_commands(agent_type):
+    """The shell commands an agent of this toolkit may run, as patterns; None when it is not
+    one of ours or allows the shell without restriction.
+
+    Claude Code grants the whole Bash tool for an entry such as `Bash(python tools/x.py *)`
+    in an agent's `tools`; the pattern is enforced here."""
+    path = ROOT / ".claude" / "agents" / ("%s.md" % agent_type)
+    if not agent_type or not re.match(r"^[\w-]+$", str(agent_type)) or not path.is_file():
+        return None
+    head = re.match(r"\A---\n(.*?)\n---", path.read_text(encoding="utf-8").replace("\r\n", "\n"), re.S)
+    line = re.search(r"(?m)^tools:\s*(.+)$", head.group(1)) if head else None
+    if not line:
+        return None
+    tools = [t.strip() for t in re.split(r",(?![^(]*\))", line.group(1))]
+    if "Bash" in tools or "PowerShell" in tools:
+        return None
+    return [t[len("Bash("):-1] for t in tools if t.startswith("Bash(") and t.endswith(")")]
+
+
 def pre_shell(payload):
     command = str((payload.get("tool_input") or {}).get("command") or "")
+    allowed = agent_commands(payload.get("agent_type"))
+    if allowed is not None:
+        plain = command.strip()
+        if SHELL_OPERATORS.search(plain) or not any(fnmatch.fnmatchcase(plain, p) for p in allowed):
+            return deny("The agent %s may run only these commands, one at a time and without shell operators: "
+                        "%s. Ask the caller for anything else." % (payload.get("agent_type"), "; ".join(allowed) or "none"))
     if not re.search(r"\bgit\b[^|;&]*\bcommit\b", command):
         return 0
     if not (ROOT / ".confidential").is_dir():

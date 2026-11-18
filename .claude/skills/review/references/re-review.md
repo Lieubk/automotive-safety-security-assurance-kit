@@ -58,6 +58,12 @@ the code that was reviewed` on the unit. The unit item is unchanged and stays
 3. Because the commit was named, the record stores the hashes of the present source
    files; the `SUSPECT` line is gone.
 
+When the review of code finds defects, the order is: record the review as `rework`;
+correct the code (`/sw-unit-implement`); run the tests and the analysis again and record
+the runs (`/sw-unit-verify`); commit; review the corrected code against the earlier
+findings, with that commit named. Corrections made inside the sitting follow the same
+order before the record is written: the runs are of the code the record names.
+
 `COV-30` lines on the same unit say that the latest test run and analysis run describe
 the old code. They are not cleared by a review: `/sw-unit-verify` runs and records again.
 A review of code that has not been built, analysed and tested in this form is
@@ -112,9 +118,11 @@ link to it.
   review: then the subject changed, and it is a full review with its checklist.
 - Several unchanged items that build on the same change may share one reconfirmation,
   as long as the reviewers really compared each of them.
-- A reconfirmation rests on the earlier review of the same content. Where that review
-  was itself weak - recorded with outside criteria, or long ago - say so, and let the
-  reviewers choose a full review instead.
+- A reconfirmation rests on the earlier review of the same content; the tool prints each
+  record it rests on with its kind of criteria. Read them out to the user before
+  recording when one used outside criteria or was itself a reconfirmation - a
+  demonstration fixture is outside criteria - and let the reviewers choose a full
+  review instead. `practices` does not tell the difference.
 
 ### Outcome
 

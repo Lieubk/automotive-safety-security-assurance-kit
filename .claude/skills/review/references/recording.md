@@ -15,7 +15,7 @@ hand-over how many were rejected.
 Show the overview before asking anything:
 
 ```
-Review 2: SWR-0010, SWR-0011 - software-requirements v1 - independent pass: yes
+Review 2: SWR-0010, SWR-0011 - software-requirements v2 - independent pass: yes
 
 Script (check):      no finding on the subject
 Proposed (semantic):
@@ -185,6 +185,10 @@ The example is shortened; a real file has all 20 check IDs of that checklist.
   of plan. It is not a way around a check that is inconvenient.
 - `not-assessed` is honest and blocks approval. Do not leave out a check to avoid it,
   and do not turn it into `not-applicable`.
+- A check whose only finding lies in an item that is not a subject is `finding`, with
+  the problem report or query that records it named in the note, and no finding entry:
+  the tool refuses an entry on an item outside the review. It does not stand against
+  `approved`, because the problem is tracked against the item it lies in.
 - A semantic check that waits for an answer only a person can give - a question of the
   agent that the user cannot answer yet - is `not-assessed`, with the question in the
   note, unless the reviewers turn the question into a finding.
@@ -211,7 +215,7 @@ The example is shortened; a real file has all 20 check IDs of that checklist.
 ## The command
 
 ```
-python tools/record.py review --checklist "software-requirements v1" --reviewer "<name as the user stated it>" --verdict rework --findings build/review-findings.json --checks build/review-checks.json SWR-0010 SWR-0011
+python tools/record.py review --checklist "software-requirements v2" --reviewer "<name as the user stated it>" --verdict rework --findings build/review-findings.json --checks build/review-checks.json SWR-0010 SWR-0011
 ```
 
 `--project <dir>` goes before `review` when the project is not the current directory.
@@ -219,7 +223,7 @@ Repeat `--reviewer` for each person. When the code of the units was part of the 
 and only then, add `--item-under-test <commit>`:
 
 ```
-python tools/record.py review --checklist "software-unit-code v1" --reviewer "<name>" --verdict approved --checks build/review-checks.json --item-under-test c2dc5ca UNT-0002
+python tools/record.py review --checklist "software-unit-code v2" --reviewer "<name>" --verdict approved --checks build/review-checks.json --item-under-test c2dc5ca UNT-0002
 ```
 
 When the user named criteria from outside the toolkit because no checklist exists for

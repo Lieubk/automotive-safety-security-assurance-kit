@@ -20,10 +20,11 @@ Two limits to keep in mind and to say in the hand-over:
 - These practices ask that the affected parties share one understanding. They do not ask
   for a signature. A notice that reached the right roles is evidence; an agreement is
   recorded only when one was actually reached.
-- `python tools/traceability.py practices` counts every communication record for each
-  of these practices, because the schema cannot tell them apart. A record about the
-  requirements freeze says nothing about the design. Name per record which practice it
-  serves, from its subject and audience.
+- Name per record which practices it serves, from its subject and audience, with
+  `--practice` (repeatable): a mail to customer system engineering about the
+  requirements freeze serves SWE.1.BP8, not SWE.3.BP7. `practices` then counts the
+  record only for those; a record without `--practice` counts for every communicate
+  practice, which overstates the evidence.
 
 `COV-26` demands at least one final communication record for every baseline whose
 purpose is not internal, and names all communicate practices of the processes in
@@ -55,7 +56,7 @@ below and stop.
 A notification:
 
 ```
-python tools/record.py communication --subject BL-0001 --audience "software architect" --audience "software developers" --audience "customer system engineering" --channel "baseline notice by mail, with the status output"
+python tools/record.py communication --subject BL-0001 --audience "software architect" --audience "software developers" --audience "customer system engineering" --channel "baseline notice by mail, with the status output" --practice SWE.1.BP8
 ```
 
 A notification with an agreement:

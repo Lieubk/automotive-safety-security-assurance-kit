@@ -173,7 +173,7 @@ Report, in this order:
 3. Risks from the evaluation that have no owner or no decided measure yet.
 4. The remaining findings of the check that concern these items.
 5. Next: `/review` for the design items and decisions, a component design together
-   with its units, checklist `software-detailed-design v1`. Approval goes from the top
+   with its units, checklist `software-detailed-design v2`. Approval goes from the top
    down: everything a subject links to has to be approved or be a subject of the same
    review. Then `/baseline` to record the agreed design and who was informed,
    `/sw-unit-implement` for the approved units, and `/sw-unit-verify` to derive test

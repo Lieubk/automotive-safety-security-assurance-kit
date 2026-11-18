@@ -51,7 +51,7 @@ class RecordCase(unittest.TestCase):
 
 
 class Review(RecordCase):
-    def review(self, *extra, checklist="software-requirements v1", verdict="approved", ids=("SWR-0001",)):
+    def review(self, *extra, checklist="software-requirements v2", verdict="approved", ids=("SWR-0001",)):
         return self.record("review", "--checklist", checklist, "--reviewer", REVIEWER, "--verdict", verdict, *extra, *ids)
 
     def test_approval_under_a_toolkit_checklist_needs_a_result_for_every_check(self):
@@ -70,13 +70,19 @@ class Review(RecordCase):
         self.assertEqual(record["subject"][0]["item"], "SWR-0001")
 
     def test_the_title_of_the_checklist_is_accepted_as_citation(self):
-        code, out = self.review("--checks", self.all_checks(), checklist="Software requirements review v1")
+        code, out = self.review("--checks", self.all_checks(), checklist="Software requirements review v2")
         self.assertEqual(code, 0, out)
 
     def test_unknown_checklist_is_refused(self):
         code, out = self.review("--checks", self.all_checks(), checklist="my own list v1")
         self.assertEqual(code, 1)
         self.assertIn("cites no checklist of this toolkit", out)
+
+    def test_the_record_keeps_the_hash_of_the_checklist_applied(self):
+        code, out = self.review("--checks", self.all_checks())
+        self.assertEqual(code, 0, out)
+        record = self.front("records/reviews/" + self.records("records/reviews")[-1])
+        self.assertRegex(record["checklist_hash"], r"^[0-9a-f]{12}$")
 
     def test_wrong_version_is_refused(self):
         code, out = self.review("--checks", self.all_checks(), checklist="software-requirements v9")
@@ -308,6 +314,17 @@ class Baselines(RecordCase):
         self.assertIn("needs none", out)
         code, out = self.record("baseline", "--tag", "work-1", "--purpose", "working")
         self.assertEqual(code, 0, out)
+
+    def test_a_communication_record_counts_only_for_the_practices_it_names(self):
+        self.record("baseline", "--tag", "design-1", "--purpose", "design freeze")
+        code, out = self.record("communication", "--subject", "BL-0001", "--audience", "Customer", "--channel", "mail",
+                                "--practice", "SWE.1.BP8")
+        self.assertEqual(code, 0, out)
+        sys.path.insert(0, str(ROOT / "tools"))
+        from traceability import Project, practice_rows
+        rows = {r["practice"]: r for r in practice_rows(Project(self.project))}
+        self.assertEqual(rows["SWE.1.BP8"]["evidence"], 1)
+        self.assertEqual(rows["SWE.3.BP7"]["evidence"], 0)
 
     def test_communication_date_must_be_a_date(self):
         self.record("baseline", "--tag", "design-1", "--purpose", "design freeze")

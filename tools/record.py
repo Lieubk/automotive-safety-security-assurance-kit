@@ -343,7 +343,7 @@ def find_checklist(citation):
                 if found and heading:
                     sections.setdefault(heading, []).append(found.group(1))
             return {"file": path.name, "version": version.group(1) if version else None, "cited": cited.group(2),
-                    "checks": dict(rows), "sections": sections}
+                    "checks": dict(rows), "sections": sections, "hash": file_hash(path)}
     return None
 
 
@@ -371,6 +371,7 @@ def cmd_review(project, args):
         elif entry["result"] == "not-applicable" and not entry.get("note"):
             problems.append("check %s is not-applicable: the note must say why" % entry.get("check"))
     approving = args.verdict == "approved"
+    listed = None                                         # the toolkit checklist, when one is cited
 
     if args.reconfirm:
         # nothing in the subject changed: it is confirmed against the new versions of what it builds on
@@ -461,6 +462,7 @@ def cmd_review(project, args):
         "status": "final",
         "checklist": citation,
         "checklist_source": source,
+        "checklist_hash": listed["hash"] if listed else None,
         "reviewers": args.reviewer,
         "verdict": args.verdict,
         "reviewed_at": datetime.date.today().isoformat(),
@@ -468,6 +470,8 @@ def cmd_review(project, args):
         "references": [{"item": i, "hash": h} for i, h in sorted(references.items())],
         "findings": findings,
     }
+    if front["checklist_hash"] is None:
+        del front["checklist_hash"]
     if checks:
         front["checks"] = checks
     if args.reconfirm:
@@ -495,6 +499,9 @@ def cmd_review(project, args):
     path = write_item(project, "review-record", front)
     print("wrote %s: %s, %d items, %d references, %d findings"
           % (path, args.verdict, len(items), len(references), len(findings)))
+    for earlier in front.get("rests_on") or []:
+        basis = project.items[earlier].front
+        print("rests on %s: %s - %s" % (earlier, basis.get("checklist_source") or "toolkit", basis.get("checklist")))
     return 0
 
 
@@ -582,6 +589,8 @@ def cmd_communication(project, args):
     }
     if args.agreement:
         front["agreement"] = args.agreement
+    if args.practice:
+        front["practices"] = args.practice
     path = write_item(project, "communication-record", front)
     print("wrote %s: %s to %s" % (path, ", ".join(args.subject), ", ".join(args.audience)))
     return 0
@@ -627,6 +636,7 @@ def main():
     told.add_argument("--channel", required=True)
     told.add_argument("--agreement")
     told.add_argument("--sent-at", help="date it was sent, when not today")
+    told.add_argument("--practice", action="append", help="communicate practice the record serves, e.g. SWE.1.BP8")
     args = ap.parse_args()
     project = Project(args.project)
     commands = {"next-id": cmd_next_id, "test-run": cmd_test_run, "analysis-run": cmd_analysis_run,

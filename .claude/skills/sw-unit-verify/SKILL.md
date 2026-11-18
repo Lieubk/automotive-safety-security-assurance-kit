@@ -143,7 +143,7 @@ Follow the command sequence in `references/running-and-recording.md` exactly.
   findings as proposals and correct what the user accepts.
 - `/review` adds a named reviewer's verdict and the hashes of the unit design the test
   cases were compared with; a later design change shows as `SUSPECT`. It cites
-  `unit-test-specification v1` and needs a result for every check; before runs exist the
+  `unit-test-specification v2` and needs a result for every check; before runs exist the
   checks of the part on results are `not-applicable`.
 - Summarize as "Summary for the user" in `references/running-and-recording.md` says.
 

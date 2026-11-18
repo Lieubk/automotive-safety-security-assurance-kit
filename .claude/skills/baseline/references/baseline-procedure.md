@@ -183,7 +183,7 @@ record under a person's name, that person states the verdict and the tool writes
 review record whose subject is the baseline record:
 
 ```
-python tools/record.py review --checklist "baseline v1" --reviewer "<name as the user stated it>" --verdict approved --checks build/baseline-checks.json BL-0004
+python tools/record.py review --checklist "baseline v2" --reviewer "<name as the user stated it>" --verdict approved --checks build/baseline-checks.json BL-0004
 ```
 
 - The checks file is JSON, a list of entries with `check`, `result` and `note`, with a

@@ -295,8 +295,10 @@ Notes:
   decision shapes. The engine accepts an approved decision that concerns an item as
   the waiver for a lower ASIL (`COV-23`); such a decision documents the decomposition.
 - Every alternative is assessed against every criterion, including the one that lost.
-- `Decision` and `Consequences` are required before approval. The decision is taken
-  by the user; write into `Decision` what they decided and why, not what you prefer.
+- `Decision` and `Consequences` are required before approval. Ask who takes the
+  decision, in which role; write into `Decision` what was decided, why, by whom and on
+  which date, as the user states it - not what you prefer. "The user" is not an answer
+  a reviewer can check.
 
 ## Query to the source of an input
 
@@ -326,7 +328,8 @@ without a pulse; a start that takes longer would be taken for the end stop.
 
 Notes:
 
-- `to` and `asked_at` are always required, and so is the `Question` section. Ask one
+- `to` and the `Question` section are always required; `asked_at` from the day the
+  question is put to the source - a query written down before it is sent leaves it out. Ask one
   question per item, say what depends on the answer, and name the items by ID.
 - `about` links every item the question is about. `answered_by` and the `Answer`
   section are added when the answer exists; the user states who answered, and when.

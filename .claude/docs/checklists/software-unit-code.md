@@ -1,6 +1,6 @@
 # Software unit code review checklist
 
-Version 1. Applies to: the code of a `software-unit` (the files in its `source_files`),
+Version 2. Applies to: the code of a `software-unit` (the files in its `source_files`),
 reviewed against the design the unit item states. Supports: SWE.3.BP5, SWE.3.BP6,
 SWE.3.BP8.
 
@@ -20,8 +20,8 @@ every later change of the code; the check asks for it with `CONSISTENCY` or `SUS
 on the unit. The unit item itself stays approved throughout: registering code does not
 change its content.
 
-The record cites this checklist as `software-unit-code v1`, or by its title as
-`software unit code review v1`. An approved verdict needs a result for every check:
+The record cites this checklist as `software-unit-code v2`, or by its title as
+`software unit code review v2`. An approved verdict needs a result for every check:
 `pass`, `finding`, or `not-applicable` with a note that says why (SUC-40 to SUC-45 for
 a unit without an ASIL, SUC-51 for a handwritten unit, SUC-39 when there is no
 deviation, the reading checks for generated or third-party code). A check that cannot

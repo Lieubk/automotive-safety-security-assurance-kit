@@ -466,6 +466,7 @@ types:
       reviewed_at: {required: optional}
       checks: {required: optional, note: "list of {check: <checklist ID>, result: pass | finding | not-applicable | not-assessed, note}: what each check of the checklist gave, including the answers to accountable checks"}
       checklist_source: {values: [toolkit, external, reconfirmation], required: optional, note: "toolkit: a checklist under .claude/docs/checklists at the cited version; external: criteria from outside the toolkit, named in `checklist`; reconfirmation: unchanged items confirmed against new versions of what they build on"}
+      checklist_hash: {required: optional, note: "file hash of the toolkit checklist that was applied; written by tooling"}
       item_under_test: {required: optional, note: "commit, tag or baseline ID of the code that was reviewed"}
       sources: {required: optional, note: "list of {file, hash} of the source files of the units reviewed; written by tooling"}
       rests_on: {required: optional, note: "reconfirmation only: the earlier approving review records of the subjects, whose checks the reconfirmation does not repeat"}
@@ -484,6 +485,7 @@ types:
       channel: {required: always, note: "how they were informed"}
       sent_at: {required: always}
       agreement: {required: optional, note: "what was agreed and by whom, when the record documents an agreement rather than a notification"}
+      practices: {required: optional, note: "the communicate practices the record serves, for example [SWE.1.BP8]; without it, `practices` counts the record for every one"}
 
   query:
     prefix: QRY

@@ -187,9 +187,9 @@ The rules are those of `/review`: people give the verdict, the tool writes the r
    on the present text. The tool refuses verdict approved when a check has no result
    or is `not-assessed`. Findings go into a second file in the format the help text of
    the tool gives.
-6. Ask: "May I record this review of CR-nnnn: checklist change-request v1, reviewers
+6. Ask: "May I record this review of CR-nnnn: checklist change-request v2, reviewers
    <names>, verdict <verdict>, N findings?" Then run
-   `python tools/record.py review --checklist "change-request v1" --reviewer "<name>" --verdict <verdict> --checks <file> --item-under-test <commit> <CR-ID>`,
+   `python tools/record.py review --checklist "change-request v2" --reviewer "<name>" --verdict <verdict> --checks <file> --item-under-test <commit> <CR-ID>`,
    with `--findings <file>` when there are findings and one `--reviewer` per person.
    `<commit>` is the commit that holds the change. The checklist is cited by its file
    name and version, exactly as shown; the tool reads the check IDs from that file. It

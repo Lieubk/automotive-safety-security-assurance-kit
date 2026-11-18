@@ -65,7 +65,7 @@ assurance plan says how independent that person must be. The agent is never that
 - Imported items: `.claude/docs/checklists/input-acceptance.md`. Otherwise the checklist
   whose `Applies to:` sentence names the item type (Grep it in
   `.claude/docs/checklists/`). Read it. Cite it as `"<file name without .md> v<N>"`,
-  with the number of its version line: `software-requirements v1`.
+  with the number of its version line: `software-requirements v2`.
 - No checklist for the type: say "Semantic checks: NOT ASSESSED - the toolkit has no
   checklist for <type>". Do not write one on the spot. Ask which criteria the
   reviewers use; the record names them and is written with `--external-criteria`.
