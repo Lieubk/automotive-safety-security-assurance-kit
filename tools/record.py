@@ -11,11 +11,16 @@ Commands
         print the next free ID for an item type, for example `next-id review-record`
 
     test-run --level LEVEL --results FILE --item-under-test REF --environment NAME
-             [--deviation UNIT=TEXT ...]
+             [--deviation UNIT=TEXT ...] [--build BLD-ID] [--selection TEXT] [--executed-at TIME]
         final test-run record from a results file (JSON):
         {"executed_at": "<ISO time>", "compiler": "...",            (compiler optional)
-         "results": [{"test": "UT-0001", "verdict": "passed", "evidence": "<path>"}],
+         "results": [{"test": "UT-0001", "verdict": "passed", "evidence": "<path>",
+                      "reason": "<why not-run or blocked>"}],
          "coverage": [{"file": "src/a.c", "statement_percent": 100.0, "branch_percent": 97.5}]}
+        or from a JUnit XML report (a file ending in .xml), as test benches write
+        them: a <testcase> is matched to a test case by the ID in its name or
+        class name; <failure> and <error> give failed, <skipped> not-run with its
+        message as the reason; the report itself is kept as evidence.
         `coverage` is optional: a list per source file (attributed to the owning
         unit; every key ending in `_percent` is kept), or a text saying why it
         was not measured. --deviation records, for one unit, the reason a person
@@ -24,7 +29,31 @@ Commands
         change of the code after the run can be seen.
         Every test named must be a test case of that level, and every approved
         test case of that level must appear; otherwise nothing is written.
+        --build names the build record of the integrated software that was
+        tested; it must be final, have succeeded and be built from the item under
+        test. A software-integration run needs it: then the approved test cases
+        of the build's step must appear, cases of earlier steps may appear as
+        regression, and cases of later steps may not. A software-qualification
+        run needs a build of the last step once an approved software-integration
+        plan exists. --selection says how the cases were chosen (all, the
+        regression set, the impact of a change), in the strategy's terms.
         Evidence files are copied to verification/evidence/<record id>/.
+
+    build --step NAME --manifest FILE --item-under-test REF
+        final build record of one step of the approved software-integration plan,
+        from the manifest (JSON) the project's build writes:
+        {"executed_at": "<ISO time>", "tool": "<build tool and compiler, versions>",
+         "result": "succeeded" | "failed",
+         "files": ["src/a.c", ...],                     (project sources built)
+         "delivered": [{"component": "CMP-0005", "version": "...", "files": [...]}],
+                                                        (optional: integrated as received)
+         "doubles": [{"component": "CMP-0006", "file": "tests/x/double.c"}],
+                                                        (optional: stand-ins)
+         "evidence": "<path of the build log>"}
+        Every built file must belong to a live software unit (or match the
+        generated or third-party patterns of project.yaml); the units are grouped
+        by their component. The record stores a hash of every file built, so a
+        change after the build can be seen. A failed build is recorded as well.
 
     analysis-run --results FILE --item-under-test REF
         final static-analysis-run record from a results file (JSON):
@@ -103,6 +132,7 @@ Requires PyYAML.
 """
 import argparse
 import datetime
+import fnmatch
 import json
 import re
 import shutil
@@ -169,12 +199,79 @@ def cmd_next_id(project, args):
     return 0
 
 
+TEST_ID = re.compile(r"\b([A-Z]+-\d{4,})\b")
+
+
+def junit_results(project, path):
+    """The results of a JUnit XML report (as most test benches write one) in the form of a results file.
+    A test case is recognised by its ID in the name or class name of the <testcase>."""
+    import xml.etree.ElementTree as ElementTree
+    root = ElementTree.parse(str(path)).getroot()
+    suites = [root] if root.tag == "testsuite" else root.iter("testsuite")
+    try:
+        evidence = path.resolve().relative_to(project.root).as_posix()
+    except ValueError:
+        evidence = str(path.resolve())
+    results, stamps = [], []
+    for suite in suites:
+        if suite.get("timestamp"):
+            stamps.append(suite.get("timestamp"))
+        for case in suite.iter("testcase"):
+            names = " ".join(filter(None, (case.get("name"), case.get("classname"))))
+            ids = TEST_ID.findall(names)
+            row = {"test": ids[0] if ids else names, "verdict": "passed", "evidence": evidence}
+            failed = case.find("failure") if case.find("failure") is not None else case.find("error")
+            skipped = case.find("skipped")
+            if failed is not None:
+                row["verdict"] = "failed"
+            elif skipped is not None:
+                row["verdict"] = "not-run"
+                reason = (skipped.get("message") or skipped.text or "").strip()
+                if reason:
+                    row["reason"] = reason
+            results.append(row)
+    return {"executed_at": min(stamps) if stamps else None, "results": results}
+
+
 def cmd_test_run(project, args):
     levels = {level: type_name for type_name, (_, level) in TEST_TYPES.items()}
     if args.level not in levels:
         return stop(["unknown level %s; one of %s" % (args.level, sorted(levels))])
-    data = json.loads(Path(args.results).read_text(encoding="utf-8"))
+    source = Path(args.results)
+    data = junit_results(project, source) if source.suffix.lower() == ".xml" \
+        else json.loads(source.read_text(encoding="utf-8"))
+    if args.executed_at:
+        data["executed_at"] = args.executed_at
+    if not data.get("executed_at"):
+        return stop(["the results give no time of execution; pass the time the tests ran with --executed-at"])
     cases = {i.id: i for i in project.of_type(levels[args.level])}
+    build, required, allowed = None, (lambda case: True), (lambda case: True)
+    steps = [str(s.get("name")) for s in project.integration_steps()]
+    if args.build:
+        build = project.items.get(args.build)
+        if build is None or build.type != "build-record" or build.status != "final":
+            return stop(["%s is not a final build record" % args.build])
+        if build.front.get("result") != "succeeded":
+            return stop(["%s records a build that failed: nothing can have been tested on it" % build.id])
+        if str(build.front.get("item_under_test")) != args.item_under_test:
+            return stop(["%s was built from %s, not from %s" % (build.id, build.front.get("item_under_test"),
+                                                                 args.item_under_test)])
+        step = str(build.front.get("step"))
+        if step not in steps:
+            return stop(["%s carries out step '%s', which the approved software-integration plan does not have"
+                         % (build.id, step)])
+        if args.level == "software-integration":
+            done = steps[:steps.index(step) + 1]
+            required = lambda case: str(case.front.get("step")) == step               # noqa: E731
+            allowed = lambda case: str(case.front.get("step")) in done                # noqa: E731
+        elif args.level == "software-qualification" and step != steps[-1]:
+            return stop(["%s is a build of step '%s'; the software is qualified on a build of the last step '%s'"
+                         % (build.id, step, steps[-1])])
+    elif args.level == "software-integration":
+        return stop(["a software integration run needs --build: the build record of the integration step tested"])
+    elif args.level == "software-qualification" and steps:
+        return stop(["the project has an approved software-integration plan: name the build of its last step "
+                     "that was tested with --build"])
     problems, results = [], []
     for entry in data.get("results", []):
         test, verdict = entry.get("test"), entry.get("verdict")
@@ -182,13 +279,16 @@ def cmd_test_run(project, args):
             problems.append("%s is not a %s item" % (test, levels[args.level]))
         elif verdict not in VERDICTS:
             problems.append("%s has verdict %r; one of %s" % (test, verdict, sorted(VERDICTS)))
+        elif not allowed(cases[test]):
+            problems.append("%s belongs to step '%s', which comes after the step of %s: what it tests is not "
+                            "in the build" % (test, cases[test].front.get("step"), build.id))
         else:
             row = {"test": test, "verdict": verdict}
             row.update({k: entry[k] for k in ("evidence", "reason") if entry.get(k)})
             results.append(row)
     reported = {r["test"] for r in results}
     problems += ["approved test case %s has no result in the file" % c.id
-                 for c in cases.values() if c.status == "approved" and c.id not in reported]
+                 for c in cases.values() if c.status == "approved" and required(c) and c.id not in reported]
     if problems:
         return stop(problems)
     coverage = data.get("coverage")
@@ -227,6 +327,10 @@ def cmd_test_run(project, args):
         "executed_at": data.get("executed_at"),
         "results": sorted(results, key=lambda r: r["test"]),
     }
+    if build is not None:
+        front["build"] = build.id
+    if args.selection:
+        front["selection"] = args.selection
     if coverage:
         front["coverage"] = coverage       # a list per unit, or the reason it was not measured
     scripts = [str(cases[r["test"]].front.get("script") or "").partition("::")[0] for r in results]
@@ -234,6 +338,86 @@ def cmd_test_run(project, args):
     path = write_item(project, "test-run", front)
     counts = {v: sum(1 for r in results if r["verdict"] == v) for v in sorted(VERDICTS)}
     print("wrote %s: %s" % (path, ", ".join("%d %s" % (n, v) for v, n in counts.items() if n)))
+    return 0
+
+
+def cmd_build(project, args):
+    plan = project.integration_plan()
+    if plan is None:
+        return stop(["no approved software-integration plan: the steps a build carries out are defined there"])
+    steps = [str(s.get("name")) for s in project.integration_steps(plan)]
+    if args.step not in steps:
+        return stop(["%s has no step '%s'; its steps: %s" % (plan.id, args.step, ", ".join(steps))])
+    data = json.loads(Path(args.manifest).read_text(encoding="utf-8"))
+    problems = ["the manifest gives no %s" % key for key in ("executed_at", "tool") if not data.get(key)]
+    if data.get("result") not in ("succeeded", "failed"):
+        problems.append("the manifest gives result %r; one of succeeded, failed" % data.get("result"))
+    paths = project.config.get("paths") or {}
+    exempt = trace.as_list(paths.get("generated")) + trace.as_list(paths.get("third_party"))
+    owner = {Path(str(f)).as_posix(): u for u in project.of_type("software-unit") if project.live(u)
+             for f in u.front.get("source_files") or []}
+    contents, built = {}, []
+    for name in (Path(str(f)).as_posix() for f in data.get("files", [])):
+        built.append(name)
+        if name in owner:
+            unit = owner[name]
+            parents = unit.targets("part_of")
+            if not parents:
+                problems.append("%s belongs to %s, which is part of no component" % (name, unit.id))
+                continue
+            entry = contents.setdefault(parents[0][0], {"component": parents[0][0], "units": []})
+            if unit.id not in entry["units"]:
+                entry["units"].append(unit.id)
+        elif not any(fnmatch.fnmatch(name, pattern) for pattern in exempt):
+            problems.append("built file %s belongs to no software unit; code of a component integrated as received "
+                            "is listed under 'delivered' with the component and its version" % name)
+    for entry in data.get("delivered", []):
+        comp = project.items.get(str(entry.get("component")))
+        if comp is None or comp.type != "software-component":
+            problems.append("delivered names %s, which is not a software component" % entry.get("component"))
+        elif not entry.get("version"):
+            problems.append("delivered %s needs the version that was integrated" % comp.id)
+        elif comp.id in contents:
+            problems.append("%s is listed as delivered and has units built from the project's sources" % comp.id)
+        else:
+            contents[comp.id] = {"component": comp.id, "delivered": str(entry["version"])}
+            built += [Path(str(f)).as_posix() for f in entry.get("files", [])]
+    doubles = []
+    for entry in data.get("doubles", []):
+        comp = project.items.get(str(entry.get("component")))
+        if comp is None or comp.type != "software-component" or not entry.get("file"):
+            problems.append("a double needs the software component it stands for and its file: %s" % entry)
+        else:
+            doubles.append({"component": comp.id, "file": Path(str(entry["file"])).as_posix()})
+    problems += ["built file %s does not exist" % f for f in built + [d["file"] for d in doubles]
+                 if not (project.root / f).is_file()]
+    if problems:
+        return stop(problems)
+    record_id = next_id(project, "build-record")
+    front = {
+        "id": record_id,
+        "type": "build-record",
+        "status": "final",
+        "step": args.step,
+        "item_under_test": args.item_under_test,
+        "tool": data["tool"],
+        "executed_at": data["executed_at"],
+        "result": data["result"],
+        "contents": [dict(contents[c], units=sorted(contents[c]["units"])) if "units" in contents[c] else contents[c]
+                     for c in sorted(contents)],
+    }
+    if doubles:
+        front["doubles"] = sorted(doubles, key=lambda d: (d["component"], d["file"]))
+    front["sources"] = source_hashes(project, built + [d["file"] for d in doubles])
+    if data.get("evidence"):
+        front["evidence"] = keep_evidence(project, record_id, data["evidence"])
+    path = write_item(project, "build-record", front)
+    expected = project.integrated_up_to(project.integration_steps(plan), steps.index(args.step))
+    absent = [c for c in expected if c not in contents]
+    print("wrote %s: step '%s', %s, %d components (%s)" % (path, args.step, data["result"], len(contents),
+                                                             ", ".join(sorted(contents))))
+    if absent:
+        print("not in this build, although the step integrates them: %s" % ", ".join(absent))
     return 0
 
 
@@ -607,6 +791,13 @@ def main():
     run.add_argument("--item-under-test", required=True)
     run.add_argument("--environment", required=True)
     run.add_argument("--deviation", action="append", metavar="UNIT=TEXT")
+    run.add_argument("--build", help="build record of the integrated software that was tested")
+    run.add_argument("--selection", help="how the test cases were chosen, in the terms of the test strategy")
+    run.add_argument("--executed-at", help="time the tests ran, when the results file does not give it")
+    built = sub.add_parser("build")
+    built.add_argument("--step", required=True)
+    built.add_argument("--manifest", required=True)
+    built.add_argument("--item-under-test", required=True)
     analysis = sub.add_parser("analysis-run")
     analysis.add_argument("--results", required=True)
     analysis.add_argument("--item-under-test", required=True)
@@ -641,7 +832,7 @@ def main():
     project = Project(args.project)
     commands = {"next-id": cmd_next_id, "test-run": cmd_test_run, "analysis-run": cmd_analysis_run,
                 "review": cmd_review, "baseline": cmd_baseline, "communication": cmd_communication,
-                "status-report": cmd_status_report}
+                "status-report": cmd_status_report, "build": cmd_build}
     return commands[args.command](project, args)
 
 

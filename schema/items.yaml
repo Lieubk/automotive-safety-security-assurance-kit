@@ -130,6 +130,10 @@ structures:
     keys: [estimate, planned_finish, skill, description]
     dates: [planned_finish]
     note: "estimate in person-days; skill names what the activity needs that the owner must bring (MAN.3.BP6)"
+  integration-steps:               # plan.integration_steps when kind is software-integration
+    mandatory: [name, components]
+    keys: [doubles, environment, description]
+    note: "the steps in the order they are carried out. components: the software components added in the step (a composition stands for the components inside it); doubles: components a test double stands in for in the step. A step contains everything added up to it; a component that is never integrated by this project is a double of the last step, and Scope says who integrates it"
   progress:                        # work-package.progress - tracking, not plan: excluded from the content hash
     shape: mapping
     mandatory: []
@@ -345,6 +349,7 @@ types:
       kind: {values: [project, unit-verification, software-integration, software-qualification-test, system-integration, system-qualification-test, configuration-management, quality-assurance, problem-resolution, change-request-management], required: always}
       milestones: {structure: milestones, required: optional, note: "project plans: the milestones of the life cycle, each with its date and the baseline purpose that marks it"}
       coverage_targets: {required: optional, note: "unit-verification plans: structural coverage a unit must reach, per ASIL, as {<ASIL>: {statement_percent, branch_percent, mcdc_percent}} with any subset of the metrics; an ASIL without an entry has no target"}
+      integration_steps: {structure: integration-steps, required: optional, note: "software-integration plans: the integration steps in order (conditions)"}
     sections:
       Scope: before-review         # what the plan covers and what it leaves to others
       Approach: before-review      # methods, their order, and how they depend on ASIL
@@ -389,7 +394,9 @@ types:
     folder: verification/software-integration
     lifecycle: engineering
     supports: [SWE.5.BP3, SWE.5.BP5, "08-50"]
-    attributes: {use: [common, test-case]}
+    attributes:
+      use: [common, test-case]
+      step: {required: before-review, note: "name of the integration step of the software-integration plan whose build the case is run on first; later builds may repeat it as regression"}
     sections: {Preconditions: optional, Steps: before-review, Expected result: before-review}
 
   software-qualification-test:
@@ -432,6 +439,27 @@ types:
       results: {required: always, note: "list of {test: <test case ID>, verdict: passed | failed | blocked | not-run, evidence: <report path>, reason: <why blocked or not run>}"}
       coverage: {required: optional, note: "unit level: list of {unit, file, statement_percent, branch_percent, mcdc_percent, deviation} taken from the coverage report, or a text saying why coverage was not measured; deviation carries the accepted reason for a figure below target"}
       sources: {required: optional, note: "list of {file, hash} of the unit sources and test files at the time of the run; written by tooling"}
+      build: {required: optional, note: "software-integration and software-qualification levels: the build record of the integrated software that was tested"}
+      selection: {required: optional, note: "how the test cases of the run were chosen, in the terms of the test strategy (all, regression set, impact of a change)"}
+
+  build-record:                    # written by tooling from the manifest a build writes
+    prefix: BLD
+    folder: verification/builds
+    lifecycle: record
+    supports: [SWE.5.BP4, "01-50", "17-02"]
+    attributes:
+      id: {required: always}
+      type: {required: always}
+      status: {required: always}
+      step: {required: always, note: "the integration step of the software-integration plan the build carries out"}
+      item_under_test: {required: always, note: "commit or tag the build was made from"}
+      tool: {required: always, note: "build tool and compiler, with versions"}
+      executed_at: {required: always}
+      result: {values: [succeeded, failed], required: always}
+      contents: {required: always, note: "list of {component, units} or {component, delivered}: what was integrated, per software component - the units built from the project's sources, or the version of an item integrated as received; generated"}
+      doubles: {required: optional, note: "list of {component, file}: test doubles that stood in for components not integrated in the step"}
+      sources: {required: always, note: "list of {file, hash} of every file built, doubles included; written by tooling"}
+      evidence: {required: optional, note: "path of the kept build log"}
 
   static-analysis-run:             # written by tooling from analyser reports
     prefix: SAR
@@ -604,6 +632,7 @@ conditions:
   - {types: [stakeholder-requirement], when: {assessment: [accepted-with-deviation, rejected, needs-clarification]}, attributes: [agreement], stage: before-approval}
   - {types: [software-component], when: {origin: [supplied, reused]}, attributes: [supplier], stage: before-review}
   - {types: [plan], when: {kind: [project]}, attributes: [milestones], structure: milestones, sections: [Feasibility, Interfaces and commitments, Reporting], stage: before-review}
+  - {types: [plan], when: {kind: [software-integration]}, attributes: [integration_steps], structure: integration-steps, stage: before-review}
   - {types: [software-interface], when: {kind: [sender-receiver, mode-switch, parameter, non-volatile-data]}, attributes: [elements], stage: before-review}
   - {types: [software-interface], when: {kind: [client-server, function-call]}, attributes: [operations], stage: before-review}
   - {types: [architecture-view], when: {kind: [context, structure, state-machine, sequence]}, sections: [Diagram], stage: before-review}
@@ -704,6 +733,9 @@ links:
 
 # Links that live inside records rather than as link attributes:
 #   test-run.results[].test          test result -> test case
+#   test-run.build                   test run -> build record of the integrated software tested
+#   build-record.contents            build -> software components and units integrated
+#   software-integration-test.step   test case -> integration step of the software-integration plan
 #   static-analysis-run.results      verification result -> software unit
 #   review-record.subject[].item     review -> reviewed item at a content hash
 #   baseline.items[].item            baseline -> item at a content hash
@@ -737,7 +769,7 @@ coverage:
   - {id: COV-15, subject: system-interface, expect: "at least one system-integration-test verifies it", waiver: "none", supports: [SYS.4.BP7]}
   - {id: COV-16, subject: system-requirement, expect: "verification_method test -> at least one system-qualification-test verifies it; otherwise a final review-record covers it", waiver: "none", supports: [SYS.5.BP5]}
   - {id: COV-17, subject: test-case, expect: "at least one verifies link, to an item that is not rejected or obsolete", waiver: "none", supports: [SWE.4.BP5, SWE.5.BP7, SWE.6.BP5, SYS.4.BP7, SYS.5.BP5]}
-  - {id: COV-18, subject: test-case, expect: "a verdict in the latest final test-run of its level for the baseline under assessment", waiver: "recorded as not-run with a reason accepted in the test summary", supports: [SWE.4.BP5, SWE.5.BP7, SWE.6.BP5, SYS.4.BP7, SYS.5.BP5]}
+  - {id: COV-18, subject: test-case, expect: "a verdict in the latest final test-run of its level for the baseline under assessment; for a software-integration-test, in the latest final run on a build of its step", waiver: "recorded as not-run with a reason accepted in the test summary", supports: [SWE.4.BP5, SWE.5.BP7, SWE.6.BP5, SYS.4.BP7, SYS.5.BP5]}
   - {id: COV-19, subject: any-engineering-item, expect: "a final review-record with verdict approved covers the current content hash and all its findings are closed", waiver: "none", supports: [SUP.1.BP2, SYS.2.BP7, SYS.3.BP7, SYS.4.BP8, SYS.5.BP6, SWE.1.BP7, SWE.2.BP8, SWE.3.BP6, SWE.4.BP6, SWE.5.BP8, SWE.6.BP6]}
   - {id: COV-20, subject: change-request, expect: "from state analysed on: at least one affects link", waiver: "none", supports: [SUP.10.BP8]}
   - {id: COV-21, subject: software-interface, expect: "provided by a component with origin developed -> at least one software-unit of that component realizes it", waiver: "none", supports: [SWE.3.BP2, SWE.3.BP5]}
@@ -753,6 +785,10 @@ coverage:
   - {id: COV-32, subject: any-engineering-item, expect: "every live engineering item of a process in scope, other than imported items and work packages, is delivered by a live work package", waiver: "none", supports: [MAN.3.BP4, MAN.3.BP9]}
   - {id: COV-33, subject: project, expect: "live work packages exist for engineering, for management and for support work", waiver: "none", supports: [MAN.3.BP4]}
   - {id: COV-34, subject: work-package, expect: "planned finish not before planned start, not after the finish of the package it is part of, and not before the finish of a package it depends on plus nothing; activities finish within the package", waiver: "none", supports: [MAN.3.BP8, MAN.3.BP9]}
+  - {id: COV-35, subject: project, expect: "the approved software-integration plan integrates every live software component other than a composition in exactly one step, or names it as a double of its last step; every component a step names exists and is live, and step names are unique", waiver: "none", supports: [SWE.5.BP1]}
+  - {id: COV-36, subject: project, expect: "for every step of the approved software-integration plan, the latest final build record of that step succeeded, contains every component integrated up to that step - a developed component with each of its live units that has code - and recorded every file it built as it is now", waiver: "none; while no unit of the step has code the finding is pending", supports: [SWE.5.BP4]}
+  - {id: COV-37, subject: software-integration-test, expect: "names a step of the approved software-integration plan; every step of that plan has at least one live software-integration-test", waiver: "none", supports: [SWE.5.BP3, SWE.5.BP5]}
+  - {id: COV-38, subject: test-run, expect: "the latest final run of level software-integration of each step, and the latest final run of level software-qualification, name the latest final successful build of that step (for qualification: of the last step), made from the item under test of the run", waiver: "software-qualification: no approved software-integration plan exists, because the integrated software comes from outside the scope", supports: [SWE.5.BP6, SWE.6.BP4]}
   - {id: COV-26, subject: baseline, expect: "at least one final communication-record names the baseline as subject", waiver: "baseline purpose marked internal in the project configuration", supports: [SYS.2.BP8, SYS.3.BP8, SYS.4.BP9, SYS.5.BP7, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7, SWE.4.BP7, SWE.5.BP9, SWE.6.BP7]}
 
 # ---------------------------------------------------------------------------

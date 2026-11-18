@@ -33,7 +33,7 @@ BUILT_IN_AGENTS = {"general-purpose", "Explore", "Plan"}
 MAX_LINES = 200
 TRACE_COMMANDS = {"check", "matrix", "show", "impact", "hash", "status", "list", "audit", "practices", "diff",
                   "progress"}
-RECORD_COMMANDS = {"next-id", "test-run", "analysis-run", "review", "baseline", "communication", "status-report"}
+RECORD_COMMANDS = {"next-id", "test-run", "analysis-run", "review", "baseline", "communication", "status-report", "build"}
 
 
 def front_matter(path, errors):

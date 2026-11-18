@@ -874,5 +874,162 @@ class Scope(Case):
         self.assertIn(("COV-07", "SWR-0001"), fixture.rules("info"))
 
 
+INTEGRATION_SCOPE = SCOPE + ["SWE.5", "SWE.6"]
+INTEGRATION_FILES = {"tests/test_integration.c": "static void test_SIT_0001(void)\n{\n}\n",
+                     "tests/test_qualification.c": "static void test_SQT_0001(void)\n{\n}\n"}
+
+
+def integration_items():
+    """The base thread, integrated in one step, with a passed integration and qualification test."""
+    items = base_items()
+    plan_sections = {"Scope": "All components.", "Approach": "Step by step.", "Criteria": "All pass.",
+                     "Environment and tools": "Host.", "Responsibilities": "Tester."}
+    case = {"status": "approved", "asil": "B", "execution": "automated", "regression": True}
+    steps_text = {"Steps": "Run the step.", "Expected result": "The state is reported."}
+    items.update({
+        "PLN-0003": ({"type": "plan", "title": "Software integration strategy", "status": "approved",
+                      "kind": "software-integration",
+                      "integration_steps": [{"name": "detection", "components": ["CMP-0001"], "environment": "host"}]},
+                     plan_sections),
+        "PLN-0004": ({"type": "plan", "title": "Software qualification test strategy", "status": "approved",
+                      "kind": "software-qualification-test"}, plan_sections),
+        "SIT-0001": ({"type": "software-integration-test", "title": "Obstacle state is passed on", **case,
+                      "script": "tests/test_integration.c::test_SIT_0001", "environment": "host", "step": "detection",
+                      "links": {"verifies": ["IFC-0001"]}}, steps_text),
+        "SQT-0001": ({"type": "software-qualification-test", "title": "Obstacle detected in time", **case,
+                      "script": "tests/test_qualification.c::test_SQT_0001", "environment": "software-in-the-loop",
+                      "links": {"verifies": ["SWR-0001"]}}, steps_text),
+        "BLD-0001": ({"type": "build-record", "status": "final", "step": "detection", "item_under_test": "abc123",
+                      "tool": "gcc 13", "executed_at": "2026-01-02T09:00:00", "result": "succeeded",
+                      "contents": [{"component": "CMP-0002", "units": ["UNT-0001"]}], "sources": "auto"}, {}),
+        "RUN-0002": ({"type": "test-run", "status": "final", "level": "software-integration", "item_under_test": "abc123",
+                      "environment": "host", "executed_at": "2026-01-02T11:00:00", "build": "BLD-0001",
+                      "results": [{"test": "SIT-0001", "verdict": "passed"}]}, {}),
+        "RUN-0003": ({"type": "test-run", "status": "final", "level": "software-qualification",
+                      "item_under_test": "abc123", "environment": "software-in-the-loop",
+                      "executed_at": "2026-01-02T12:00:00", "build": "BLD-0001",
+                      "results": [{"test": "SQT-0001", "verdict": "passed"}]}, {}),
+    })
+    return items
+
+
+SUPPLIED = ({"type": "software-component", "title": "Platform", "status": "approved", "asil": "B",
+             "security_relevant": False, "kind": "basic-software", "layer": "services", "origin": "supplied",
+             "supplier": "the customer, as object code", "resource_budget": {"not_relevant": "customer's"}},
+            {"Purpose": "Platform services the customer supplies.", "Responsibility": "Timers.",
+             "Dynamic behavior": "Not applicable: services only."})
+
+
+class Integration(Case):
+    def make(self, items=None, **kwargs):
+        kwargs.setdefault("scope", INTEGRATION_SCOPE)
+        kwargs.setdefault("files", INTEGRATION_FILES)
+        return super().make(integration_items() if items is None else items, **kwargs)
+
+    def steps(self, items, *steps):
+        items["PLN-0003"][0]["integration_steps"] = list(steps)
+        return items
+
+    def test_integrated_and_tested_project_has_no_findings(self):
+        self.assertEqual(self.make().findings(), [])
+
+    def test_component_in_no_step(self):
+        items = integration_items()
+        items["CMP-0003"] = copy.deepcopy(SUPPLIED)
+        self.assertIn(("COV-35", "CMP-0003"), self.make(items).rules())
+
+    def test_component_left_to_others_is_a_double_of_the_last_step(self):
+        items = integration_items()
+        items["CMP-0003"] = copy.deepcopy(SUPPLIED)
+        self.steps(items, {"name": "detection", "components": ["CMP-0001"], "doubles": ["CMP-0003"]})
+        self.assertNotIn("COV-35", {r for r, _ in self.make(items).rules()})
+
+    def test_component_in_two_steps(self):
+        items = self.steps(integration_items(), {"name": "detection", "components": ["CMP-0002"]},
+                           {"name": "again", "components": ["CMP-0001"]})
+        self.assertIn(("COV-35", "CMP-0002"), self.make(items).rules())
+
+    def test_double_for_a_component_already_integrated(self):
+        items = integration_items()
+        items["CMP-0003"] = copy.deepcopy(SUPPLIED)
+        self.steps(items, {"name": "detection", "components": ["CMP-0001", "CMP-0003"]},
+                   {"name": "rest", "components": [], "doubles": ["CMP-0002"]})
+        messages = [f["message"] for f in self.make(items).findings("error") if f["rule"] == "COV-35"]
+        self.assertTrue(any("names CMP-0002 as a double" in m for m in messages), messages)
+
+    def test_step_without_build(self):
+        items = integration_items()
+        for key in ("BLD-0001", "RUN-0002", "RUN-0003"):
+            items.pop(key)
+        self.assertIn(("COV-36", "PLN-0003"), self.make(items).rules())
+
+    def test_step_without_build_is_pending_while_no_unit_has_code(self):
+        items = integration_items()
+        for key in ("BLD-0001", "RUN-0002", "RUN-0003"):
+            items.pop(key)
+        items["UNT-0001"][0].pop("source_files")
+        fixture = self.make(items)
+        self.assertNotIn(("COV-36", "PLN-0003"), fixture.rules())
+        self.assertIn(("COV-36", "PLN-0003"), fixture.rules("warning"))
+
+    def test_code_changed_after_the_build(self):
+        fixture = self.make()
+        (fixture.root / "src/unit.c").write_text(CODE + "/* changed */\n", encoding="utf-8")
+        messages = [f["message"] for f in fixture.findings("error") if f["rule"] == "COV-36"]
+        self.assertTrue(any("src/unit.c changed after build BLD-0001" in m for m in messages), messages)
+
+    def test_build_that_lacks_a_unit_with_code(self):
+        items = integration_items()
+        items["BLD-0001"][0]["contents"] = [{"component": "CMP-0002", "units": []}]
+        messages = [f["message"] for f in self.make(items).findings("error") if f["rule"] == "COV-36"]
+        self.assertTrue(any("does not contain UNT-0001 of CMP-0002" in m for m in messages), messages)
+
+    def test_failed_build(self):
+        items = changed(integration_items(), "BLD-0001", result="failed")
+        self.assertIn(("COV-36", "PLN-0003"), self.make(items).rules())
+
+    def test_integration_test_names_a_step_the_plan_does_not_have(self):
+        items = changed(integration_items(), "SIT-0001", step="elsewhere")
+        rules = self.make(items).rules()
+        self.assertIn(("COV-37", "SIT-0001"), rules)
+        self.assertIn(("COV-37", "PLN-0003"), rules)            # and the step has no test now
+
+    def test_run_on_a_build_of_another_commit(self):
+        items = changed(integration_items(), "RUN-0002", item_under_test="def456")
+        self.assertIn(("COV-38", "RUN-0002"), self.make(items).rules())
+
+    def test_run_older_than_the_latest_build_of_its_step(self):
+        items = integration_items()
+        items["BLD-0002"] = copy.deepcopy(items["BLD-0001"])
+        items["BLD-0002"][0]["executed_at"] = "2026-01-03T09:00:00"
+        rules = self.make(items).rules()
+        self.assertIn(("COV-38", "RUN-0002"), rules)
+        self.assertIn(("COV-38", "RUN-0003"), rules)
+
+    def test_integration_verdict_counts_only_from_a_run_on_its_step(self):
+        items = integration_items()
+        self.steps(items, {"name": "detection", "components": ["CMP-0001"]}, {"name": "complete", "components": []})
+        items["SIT-0002"] = copy.deepcopy(items["SIT-0001"])
+        items["SIT-0002"][0]["step"] = "complete"
+        items["BLD-0002"] = changed(items, "BLD-0001", step="complete", executed_at="2026-01-02T09:30:00")["BLD-0001"]
+        items["RUN-0004"] = changed(items, "RUN-0002", build="BLD-0002", executed_at="2026-01-02T11:30:00",
+                                    results=[{"test": "SIT-0001", "verdict": "passed"}])["RUN-0002"]
+        rules = self.make(items).rules()
+        self.assertIn(("COV-18", "SIT-0002"), rules)            # step 'complete' ran, but not SIT-0002
+        self.assertNotIn(("COV-18", "SIT-0001"), rules)         # its own step's run still counts
+
+    def test_qualification_run_without_a_build(self):
+        items = integration_items()
+        items["RUN-0003"][0].pop("build")
+        self.assertIn(("COV-38", "RUN-0003"), self.make(items).rules())
+
+    def test_qualification_without_integration_in_scope_needs_no_build(self):
+        items = integration_items()
+        for key in ("PLN-0003", "SIT-0001", "BLD-0001", "RUN-0002"):
+            items.pop(key)
+        items["RUN-0003"][0].pop("build")
+        self.assertEqual(self.make(items, scope=SCOPE + ["SWE.6"]).findings(), [])
+
+
 if __name__ == "__main__":
     unittest.main()

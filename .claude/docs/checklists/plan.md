@@ -1,6 +1,6 @@
 # Plan review checklist
 
-Version 2. Applies to: `plan`. Supports: MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6,
+Version 3. Applies to: `plan`. Supports: MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6,
 MAN.3.BP7, SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1,
 SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1.
 
@@ -82,8 +82,9 @@ empty, ask the user; do not assume a value.
 
 | ID | Check | How to check | Kind |
 |---|---|---|---|
-| PLN-30 | The items to be integrated are identified from the software architecture, including reused, supplied and generated ones | compare `Scope` with the `software-component` items | semantic |
-| PLN-31 | The integration order is given as steps, with what enters each step and what an item must have passed before (for example unit verification) | read `Approach`, `Criteria` | semantic |
+| PLN-38 | `integration_steps` is present; every software component is integrated in exactly one step or named as a double of the last step, and every name in a step is a live component | `check`: no `SCHEMA` finding on the item and no `COV-35` finding | script |
+| PLN-30 | The items to be integrated are identified from the software architecture, including reused, supplied and generated ones; a component this project does not integrate is a double of the last step, and `Scope` says who integrates it | compare `Scope` and `integration_steps` with the `software-component` items | semantic |
+| PLN-31 | The integration order is given as steps, with what enters each step and what an item must have passed before (for example unit verification); the order follows the dependencies in the architecture, so that each step can be tested with doubles for what is still missing | read `integration_steps`, `Approach`, `Criteria`; compare with the interfaces' `provided_by` and `used_by` | semantic |
 | PLN-32 | The test strategy follows the integration order: for each step what is tested and by which method (interface, data flow, timing, resource use) | read `Approach` | semantic |
 | PLN-33 | Integration tests are to be derived from the architecture: every `software-interface` and the interplay shown in the `architecture-view` items are to be covered | read `Approach`, `Criteria` | semantic |
 | PLN-34 | The environment of each step is named, and what can only be shown on the target is assigned to a step that runs there | read `Environment and tools` | semantic |
