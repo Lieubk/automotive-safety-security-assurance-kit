@@ -81,7 +81,7 @@ attribute_sets:
     title: {required: always, note: "short name, not the normative text"}
     status: {required: always}
     variants: {required: optional, note: "product variants the item applies to; absent means all"}
-    imported: {required: optional, note: "marks an input received from outside the project's process scope: source document or baseline, version, date received. Imported items are read-only; only `always` attributes are enforced, and an input acceptance review covers them"}
+    imported: {required: optional, note: "marks an input received from outside the project's process scope, as {source, version, received, source_id}: document or baseline, its version, the date received, the identifier in the source. Imported items are read-only; only `always` attributes are enforced, and an input acceptance review covers them"}
     rejection_reason: {required: optional, note: "mandatory in state rejected"}
     superseded_by: {required: optional, note: "item ID; reason text is acceptable in state obsolete when nothing replaces the item"}
   criticality:
@@ -95,7 +95,7 @@ attribute_sets:
     origin: {values: [derived, internal], required: before-review, note: "internal = no upstream item exists; needs a rationale section"}
   test-case:
     execution: {values: [automated, manual], required: before-review}
-    script: {required: optional, note: "repository path of the test implementation; mandatory before approval when execution is automated"}
+    script: {required: optional, note: "test implementation as <repository path>::<test function>; mandatory before approval when execution is automated"}
     environment: {required: before-approval, note: "host, software-in-the-loop, hardware-in-the-loop, target, or a project-defined name"}
     asil: {values: [QM, A, B, C, D], required: before-review, note: "highest ASIL of the items verified"}
     regression: {values: [true, false], required: before-approval, note: "belongs to the regression set"}
@@ -110,13 +110,13 @@ structures:
     keys: [unit, min, max, resolution, initial, invalid, period_ms, timeout_ms, description]
     note: "direction is in, out or inout as seen from the providing component; unit and range are expected for physical quantities"
   operations:                      # software-interface.operations
-    mandatory: [name, returns]
-    keys: [arguments, call_context, reentrant, blocking, description]
-    note: "arguments is a list of data-element records; returns lists each value with its meaning; call_context is task, interrupt or both"
+    mandatory: [name]
+    keys: [arguments, returns, call_context, reentrant, blocking, description]
+    note: "arguments is a list of data-element records; returns is a list of {value, meaning} and is left out for an operation that returns nothing; call_context is task, interrupt or both"
   functions:                       # software-unit.functions
     mandatory: [name, category]
-    keys: [arguments, returns, preconditions, postconditions, errors, trigger, period_ms, call_context, reentrant]
-    note: "category is public, scheduled, callback or local; trigger names the activating event of a scheduled function"
+    keys: [description, arguments, return_type, returns, preconditions, postconditions, errors, trigger, period_ms, call_context, reentrant]
+    note: "category is public, scheduled, callback or local; arguments is a list of data-element records; returns is a list of {value, meaning}; errors is a list of {condition, reaction}; trigger names the activating event of a scheduled function"
   data:                            # software-unit.data
     mandatory: [name, type, scope]
     keys: [unit, min, max, initial, protection]
@@ -296,7 +296,7 @@ types:
       functions: {structure: functions, required: before-review}
       data: {structure: data, required: optional}
       resource_budget: {structure: resource-budget, required: optional}
-      platform: {required: optional, note: "platform resources the unit touches: exclusive areas, diagnostic events, non-volatile blocks, calibration parameters, memory sections"}
+      platform: {required: optional, note: "platform resources the unit touches, as a mapping with any of the keys exclusive_areas, diagnostic_events, non_volatile_blocks, calibration_parameters, memory_sections, services"}
     sections:
       Purpose: before-review
       Behavior: before-review      # algorithm and states
@@ -568,7 +568,7 @@ coverage:
   - {id: COV-20, subject: change-request, expect: "from state analysed on: at least one affects link", waiver: "none", supports: [SUP.10.BP8]}
   - {id: COV-21, subject: software-interface, expect: "provided by a component with origin developed -> at least one software-unit of that component realizes it", waiver: "none", supports: [SWE.3.BP2, SWE.3.BP5]}
   - {id: COV-22, subject: software-unit, expect: "every function of category public, scheduled or callback exists in the listed source files with the designed signature, and no such function exists in the code without a design entry", waiver: "origin generated or third-party", supports: [SWE.3.BP5, SWE.3.BP8]}
-  - {id: COV-23, subject: any-engineering-item, expect: "ASIL not lower than the highest ASIL of the items it is derived from, allocated, part of or implements", waiver: "an approved design-decision that documents the decomposition concerns the item", supports: [SWE.2.BP8, SWE.3.BP6]}
+  - {id: COV-23, subject: any-engineering-item, expect: "ASIL not lower than that of any item it is derived from or implements; a unit not lower than its component; a component or interface not lower than any requirement allocated to it", waiver: "an approved design-decision that documents the decomposition concerns the item", supports: [SWE.2.BP8, SWE.3.BP6]}
   - {id: COV-24, subject: architecture-view, expect: "at least one shows link, and every shown item exists and is not rejected or obsolete", waiver: "none", supports: [SWE.2.BP4, SYS.3.BP4]}
   - {id: COV-25, subject: project, expect: "at software level one approved architecture-view exists for each of the kinds structure, execution-model and resource-summary, and at least one of kind state-machine or sequence", waiver: "a kind declared not applicable in the project configuration, with the reason", supports: [SWE.2.BP1, SWE.2.BP4, SWE.2.BP5]}
   - {id: COV-26, subject: baseline, expect: "at least one final communication-record names the baseline as subject", waiver: "baseline purpose marked internal in the project configuration", supports: [SYS.2.BP8, SYS.3.BP8, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7]}

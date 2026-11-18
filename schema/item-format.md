@@ -47,9 +47,10 @@ zone, the obstacle signal is set no later than the second 5 ms cycle after the d
 - `links` is a mapping from link role to a list of target IDs. A link is written on
   the downstream item only; the reverse direction is computed.
 - A target may address one design element inside an item: `UNT-0012#AntiPinch_Step`.
-- Structured attributes (`elements`, `operations`, `functions`, `data`, `table`,
-  `resource_budget`) are lists of mappings with the keys the schema defines under
-  `structures`.
+- Structured attributes (`elements`, `operations`, `functions`, `data`, `table`) are
+  lists of mappings with the keys the schema defines under `structures`;
+  `resource_budget` is a single mapping.
+- `script` of a test case is `<repository path>::<test function>`.
 - Avoid bare `yes`, `no`, `on`, `off` as values: YAML 1.1 parsers read them as
   booleans. Use `true` / `false` where a boolean is meant.
 

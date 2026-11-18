@@ -1,0 +1,17 @@
+# Power window control with anti-pinch protection - worked example.
+# Configuration read by the trace engine (schema/item-format.md).
+
+scope:
+  processes: [SWE.1, SWE.2, SWE.3, SWE.4, SUP.8]   # the software supplier's responsibility; system level is imported
+paths:
+  items: [spec, verification, records]              # folders scanned for item files
+  source_roots: [src]                               # code that must belong to a software unit
+  generated: []                                     # no generated code in this example
+  third_party: []                                   # no third-party code in this example
+trace:
+  views_not_applicable:                             # view kinds the project does not provide, with the reason
+    context: "the surroundings of the software are defined by the customer and imported as SYE-0001, SYE-0002 and SYI-0001 to SYI-0003; a second drawing of them would be a copy"
+    memory-layout: "the software is delivered as source code; linker configuration and memory sections belong to the customer, who integrates it into the door module"
+    fault-reaction: "fault storage and degraded operation of the door module are part of the customer's basic software; the reactions of the delivered components to invalid inputs are specified with each interface and unit"
+    communication: "the delivered software has no access to the body network; the one bus signal it uses reaches it as interface IFC-0006 from the customer's communication stack"
+  internal_baselines: [working]                     # baseline purposes that need no communication record
