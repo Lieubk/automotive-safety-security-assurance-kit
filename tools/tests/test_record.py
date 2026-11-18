@@ -274,19 +274,20 @@ class StatusReports(RecordCase):
         self.assertIn("reporter's reading", out)
 
     def test_a_report_carries_the_figures_and_the_assessment(self):
-        package = self.project / "plans" / "work-packages" / "WP-0001.md"
+        package = self.project / "plans" / "work-packages" / "WP-0099.md"
         package.parent.mkdir(parents=True, exist_ok=True)
-        package.write_text("---\nid: WP-0001\ntype: work-package\ntitle: Feature\nstatus: draft\nowner: Project lead\n"
+        package.write_text("---\nid: WP-0099\ntype: work-package\ntitle: Feature\nstatus: draft\nowner: Project lead\n"
                            "category: engineering\nplanned_finish: '2026-01-31'\nlinks:\n  delivers: [SWR-0001]\n---\n\n"
                            "## Description\n\nThe work.\n", encoding="utf-8")
         text = Path(self.tmp.name) / "assessment.txt"
         text.write_text("On track except the feature package, which is late by two weeks.", encoding="utf-8")
         code, out = self.record("status-report", "--reported-by", "P. Lead", "--assessment", text, "--as-of", "2026-02-15")
         self.assertEqual(code, 0, out)
-        record_text = (self.project / "records" / "status" / "PSR-0001.md").read_text(encoding="utf-8")
+        newest = self.records("records/status", "PSR-")[-1]
+        record_text = (self.project / "records" / "status" / newest).read_text(encoding="utf-8")
         record = yaml.safe_load(record_text.split("---")[1])
-        self.assertEqual(record["work_packages"][0]["item"], "WP-0001")
-        self.assertTrue(record["work_packages"][0]["late"])
+        entry = next(p for p in record["work_packages"] if p["item"] == "WP-0099")
+        self.assertTrue(entry["late"])
         self.assertIn("## Assessment", record_text)
 
 
