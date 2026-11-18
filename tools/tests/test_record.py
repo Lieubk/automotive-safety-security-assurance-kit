@@ -174,6 +174,40 @@ class Review(RecordCase):
         self.assertEqual(code, 1)
         self.assertIn("cannot be combined", out)
 
+    def test_a_finding_on_an_item_that_is_not_a_subject_is_refused(self):
+        findings = self.json_file("f.json", [{"id": "F1", "item": "SWR-0002", "text": "x", "severity": "minor",
+                                              "state": "open"}])
+        code, out = self.review("--findings", findings, verdict="rework")
+        self.assertEqual(code, 1)
+        self.assertIn("not a subject of this review", out)
+
+    def test_a_whole_section_can_be_not_applicable_in_one_entry(self):
+        text = CHECKLIST.read_text(encoding="utf-8")
+        set_part = text.split("## The set")[1]
+        ids = re.findall(r"(?m)^\|\s*([A-Z]{2,5}-\d+)\s*\|", set_part)
+        checks = [c for c in json.loads(self.all_checks().read_text(encoding="utf-8")) if c["check"] not in ids]
+        checks.append({"section": "The set", "result": "not-applicable", "note": "test of a single item"})
+        code, out = self.review("--checks", self.json_file("c.json", checks))
+        self.assertEqual(code, 0, out)
+        record = self.front("records/reviews/" + self.records("records/reviews")[-1])
+        given = {c["check"]: c for c in record["checks"]}
+        self.assertTrue(all(given[i]["result"] == "not-applicable" for i in ids))
+        checks[-1]["result"] = "pass"
+        code, out = self.review("--checks", self.json_file("c2.json", checks))
+        self.assertEqual(code, 1)
+        self.assertIn("only not-applicable", out)
+
+    def test_reconfirmation_names_the_reviews_it_rests_on(self):
+        code, out = self.record("review", "--reconfirm", "--reviewer", REVIEWER, "--verdict", "approved", "SWR-0001")
+        self.assertEqual(code, 0, out)
+        record = self.front("records/reviews/" + self.records("records/reviews")[-1])
+        self.assertTrue(record["rests_on"] and all(r.startswith("REV-") for r in record["rests_on"]))
+
+    def test_the_help_shows_the_input_formats(self):
+        code, out = self.record("--help")
+        self.assertEqual(code, 0)
+        self.assertIn("Checks FILE is JSON", out)
+
     def test_code_is_recorded_only_when_the_revision_is_named(self):
         self.review("--external-criteria", checklist="x", ids=("UNT-0003",))
         without = self.front("records/reviews/" + self.records("records/reviews")[-1])

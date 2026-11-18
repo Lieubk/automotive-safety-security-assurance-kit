@@ -419,6 +419,7 @@ types:
       checklist_source: {values: [toolkit, external, reconfirmation], required: optional, note: "toolkit: a checklist under .claude/docs/checklists at the cited version; external: criteria from outside the toolkit, named in `checklist`; reconfirmation: unchanged items confirmed against new versions of what they build on"}
       item_under_test: {required: optional, note: "commit, tag or baseline ID of the code that was reviewed"}
       sources: {required: optional, note: "list of {file, hash} of the source files of the units reviewed; written by tooling"}
+      rests_on: {required: optional, note: "reconfirmation only: the earlier approving review records of the subjects, whose checks the reconfirmation does not repeat"}
 
   communication-record:
     prefix: CMR
@@ -443,7 +444,7 @@ types:
     attributes:
       use: [common]
       to: {required: always, note: "who the question goes to: the source of the input, by role or name"}
-      asked_at: {required: always}
+      asked_at: {required: optional, note: "the date the question was put to the source; empty while it is written down and not sent yet"}
       answered_by: {required: before-review, note: "who answered, and when"}
     sections:
       Question: always
@@ -548,6 +549,11 @@ links:
     pairs:
       - {from: software-component, to: [software-component], supports: [SWE.2.BP1]}
       - {from: software-unit, to: [software-component], supports: [SWE.3.BP5, SWE.3.BP6]}
+  relies_on:
+    meaning: "the requirement uses a term, a value or a behaviour that the target requirement defines; a change of the target makes it suspect"
+    pairs:
+      - {from: software-requirement, to: [software-requirement], supports: [SWE.1.BP3]}
+      - {from: system-requirement, to: [system-requirement], supports: [SYS.2.BP3]}
   refines:
     meaning: "the detailed design of the component"
     pairs:

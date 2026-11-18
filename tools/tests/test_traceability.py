@@ -644,6 +644,27 @@ class Coverage(Case):
         self.assertNotIn(("COV-26", "BL-0001"), self.make(items).rules())
 
 
+class OpenPoints(Case):
+    def test_a_query_not_sent_yet_is_valid_and_says_so(self):
+        items = base_items()
+        items["QRY-0001"] = ({"type": "query", "title": "Meaning of reverse", "status": "open", "to": "customer",
+                              "links": {"about": ["SYR-0001"]}}, {"Question": "Which distance?"})
+        fixture = self.make(items)
+        self.assertFalse([f for f in fixture.findings("error") if f["item"] == "QRY-0001"])
+        messages = [f["message"] for f in fixture.findings("warning") if f["rule"] == "QUERY"]
+        self.assertTrue(messages and "not put to its source yet" in messages[0], messages)
+
+    def test_an_open_problem_report_stays_visible_on_the_approved_item(self):
+        items = base_items()
+        items["PRB-0001"] = ({"type": "problem-report", "title": "Task bound missing", "status": "open",
+                              "severity": "major", "found_in": "review REV-0001",
+                              "links": {"affects": ["VIEW-0003"]}}, {"Description": "Nothing bounds the task."})
+        fixture = self.make(items)
+        self.assertIn(("PROBLEM", "VIEW-0003"), fixture.rules("warning"))
+        fixture.edit("PRB-0001", status="rejected")
+        self.assertNotIn(("PROBLEM", "VIEW-0003"), fixture.rules("warning"))
+
+
 class Impact(Case):
     def downstream(self, fixture, item_id):
         project = Project(fixture.root)
@@ -684,6 +705,25 @@ class Impact(Case):
     def test_component_approved_above_a_draft_interface(self):
         fixture = self.make(changed(base_items(), "IFC-0001", status="draft"))
         self.assertIn(("UPSTREAM", "CMP-0002"), fixture.rules())
+
+    def test_a_changed_draft_is_reported_once_as_upstream_not_also_as_suspect(self):
+        fixture = self.make()
+        fixture.edit("IFC-0001", title="Obstacle state, renamed", status="draft")
+        rules = fixture.rules()
+        self.assertIn(("UPSTREAM", "CMP-0002"), rules)
+        self.assertNotIn(("SUSPECT", "CMP-0002"), rules)
+
+    def test_a_requirement_that_relies_on_another_becomes_suspect_when_it_changes(self):
+        items = base_items()
+        items["SWR-0002"] = copy.deepcopy(items["SWR-0001"])
+        items["SWR-0002"][0]["title"] = "React to the detection"
+        items["SWR-0002"][0]["links"] = {"derived_from": ["SYR-0001"], "relies_on": ["SWR-0001"]}
+        items["CMP-0002"][0]["links"]["fulfils"] = ["SWR-0001", "SWR-0002"]
+        fixture = self.make(items)
+        self.assertNotIn(("SUSPECT", "SWR-0002"), fixture.rules())
+        fixture.edit("SWR-0001", title="Detect obstacle, reworded")
+        self.assertIn(("SUSPECT", "SWR-0002"), fixture.rules())
+        self.assertIn("SWR-0002", self.downstream(fixture, "SWR-0001"))
 
 
 class Scope(Case):

@@ -183,9 +183,9 @@ def post_write(payload):
             and project.approving_review(item) is None:
         dependents = sum(len(v) for v in project.incoming[item.id].values())
         notes.append("%s has status approved, but no final review record covers its current content (hash %s). "
-                     "An item is approved only through /review: set its status to draft, and tell the user that "
-                     "%d items link to it (python tools/traceability.py impact %s)."
-                     % (item.id, item.hash, dependents, item.id))
+                     "An item is approved only through /review: set its status to draft first, then go on editing. "
+                     "Tell the user that %d items link to it directly; python tools/traceability.py impact %s lists "
+                     "everything that depends on it." % (item.id, item.hash, dependents, item.id))
     if notes:
         print(json.dumps({"decision": "block", "reason": "\n".join(notes)}))
     return 0

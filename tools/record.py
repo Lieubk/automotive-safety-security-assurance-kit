@@ -56,6 +56,11 @@ Commands
          "closes": "<REV-ID>#<finding id>"}    (closes is optional)
         Checks FILE is JSON: a list of
         {"check", "result": "pass"|"finding"|"not-applicable"|"not-assessed", "note"}.
+        A whole section of the checklist that does not concern the subjects is
+        one entry {"section": "<heading>", "result": "not-applicable", "note"};
+        it stands for every check of that section the file does not list.
+        A finding names an item that is a subject of the review, or none for a
+        finding on the set.
         The checklist is cited as "<name> v<N>", <name> being a file under
         .claude/docs/checklists (without .md) or its title without the word
         "checklist"; the version must be the one in the file. Criteria from
@@ -329,8 +334,15 @@ def find_checklist(citation):
         if plain(cited.group(1)) in names:
             version = re.search(r"^Version (\d+)", text, re.M)
             rows = re.findall(r"(?m)^\|\s*([A-Z]{2,5}-\d+)\s*\|.*\|\s*(script|semantic|accountable)\s*\|\s*$", text)
+            sections, heading = {}, None
+            for line in text.splitlines():
+                if line.startswith("## "):
+                    heading = plain(line[3:])
+                found = re.match(r"^\|\s*([A-Z]{2,5}-\d+)\s*\|", line)
+                if found and heading:
+                    sections.setdefault(heading, []).append(found.group(1))
             return {"file": path.name, "version": version.group(1) if version else None, "cited": cited.group(2),
-                    "checks": dict(rows)}
+                    "checks": dict(rows), "sections": sections}
     return None
 
 
@@ -344,6 +356,14 @@ def cmd_review(project, args):
         if finding.get("state") not in ("open", "closed") or finding.get("severity") not in ("major", "minor"):
             problems.append("finding %s needs severity major|minor and state open|closed" % finding.get("id"))
     checks = json.loads(Path(args.checks).read_text(encoding="utf-8")) if args.checks else []
+    subjects = set(args.ids)
+    for finding in findings:
+        if finding.get("item") and finding["item"] not in subjects:
+            problems.append("finding %s is on %s, which is not a subject of this review. A problem in another item is "
+                            "recorded about that item: a problem report with `affects` for an item of the project, a "
+                            "query for an imported one; or the item becomes a subject" % (finding.get("id"), finding["item"]))
+    sectioned = [entry for entry in checks if "section" in entry and "check" not in entry]
+    checks = [entry for entry in checks if entry not in sectioned]
     for entry in checks:
         if entry.get("result") not in RESULTS:
             problems.append("check %s needs result %s" % (entry.get("check"), "|".join(RESULTS)))
@@ -360,10 +380,14 @@ def cmd_review(project, args):
         problems += ["%s: its current content has no approving review, so there is nothing to reconfirm; "
                      "it needs a review against its checklist" % item.id
                      for item in items if project.approving_review(item) is None]
+        if sectioned or checks:
+            problems.append("--reconfirm applies no checklist: leave out --checks")
     elif args.external_criteria:
         source, citation = "external", args.checklist
         if not citation:
             problems.append("--external-criteria needs --checklist to name the criteria that were used")
+        if sectioned:
+            problems.append("a section entry needs a checklist of the toolkit; list the checks one by one")
     else:
         source, citation = "toolkit", args.checklist
         listed = find_checklist(citation) if citation else None
@@ -374,6 +398,17 @@ def cmd_review(project, args):
                             ".claude/docs/checklists. For criteria from outside the toolkit pass --external-criteria; "
                             "to confirm unchanged items after a change upstream pass --reconfirm." % citation)
         else:
+            given_ids = {str(c.get("check")) for c in checks}
+            for entry in sectioned:
+                ids = listed["sections"].get(plain(str(entry["section"])))
+                if ids is None:
+                    problems.append("section '%s' is not a section of %s" % (entry["section"], listed["file"]))
+                elif entry.get("result") != "not-applicable" or not entry.get("note"):
+                    problems.append("section '%s': only not-applicable, with a note that says why, can be given for a "
+                                    "whole section" % entry["section"])
+                else:
+                    checks += [{"check": i, "result": "not-applicable", "note": "section %s: %s" % (entry["section"], entry["note"])}
+                               for i in ids if i not in given_ids]
             if listed["version"] != listed["cited"]:
                 problems.append("%s is at version %s, the citation says v%s" % (listed["file"], listed["version"], listed["cited"]))
             given = {str(c.get("check")): c for c in checks}
@@ -434,6 +469,8 @@ def cmd_review(project, args):
     }
     if checks:
         front["checks"] = checks
+    if args.reconfirm:
+        front["rests_on"] = sorted({project.approving_review(i).id for i in items})
     code = [f for i in items if i.type == "software-unit" for f in i.front.get("source_files") or []]
     if code and args.item_under_test:      # naming the code revision is what makes it a review of the code
         front["item_under_test"] = args.item_under_test
@@ -515,7 +552,7 @@ def cmd_communication(project, args):
 
 
 def main():
-    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--project", default=".")
     sub = ap.add_subparsers(dest="command", required=True)
     sub.add_parser("next-id").add_argument("type")

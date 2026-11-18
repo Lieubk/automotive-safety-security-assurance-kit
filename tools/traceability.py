@@ -103,6 +103,7 @@ HASH_EXCLUDED = ("status", "source_files")     # state, and the pointer from a u
 # What a component is to an interface that names it. The names differ from every link role
 # on purpose: `uses` is a link of software units.
 INTERFACE_ROLES = {"provided_by": "provider of", "used_by": "user of"}
+UNRESOLVED = ("open", "analysed", "in-resolution")          # states of a problem report that is not yet resolved
 
 
 def content_hash(front, body):
@@ -236,6 +237,11 @@ class Project:
 
     def live(self, item):
         return item.status not in ("rejected", "obsolete")
+
+    def unsettled(self, item):
+        """An engineering item that is in use but not approved: what builds on it cannot be settled either."""
+        return self.live(item) and item.status != "approved" \
+            and self.types.get(item.type, {}).get("lifecycle") == "engineering"
 
     def of_type(self, *types):
         return [i for i in self.items.values() if i.type in types]
@@ -963,6 +969,8 @@ class Project:
                     self.add("warning", "CONSISTENCY", item.id, "review %s does not record %s (%s) as a reference: "
                              "consistency with it is not evidenced" % (review.id, target_id, role), supports)
                 elif seen[target_id] != target.hash:
+                    if self.unsettled(target):
+                        continue                          # reported as UPSTREAM until the target is approved again
                     self.add("error", "SUSPECT", item.id, "suspect link: %s (%s) changed after review %s"
                              % (target_id, role, review.id), supports)
 
@@ -975,17 +983,25 @@ class Project:
                 target, supports = self.items.get(target_id), self.supports_of(item, role)
                 if target is None or not self.in_scope(supports):
                     continue
-                if self.live(target) and target.status != "approved" \
-                        and self.types.get(target.type, {}).get("lifecycle") == "engineering":
+                if self.unsettled(target):
                     self.add("error", "UPSTREAM", item.id, "approved, but %s (%s) is in state %s"
                              % (target_id, role, target.status), supports)
         for query in self.of_type("query"):
             if query.status != "open":
                 continue
+            sent = "" if query.front.get("asked_at") else " (not put to its source yet)"
             for target_id, _ in query.targets("about"):
                 target = self.items.get(target_id)
                 if target is not None and target.status == "approved":
-                    self.add("warning", "QUERY", target_id, "open query %s is about this approved item" % query.id)
+                    self.add("warning", "QUERY", target_id, "open query %s%s is about this approved item" % (query.id, sent))
+        for problem in self.of_type("problem-report"):
+            if problem.status not in UNRESOLVED:
+                continue
+            for target_id, _ in problem.targets("affects"):
+                target = self.items.get(target_id)
+                if target is not None and target.status == "approved":
+                    self.add("warning", "PROBLEM", target_id, "problem report %s (%s, %s) concerns this approved item"
+                             % (problem.id, problem.front.get("severity"), problem.status))
 
     def check(self):
         self.check_structure()
