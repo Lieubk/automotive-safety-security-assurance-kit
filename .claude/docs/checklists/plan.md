@@ -269,3 +269,12 @@ empty, ask the user; do not assume a value.
 | PLN-170 | The confirmation measures cover the work products and the audit and assessment the ASIL calls for, each with the independence the responsible people read from the standard, and name who performs them | read `confirmation_measures` | semantic |
 | PLN-171 | Activities left to the customer or a supplier are those the development interface agreement assigns to them | read next to the agreement | semantic |
 | PLN-172 | The safety manager and the project lead state that the plan is the project's and that its activities are resourced | ask them; the note names who and when | accountable |
+
+## Kind development-interface-agreement (26262-8:5)
+
+| ID | Check | How to check | Kind |
+|---|---|---|---|
+| PLN-173 | `shared_activities` is present; each entry names the activity and the role of customer and supplier | `check`: no `SCHEMA` finding on the item | script |
+| PLN-174 | Every clause of the safety plan decided by-customer or by-supplier appears, and each activity has exactly one side that performs it | read next to `safety_activities` | semantic |
+| PLN-175 | What is exchanged, when, and how problems and changes of safety requirements reach the other side is stated | read `exchange` and `Approach` | semantic |
+| PLN-176 | Both parties have agreed to the arrangement, as a communication record with `agreement` shows | read the communication record; the note names who agreed and when | accountable |

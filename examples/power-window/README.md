@@ -29,7 +29,7 @@ and is responsible for:
 | SUP.1 Quality Assurance | a quality assurance plan with two checks before the release candidate; a work product sample and a process audit with their findings and corrective actions, a quality report, an escalation |
 | SUP.8 Configuration Management | a configuration management plan; everything is text under version control |
 | SUP.9 Problem Resolution Management | a problem resolution strategy with urgent and alert rules; one problem report from recording to closure - a defect the qualification test found in a component taken over - with its alert and a trend report |
-| MAN.3 Project Management | a project plan with four milestones, eleven work packages that deliver every item the project wrote, and one status report |
+| MAN.3 Project Management | a project plan with four milestones, twelve work packages that deliver every item the project wrote, and one status report |
 
 It also carries the cybersecurity of its part under ISO/SAE 21434, for the clauses
 `scope.cybersecurity` names in `project.yaml`:
@@ -38,6 +38,18 @@ It also carries the cybersecurity of its part under ISO/SAE 21434, for the claus
 |---|---|
 | 6 Project dependent cybersecurity management | a cybersecurity plan (`PLN-0008`) with a decision for every subclause of clauses 6 and 15, the reasons for what is tailored or left to the customer, and the TARA method: impact categories, attack-vector feasibility, a risk matrix of the project's own, `retain_up_to` 2; a cybersecurity case (`CSE-0001`) |
 | 15 Threat analysis and risk assessment methods | on the customer's item definition (`ITM-0001`, imported): 2 assets, 3 damage scenarios, 3 threat scenarios with attack paths; one risk reduced by a cybersecurity goal (`CSG-0001`), one retained by a named decision and one shared with the customer, each argued in a claim (`CLM-0001`, `CLM-0002`); the hand-over to the customer (`CMR-0004`) |
+
+Functional safety under ISO 26262 at ASIL B covers parts 2, 6, 8 and 9 (`scope.safety`):
+
+| Part | In the example |
+|---|---|
+| 2 Management of functional safety | a safety plan (`PLN-0010`) with a decision per clause, the methods per table of parts 6 and 8 and where they are applied, two confirmation reviews (`CFM-0001`, `CFM-0002`), a safety case (`SFC-0001`) |
+| 6 Software | the software requirements, architecture, units and verification already in the example, carrying ASIL B; testing on the target is the customer's |
+| 8 Supporting processes | a development interface agreement with the customer (`PLN-0012`), a change management plan (`PLN-0011`), tool evaluations of the compilers and coverage tool (`TEV-0001`, `TEV-0002`) |
+| 9 Analyses | an FMEA of the ASIL B components (`SAN-0001`) and a dependent failures analysis of WindowCmd (QM) next to them (`SAN-0002`) |
+
+The hazard analysis, the safety goals and everything at system and vehicle level are the
+customer's: the system requirements it delivered carry their ASIL.
 
 The item, its cybersecurity concept, validation and everything after development are
 the customer's: clauses 9 and 11 to 14 are not in scope, so the goal goes to the
@@ -69,8 +81,9 @@ under `verification/evidence/`.
 | `CMR-0001`, `PTR-0001` | written by `record.py communication` and `record.py problem-trends` | an alert anybody sent, an analysis anybody made: their texts say so |
 | `QAR-0001` to `QAR-0003`, `CA-0001`, `CA-0002`, `CMR-0002`, `CMR-0003` | written by `record.py quality-check`, `quality-report` and `communication`; the facts in the quality records are what the tools showed at the time. The findings are true of the example: its reviews are fixtures (CA-0001), and no integration or qualification result was communicated (CA-0002) | a check by a quality engineer, an answer of a project lead: the texts say they are demonstration data |
 | `PSR-0001` | written by `record.py status-report` from `progress` and `check` as of 2026-06-05; the planned and actual dates and efforts in the work packages are invented | an assessment by a person: its text says it is demonstration data |
+| `CFM-0001`, `CFM-0002`, `SFC-0001` | written by `record.py confirmation-measure` and `safety-case` | a confirmation review or an argument by a person: their texts say they are demonstration data |
 | `CSE-0001`, `CMR-0004` | written by `record.py cybersecurity-case` and `communication`; the case lists per work product of clauses 6 and 15 the items and their hashes as the tools showed them | an argument or an agreement of a person: their texts say they are demonstration data |
-| `REV-0001` to `REV-0011` | nothing: they are fixtures that bind each item to a content hash, and the units to the hashes of their code, so that the trace check can be demonstrated. They are recorded as "external criteria: demonstration fixture" | a review. No person reviewed these items, no checklist was applied, and the records say so |
+| `REV-0001` to `REV-0014` | nothing: they are fixtures that bind each item to a content hash, and the units to the hashes of their code, so that the trace check can be demonstrated. They are recorded as "external criteria: demonstration fixture" | a review. No person reviewed these items, no checklist was applied, and the records say so |
 
 A real project replaces the review fixtures with reviews by named people against the
 checklists under `.claude/docs/checklists/`, and adds the guideline check its coding
@@ -99,8 +112,11 @@ whether that is enough is for a person to judge.
 | Unit test case | UT | `verification/unit` | 20 |
 | Software integration test case | SIT | `verification/software-integration` | 7 |
 | Software qualification test case | SQT | `verification/software-qualification` | 9 |
-| Plan | PLN | `plans` | 8 |
-| Work package | WP | `plans/work-packages` | 11 |
+| Plan | PLN | `plans` | 12 |
+| Work package | WP | `plans/work-packages` | 12 |
+| Safety analysis | SAN | `spec/safety/analyses` | 2 |
+| Tool evaluation | TEV | `plans/tools` | 2 |
+| Confirmation measure, safety case | CFM, SFC | `records/safety` | 2, 1 |
 | Item definition (imported) | ITM | `spec/cybersecurity/item` | 1 |
 | Asset, damage scenario, threat scenario | AST, DMG, THR | `spec/cybersecurity/tara` | 2, 3, 3 |
 | Cybersecurity goal, claim | CSG, CLM | `spec/cybersecurity/goals` | 1, 2 |
@@ -113,7 +129,7 @@ whether that is enough is for a person to judge.
 | Corrective action | CA | `records/actions` | 2 |
 | Build record | BLD | `verification/builds` | 2 |
 | Test run, static analysis run | RUN, SAR | `verification/runs` | 4, 1 |
-| Review record | REV | `records/reviews` | 11 |
+| Review record | REV | `records/reviews` | 14 |
 
 A good place to start reading is `spec/views/VIEW-0001.md` (structure), then
 `spec/views/VIEW-0003.md` (what happens when the glass meets an obstacle), then
@@ -194,6 +210,7 @@ python tools/traceability.py --project examples/power-window matrix
 python tools/traceability.py --project examples/power-window progress --as-of 2026-06-05
 python tools/traceability.py --project examples/power-window tara
 python tools/traceability.py --project examples/power-window clauses
+python tools/traceability.py --project examples/power-window safety
 ```
 
 `tara` lists the threat scenarios by risk value with the impact and feasibility they

@@ -21,6 +21,7 @@ items, `confirmation-measure` records and a `safety-case`.
 | 26262-8:11 Confidence in the use of software tools | evaluates every tool the records name: use cases, impact, detection, confidence level; qualification where needed | `tool-evaluation` (26262-8:11.5.1, 11.5.2); COV-71, COV-72 |
 | 26262-2:6 confirmation measures | prepares confirmation reviews, the audit and the assessment; records what the independent person states | `confirmation-measure` records (26262-2:6.5.5); COV-73 |
 | 26262-2:6 safety case | prepares the evidence per clause; the responsible person writes the argument | `safety-case` (26262-2:6.5.4) |
+| 26262-8:5 Interfaces within distributed developments | drafts the development interface agreement with the customer or a supplier; records the agreement only when the user states it | plan of kind `development-interface-agreement` (26262-8:5.5.2) |
 | 26262-2:6 release for production | not a record of its own: a baseline whose communication record names the case and the assessment | `/baseline` |
 
 ## Before you start
@@ -42,6 +43,12 @@ items, `confirmation-measure` records and a `safety-case`.
   `safety_activities`, written `"<part>:<clause>"`. Tailored and not-applicable entries
   need the user's reason; by-customer and by-supplier need the development interface
   agreement with that party.
+
+### 1a. Development interface agreement (26262-8:5)
+- Where a customer or supplier performs part of the safety activities, draft the plan of
+  kind `development-interface-agreement` with `shared_activities`, in the same form as the
+  cybersecurity interface agreement of `/cybersecurity-plan`.
+  Record the agreement only when the user states that both parties agreed.
 
 ### 2. Methods per table
 - For every table of parts 4, 5, 6 and 8 in scope, ask which methods the project applies

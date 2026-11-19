@@ -13,6 +13,8 @@ scope:
   role: software-supplier
   processes: [SWE.1, SWE.2, SWE.3, SWE.4, SWE.5, SWE.6, SUP.1, SUP.8, SUP.9, MAN.3]   # the software supplier's responsibility; system level is imported
   assessment_scope: []                              # no assessment planned for the example
+  safety: [2, 6, 8, 9]                              # ISO 26262 at ASIL B: management, software, supporting processes and
+                                                    # analyses; item, HARA, system and vehicle are the customer's (PLN-0010)
   cybersecurity: [6, 15]                            # ISO/SAE 21434: project management and the TARA of the window
                                                     # control; item, concept and vehicle are the customer's (PLN-0008)
 inputs:

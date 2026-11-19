@@ -1459,7 +1459,9 @@ def fs_items():
                          {"Boundary and functions": "Door module.", "Preliminary architecture": "One ECU.",
                           "Operational environment": "Vehicle."})
     for plan_id, kind, extra in (("PLN-0010", "software-integration", {"integration_steps": [{"name": "all", "components": ["CMP-0002"]}]}),
-                                 ("PLN-0011", "software-qualification-test", {}), ("PLN-0012", "change-request-management", {})):
+                                 ("PLN-0011", "software-qualification-test", {}), ("PLN-0012", "change-request-management", {}),
+                                 ("PLN-0013", "development-interface-agreement",
+                                  {"shared_activities": [{"activity": "3:6", "customer": "R", "supplier": "I"}]})):
         items[plan_id] = ({"type": "plan", "title": kind, "status": "approved", "kind": kind, **extra},
                           {"Scope": "x", "Approach": "x", "Criteria": "x", "Environment and tools": "x", "Responsibilities": "x"})
     items["HZE-0001"] = ({"type": "hazardous-event", "title": "Arm trapped while closing", "status": "approved",

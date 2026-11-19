@@ -317,7 +317,7 @@ types:
     prefix: SYR
     folder: spec/system/requirements
     lifecycle: engineering
-    supports: [SYS.2.BP1, SYS.2.BP2, SYS.2.BP3, SYS.2.BP4, SYS.2.BP5, "17-12", "17-50", "21434:10.4.1", "21434:WP-10-01", "26262-3:7", "26262-4:6", "26262-4:6.5.1"]
+    supports: [SYS.2.BP1, SYS.2.BP2, SYS.2.BP3, SYS.2.BP4, SYS.2.BP5, "17-12", "17-50", "21434:10.4.1", "21434:WP-10-01", "26262-3:7", "26262-4:6", "26262-4:6.5.1", "26262-8:6"]
     attributes: {use: [common, criticality, requirement]}
     sections:
       Statement: before-review
@@ -353,7 +353,7 @@ types:
     prefix: SWR
     folder: spec/software/requirements
     lifecycle: engineering
-    supports: [SWE.1.BP1, SWE.1.BP2, SWE.1.BP3, SWE.1.BP4, SWE.1.BP5, "17-11", "17-50", "21434:10.4.1", "21434:WP-10-01", "26262-6:6", "26262-6:6.5.1"]
+    supports: [SWE.1.BP1, SWE.1.BP2, SWE.1.BP3, SWE.1.BP4, SWE.1.BP5, "17-11", "17-50", "21434:10.4.1", "21434:WP-10-01", "26262-6:6", "26262-6:6.5.1", "26262-8:6"]
     attributes: {use: [common, criticality, requirement]}
     sections:
       Statement: before-review
@@ -465,7 +465,7 @@ types:
     supports: [MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6, MAN.3.BP7, SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1, SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1, "08-12", "08-52", "08-04", "08-13", "08-27", "08-28"]
     attributes:
       use: [common]
-      kind: {values: [project, unit-verification, software-integration, software-qualification-test, system-integration, system-qualification-test, configuration-management, quality-assurance, problem-resolution, change-request-management, risk-management, cybersecurity, cybersecurity-interface-agreement, cybersecurity-monitoring, cybersecurity-incident-response, production-control, end-of-cybersecurity-support, safety], required: always}
+      kind: {values: [project, unit-verification, software-integration, software-qualification-test, system-integration, system-qualification-test, configuration-management, quality-assurance, problem-resolution, change-request-management, risk-management, cybersecurity, cybersecurity-interface-agreement, cybersecurity-monitoring, cybersecurity-incident-response, production-control, end-of-cybersecurity-support, safety, development-interface-agreement], required: always}
       milestones: {structure: milestones, required: optional, note: "project plans: the milestones of the life cycle, each with its date and the baseline purpose that marks it"}
       coverage_targets: {required: optional, note: "unit-verification plans: structural coverage a unit must reach, per ASIL, as {<ASIL>: {statement_percent, branch_percent, mcdc_percent}} with any subset of the metrics; an ASIL without an entry has no target"}
       integration_steps: {structure: integration-steps, required: optional, note: "software-integration and system-integration plans: the integration steps in order (conditions)"}
@@ -477,7 +477,7 @@ types:
       escalation: {structure: escalation-rules, required: optional, note: "quality-assurance plans: when an overdue non-conformance goes to which level (conditions)"}
       tara_method: {structure: tara-method, required: optional, note: "cybersecurity plans: impact categories, feasibility approach and risk matrix of the TARA (conditions)"}
       cybersecurity_activities: {structure: cybersecurity-activities, required: optional, note: "cybersecurity plans: the activities per subclause of ISO/SAE 21434 in scope, with tailoring (conditions, COV-53)"}
-      shared_activities: {structure: shared-activities, required: optional, note: "cybersecurity interface agreements: who performs, approves, supports and is informed of each activity (conditions)"}
+      shared_activities: {structure: shared-activities, required: optional, note: "cybersecurity interface agreements and development interface agreements of ISO 26262: who performs, approves, supports and is informed of each activity (conditions)"}
       monitoring_sources: {structure: monitoring-sources, required: optional, note: "cybersecurity-monitoring plans: where cybersecurity information is collected (conditions)"}
       triggers: {structure: monitoring-triggers, required: optional, note: "cybersecurity-monitoring plans: what makes collected information a cybersecurity event (conditions)"}
       safety_activities: {structure: safety-activities, required: optional, note: "safety plans: the activities per clause of ISO 26262 in scope, with tailoring (conditions, COV-63)"}
@@ -1124,7 +1124,7 @@ plan_kinds:
   software-qualification-test: [SWE.6.BP1, "26262-6:11"]
   system-integration: [SYS.4.BP1, SYS.4.BP2, "26262-4:7"]
   system-qualification-test: [SYS.5.BP1]
-  configuration-management: [SUP.8.BP1, "26262-8:7", "26262-8:7.5.1"]
+  configuration-management: [SUP.8.BP1, "26262-8:7", "26262-8:7.5.1", "26262-8:10"]
   quality-assurance: [SUP.1.BP1]
   problem-resolution: [SUP.9.BP1]
   risk-management: [MAN.5.BP1, MAN.5.BP2]
@@ -1136,6 +1136,7 @@ plan_kinds:
   production-control: ["21434:12", "21434:WP-12-01"]
   end-of-cybersecurity-support: ["21434:14.3", "21434:WP-14-01"]
   safety: ["26262-2:6", "26262-2:6.5.3", "26262-4:5", "26262-5:5", "26262-6:5"]
+  development-interface-agreement: ["26262-8:5", "26262-8:5.5.2"]
 
 # ---------------------------------------------------------------------------
 # Conditional requirements: attributes or sections that become mandatory when
@@ -1168,7 +1169,7 @@ conditions:
   - {types: [plan], when: {kind: [quality-assurance]}, attributes: [escalation], structure: escalation-rules, stage: before-review}
   - {types: [plan], when: {kind: [cybersecurity]}, attributes: [tara_method], structure: tara-method, stage: before-review}
   - {types: [plan], when: {kind: [cybersecurity]}, attributes: [cybersecurity_activities], structure: cybersecurity-activities, stage: before-review}
-  - {types: [plan], when: {kind: [cybersecurity-interface-agreement]}, attributes: [shared_activities], structure: shared-activities, stage: before-review}
+  - {types: [plan], when: {kind: [cybersecurity-interface-agreement, development-interface-agreement]}, attributes: [shared_activities], structure: shared-activities, stage: before-review}
   - {types: [plan], when: {kind: [cybersecurity-monitoring]}, attributes: [monitoring_sources], structure: monitoring-sources, stage: before-review}
   - {types: [plan], when: {kind: [cybersecurity-monitoring]}, attributes: [triggers], structure: monitoring-triggers, stage: before-review}
   - {types: [weakness], when: {status: [closed]}, attributes: [closure], structure: closure, stage: always}
