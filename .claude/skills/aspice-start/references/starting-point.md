@@ -69,6 +69,22 @@ each kind listed, and reports each missing one as an error from the first check 
 | SUP.9 | `problem-resolution` | SUP.9.BP1 |
 | SUP.10 | `change-request-management` | SUP.10.BP1 |
 
+The standards add plans of their own, by the parts or clauses under `scope.safety` and
+`scope.cybersecurity`:
+
+| In scope | Plan kinds |
+|---|---|
+| ISO 26262 part 2 (clause 6) | `safety` |
+| ISO 26262 part 6 | `unit-verification`, `software-integration`, `software-qualification-test` - also when SWE.4 to SWE.6 come in a later phase: write short strategies now, and the integration steps once the architecture is drafted, since they name its components |
+| ISO 26262 part 4 | `system-integration` |
+| ISO 26262 part 8 | `configuration-management`, `change-request-management`, `development-interface-agreement` |
+| ISO/SAE 21434 clause 6 or 15 | `cybersecurity` |
+| ISO/SAE 21434 clause 7 | `cybersecurity-interface-agreement` |
+| ISO/SAE 21434 clauses 8, 12, 13, 14 | `cybersecurity-monitoring`, `production-control`, `cybersecurity-incident-response`, `end-of-cybersecurity-support` |
+
+`/safety-plan` and `/cybersecurity-plan` draft theirs; `python tools/traceability.py check`
+lists every plan that is missing under `COV-27`.
+
 Tell the user which plans that makes, and that a plan is an item like any other: it
 is drafted, reviewed and approved through `/review`. The base practice table of the
 skill that owns the process says whether that skill drafts the plan; today

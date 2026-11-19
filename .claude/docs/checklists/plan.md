@@ -1,6 +1,6 @@
 # Plan review checklist
 
-Version 8. Applies to: `plan`. Supports: MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6,
+Version 9. Applies to: `plan`. Supports: MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6,
 MAN.3.BP7, SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1,
 SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1, MAN.5.BP1, MAN.5.BP2, the subclauses of
 ISO/SAE 21434 that the cybersecurity kinds name, and the clauses of ISO 26262 the kind safety
@@ -265,7 +265,7 @@ empty, ask the user; do not assume a value.
 | PLN-166 | Each tailored or not-applicable clause says how its purpose is still reached or why it does not apply to this item | read `rationale` next to the clause's purpose in `iso-26262/2018/catalog.yaml` | semantic |
 | PLN-167 | `Scope` holds the impact analysis: what is new, changed or reused, and what follows for the activities | read `Scope` | semantic |
 | PLN-168 | The methods named per table agree with the strategies that apply them (unit verification, integration, qualification, coding guideline) | read `method_selection` next to those plans | semantic |
-| PLN-169 | The ASIL and tool confidence determinations are stated, and the safety manager states that they are those of the standard | ask; the note names who and when | accountable |
+| PLN-169 | Where the plan states an ASIL or tool confidence determination, the safety manager states that it is the one of the standard. A determination not stated yet is no finding: `check` then reports the ASILs or confidence levels as not assessed, and the plan says when it will be stated | ask; the note names who and when; `not-applicable` while none is stated | accountable |
 | PLN-170 | The confirmation measures cover the work products and the audit and assessment the ASIL calls for, each with the independence the responsible people read from the standard, and name who performs them | read `confirmation_measures` | semantic |
 | PLN-171 | Activities left to the customer or a supplier are those the development interface agreement assigns to them | read next to the agreement | semantic |
 | PLN-172 | The safety manager and the project lead state that the plan is the project's and that its activities are resourced | ask them; the note names who and when | accountable |

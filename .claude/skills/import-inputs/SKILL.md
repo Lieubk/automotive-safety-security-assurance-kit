@@ -22,6 +22,10 @@ the same way, as imported items of the types `item-definition`, `threat-scenario
 `cybersecurity-goal`, `cybersecurity-claim` or `system-requirement` (with
 `security_relevant`). The rules of ISO/SAE 21434 apply to them only for the clauses under
 `scope.cybersecurity`; `COV-59` still asks for the requirements derived from a goal.
+An ASIL or a link the source states in its text ("ASIL B, derived from SG-BL-01") is set
+as the attribute or link at registration: it is what the source says, not a change of it.
+A ReqIF attribute that carries such a value is taken over with
+`python tools/reqif.py import ... --attribute asil=<ReqIF attribute>`.
 Safety work products from the customer - item definition, hazardous events, safety goals,
 functional and technical safety requirements with their ASIL - are registered likewise,
 as `item-definition`, `hazardous-event`, `safety-goal` and `system-requirement`; `COV-67`

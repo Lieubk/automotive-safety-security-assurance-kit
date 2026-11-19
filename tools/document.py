@@ -471,8 +471,14 @@ def build(project, kind, include_drafts=False, baseline=None, as_of=None):
             shown.append(plan)
     shown = list({i.id: i for i in shown}.values())
     _FINDINGS.pop(id(project), None)
+    left_out = sorted({i.id for chapter in spec["chapters"] for key in ("items", "table") if key in chapter
+                       for i in project.of_type(*chapter[key].get("types", []))
+                       if project.live(i) and unsettled(project, i) and not include_drafts
+                       and (allowed is None or i.id in allowed)})
     doc.anchors = {i.id for i in shown}
-    return doc, provenance(project, kind, spec, shown, baseline), []
+    info = provenance(project, kind, spec, shown, baseline)
+    info["left_out"] = left_out
+    return doc, info, []
 
 
 _FINDINGS = {}
@@ -885,7 +891,7 @@ def cmd_build(project, args):
     if fmt not in ("html", "docx", "xlsx"):
         print("--format must be html, docx or xlsx")
         return 2
-    template = args.template or ((project.config.get("documents") or {}).get("template") or None)
+    template = args.template or ((project.config.get("documents") or {}).get("template") if fmt == "docx" else None) or None
     if template:
         template = Path(template) if Path(template).is_absolute() else (project.root / template)
         if fmt != "docx":
@@ -918,6 +924,11 @@ def cmd_build(project, args):
     out = Path(args.out) if args.out else project.root / "build" / "documents" / ("%s.%s" % (args.kind, fmt))
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_bytes(data)
+    if info["left_out"]:
+        print("left out: %d items that are not approved (%s); --include-drafts shows them, marked DRAFT"
+              % (len(info["left_out"]), ", ".join(info["left_out"][:10]) + (" ..." if len(info["left_out"]) > 10 else "")))
+    if not info["items"]:
+        print("warning: the document shows no item")
     print("wrote %s: %s, %d items, commit %s%s%s" % (
         out.as_posix(), info["title"], len(info["items"]), info["commit"],
         ", template %s" % template.name if template else "",

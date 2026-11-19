@@ -51,6 +51,10 @@ Functional safety under ISO 26262 at ASIL B covers parts 2, 6, 8 and 9 (`scope.s
 The hazard analysis, the safety goals and everything at system and vehicle level are the
 customer's: the system requirements it delivered carry their ASIL.
 
+The check reports one warning on purpose: the safety plan states no tool confidence
+determination, because the toolkit does not carry the tables of the standard; a real
+project types the one it applies, and `COV-71` then checks the tool evaluations against it.
+
 The item, its cybersecurity concept, validation and everything after development are
 the customer's: clauses 9 and 11 to 14 are not in scope, so the goal goes to the
 customer instead of being refined here, and the software items carry

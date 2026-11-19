@@ -1,6 +1,6 @@
 # Software architecture review checklist
 
-Version 2. Applies to: `software-component`, `software-interface`, `architecture-view`
+Version 3. Applies to: `software-component`, `software-interface`, `architecture-view`
 of level `software`, and `design-decision` of level `software`. Supports: SWE.2.BP1,
 SWE.2.BP2, SWE.2.BP3, SWE.2.BP4, SWE.2.BP5, SWE.2.BP6, SWE.2.BP7, SWE.2.BP8.
 
@@ -43,7 +43,7 @@ requirements an element fulfils and the interfaces a component provides and uses
 | ARC-08 | `Dynamic behavior` gives activation, own states, the state after initialisation and the timing objective, and agrees with the execution model view | compare the section with the `tasks` row of the component's entries | semantic |
 | ARC-09 | `resource_budget` has objectives for the resources that matter, their origin is recognisable, and `wcet_us` equals the timing objective in the text; or `not_relevant` names who budgets the component instead | read attribute and section | semantic |
 | ARC-10 | `supplier` names source, version and form of delivery, and for a component with safety requirements the ASIL it was developed to | read the attribute | semantic |
-| ARC-11 | A reused or supplied component that carries safety requirements is fit for them: the evidence named in `supplier` exists and was accepted | ask who accepted it, and on which evidence | accountable |
+| ARC-11 | A reused or supplied component that carries safety requirements is fit for them: the evidence named in `supplier` exists and was accepted | ask who accepted it, and on which evidence. `not-applicable` when the development interface agreement leaves the component and its evidence to the customer, with the plan's ID in the note | accountable |
 | ARC-12 | `model`, where set, names an existing component description, and the item contradicts it in no name of a port, interface or runnable | open the file and compare; no tool does | semantic |
 | ARC-13 | `execution_context` agrees with the execution model and with the partitioning argument for elements of different ASIL | compare with the views and the decision that concern the component | semantic |
 
@@ -115,5 +115,5 @@ requirements an element fulfils and the interfaces a component provides and uses
 | ARC-82 | Every choice that shaped the structure has a decision item, including the adoption of a given platform or architecture | ask which alternatives were discussed; compare with the decisions | semantic |
 | ARC-83 | The architecture can be built on the target with the given team and time | ask the software lead or the architect; the note names who states it | accountable |
 | ARC-84 | Capacities and reserves are the ones agreed with the owner of the hardware | ask who agreed, and when | accountable |
-| ARC-85 | Where safety requirements are allocated: the safety analyses that are due at architecture level by now exist, and their results are reflected in requirements and elements | ask the person responsible for functional safety which analyses are due at this point and whether they exist. `not-applicable` only when no subject carries an ASIL. Where nobody holds that role, the check cannot be answered: `not-assessed` | accountable |
+| ARC-85 | Where safety requirements are allocated: the safety analyses due at architecture level exist - drafted or in review is enough - cover the components of ASIL A to D, and their measures are reflected in requirements and elements | `check --all`: no `COV-69` finding; read the analyses (`safety-analysis` items that `analyses` the components) next to the requirements and elements. The analyses are approved after the architecture, because they build on it. `not-applicable` only when no subject carries an ASIL, or when part 6 of ISO 26262 is not in `scope.safety` and nobody answers for safety | accountable |
 | ARC-86 | Open questions to the source of an input are `query` items, and no open one invalidates an item under review | `python tools/traceability.py list --type query --status open`; go through each with the author | accountable |

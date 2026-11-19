@@ -200,6 +200,11 @@ class AgentCommands(unittest.TestCase):
     def test_an_agent_runs_the_commands_its_file_allows(self):
         self.assertIsNone(self.shell("aspice-reviewer", "python tools/traceability.py --project p show SWR-0001"))
 
+    def test_an_agent_may_name_the_project_after_the_script(self):
+        self.assertIsNone(self.shell("software-architect", 'python tools/record.py --project "C:/a b/p" next-id plan'))
+        self.assertEqual(self.shell("software-architect", "python tools/record.py --project p review --verdict approved X"),
+                         "deny")
+
     def test_an_agent_cannot_run_anything_else(self):
         self.assertEqual(self.shell("aspice-reviewer", "python -c \"open('x.py', 'w').write('')\""), "deny")
         self.assertEqual(self.shell("aspice-reviewer", "python tools/traceability.py check && python x.py"), "deny")

@@ -75,6 +75,26 @@ class Documents(unittest.TestCase):
         self.assertEqual(sheet.count("THR-0001"), 2)                      # two attack paths, two rows
         self.assertIn("CSG-0001", sheet)
 
+    def test_the_word_template_of_the_project_does_not_stop_other_formats(self):
+        if docx is None:
+            self.skipTest("python-docx is not installed")
+        template = docx.Document()
+        template.add_paragraph("{{content}}")
+        template.save(str(self.project / "customer.docx"))
+        config = self.project / "project.yaml"
+        config.write_text(config.read_text(encoding="utf-8") + "documents:\n  template: customer.docx\n", encoding="utf-8")
+        self.html("software-requirements-specification")                     # html ignores the Word template
+        out = Path(self.tmp.name) / "x.xlsx"
+        code, text = self.tool("document.py", "build", "software-requirements-specification", "--out", out)
+        self.assertEqual(code, 0, text)
+
+    def test_items_left_out_are_named(self):
+        path = self.project / "spec" / "cybersecurity" / "tara" / "THR-0002.md"
+        path.write_text(path.read_text(encoding="utf-8").replace("status: approved", "status: draft", 1), encoding="utf-8")
+        code, text = self.tool("document.py", "build", "tara-report", "--out", Path(self.tmp.name) / "t.html")
+        self.assertEqual(code, 0, text)
+        self.assertIn("left out: 1 items that are not approved (THR-0002)", text)
+
     def test_the_tara_report_shows_the_method_and_the_risks(self):
         page = self.html("tara-report")
         self.assertIn("risk matrix", page)

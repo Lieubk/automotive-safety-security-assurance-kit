@@ -723,6 +723,20 @@ class SafetyRecords(unittest.TestCase):
         from traceability import Project
         self.assertFalse([f for f in Project(self.project).check() if f["rule"] == "COV-73"])
 
+    def test_records_of_what_happened_are_not_dated_in_the_future(self):
+        code, out = self.record("confirmation-measure", "--kind", "confirmation-review", "--subject", "safety plan",
+                                "--performed-by", "R. Reviewer", "--independence", "I1", "--result", "passed",
+                                "--report", self.text, "--as-of", "2999-01-01")
+        self.assertEqual(code, 1)
+        self.assertIn("lies in the future", out)
+
+    def test_a_safety_case_needs_an_approved_safety_plan(self):
+        path = self.project / "plans" / "PLN-0009.md"
+        path.write_text(path.read_text(encoding="utf-8").replace("status: approved", "status: in-review", 1), encoding="utf-8")
+        code, out = self.record("safety-case", "--prepared-by", "S. Manager", "--argument", self.text)
+        self.assertEqual(code, 1)
+        self.assertIn("no approved safety plan", out)
+
     def test_the_safety_case_lists_the_evidence_per_clause(self):
         code, out = self.record("safety-case", "--prepared-by", "S. Manager", "--argument", self.text)
         self.assertEqual(code, 0, out)

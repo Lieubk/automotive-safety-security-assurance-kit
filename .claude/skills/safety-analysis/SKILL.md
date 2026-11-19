@@ -52,7 +52,12 @@ level, with its findings as a structured list.
 
 ### 4. Results and review
 - Write `Results`: what the analysis shows as a whole and what stays open. Status
-  `in-review` when complete; `/review` with `.claude/docs/checklists/safety-analysis.md`.
+  `in-review` when complete.
+- Order of approval: the analysis is drafted on the drafted architecture and read by the
+  architecture review (ARC-85 asks that it exists, not that it is approved); the
+  architecture is approved first, then the analysis with `/review` and
+  `.claude/docs/checklists/safety-analysis.md`, because an approved analysis may not rest
+  on elements that are not (`UPSTREAM`).
 
 ## Writing
 

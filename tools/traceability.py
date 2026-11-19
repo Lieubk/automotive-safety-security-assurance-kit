@@ -1695,6 +1695,32 @@ class Project:
         return next((p for p in sorted(self.of_type("plan"), key=lambda p: record_number(p.id))
                      if p.status == "approved" and p.front.get("kind") == "safety"), None)
 
+    def plan_in_work(self, kind):
+        """The approved plan of a kind, or else the newest live one, so that a plan is checked while it is written
+        and reviewed; findings on it then carry the level of its state."""
+        plans = sorted((p for p in self.of_type("plan") if self.live(p) and p.front.get("kind") == kind),
+                       key=lambda p: record_number(p.id))
+        return next((p for p in plans if p.status == "approved"), plans[-1] if plans else None)
+
+    def fs_related(self, item, seen=None):
+        """Whether an item is evidence of functional safety: of a type only ISO 26262 uses, of an ASIL above QM,
+        derived from a safety goal, or a test case, review or run of such an item."""
+        seen = seen if seen is not None else set()
+        if item.id in seen:
+            return False
+        seen.add(item.id)
+        refs = [str(r) for r in self.types.get(item.type, {}).get("supports") or []]
+        if refs and all(r.startswith("26262-") for r in refs) or ASIL_RANK.get(str(item.front.get("asil")), 0) > 0:
+            return True
+        if item.type == "plan":
+            return any(str(r).startswith("26262-") for r in self.schema["plan_kinds"].get(item.front.get("kind"), []))
+        related = [t for t, _ in item.targets("verifies")]
+        if item.type == "review-record":
+            related = [str(e.get("item")) for e in as_list(item.front.get("subject")) if isinstance(e, dict)]
+        elif item.type == "test-run":
+            related = [str(e.get("test")) for e in as_list(item.front.get("results")) if isinstance(e, dict)]
+        return any(self.fs_related(self.items[t], seen) for t in related if t in self.items)
+
     def safety_parts(self):
         return [p for p in fs_catalog()["parts"] if FS_PREFIX + str(p["id"]) in self.fs_scope]
 
@@ -1705,8 +1731,12 @@ class Project:
                 entries[str(entry.get(key))] = entry
         return entries
 
+    def plan_gap(self, rule, plan, message):
+        self.add("error" if plan.status == "approved" else self.level_for(plan), rule, plan.id, message,
+                 self.rules[rule]["supports"])
+
     def cov_63(self, rule):
-        plan = self.safety_plan()
+        plan = self.plan_in_work("safety")
         if plan is None:
             return                                        # COV-27 reports the missing plan
         supports, entries = self.rules[rule]["supports"], self.safety_entries(plan, "safety_activities", "clause")
@@ -1718,19 +1748,18 @@ class Project:
                 key = "%s:%s" % (part["id"], clause["id"])
                 entry = entries.get(key)
                 if entry is None:
-                    self.add("error", rule, plan.id, "safety_activities has no entry for clause %s %s"
-                             % (key, clause["name"]), supports)
+                    self.plan_gap(rule, plan, "safety_activities has no entry for clause %s %s" % (key, clause["name"]))
                 elif entry.get("decision") not in FS_DECISIONS:
-                    self.add("error", rule, plan.id, "clause %s: decision %r, allowed: %s"
-                             % (key, entry.get("decision"), ", ".join(FS_DECISIONS)), supports)
+                    self.plan_gap(rule, plan, "clause %s: decision %r, allowed: %s"
+                                  % (key, entry.get("decision"), ", ".join(FS_DECISIONS)))
                 elif entry.get("decision") in ("tailored", "not-applicable") and not entry.get("rationale"):
-                    self.add("error", rule, plan.id, "clause %s is %s without a rationale" % (key, entry["decision"]), supports)
+                    self.plan_gap(rule, plan, "clause %s is %s without a rationale" % (key, entry["decision"]))
         for name in sorted(set(entries) - known):
             self.add("warning", rule, plan.id, "safety_activities names %s, which is not a clause of ISO 26262 "
                      "(write \"<part>:<clause>\", for example \"6:7\")" % name, supports)
 
     def cov_64(self, rule):
-        plan = self.safety_plan()
+        plan = self.plan_in_work("safety")
         if plan is None:
             return
         supports, entries = self.rules[rule]["supports"], self.safety_entries(plan, "method_selection", "table")
@@ -1741,14 +1770,13 @@ class Project:
                 key = "%s:%s" % (part["id"], table["id"])
                 entry = entries.get(key)
                 if entry is None:
-                    self.add("error", rule, plan.id, "method_selection has no entry for table %s (%s)" % (key, table["name"]), supports)
+                    self.plan_gap(rule, plan, "method_selection has no entry for table %s (%s)" % (key, table["name"]))
                 elif entry.get("decision") not in ("applied", "not-applicable"):
-                    self.add("error", rule, plan.id, "table %s: decision %r, allowed: applied, not-applicable"
-                             % (key, entry.get("decision")), supports)
+                    self.plan_gap(rule, plan, "table %s: decision %r, allowed: applied, not-applicable" % (key, entry.get("decision")))
                 elif entry["decision"] == "applied" and not (entry.get("methods") or entry.get("applied_in")):
-                    self.add("error", rule, plan.id, "table %s is applied, but names neither methods nor where they are applied" % key, supports)
+                    self.plan_gap(rule, plan, "table %s is applied, but names neither methods nor where they are applied" % key)
                 elif entry["decision"] == "not-applicable" and not entry.get("rationale"):
-                    self.add("error", rule, plan.id, "table %s is not-applicable without a rationale" % key, supports)
+                    self.plan_gap(rule, plan, "table %s is not-applicable without a rationale" % key)
 
     def cov_65(self, rule):
         events = [e for e in self.of_type("hazardous-event") if self.live(e) and not e.imported]
@@ -1861,6 +1889,9 @@ class Project:
     def cov_71(self, rule):
         plan = self.safety_plan()
         table = plan.front.get("tcl_determination") if plan and isinstance(plan.front.get("tcl_determination"), dict) else None
+        if not table and any(self.live(t) for t in self.of_type("tool-evaluation")):
+            self.add("warning", rule, plan.id if plan else "project", "no approved safety plan with a tcl_determination: "
+                     "the confidence levels of the tools are not assessed", self.rules[rule]["supports"])
         for tool in self.of_type("tool-evaluation"):
             if not self.live(tool) or not self.due(tool, "before-review"):
                 continue
@@ -1957,7 +1988,7 @@ class Project:
         return any(self.cs_related(self.items[t], seen) for t in related if t in self.items)
 
     def cov_53(self, rule):
-        plan = self.cs_plan()
+        plan = self.plan_in_work("cybersecurity")
         if plan is None:
             return                                        # COV-27 reports the missing plan
         supports = self.rules[rule]["supports"]
@@ -2640,7 +2671,7 @@ def safety_rows(project, only=None):
     """Per clause of ISO 26262 under scope.safety (or of the part asked for): the decision of the safety plan,
     the items whose types give evidence for it, and the open findings of the rules behind it."""
     findings = project.check()
-    plan = project.safety_plan()
+    plan = project.plan_in_work("safety")
     decisions = project.safety_entries(plan, "safety_activities", "clause")
     rows = []
     for part in fs_catalog()["parts"]:
@@ -2653,18 +2684,14 @@ def safety_rows(project, only=None):
                            if any(str(s) == ref or str(s).startswith(ref + ".") for s in spec.get("supports") or []))
             kinds = sorted(k for k, refs in project.schema["plan_kinds"].items() if any(str(r) == ref or str(r).startswith(ref + ".") for r in refs))
             items = [i for i in project.items.values() if project.live(i) and (
-                (i.type in types and i.type != "plan") or (i.type == "plan" and i.front.get("kind") in kinds))]
-            if types and set(types) & {"system-requirement", "software-requirement", "software-component", "software-interface",
-                                       "software-unit", "component-design", "system-element", "system-interface"}:
-                items = [i for i in items if i.type not in ("system-requirement", "software-requirement", "software-component",
-                                                            "software-interface", "software-unit", "component-design",
-                                                            "system-element", "system-interface")
-                         or ASIL_RANK.get(str(i.front.get("asil")), 0) > 0]
+                (i.type in types and i.type != "plan") or (i.type == "plan" and i.front.get("kind") in kinds))
+                and project.fs_related(i)]
             entry = decisions.get("%s:%s" % (part["id"], clause["id"])) or {}
             open_findings = [f for f in findings if f["level"] != "info"
                              and any(str(s) == ref or str(s).startswith(ref + ".") for s in f["supports"])]
             rows.append({"clause": "%s:%s" % (part["id"], clause["id"]), "name": clause["name"],
                          "in_scope": key in project.fs_scope, "decision": entry.get("decision"),
+                         "plan": "%s (%s)" % (plan.id, plan.status) if plan else None,
                          "responsible": entry.get("responsible"),
                          "items": len(items), "approved_or_final": sum(1 for i in items if i.status in ("approved", "final")),
                          "types": sorted({i.type for i in items}) or types + ["plan of kind %s" % k for k in kinds],
@@ -2684,7 +2711,8 @@ def cmd_safety(project, args):
               else "%s is not a part of ISO 26262 with clauses (2 to 9, 12)" % args.part)
         return 0
     for row in rows:
-        decision = "%s, %s" % (row["decision"], row["responsible"]) if row["decision"] else "no entry in the safety plan"
+        decision = ("%s, %s" % (row["decision"], row["responsible"]) if row["decision"] else "no entry in the safety plan") \
+            + ("; plan %s" % row["plan"] if row["plan"] and not row["plan"].endswith("(approved)") else "")
         evidence = "%d items (%d approved or final; %s)" % (row["items"], row["approved_or_final"], ", ".join(row["types"])) \
             if row["items"] else "no evidence (%s)" % (", ".join(row["types"]) or "no item type of the toolkit")
         print("26262-%-6s %s  [%s]\n    %s" % (row["clause"], row["name"], decision, evidence))
@@ -2727,7 +2755,7 @@ def clause_rows(project, only=None):
     """Per subclause of ISO/SAE 21434 in scope (or the clause asked for): the decision of the cybersecurity plan,
     the items that provide each work product, and the open findings of the rules behind the subclause."""
     findings = project.check()
-    plan = project.cs_plan()
+    plan = project.plan_in_work("cybersecurity")
     decisions = {str(e.get("subclause")): e for e in as_list(plan.front.get("cybersecurity_activities") if plan else [])
                  if isinstance(e, dict)}
     plans = defaultdict(list)

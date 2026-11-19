@@ -1452,7 +1452,7 @@ def fs_items():
                           "method_selection": [{"table": tb, "decision": "applied", "applied_in": "PLN-0001"} for tb in tables],
                           "confirmation_measures": [{"measure": "confirmation-review", "subject": "safety plan",
                                                      "independence": "I1"}],
-                          "asil_determination": {"S1E4C2": "B"}},
+                          "asil_determination": {"S1E4C2": "B"}, "tcl_determination": {"TI2-TD1": "TCL1"}},
                          {"Scope": "The window software.", "Approach": "Per clause.", "Criteria": "Reviewed.",
                           "Environment and tools": "Repository.", "Responsibilities": "Safety manager."})
     items["ITM-0001"] = ({"type": "item-definition", "title": "Window lifter", "status": "approved"},
@@ -1581,6 +1581,24 @@ class FunctionalSafety(Case):
     def test_confirmation_measures_need_their_records_with_enough_independence(self):
         fixture = self.make(changed(fs_items(), "CFM-0001", independence="I0"))
         self.assertTrue(any("do not reach independence I1" in m for m in self.messages(fixture, "COV-73")))
+
+    def test_a_plan_in_work_is_checked_at_the_level_of_its_state(self):
+        items = fs_items()
+        items["PLN-0009"][0]["status"] = "in-review"
+        items["PLN-0009"][0]["safety_activities"] = items["PLN-0009"][0]["safety_activities"][1:]
+        fixture = self.make(items)
+        self.assertIn(("COV-63", "PLN-0009"), fixture.rules("warning"))
+        self.assertNotIn(("COV-63", "PLN-0009"), fixture.rules("error"))
+
+    def test_evidence_per_clause_is_safety_evidence_only(self):
+        from traceability import safety_rows
+        items = fs_items()
+        items["SWR-0002"] = (dict(items["SWR-0001"][0], title="Logging", asil="QM", links={"derived_from": ["SYR-0001"]}),
+                             items["SWR-0001"][1])
+        rows = {r["clause"]: r for r in safety_rows(Project(self.make(items).root))}
+        evidence = {e["item"] for e in rows["6:6"]["evidence"]}
+        self.assertIn("SWR-0001", evidence)
+        self.assertNotIn("SWR-0002", evidence)
 
     def test_safety_rows_show_decision_and_evidence_per_clause(self):
         from traceability import safety_rows

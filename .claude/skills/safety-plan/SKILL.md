@@ -31,7 +31,14 @@ items, `confirmation-measure` records and a `safety-case`.
    and stop; `/aspice-start` adds them.
 3. Run `python tools/traceability.py status`, `python tools/traceability.py check` and
    `python tools/traceability.py safety`. Read `COV-27` for kind `safety`, `COV-63`,
-   `COV-64`, `COV-71` to `COV-73`.
+   `COV-64`, `COV-71` to `COV-73`. The checks run on the plan while it is drafted.
+4. Say early which answers keep reviews from approving, so that the user can get them in
+   time: who is safety manager and who performs the confirmation reviews with which
+   independence (PLN-170, PLN-172); for every supplied or reused component of ASIL A to D,
+   who accepted its evidence, or that the development interface agreement leaves it to the
+   customer (ARC-11); an analysis of every component of ASIL A to D before the architecture
+   review (ARC-85). Determinations not stated yet do not block: `check` reports what they
+   leave unassessed.
 
 ## Steps
 

@@ -99,6 +99,9 @@ class ReqIF(unittest.TestCase):
         self.assertEqual(code, 0, out)
         text = (self.target / "spec" / "stakeholder" / "STK-0001.md").read_text(encoding="utf-8")
         self.assertIn("source_id: CUS-12", text)
+        code, out = self.reqif(self.target, "compare", file, "--source", "OEM spec", "--id-attribute", "Object Identifier",
+                               "--text-attribute", "Object Text")
+        self.assertEqual(code, 0, out)
         self.assertIn("The window shall close by one touch.\n\nIt stops at the closed end.", text)
 
 

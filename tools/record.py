@@ -1219,6 +1219,9 @@ def cmd_baseline(project, args):
 def cmd_cybersecurity_case(project, args):
     as_of = trace.as_date(args.as_of) if args.as_of else datetime.date.today()
     problems = [] if as_of else ["--as-of must be a date YYYY-MM-DD"]
+    not_future(as_of, problems, "a cybersecurity case")
+    if project.cs_plan() is None:
+        problems.append("no approved cybersecurity plan: the case argues that the plan was carried out; approve the plan first (/review)")
     argument = read_text_file(args.argument, "argument")
     if not argument:
         problems.append("--argument names no file with text: the case is the argument of the person who prepares it, "
@@ -1265,6 +1268,7 @@ def cmd_cybersecurity_case(project, args):
 def cmd_cybersecurity_assessment(project, args):
     as_of = trace.as_date(args.as_of) if args.as_of else datetime.date.today()
     problems = [] if as_of else ["--as-of must be a date YYYY-MM-DD"]
+    not_future(as_of, problems, "an assessment")
     case = project.items.get(args.case)
     if case is None or case.type != "cybersecurity-case":
         problems.append("--case %s is not a cybersecurity case" % args.case)
@@ -1296,9 +1300,15 @@ def cmd_cybersecurity_assessment(project, args):
     return 0
 
 
+def not_future(as_of, problems, what):
+    if as_of and as_of > datetime.date.today():
+        problems.append("--as-of %s lies in the future: %s records what happened, on the day it happened" % (as_of, what))
+
+
 def cmd_confirmation_measure(project, args):
     as_of = trace.as_date(args.as_of) if args.as_of else datetime.date.today()
     problems = [] if as_of else ["--as-of must be a date YYYY-MM-DD"]
+    not_future(as_of, problems, "a confirmation measure")
     report = read_text_file(args.report, "report")
     if not report:
         problems.append("--report names no file with text: the report is the words of the person who performed the measure")
@@ -1313,6 +1323,10 @@ def cmd_confirmation_measure(project, args):
     if problems:
         return stop(problems)
     items = [project.items[i] for i in args.item or []]
+    for item in items:
+        if item.status not in ("approved", "final"):
+            print("note: %s is in state %s; the record keeps its hash, and a change after this measure makes it stale"
+                  % (item.id, item.status))
     front = {
         "id": next_id(project, "confirmation-measure"),
         "type": "confirmation-measure",
@@ -1339,6 +1353,9 @@ def cmd_confirmation_measure(project, args):
 def cmd_safety_case(project, args):
     as_of = trace.as_date(args.as_of) if args.as_of else datetime.date.today()
     problems = [] if as_of else ["--as-of must be a date YYYY-MM-DD"]
+    not_future(as_of, problems, "a safety case")
+    if project.safety_plan() is None:
+        problems.append("no approved safety plan: the case argues that the plan was carried out; approve the plan first (/review)")
     argument = read_text_file(args.argument, "argument")
     if not argument:
         problems.append("--argument names no file with text: the safety case is the argument of the person who prepares it")

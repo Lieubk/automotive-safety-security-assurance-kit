@@ -1194,6 +1194,8 @@ links:
       - {from: software-requirement, to: [cybersecurity-goal], supports: ["21434:9.5", "21434:10.4.1", "21434:WP-09-06"]}
       - {from: system-requirement, to: [safety-goal], supports: ["26262-3:7", "26262-3:7.5.1"]}
       - {from: software-requirement, to: [safety-goal], supports: ["26262-6:6", "26262-6:6.5.1"]}
+      - {from: software-requirement, to: [safety-analysis], supports: ["26262-9:8", "26262-6:7"]}
+      - {from: system-requirement, to: [safety-analysis], supports: ["26262-9:8", "26262-4:6"]}
   fulfils:
     meaning: "the requirement is allocated to this architectural element. The link is stored on the element because the element depends on the requirement: when the requirement changes, the element becomes suspect"
     pairs:

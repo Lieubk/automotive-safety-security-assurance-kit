@@ -215,11 +215,14 @@ def agent_commands(agent_type):
     return [t[len("Bash("):-1] for t in tools if t.startswith("Bash(") and t.endswith(")")]
 
 
+PROJECT_OPTION = re.compile(r"""^(python3?\s+\S*tools[\\/]\w+\.py)\s+--project(?:\s+|=)(?:"[^"]*"|'[^']*'|\S+)""")
+
+
 def pre_shell(payload):
     command = str((payload.get("tool_input") or {}).get("command") or "")
     allowed = agent_commands(payload.get("agent_type"))
     if allowed is not None:
-        plain = command.strip()
+        plain = PROJECT_OPTION.sub(r"\1", command.strip())     # --project <dir> right after the script is allowed
         if SHELL_OPERATORS.search(plain) or not any(fnmatch.fnmatchcase(plain, p) for p in allowed):
             return deny("The agent %s may run only these commands, one at a time and without shell operators: "
                         "%s. Ask the caller for anything else." % (payload.get("agent_type"), "; ".join(allowed) or "none"))

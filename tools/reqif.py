@@ -144,6 +144,11 @@ def cmd_import(project, args):
         return record.stop(problems)
     section = first_section(project, args.type)
     attributes = project.attributes(args.type)
+    mapped = [tuple(m.split("=", 1)) for m in args.attribute or [] if "=" in m]
+    unknown = [n for n, _ in mapped if n not in attributes]
+    if unknown or len(mapped) != len(args.attribute or []):
+        return record.stop(["--attribute takes <item attribute>=<ReqIF attribute>; %s has no attribute %s"
+                            % (args.type, ", ".join(unknown) or "-")])
     received = args.received or datetime.date.today().isoformat()
     number = int(record.next_id(project, args.type).rsplit("-", 1)[1])
     prefix = project.types[args.type]["prefix"]
@@ -158,6 +163,10 @@ def cmd_import(project, args):
             front["source_document"] = "%s, version %s" % (args.source, args.version)
         if "source_id" in attributes:
             front["source_id"] = source_id(obj, args)
+        for name, reqif_name in mapped:
+            value = obj["values"].get(reqif_name)
+            if value not in (None, ""):
+                front[name] = value
         body = "\n## %s\n\n%s\n" % (section, text)
         written.append(front["id"])
         if not args.dry_run:
@@ -304,6 +313,8 @@ def main():
             p.add_argument("--received")
             p.add_argument("--title-attribute", default="ReqIF.Name")
             p.add_argument("--dry-run", action="store_true")
+            p.add_argument("--attribute", action="append",
+                           help="<item attribute>=<ReqIF attribute>: take a value over, for example asil=ASIL")
     export = sub.add_parser("export")
     export.add_argument("--type", required=True, action="append")
     export.add_argument("--out", required=True)

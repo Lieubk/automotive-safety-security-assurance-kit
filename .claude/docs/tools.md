@@ -148,7 +148,7 @@ module text). Records are final when written and are never edited afterwards.
 
 | Command | Use it to |
 |---|---|
-| `import FILE --type T --source NAME --version V [--received DATE] [--id-attribute A] [--title-attribute A] [--text-attribute A] [--dry-run]` | register a ReqIF delivery: one imported item in state draft per object, text unchanged, `imported` with source, version, date and source identifier. Refused when the source already has imported items |
+| `import FILE --type T --source NAME --version V [--received DATE] [--id-attribute A] [--title-attribute A] [--text-attribute A] [--attribute ATTR=REQIF-ATTRIBUTE ...] [--dry-run]` | register a ReqIF delivery (`--attribute` takes a value such as the ASIL over from a ReqIF attribute): one imported item in state draft per object, text unchanged, `imported` with source, version, date and source identifier. Refused when the source already has imported items |
 | `compare FILE --source NAME` | see what a new version changes against the imported items of the source: new, changed and removed objects |
 | `export --type T [--type T ...] --out FILE [--title TEXT]` | deliver items to an ALM tool: identifier, title, text, type, status and ASIL per object, links between exported items as relations |
 
@@ -160,6 +160,9 @@ module text). Records are final when written and are never edited afterwards.
 | `compare FILE` | see where the items and the model differ: components and interfaces on one side only, providers, users, data elements and operations. Exit code 1 when there are differences |
 
 ## Documents - `python tools/document.py [--project DIR] <command>`
+
+A build prints the items it left out because they are not approved, and warns when the
+document shows no item. `documents.template` of `project.yaml` applies to Word only.
 
 Generates documents from the items; the kinds and their chapters are in
 `schema/documents.yaml`. The items stay the source.
