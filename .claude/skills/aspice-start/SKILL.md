@@ -89,6 +89,11 @@ the product is cybersecurity relevant. Say what follows: items carry `asil` and
 `security_relevant`, an item may not fall below what it is derived from (COV-23), and
 unit coverage targets are set per ASIL in the unit verification plan (COV-28). QM is a
 statement, not a default: if nobody has decided yet, leave the value empty.
+When the product is cybersecurity relevant, ask which clauses of ISO/SAE 21434 the team
+is responsible for and which the customer or a supplier performs (show the clauses of
+`iso-sae-21434/2021/catalog.yaml` with their level: organization, project, lifecycle,
+method). Write the team's under `scope.cybersecurity`. Clause 5 is the organization's,
+not a project's; say so if it is named.
 Then ask for the project's rules that reviews check against, one by one, as listed
 under `conventions` in `references/project-yaml.md`: what the safety plan or the
 customer demands of the design notation and of review independence per ASIL, the

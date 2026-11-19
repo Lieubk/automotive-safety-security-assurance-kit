@@ -18,6 +18,8 @@ example is `examples/power-window`). They need Python 3 and PyYAML.
 | `audit <BL-ID>` | compare a baseline record with the items as they are now | one line per difference; exit code 1 when there are any |
 | `progress [--as-of DATE] [--json]` | compare the plan with what the items show: per work package its state read from the items it delivers, lateness, effort against estimate; milestones against baselines; open corrective actions | a tree of work packages, milestones, corrective actions, a summary line |
 | `problems [--as-of DATE] [--json]` | see every problem report with state, severity, origin, detection, age and the change requests that resolve it, and counts by severity, origin, detection and age | a list and a summary line |
+| `tara [--json]` | see the TARA by risk value: per threat scenario its assets, damage scenarios, highest impact, feasibility, the risk value written and the value of the cybersecurity plan's matrix, the treatment and the goals or claims that address it | a list and a summary line |
+| `clauses [CLAUSE] [--json]` | see, per subclause of ISO/SAE 21434 under `scope.cybersecurity` (or of the clause given), the decision of the cybersecurity plan, the items that provide each work product, and the open findings of the rules behind it | a block per subclause |
 | `risks [--as-of DATE] [--json]` | see the risks by exposure: state, category, owner, above the threshold of the risk-management plan or not, treatment actions open and overdue, indicators at their threshold, corrective actions | a list and a summary line |
 | `suppliers [--as-of DATE] [--json]` | see per supplier agreement the meetings held against the agreed rhythm, the communication records about it, the open items no later review closed, and the corrective actions | one block per agreement |
 | `quality [--as-of DATE] [--json]` | see the checks of the quality assurance plan with their last record, every finding with the state of its action, how far it is overdue and the escalation due by the plan, and whether the reports were communicated | lists and a summary line |
@@ -43,7 +45,7 @@ ratings:
 
 Finding levels: `error` (approved items, or always-wrong structure), `warning` (items
 in review, or missing consistency evidence), `info` (drafts). Rule names: `FORMAT`,
-`SCHEMA`, `LINK` (structure), `COV-01` to `COV-52` (coverage rules of
+`SCHEMA`, `LINK` (structure), `COV-01` to `COV-62` (coverage rules of
 `schema/items.yaml`), `SUSPECT` (an upstream item, or the code of a unit, changed after
 the review), `CONSISTENCY` (a review did not record what the item was compared with, or
 did not record the code of a unit), `UPSTREAM` (approved above something that is not),
@@ -69,6 +71,8 @@ active. The summary line says how many.
 | `quality-report --checked-by NAME --result R --summary FILE [--as-of DATE] [--period TEXT]` | record the periodic report of quality assurance: the quality records since the last report, the figures and findings of `quality`, and the reading of the person in the role. It raises no findings of its own |
 | `self-assessment --ratings FILE --assessor NAME [--process ID ...] --summary FILE [--as-of DATE] [--level 2] [--check-only]` | record the ratings N, P, L, F that named people gave per base practice in a mock assessment, with the observations of `practices` at the time and the consistency flags: a rating outside the band of the observation, a rating above that of a practice it depends on in the catalog. A flag from an observation or a rule needs the reason in the rating's note. `--check-only` lists gaps and flags and writes nothing. The toolkit rates nothing |
 | `supplier-review --agreement SAG-ID --kind technical\|progress --held-at DATE --participant NAME ... --minutes FILE [--open-items FILE]` | record a technical or progress review with a supplier: the minutes as the participants agree them and the open items; an item with `closes` settles an open item of an earlier review |
+| `cybersecurity-case --prepared-by NAME --argument FILE [--clause N ...] [--as-of DATE]` | write a cybersecurity case: per work product of the clauses in scope (or given) the items that provide it with state and hash, the open findings of those clauses, and the argument in the words of the person who prepares it | refused without the argument or without a clause |
+| `cybersecurity-assessment --case CSE-ID --assessor NAME --independence TEXT --judgement accepted\|conditionally-accepted\|rejected --report FILE [--conditions TEXT] [--as-of DATE]` | record the judgement of an independent assessor on a case | refused when the assessor prepared the case, without the report, or for a conditional acceptance without its conditions |
 | `problem-trends --reported-by NAME --assessment FILE [--as-of DATE] [--period TEXT]` | write a problem trend report: the list and figures of `problems` for the date, and the analyst's assessment from the file, in their words. Refused without an assessment |
 | `communication --subject ID --audience WHO --channel TEXT [--agreement TEXT] [--sent-at DATE] [--practice BP]` | record what was made known to whom, and what was agreed; `--subject`, `--audience` and `--practice` may repeat. `--practice` names the communicate practices the record serves; `practices` counts it for those only |
 

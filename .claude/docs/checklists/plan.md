@@ -1,8 +1,9 @@
 # Plan review checklist
 
-Version 6. Applies to: `plan`. Supports: MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6,
+Version 7. Applies to: `plan`. Supports: MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6,
 MAN.3.BP7, SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1,
-SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1, MAN.5.BP1, MAN.5.BP2.
+SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1, MAN.5.BP1, MAN.5.BP2, and the subclauses of
+ISO/SAE 21434 that the cybersecurity kinds name.
 
 Kinds: `script` - a tool answers it; `semantic` - needs reading and judgement, a model
 may propose and a person confirms; `accountable` - only a person can state it.
@@ -14,7 +15,8 @@ decision: the verdict is `rework` until the fact exists.
 
 A plan says how a process is going to be performed in this project. Apply the part
 "Every plan" to each plan, then the part for its `kind`. The parts follow `plan_kinds`
-in `schema/items.yaml`. A kind whose process is not in `scope.processes` needs no plan.
+in `schema/items.yaml`. A kind whose process is not in `scope.processes`, or whose clause
+is not under `scope.cybersecurity`, needs no plan.
 
 Recording: the review record needs a result for every check ID of this file. The checks
 of the parts for other kinds are `not-applicable`, with the note "plan of kind <kind>".
@@ -198,3 +200,56 @@ empty, ask the user; do not assume a value.
 | PLN-137 | Monitoring is defined: the review rhythm, what an indicator must show, who supplies values, and when an overdue action or an indicator at its threshold counts as treatment not progressing | read `Approach`, `Responsibilities` | semantic |
 | PLN-138 | Reporting and escalation are defined: the risk figures in the project status report, which risks go to higher management, to whom and how fast; it agrees with the project plan and the quality assurance escalation path | read `Approach`; compare with the project plan and the quality assurance plan | semantic |
 | PLN-139 | The people named as risk owners, acceptors and escalation recipients know the arrangement and have agreed to take the roles | ask who was informed, and when | accountable |
+
+## Kind cybersecurity (21434:6.4.1, 21434:6.4.2, 21434:6.4.3, 21434:6.4.4, 21434:6.4.5, 21434:6.4.6, 21434:15.8)
+
+| ID | Check | How to check | Kind |
+|---|---|---|---|
+| PLN-140 | `tara_method` and `cybersecurity_activities` are present, and the risk matrix has four values 1 to 5 for every impact level | `check`: no `SCHEMA` finding on the item, no `COV-57` finding on the plan | script |
+| PLN-141 | Every subclause of the clauses in `scope.cybersecurity` has an entry with a decision; tailored and not-applicable entries have a rationale | `check`: no `COV-53` finding; `clauses` shows the decision per subclause | script |
+| PLN-142 | Each tailored or not-applicable entry says how the objective of the subclause is still reached, or why it does not apply to this item | read `rationale` next to the subclause's objective in `iso-sae-21434/2021/catalog.yaml` | semantic |
+| PLN-143 | Each entry names who is responsible, and the work products and dates agree with the work breakdown where MAN.3 is in scope | read next to the work packages | semantic |
+| PLN-144 | Reused components, components developed out of context and off-the-shelf components of the architecture are named, with what is analysed or done again for each (entries for 6.4.4 to 6.4.6) | read next to the components of origin reused, supplied or third-party | semantic |
+| PLN-145 | The impact categories and their meaning, the feasibility approach and the risk matrix are defined so that two people rate alike; `impact_meaning` and `feasibility_meaning` are filled | read `tara_method` | semantic |
+| PLN-146 | The risk matrix rises with impact and with feasibility, and `retain_up_to` says up to which risk value a risk may be retained without a named person accepting it | read `risk_matrix` and `retain_up_to` | semantic |
+| PLN-147 | Activities left to the customer or a supplier are the ones the cybersecurity interface agreement assigns to them | read next to the plan of kind cybersecurity-interface-agreement | semantic |
+| PLN-148 | Whether a cybersecurity assessment is done, by whom and with which independence is stated, with the reason | read `Approach` and `Responsibilities` | semantic |
+| PLN-149 | The person responsible for cybersecurity and the project lead state that the plan is the project's and that its activities are resourced | ask them; the note names who and when | accountable |
+
+## Kind cybersecurity-interface-agreement (21434:7.4.3)
+
+| ID | Check | How to check | Kind |
+|---|---|---|---|
+| PLN-150 | `shared_activities` is present; each entry names the activity and the role of customer and supplier | `check`: no `SCHEMA` finding on the item | script |
+| PLN-151 | Every activity of the cybersecurity plan decided by-customer or by-supplier appears, and each activity has exactly one side that performs it | read next to `cybersecurity_activities` | semantic |
+| PLN-152 | What is exchanged, in which form and when is said for each activity that needs input from the other side, including vulnerabilities and incidents | read `exchange` and `Approach` | semantic |
+| PLN-153 | Both parties have agreed to the arrangement, as a communication record with `agreement` shows | read the communication record; the note names who agreed and when | accountable |
+
+## Kind cybersecurity-monitoring (21434:8.3)
+
+| ID | Check | How to check | Kind |
+|---|---|---|---|
+| PLN-154 | `monitoring_sources` and `triggers` are present | `check`: no `SCHEMA` finding on the item | script |
+| PLN-155 | The sources cover the components of the item that come from outside (origin supplied, third-party, reused) and the item's own field and test data | read next to the components | semantic |
+| PLN-156 | Each trigger can be decided from the collected information without interpretation, and says what follows | read `triggers` | semantic |
+| PLN-157 | The rhythm of collection and triage, who triages and how a cybersecurity event becomes a weakness item are defined | read `Approach` and `Responsibilities` | semantic |
+
+## Kind cybersecurity-incident-response (21434:13.3)
+
+| ID | Check | How to check | Kind |
+|---|---|---|---|
+| PLN-158 | The plan says who is told of an incident, how fast, who decides the remedy, how progress is followed and when an incident is closed | read `Approach`, `Criteria`, `Responsibilities` | semantic |
+| PLN-159 | It agrees with the escalation of the problem resolution strategy and with the interface agreement | read next to those plans | semantic |
+
+## Kind production-control (21434:12)
+
+| ID | Check | How to check | Kind |
+|---|---|---|---|
+| PLN-160 | The plan names each cybersecurity requirement for post-development and the production step that puts it in place (keys, configuration, locks of debug access) and how that is checked | read next to the requirements marked for post-development | semantic |
+| PLN-161 | Protection of the production equipment and the data it handles is stated | read `Approach`, `Environment and tools` | semantic |
+
+## Kind end-of-cybersecurity-support (21434:14.3)
+
+| ID | Check | How to check | Kind |
+|---|---|---|---|
+| PLN-162 | The procedure says how and when customers learn that cybersecurity support ends, and what happens to open vulnerabilities | read `Approach` | semantic |

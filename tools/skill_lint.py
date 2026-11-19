@@ -33,10 +33,10 @@ BUILT_IN_AGENTS = {"general-purpose", "Explore", "Plan"}
 MAX_LINES = 200
 TRACE_COMMANDS = {"check", "matrix", "show", "impact", "hash", "status", "list", "audit", "practices", "diff",
                   "progress", "problems", "history", "quality", "generic",
-                  "suppliers", "risks"}
+                  "suppliers", "risks", "tara", "clauses"}
 RECORD_COMMANDS = {"next-id", "test-run", "analysis-run", "review", "baseline", "communication", "status-report", "build",
                    "problem-trends", "quality-check", "quality-report", "self-assessment",
-                   "supplier-review"}
+                   "supplier-review", "cybersecurity-case", "cybersecurity-assessment"}
 
 
 def front_matter(path, errors):
@@ -63,8 +63,16 @@ def vocabulary():
     for f in (ROOT / "aspice").rglob("processes/*.yaml"):
         practices |= {bp["id"] for bp in yaml.safe_load(f.read_text(encoding="utf-8"))["base_practices"]}
     schema = yaml.safe_load((ROOT / "schema" / "items.yaml").read_text(encoding="utf-8"))
+    cybersecurity = set()
+    for f in (ROOT / "iso-sae-21434").rglob("catalog.yaml") if (ROOT / "iso-sae-21434").is_dir() else []:
+        catalog = yaml.safe_load(f.read_text(encoding="utf-8"))
+        for clause in catalog["clauses"]:
+            cybersecurity.add("21434:" + str(clause["id"]))
+            for sub in clause["subclauses"]:
+                cybersecurity |= {"21434:" + str(sub["id"])} | set(sub["requirements"]) | set(sub["work_products"])
     return {
         "practices": practices,
+        "cybersecurity": cybersecurity,
         "rules": {r["id"] for r in schema["coverage"]},
         "types": set(schema["types"]),
         "roles": set(schema["links"]),
@@ -83,6 +91,9 @@ def check_references(path, text, vocab, skills, errors, warnings):
     for ref in sorted(set(re.findall(r"\b[A-Z]{3}\.\d+\.BP\d+\b", text))):
         if ref not in vocab["practices"]:
             errors.append("%s: base practice %s is not in the catalog" % (name, ref))
+    for ref in sorted(set(re.findall(r"\b21434:\d+(?:\.\d+)*|\b(?:RQ|RC|PM|WP)-\d{2}-\d{2}\b", text))):
+        if ref not in vocab["cybersecurity"]:
+            errors.append("%s: %s is not in the catalog of ISO/SAE 21434" % (name, ref))
     for ref in sorted(set(re.findall(r"\bCOV-\d+\b", text))):
         if ref not in vocab["rules"]:
             errors.append("%s: coverage rule %s is not in the schema" % (name, ref))
@@ -113,7 +124,8 @@ def check_references(path, text, vocab, skills, errors, warnings):
 CANDIDATE_SKILL_NAMES = {
     "aspice-start", "import-inputs", "next-step", "sw-requirements", "sw-architecture", "sw-detailed-design",
     "sw-unit-implement", "sw-unit-verify", "review", "trace-check", "process-gate", "baseline", "change-request",
-    "project-plan", "work-breakdown", "project-status",
+    "project-plan", "work-breakdown", "project-status", "tara", "cybersecurity-plan", "cybersecurity-concept",
+    "vulnerability-management",
 }
 
 

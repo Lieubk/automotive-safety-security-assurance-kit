@@ -1285,8 +1285,8 @@ def cs_items():
     items["PLN-0009"] = ({"type": "plan", "title": "Cybersecurity plan", "status": "approved", "kind": "cybersecurity",
                           "tara_method": {"impact_categories": ["safety", "financial", "operational", "privacy"],
                                           "feasibility_approach": "attack-vector", "retain_up_to": 2,
-                                          "risk_matrix": {"severe": [2, 3, 4, 5], "major": [1, 2, 3, 4],
-                                                          "moderate": [1, 2, 2, 3], "negligible": [1, 1, 1, 1]}},
+                                          "risk_matrix": {"severe": [3, 4, 5, 5], "major": [2, 3, 4, 5],
+                                                          "moderate": [1, 2, 3, 4], "negligible": [1, 1, 2, 2]}},
                           "cybersecurity_activities": [{"subclause": s, "decision": "performed",
                                                         "responsible": "Cybersecurity lead"} for s in CS_SUBCLAUSES]},
                          PLAN_SECTIONS)
@@ -1301,7 +1301,7 @@ def cs_items():
                                      "privacy": "negligible"}},
                          {"Description": "A passenger is hurt.", "Impact rationale": "Pinching, bounded force."})
     items["THR-0001"] = ({"type": "threat-scenario", "title": "Spoofed close command", "status": "approved",
-                          "property": "integrity", "feasibility": "medium", "risk_value": 3, "treatment": ["reduce"],
+                          "property": "integrity", "feasibility": "medium", "risk_value": 4, "treatment": ["reduce"],
                           "attack_paths": [{"path": "diagnostic port, forged frame", "feasibility": "medium"},
                                            {"path": "telematics unit, then the bus", "feasibility": "low"}],
                           "links": {"threatens": ["AST-0001"], "leads_to": ["DMG-0001"]}},
@@ -1356,14 +1356,14 @@ class Cybersecurity(Case):
         self.assertEqual(len(messages), 2, messages)
 
     def test_feasibility_is_the_highest_of_the_attack_paths(self):
-        fixture = self.make(changed(cs_items(), "THR-0001", feasibility="low", risk_value=2))
+        fixture = self.make(changed(cs_items(), "THR-0001", feasibility="low", risk_value=3))
         messages = [f["message"] for f in fixture.findings("error") if f["rule"] == "COV-56"]
         self.assertTrue(messages and "highest of its attack paths is medium" in messages[0], messages)
 
     def test_risk_value_follows_the_matrix_of_the_plan(self):
-        fixture = self.make(changed(cs_items(), "THR-0001", risk_value=4))
+        fixture = self.make(changed(cs_items(), "THR-0001", risk_value=3))
         messages = [f["message"] for f in fixture.findings("error") if f["rule"] == "COV-57"]
-        self.assertTrue(messages and "gives 3 for impact major and feasibility medium" in messages[0], messages)
+        self.assertTrue(messages and "gives 4 for impact major and feasibility medium" in messages[0], messages)
 
     def test_a_tara_without_method_is_not_assessed(self):
         items = cs_items()
@@ -1413,11 +1413,11 @@ class Cybersecurity(Case):
 
     def test_tara_lists_threats_with_what_their_risk_rests_on(self):
         from traceability import tara
-        fixture = self.make(changed(cs_items(), "THR-0001", risk_value=4))
+        fixture = self.make(changed(cs_items(), "THR-0001", risk_value=3))
         data = tara(Project(fixture.root))
         entry = data["threat_scenarios"][0]
         self.assertEqual((entry["impact"], entry["feasibility"], entry["risk_value"], entry["matrix_value"]),
-                         ("major", "medium", 4, 3))
+                         ("major", "medium", 3, 4))
         self.assertEqual(entry["goals"], ["CSG-0001"])
         self.assertEqual(data["figures"]["risk_value_differs"], 1)
 

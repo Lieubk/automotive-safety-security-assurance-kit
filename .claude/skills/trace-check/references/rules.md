@@ -96,7 +96,7 @@ code need SWE.3 in scope.
 
 ## Coverage rules
 
-`COV-01` to `COV-52`; `COV-19` is listed above. A rule is active only when at least one
+`COV-01` to `COV-62`; `COV-19` is listed above. A rule is active only when at least one
 process in the column "Processes" is in `scope.processes`. "Accept" names the waiver the
 schema allows. A waiver is content of an item or of `project.yaml`; it is written by
 the authoring skill and reviewed like everything else. This skill does not apply
@@ -156,6 +156,16 @@ requirement. Nothing is written on the requirement.
 | `COV-50` | risk from state analysed on | probability and impact lie within the scales of the approved risk-management plan; the category is one the plan names | a rating on another scale; a new kind of risk the plan does not name | MAN.5.BP4, MAN.5.BP1 | MAN.5 | `/risk-management` | No |
 | `COV-51` | live risk above the threshold (probability times impact more than `acceptable_up_to`) | in treatment or closed, or accepted with a `decision` naming who accepted it | a high risk analysed and left | MAN.5.BP5 | MAN.5 | `/risk-management`; the decision is a person's | No |
 | `COV-52` | risk in treatment | at least one indicator with a threshold | treatment without a way to see whether it works | MAN.5.BP6 | MAN.5 | `/risk-management` | No |
+| `COV-53` | approved cybersecurity plan | an entry with a decision for every subclause of the clauses under `scope.cybersecurity`; tailored and not-applicable with a rationale | a subclause nobody decided about | 21434:6.4.2, 21434:6.4.3 | clauses in scope | `/cybersecurity-plan` | No |
+| `COV-54` | asset; damage scenario | a threat scenario threatens the asset; one leads to the damage scenario | an asset nobody analysed; a damage nothing causes | 21434:15.3, 21434:15.4 | clauses in scope | `/tara` | No |
+| `COV-55` | damage scenario from in-review on | an impact rating for every category of the plan, and none other | a category left out; a rating on another scale | 21434:15.5 | clauses in scope | `/tara` | No |
+| `COV-56` | threat scenario | threatens an asset with that property, leads to damage; rated attack paths; feasibility the highest of them | a scenario without paths; a feasibility lower than its worst path | 21434:15.4, 21434:15.6, 21434:15.7 | clauses in scope | `/tara` | No |
+| `COV-57` | threat scenario from in-review on | the risk value of the plan's matrix for its highest impact and its feasibility | a risk value chosen by hand; a matrix without four values 1 to 5 per impact | 21434:15.8 | clauses in scope | `/tara`, `/cybersecurity-plan` | No |
+| `COV-58` | threat scenario from in-review on | a treatment; reduce has a goal, share and retain a claim; retained above `retain_up_to` with a decision | a decision without consequence | 21434:15.9, 21434:9.4 | clauses in scope | `/tara`; the decision is a person's | No |
+| `COV-59` | cybersecurity goal | a system or software requirement derived from it | a goal that nothing implements | 21434:9.5, 21434:10.4.1 | clauses in scope | `/cybersecurity-concept` | No |
+| `COV-60` | requirements, elements, components, units | security-relevant when derived from a goal or a security-relevant item, or fulfilling one | security relevance lost on the way down | 21434:9.5, 21434:10.4.1 | clauses in scope | `/cybersecurity-concept`, the skill of the item's level | No |
+| `COV-61` | weakness from analysed on | a vulnerability to reduce has its change request or problem report; one shared or retained has a claim | a vulnerability decided and left | 21434:8.5, 21434:8.6 | clauses in scope | `/vulnerability-management` | No |
+| `COV-62` | cybersecurity goal | a system qualification test verifies it | a goal never validated on the vehicle | 21434:11 | clauses in scope | `/cybersecurity-concept`, `/sys-qualification-test` | No |
 
 ## Link roles and the practices behind `UPSTREAM`, `SUSPECT` and `CONSISTENCY`
 

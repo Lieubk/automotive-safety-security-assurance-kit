@@ -16,6 +16,7 @@ repository - one item per file - and a trace engine checks them.
 | `plans/`, `spec/`, `verification/`, `records/` | the project's items, in the folders `schema/items.yaml` names |
 | `src/`, `tests/` | code and test code |
 | `aspice/3.1/` | process catalog (`processes/`) and notes per process (`notes/`) |
+| `iso-sae-21434/2021/` | catalog of ISO/SAE 21434: clauses, subclauses, requirement and work product identifiers, objectives in our words |
 | `schema/` | item types, links and coverage rules (`items.yaml`), file layout (`item-format.md`) |
 | `tools/` | trace engine, record writer, validators |
 | `.claude/skills/`, `.claude/agents/`, `.claude/hooks/` | the toolkit itself |
@@ -52,6 +53,10 @@ repository - one item per file - and a trace engine checks them.
 | `/work-breakdown` | MAN.3 | work packages, activities, estimates, schedule, dependencies |
 | `/risk-management` | MAN.5 | risk management plan, risks rated, treated, monitored, accepted, corrective actions |
 | `/project-status` | MAN.3 | progress against the plan, status reports, corrective actions |
+| `/cybersecurity-plan` | ISO/SAE 21434 cl. 6, 7, 12-14 | cybersecurity plan with tailoring and TARA method, interface agreement, post-development plans, cybersecurity case, assessment record |
+| `/tara` | ISO/SAE 21434 cl. 9.3, 9.4, 15 | item definition, assets, damage and threat scenarios, attack paths, ratings, risk values, treatment, goals and claims |
+| `/cybersecurity-concept` | ISO/SAE 21434 cl. 9.5, 10, 11 | requirements derived from goals, security relevance down the levels, verification and validation |
+| `/vulnerability-management` | ISO/SAE 21434 cl. 8 | monitoring plan, events, weaknesses, vulnerability analysis and treatment |
 | `/next-step` | - | where the project stands and what to do next |
 
 Processes without a skill of their own are still in the catalog and covered by the
@@ -63,6 +68,7 @@ schema's rules; say so when the user asks for one.
 python tools/traceability.py check              # findings for the project in the current folder
 python tools/traceability.py --project examples/power-window check
 python tools/traceability.py practices SWE.1    # evidence and open findings per base practice
+python tools/traceability.py clauses           # ISO/SAE 21434: decision, evidence and findings per subclause
 python -m unittest discover -s tools/tests      # tests of the engine and the hooks
 python tools/skill_lint.py                      # mechanical checks of skills, agents, checklists
 ```
@@ -75,6 +81,7 @@ for the first time in a session.
 - Follow `.claude/docs/skill-authoring.md` for skills, checklists and agents.
 - `schema/items.yaml` is the single definition of items and rules; after a change run
   `python tools/schema_check.py` and the tests.
-- Text of Automotive SPICE and of other standards is not reproduced anywhere in this
-  repository: identifiers and official names only, descriptions in our own words.
+- Text of Automotive SPICE and of other standards (ISO/SAE 21434 included, with its
+  annexes and example tables) is not reproduced anywhere in this repository:
+  identifiers and official names only, descriptions in our own words.
 - Before a commit, `python tools/confidentiality_scan.py` must report no finding.

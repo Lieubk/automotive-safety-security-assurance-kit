@@ -75,6 +75,8 @@ Whether an input was registered and accepted is looked up; the tools report the 
 | `problem-resolution` | SUP.9 | `/problem-resolution` |
 | `quality-assurance` | SUP.1 | `/quality-assurance` |
 | `risk-management` | MAN.5 | `/risk-management` |
+| `cybersecurity`, `cybersecurity-interface-agreement`, `cybersecurity-incident-response`, `production-control`, `end-of-cybersecurity-support` | ISO/SAE 21434 clauses 6, 7, 12 to 14 | `/cybersecurity-plan` |
+| `cybersecurity-monitoring` | ISO/SAE 21434 clause 8 | `/vulnerability-management` |
 | `system-integration` | SYS.4 | `/sys-integration-test` |
 | `system-qualification-test` | SYS.5 | `/sys-qualification-test` |
 
@@ -200,6 +202,10 @@ and the notes of the process under `aspice/3.1/notes/`, and then goes to `/revie
 | `problem-report` items not `closed` or `rejected` | problems open; `python tools/traceability.py problems` lists them with their age | `/problem-resolution` |
 | `COV-39`, `COV-40` | an urgent problem without an authorised action; a problem not alerted to the parties the strategy names | `/problem-resolution <PRB-ID>`: the decision and the alert come from people |
 | `COV-50`, `COV-51`, `COV-52` | a risk rated outside the scales or with an unknown category; a risk above the threshold neither treated nor accepted by a named person; a risk in treatment without an indicator | `/risk-management <RSK-ID>` |
+| `COV-53` | the cybersecurity plan leaves a subclause in scope undecided or a tailoring without reason | `/cybersecurity-plan` |
+| `COV-54` to `COV-58` | the TARA is incomplete: an asset or damage without threat scenario, a rating outside the plan's method, a risk value other than the matrix gives, a treatment without goal or claim | `/tara <ID>` |
+| `COV-59`, `COV-60`, `COV-62` | a goal without requirements, security relevance lost on the way down, a goal not validated | `/cybersecurity-concept` |
+| `COV-61` | a vulnerability decided and not followed up | `/vulnerability-management <WKN-ID>` |
 | `COV-43` | a baseline was made without the quality check the quality assurance plan asks for before it | `/quality-assurance`; the next quality report names it |
 | `COV-44`, `COV-45` | a finding of quality assurance without an existing action; a quality report not communicated | `/quality-assurance` |
 | `COV-41`, `COV-42` | a problem in a baselined item without a change request; a closed problem without accepted closure, evidence, or with a change request still open | `/problem-resolution <PRB-ID>`; `/change-request` |

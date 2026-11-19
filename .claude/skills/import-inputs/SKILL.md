@@ -16,6 +16,13 @@ A ReqIF delivery is registered with `tools/reqif.py` (see "A delivery as ReqIF" 
 `references/registering-inputs.md`); other documents are read and the item files
 written by the skill.
 
+Cybersecurity work products the customer delivers - item definition, threat
+scenarios, cybersecurity goals and claims, cybersecurity requirements - are registered
+the same way, as imported items of the types `item-definition`, `threat-scenario`,
+`cybersecurity-goal`, `cybersecurity-claim` or `system-requirement` (with
+`security_relevant`). The rules of ISO/SAE 21434 apply to them only for the clauses under
+`scope.cybersecurity`; `COV-59` still asks for the requirements derived from a goal.
+
 The practices are those of SYS.1. With SYS.1 in scope the rows are evidence for it;
 without it the same steps are the entry check of the first process in scope, and no
 base practice is claimed.

@@ -24,6 +24,9 @@ scope:
   assessment_scope: []     # what an assessment will rate, when that differs from
                            # `processes`; empty when it does not differ or when no
                            # assessment is planned
+  cybersecurity: []        # clauses of ISO/SAE 21434 the team is responsible for,
+                           # as numbers 5 to 15 (iso-sae-21434/2021/catalog.yaml);
+                           # empty: no rule of the standard runs
 inputs:                    # what was received: one entry per document and version
   - level: ""              # stakeholder requirements | system requirements |
                            # system architecture | software requirements |
@@ -88,6 +91,7 @@ people:                    # who is accountable; review records need these names
 | Key | Read by | Effect |
 |---|---|---|
 | `scope.processes` | trace engine, every skill | Only the coverage rules of these processes run. A skill whose process is not listed stops. |
+| `scope.cybersecurity` | trace engine, cybersecurity skills | Only the rules of ISO/SAE 21434 whose subclauses belong to these clauses run, and `COV-27` asks for the plans of their kinds. Unlike `processes`, an empty list means none. |
 | `scope.assessment_scope` | skills and people | No effect on the checks. `/aspice-start` and `/next-step` warn while it names a process that `processes` does not. |
 | `aspice.version` | `practices` command | Selects the catalog the base practices are read from. |
 | `aspice.target_level` | people | A target, never a result. See "Target level" in `roles-and-processes.md`. |

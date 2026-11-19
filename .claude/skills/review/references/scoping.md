@@ -43,10 +43,13 @@ table says what to expect.
 | Unit code | `software-unit` as subject, read together with the files under `source_files` | `software-unit-code.md` |
 | Unit test specification | `unit-test`, with the test code its `script` names | `unit-test-specification.md` |
 | Plans | `plan` | `plan.md` |
+| Item definition (ISO/SAE 21434) | `item-definition` | `item-definition.md` |
+| TARA | `asset`, `damage-scenario`, `threat-scenario` | `tara.md` |
+| Cybersecurity goals and claims | `cybersecurity-goal`, `cybersecurity-claim` | `cybersecurity-goal.md` |
 | Anything else of the `engineering` lifecycle | for example `system-requirement` written by the project, `software-integration-test` | whichever checklist names the type; if none does, the semantic part is NOT ASSESSED |
 
 Cite a checklist as its file name without `.md`, followed by `v` and the number of its
-version line: `software-requirements v2`, `software-unit-code v2`, `plan v6`. The tool
+version line: `software-requirements v2`, `software-unit-code v2`, `plan v7`. The tool
 looks the file up and refuses a citation it cannot find or whose version is not the one
 in the file. It also accepts the title without the word "checklist"
 (`software requirements review v2`); use the file name, it cannot be mistyped as easily.

@@ -14,12 +14,13 @@ Early. One vertical slice works end to end and is demonstrated by the example:
 | Area | State |
 |---|---|
 | Process catalog | 23 processes of Automotive SPICE 3.1 with base practices, work products and rating dependencies (identifiers and official names; descriptions in our own words) |
-| Item schema | 35 item types, 17 link roles, 52 coverage rules, scope-aware |
+| Item schema | 44 item types, 20 link roles, 62 coverage rules, scope-aware |
+| ISO/SAE 21434 | clauses in scope per project; TARA (assets, damage and threat scenarios, attack paths, risk values from the project's matrix, treatment), goals and claims, concept, security relevance down to code and tests, vulnerability management, cybersecurity case and assessment records; `traceability.py tara` and `clauses` |
 | Trace engine | structure, links, coverage, stale approvals, suspect links, impact, traceability matrices, evidence per base practice, changes since a review, progress against the plan, integration steps and the builds and runs on them at software and system level, problems, quality assurance, observations per generic practice of level 2 |
 | Exchange | ReqIF import, comparison of a new version, export (`tools/reqif.py`); AUTOSAR Classic models to architecture items and back to a comparison (`tools/arxml.py`); pipeline templates for GitHub Actions and GitLab CI (`ci/`) |
 | Skills | project scoping and input registration; project management and risk management (MAN.3, MAN.5); SYS.2 to SYS.5 and SWE.1 to SWE.6; reviews and quality assurance; baselines, change requests and problem resolution; supplier monitoring; trace check, process gates and a mock assessment |
 | Hooks | imported inputs, final records and baselined items are protected; every written item is checked |
-| Not yet | exchange with ALM tools beyond ReqIF, ISO 26262 and ISO/SAE 21434 extensions, Automotive SPICE 4.0 |
+| Not yet | exchange with ALM tools beyond ReqIF, ISO 26262, a record for the release for post-development of ISO/SAE 21434, Automotive SPICE 4.0 |
 
 ## What it does not do
 

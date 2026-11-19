@@ -652,7 +652,7 @@ class CybersecurityRecords(unittest.TestCase):
         self.addCleanup(self.fixture.tmp.cleanup)
         self.project = self.fixture.root
         self.text = self.project / "argument.md"
-        self.text.write_text("The goal covers the only threat above risk 2; see the TARA.", encoding="utf-8")
+        self.text.write_text("The goal covers the only threat above risk 1; see the TARA.", encoding="utf-8")
 
     def record(self, *arguments):
         done = subprocess.run([sys.executable, str(ROOT / "tools" / "record.py"), "--project", str(self.project)]
