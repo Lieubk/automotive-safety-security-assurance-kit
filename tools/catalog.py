@@ -152,7 +152,8 @@ def main():
         known = {bp.get("id") for q in base.values() for bp in (q or {}).get("base_practices") or []}
         for pid, p in procs.items():
             for bp in (p or {}).get("base_practices") or []:
-                bad = [m for m in bp.get("maps_to") or [] if m not in known]
+                own = bp.get("id") if pid not in base else None     # a process 3.1 does not have maps to itself
+                bad = [m for m in bp.get("maps_to") or [] if m not in known and m != own]
                 if bad:
                     errors.append("%s: %s maps to %s, not a base practice of 3.1" % (pid, bp.get("id"), ", ".join(bad)))
 

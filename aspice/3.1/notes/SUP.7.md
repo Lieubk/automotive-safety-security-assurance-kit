@@ -43,6 +43,20 @@ No rating-consistency relations are recorded for this process.
 
 Related processes by content: documents that need control are handled under SUP.8 (see the hint to BP8).
 
+## Evidence in this toolkit
+Documents are generated from the items (`tools/document.py`); the items are the documentation
+that is kept and changed, a document is a view of them at a commit or a baseline.
+
+| BP | Carried by | Left to people |
+|---|---|---|
+| BP1 | the configuration management plan (where and under which control documents are kept) | - |
+| BP2, BP3 | none in the project: the item format, the schema and `schema/documents.yaml` of the toolkit, and the customer's template, are the standards and requirements | whether they are the project's |
+| BP4 | the project plan: which documents are delivered at which milestone | - |
+| BP5 | none as an item: documents are built from approved items, marked DRAFT otherwise | - |
+| BP6 | review records of the items a document shows | authorization before release |
+| BP7 | communication records with `--practice SUP.7.BP7`; releases with their delivery | - |
+| BP8 | change requests, and suspect links after a change | - |
+
 ## Automation notes
 Assumed set-up: documents are Markdown, reStructuredText or similar text sources with a metadata block, built into deliverable formats by a pipeline; review and approval happen through merge requests; version history comes from the version control system.
 

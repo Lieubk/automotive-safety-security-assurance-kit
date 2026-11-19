@@ -1846,6 +1846,31 @@ class Version40(unittest.TestCase):
         self.assertEqual(rows40["SWE.1.BP6"]["state"], rows31["SWE.1.BP8"]["state"])     # communicate
         self.assertGreaterEqual(rows40["SWE.1.BP1"]["evidence"], rows31["SWE.1.BP1"]["evidence"])
 
+    def test_validation_of_40_is_carried_by_tests_of_stakeholder_requirements(self):
+        from traceability import practice_rows
+        config = self.root / "project.yaml"
+        text = config.read_text(encoding="utf-8")
+        config.write_text(text.replace("processes: [SWE.1,", "processes: [VAL.1, SWE.1,", 1), encoding="utf-8")
+        rows = {r["practice"]: r for r in practice_rows(Project(self.root), "VAL.1")}
+        self.assertEqual(rows["VAL.1.BP1"]["state"], "no evidence yet")           # a place for it, nothing there yet
+        self.assertIn("link verifies", rows["VAL.1.BP1"]["by"])
+
+    def test_verification_and_documentation_of_31_have_their_evidence_places(self):
+        from traceability import practice_rows
+        root = Path(self.tmp.name) / "q"
+        shutil.copytree(str(self.REPO / "examples" / "power-window"), str(root), ignore=shutil.ignore_patterns("build"))
+        config = root / "project.yaml"
+        text = config.read_text(encoding="utf-8")
+        config.write_text(text.replace("processes: [SWE.1,", "processes: [SUP.2, SUP.4, SUP.7, SWE.1,", 1), encoding="utf-8")
+        project = Project(root)
+        rows = {r["practice"]: r for r in practice_rows(project, "SUP.2")}
+        self.assertEqual(rows["SUP.2.BP3"]["state"], "evidence present")          # the review records of the example
+        self.assertEqual(rows["SUP.2.BP1"]["state"], "findings open")             # no verification plan yet
+        self.assertTrue(any(f["rule"] == "COV-27" and "verification" in f["message"] for f in project.check()))
+        rows = {r["practice"]: r for r in practice_rows(project, "SUP.7")}
+        self.assertEqual(rows["SUP.7.BP2"]["state"], "no evidence structure")     # the toolkit's standards: a person judges
+        self.assertNotEqual(rows["SUP.7.BP6"]["state"], "no evidence structure")
+
     def test_generic_practices_of_40_combine_the_observations_of_31(self):
         from traceability import generic_rows
         rows = {r["practice"]: r for r in generic_rows(Project(self.root), "SWE.1")}

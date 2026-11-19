@@ -1,6 +1,6 @@
 # Plan review checklist
 
-Version 12. Applies to: `plan`. Supports: MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6,
+Version 12. Applies to: `plan`. Supports: MAN.3.BP1, SUP.2.BP1, SUP.2.BP2, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6,
 MAN.3.BP7, SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1,
 SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1, MAN.5.BP1, MAN.5.BP2, the subclauses of
 ISO/SAE 21434 that the cybersecurity kinds name, and the clauses of ISO 26262 the kind safety
@@ -161,6 +161,15 @@ empty, ask the user; do not assume a value.
 | PLN-85 | Reporting is defined: what is reported (results, deviations, trends), to whom and how often | read `Approach` | semantic |
 | PLN-86 | An escalation path is defined: when a deviation is escalated, to which level of management, and how the answer is recorded | read `Approach`, `Criteria` | semantic |
 | PLN-87 | The person in the quality assurance role has the authority to escalate, and the management named has agreed to respond | ask who agreed, and when | accountable |
+
+## Kind verification (SUP.2.BP1, SUP.2.BP2)
+
+| ID | Check | How to check | Kind |
+|---|---|---|---|
+| PLN-178 | The plan names every work product type of the processes in scope that is verified, with the method (review with a named checklist, test, analysis), the tools, and when it happens | read `Approach` next to `scope.processes` and the checklists under `.claude/docs/checklists` | semantic |
+| PLN-179 | The criteria per work product type are named: the checklist and version a review applies, or the pass criteria of a test or analysis; criteria of the project beyond the toolkit's are written down | read `Criteria` | semantic |
+| PLN-180 | The independence a verifier needs is stated per work product type, at least where a safety or security level asks for more | read `Approach` next to `conventions` of `project.yaml` | semantic |
+| PLN-181 | Findings of verification go to problem resolution or are closed in the review record, and who receives the results is named | read `Approach` next to the problem resolution strategy | semantic |
 
 ## Kind problem-resolution (SUP.9.BP1)
 

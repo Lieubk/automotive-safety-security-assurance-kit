@@ -1,6 +1,6 @@
 ---
 name: quality-assurance
-description: "Prepare and record the independent quality assurance of a project (Automotive SPICE SUP.1): the quality assurance plan with its checks and escalation path, checks of work products and of process activities that build on reviews, records and the process gate, quality records with the checker's verdict, non-conformances as corrective actions or problem reports followed to closure, escalation of overdue ones, and the periodic quality report. Use at the check dates of the plan, before a baseline the plan names, when the trace check reports COV-43 to COV-45 or no approved quality-assurance plan (COV-27), or when a non-conformance is overdue."
+description: "Prepare and record the independent quality assurance of a project (Automotive SPICE SUP.1): the quality assurance plan with its checks and escalation path, checks of work products and of process activities that build on reviews, records and the process gate, quality records with the checker's verdict, non-conformances as corrective actions or problem reports followed to closure, escalation of overdue ones, and the periodic quality report. Use at the check dates of the plan, before a baseline the plan names, when the trace check reports COV-43 to COV-45 or no approved quality-assurance or verification plan (COV-27), or when a non-conformance is overdue."
 argument-hint: "['plan', 'check <item or process IDs>', 'follow-up', 'report', or nothing for what is due]"
 allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Agent, Bash(python tools/traceability.py *), Bash(python tools/record.py *)
 ---
@@ -42,6 +42,10 @@ checks and records them; the person in the quality assurance role gives every ve
   `references/strategy-template.md`, ask the decisions listed there, and draft it.
   Independence, the checks, the escalation path and who answers an escalation are the
   user's decisions.
+- When SUP.2 is in scope, draft the verification strategy too (plan of kind
+  `verification`, part "Kind verification" of `plan.md`): which work products are
+  verified by which method and checklist, the criteria, the independence, where findings
+  go. Reviews and their records stay with `/review`.
 
 ### 2. Decide what is due
 - `quality` lists the checks of the plan with their last record; `check` reports

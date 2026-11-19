@@ -69,6 +69,11 @@ def main():
         for bp in proc["base_practices"]:
             practices[bp["id"]] = bp["name"]
         products |= {wp["id"] for wp in proc["output_work_products"]}
+    for folder in sorted((ROOT / "aspice").glob("*/processes")):      # a process only a later model has (VAL.1)
+        for f in folder.glob("*.yaml"):
+            if not (ROOT / "aspice" / args.version / "processes" / f.name).is_file():
+                proc = yaml.safe_load(f.read_text(encoding="utf-8"))
+                practices.update({bp["id"]: bp["name"] for bp in proc["base_practices"]})
 
     cybersecurity, cs_levels = {}, {}
     cs_file = ROOT / "iso-sae-21434" / "2021" / "catalog.yaml"

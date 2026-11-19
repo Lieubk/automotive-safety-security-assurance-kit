@@ -38,6 +38,15 @@ No rating-consistency relations are recorded for this process.
 
 Related processes by content: findings are handled through SUP.9 (BP4); peer reviews as a verification method connect to SUP.4.
 
+## Evidence in this toolkit
+| BP | Carried by | Left to people |
+|---|---|---|
+| BP1 | plan of kind `verification` (COV-27 asks for it while SUP.2 is in scope; `plan.md`, part "Kind verification") | whether the strategy is followed |
+| BP2 | the same plan, and the checklist with its version and hash in every review record | criteria the project adds |
+| BP3 | review records (`/review`) and the test, analysis and run records of the engineering processes | the depth of each verification |
+| BP4 | findings in review records, closed or open; problem reports for defects in other items | - |
+| BP5 | communication records with `--practice SUP.2.BP5` | - |
+
 ## Automation notes
 Assumed set-up: the verification strategy maps each work product type to a method (review, static analysis, test, analysis), a criteria set (checklist file or rule set) and an independence level; results are stored per item version.
 

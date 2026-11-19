@@ -74,12 +74,14 @@ Whether an input was registered and accepted is looked up; the tools report the 
 | `software-qualification-test` | SWE.6 | `/sw-qualification-test` |
 | `problem-resolution` | SUP.9 | `/problem-resolution` |
 | `quality-assurance` | SUP.1 | `/quality-assurance` |
+| `verification` | SUP.2 | `/quality-assurance`, which drafts the verification strategy next to its own plan |
 | `risk-management` | MAN.5 | `/risk-management` |
 | `cybersecurity`, `cybersecurity-interface-agreement`, `cybersecurity-incident-response`, `production-control`, `end-of-cybersecurity-support` | ISO/SAE 21434 clauses 6, 7, 12 to 14 | `/cybersecurity-plan` |
 | `cybersecurity-monitoring` | ISO/SAE 21434 clause 8 | `/vulnerability-management` |
 | `safety` | ISO 26262 part 2 | `/safety-plan` |
 | `release` | SPL.2 | `/release` |
 | `operation-and-service` | ISO 26262 part 7 | by hand, with `plan.md` |
+| `development-interface-agreement` | ISO 26262-8:5, 8:15, 8:16 | `/safety-plan` |
 | `system-integration` | SYS.4 | `/sys-integration-test` |
 | `system-qualification-test` | SYS.5 | `/sys-qualification-test` |
 

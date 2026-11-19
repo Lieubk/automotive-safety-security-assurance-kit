@@ -466,10 +466,10 @@ types:
     prefix: PLN
     folder: plans
     lifecycle: engineering
-    supports: [MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6, MAN.3.BP7, SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1, SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1, "08-12", "08-52", "08-04", "08-13", "08-27", "08-28"]
+    supports: [MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6, MAN.3.BP7, SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1, SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1, SUP.2.BP1, SUP.2.BP2, SUP.4.BP1, SUP.7.BP1, SUP.7.BP4, VAL.1.BP2, "08-12", "08-52", "08-04", "08-13", "08-27", "08-28"]
     attributes:
       use: [common]
-      kind: {values: [project, unit-verification, software-integration, software-qualification-test, system-integration, system-qualification-test, configuration-management, quality-assurance, problem-resolution, change-request-management, risk-management, cybersecurity, cybersecurity-interface-agreement, cybersecurity-monitoring, cybersecurity-incident-response, production-control, end-of-cybersecurity-support, safety, development-interface-agreement, release, operation-and-service], required: always}
+      kind: {values: [project, unit-verification, software-integration, software-qualification-test, system-integration, system-qualification-test, configuration-management, quality-assurance, verification, problem-resolution, change-request-management, risk-management, cybersecurity, cybersecurity-interface-agreement, cybersecurity-monitoring, cybersecurity-incident-response, production-control, end-of-cybersecurity-support, safety, development-interface-agreement, release, operation-and-service], required: always}
       milestones: {structure: milestones, required: optional, note: "project plans: the milestones of the life cycle, each with its date and the baseline purpose that marks it"}
       coverage_targets: {required: optional, note: "unit-verification plans: structural coverage a unit must reach, per ASIL, as {<ASIL>: {statement_percent, branch_percent, mcdc_percent}} with any subset of the metrics; an ASIL without an entry has no target"}
       integration_steps: {structure: integration-steps, required: optional, note: "software-integration and system-integration plans: the integration steps in order (conditions)"}
@@ -568,7 +568,7 @@ types:
     prefix: REL
     folder: records/releases
     lifecycle: record
-    supports: [SPL.2.BP5, SPL.2.BP9, SPL.2.BP10, SPL.2.BP11, SPL.2.BP12, SPL.2.BP13, "26262-2:6", "26262-2:6.5.6", "21434:6.4.9", "21434:WP-06-04", "13-06"]
+    supports: [SPL.2.BP5, SPL.2.BP9, SPL.2.BP10, SPL.2.BP11, SPL.2.BP12, SPL.2.BP13, "26262-2:6", "26262-2:6.5.6", "21434:6.4.9", "21434:WP-06-04", "13-06", SUP.7.BP7]
     attributes:
       id: {required: always}
       type: {required: always}
@@ -946,7 +946,7 @@ types:
     prefix: REV
     folder: records/reviews
     lifecycle: record
-    supports: [SUP.1.BP2, SUP.4.BP4, "13-19", "21434:WP-09-05", "21434:WP-09-07", "21434:WP-10-04", "26262-3:6.5.2", "26262-3:7.5.2", "26262-6:6.5.3", "26262-6:7.5.4", "26262-9:7.5.2", "26262-9:8.5.2", "26262-8:9.5.3", "26262-4:6.5.6"]
+    supports: [SUP.1.BP2, SUP.4.BP4, "13-19", "21434:WP-09-05", "21434:WP-09-07", "21434:WP-10-04", "26262-3:6.5.2", "26262-3:7.5.2", "26262-6:6.5.3", "26262-6:7.5.4", "26262-9:7.5.2", "26262-9:8.5.2", "26262-8:9.5.3", "26262-4:6.5.6", SUP.2.BP2, SUP.2.BP3, SUP.2.BP4, SUP.4.BP6, SUP.7.BP6]
     attributes:
       id: {required: always}
       type: {required: always}
@@ -969,7 +969,7 @@ types:
     prefix: CMR
     folder: records/communication
     lifecycle: record
-    supports: [SYS.2.BP8, SYS.3.BP8, SYS.4.BP9, SYS.5.BP7, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7, SWE.4.BP7, SWE.5.BP9, SWE.6.BP7, SUP.1.BP4, SUP.1.BP6, SUP.9.BP6, ACQ.4.BP2, "13-04"]
+    supports: [SYS.2.BP8, SYS.3.BP8, SYS.4.BP9, SYS.5.BP7, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7, SWE.4.BP7, SWE.5.BP9, SWE.6.BP7, SUP.1.BP4, SUP.1.BP6, SUP.9.BP6, ACQ.4.BP2, "13-04", SUP.2.BP5, SUP.4.BP5, SUP.7.BP7, VAL.1.BP5]
     attributes:
       id: {required: always}
       type: {required: always}
@@ -999,7 +999,7 @@ types:
     prefix: CR
     folder: records/changes
     lifecycle: change-request
-    supports: [SUP.10.BP2, SUP.10.BP3, SUP.10.BP4, SUP.10.BP5, SUP.10.BP6, SUP.10.BP7, SYS.1.BP5, "13-16", "13-21", "26262-8:8", "26262-8:8.5.2", "26262-8:8.5.3", "26262-8:8.5.4", "21434:13.4", SUP.8.BP5]
+    supports: [SUP.10.BP2, SUP.10.BP3, SUP.10.BP4, SUP.10.BP5, SUP.10.BP6, SUP.10.BP7, SYS.1.BP5, "13-16", "13-21", "26262-8:8", "26262-8:8.5.2", "26262-8:8.5.3", "26262-8:8.5.4", "21434:13.4", SUP.8.BP5, SUP.7.BP8]
     attributes:
       use: [common]
       requester: {required: always}
@@ -1033,7 +1033,7 @@ types:
     prefix: PRB
     folder: records/problems
     lifecycle: problem-report
-    supports: [SUP.9.BP2, SUP.9.BP3, SUP.9.BP4, SUP.9.BP7, SUP.9.BP8, "13-07"]
+    supports: [SUP.9.BP2, SUP.9.BP3, SUP.9.BP4, SUP.9.BP7, SUP.9.BP8, "13-07", SUP.2.BP4, SUP.4.BP8]
     attributes:
       use: [common]
       severity: {values: [critical, major, minor], required: always}
@@ -1089,7 +1089,7 @@ types:
     prefix: SAG
     folder: plans/suppliers
     lifecycle: engineering
-    supports: [ACQ.4.BP1, "02-01", "26262-8:5", "26262-8:5.5.5", "26262-8:5.5.3"]
+    supports: [ACQ.4.BP1, "02-01", "26262-8:5", "26262-8:5.5.5", "26262-8:5.5.3", SUP.4.BP1, SUP.4.BP2]
     attributes:
       use: [common]
       supplier: {required: always, note: "the supplier, by name or role, and the contract or order the agreement belongs to"}
@@ -1105,7 +1105,7 @@ types:
     prefix: SRV
     folder: records/suppliers
     lifecycle: record
-    supports: [ACQ.4.BP3, ACQ.4.BP4, "13-09", "13-14"]
+    supports: [ACQ.4.BP3, ACQ.4.BP4, "13-09", "13-14", SUP.4.BP4, SUP.4.BP6, SUP.4.BP7, SUP.4.BP8]
     attributes:
       id: {required: always}
       type: {required: always}
@@ -1204,14 +1204,15 @@ types:
 # clause of ISO/SAE 21434 in scope, one of every kind that names one of its subclauses.
 # ---------------------------------------------------------------------------
 plan_kinds:
-  project: [MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6, MAN.3.BP7]
+  project: [MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6, MAN.3.BP7, SUP.4.BP1, SUP.7.BP4]
   unit-verification: [SWE.4.BP1, "26262-6:9", "26262-8:9", "26262-8:9.5.1"]
   software-integration: [SWE.5.BP1, SWE.5.BP2, "26262-6:10", "26262-8:9", "26262-8:9.5.1"]
   software-qualification-test: [SWE.6.BP1, "26262-6:11", "26262-8:9", "26262-8:9.5.1"]
   system-integration: [SYS.4.BP1, SYS.4.BP2, "26262-4:7", "26262-4:7.5.1"]
-  system-qualification-test: [SYS.5.BP1]
-  configuration-management: [SUP.8.BP1, "26262-8:7", "26262-8:7.5.1", "26262-8:10", "26262-8:10.5.1", "26262-8:10.5.2", SUP.8.BP2, SUP.8.BP3, SUP.8.BP4, SUP.8.BP9]
+  system-qualification-test: [SYS.5.BP1, VAL.1.BP2]
+  configuration-management: [SUP.8.BP1, SUP.7.BP1, "26262-8:7", "26262-8:7.5.1", "26262-8:10", "26262-8:10.5.1", "26262-8:10.5.2", SUP.8.BP2, SUP.8.BP3, SUP.8.BP4, SUP.8.BP9]
   quality-assurance: [SUP.1.BP1]
+  verification: [SUP.2.BP1, SUP.2.BP2]
   problem-resolution: [SUP.9.BP1]
   risk-management: [MAN.5.BP1, MAN.5.BP2]
   change-request-management: [SUP.10.BP1, "26262-8:8", "26262-8:8.5.1"]
@@ -1334,6 +1335,7 @@ links:
       - {from: system-qualification-test, to: [system-requirement], supports: [SYS.5.BP5, SYS.5.BP6]}
       - {from: system-qualification-test, to: [cybersecurity-goal], supports: ["21434:11", "21434:WP-11-01"]}
       - {from: system-qualification-test, to: [safety-goal], supports: ["26262-4:8", "26262-4:8.5.2"]}
+      - {from: system-qualification-test, to: [stakeholder-requirement], supports: [VAL.1.BP1, VAL.1.BP3, VAL.1.BP4]}
   concerns:
     meaning: "the decision shapes the target"
     pairs:

@@ -47,6 +47,17 @@ No rating-consistency relations are recorded for this process.
 
 Related processes by content: SUP.2 points to this process for peer reviews used as a verification method.
 
+## Evidence in this toolkit
+| BP | Carried by | Left to people |
+|---|---|---|
+| BP1 | the project plan (reviews with the customer under its reporting and interfaces) and the `meetings` of supplier agreements | - |
+| BP2 | supplier agreements (`exchanges`, open items of their reviews) and problem resolution | - |
+| BP3 | none: preparation of a joint review is not recorded as an item | material sent ahead, the agenda |
+| BP4 | review records with participants of both sides; supplier reviews | - |
+| BP5 | communication records with `--practice SUP.4.BP5` | - |
+| BP6, BP7 | review findings; open items of supplier reviews with owner and state, followed to `closes` | priorities of actions |
+| BP8 | problem reports; open items of supplier reviews | - |
+
 ## Automation notes
 Assumed set-up: the review plan is a data file listing each planned joint review (milestone, type, scope, participants), and each held review produces a structured record (object versions, attendees, findings, decisions, actions).
 

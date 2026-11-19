@@ -29,7 +29,7 @@ base_practices:
   evidence:
   - Validation measures with pass/fail and entry/exit criteria
   rule_ids: []
-  maps_to: []
+  maps_to: [VAL.1.BP1]
 - id: VAL.1.BP2
   name: Select validation measures
   intent: Record why measures were chosen, with regression criteria and enough coverage of the release scope.
@@ -38,7 +38,7 @@ base_practices:
   evidence:
   - Selection of validation measures
   rule_ids: []
-  maps_to: []
+  maps_to: [VAL.1.BP2]
 - id: VAL.1.BP3
   name: Perform validation and evaluate results
   intent: Run the chosen measures, record outcomes and judge them.
@@ -47,7 +47,7 @@ base_practices:
   evidence:
   - Validation results with evaluation
   rule_ids: []
-  maps_to: []
+  maps_to: [VAL.1.BP3]
 - id: VAL.1.BP4
   name: Ensure consistency and establish traceability
   intent: Link measures to their sources among stakeholder requirements and results to measures, and keep them consistent.
@@ -56,7 +56,7 @@ base_practices:
   evidence:
   - Traceability and consistency results
   rule_ids: []
-  maps_to: []
+  maps_to: [VAL.1.BP4]
 - id: VAL.1.BP5
   name: Summarize and communicate results
   intent: Summarise the validation results and inform all concerned.
@@ -65,7 +65,7 @@ base_practices:
   evidence:
   - Validation summary
   rule_ids: []
-  maps_to: []
+  maps_to: [VAL.1.BP5]
 output_work_products:
 - id: 08-59
   name: Validation Measure
