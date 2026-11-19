@@ -144,6 +144,13 @@ module text). Records are final when written and are never edited afterwards.
 | `compare FILE --source NAME` | see what a new version changes against the imported items of the source: new, changed and removed objects |
 | `export --type T [--type T ...] --out FILE [--title TEXT]` | deliver items to an ALM tool: identifier, title, text, type, status and ASIL per object, links between exported items as relations |
 
+## AUTOSAR models - `python tools/arxml.py [--project DIR] <command>`
+
+| Command | Use it to |
+|---|---|
+| `import FILE [--dry-run]` | start the architecture items from an AUTOSAR Classic model: a draft component per SW component type, a draft interface per port interface, providers and users from the ports, data elements and operations, `part_of` from compositions, `model` set to the file. Refused when items of these names exist |
+| `compare FILE` | see where the items and the model differ: components and interfaces on one side only, providers, users, data elements and operations. Exit code 1 when there are differences |
+
 ## Continuous integration
 
 `ci/github-actions.yml` and `ci/gitlab-ci.yml` are templates for a project: the pipeline

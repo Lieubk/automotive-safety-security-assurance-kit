@@ -2,7 +2,7 @@
 name: sw-architecture
 description: "Design the software architecture from approved software requirements (Automotive SPICE SWE.2): components, interfaces, dynamic and resource views, design decisions, and the allocation of every requirement. Use when an architecture is to be created, extended or reworked, or when the trace check reports requirements without allocation (COV-07), components without requirements (COV-08) or missing architecture views (COV-25)."
 argument-hint: "[software requirement IDs, a component or feature name, or nothing to work on all open allocation and view findings]"
-allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Bash(python tools/traceability.py *), Bash(python tools/record.py *)
+allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Bash(python tools/traceability.py *), Bash(python tools/record.py *), Bash(python tools/arxml.py *)
 ---
 
 # Software architectural design (SWE.2)
@@ -79,7 +79,13 @@ Every requirement is allocated. All items are written in state `draft`, ready fo
 - Where a component description file exists, set `model` to its path and read ports,
   port interfaces and runnables from it. Never retype them into the component item or
   invent a name: the model stays the source, and what it lacks is a change to the model.
-- No tool compares model and items: report that comparison as `NOT ASSESSED`.
+- A model without items yet: `python tools/arxml.py import <file> --dry-run`, then,
+  with the user's yes, without `--dry-run`. It writes drafts with kind, providers,
+  users, data elements, operations and `part_of`; purpose, responsibility, layer,
+  origin, ASIL and allocation stay to be written here.
+- Model and items both exist: `python tools/arxml.py compare <file>` lists the
+  components, interfaces, providers, users, data elements and operations that differ.
+  Quote it; a difference is resolved in the model or in the item, as the user decides.
 
 ### 5. Define the interfaces
 - One `software-interface` per exchange between components, with one `provided_by` and
