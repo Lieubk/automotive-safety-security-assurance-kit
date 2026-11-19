@@ -1,0 +1,29 @@
+# Build configuration of the integration steps: what the integration strategy
+# (plans/PLN-0004.md) does not say about files. Test equipment, read by
+# tests/integration/run_tests.py and tests/qualification/run_tests.py.
+
+# Folders searched for headers, in this order. tests/unit/host holds the stand-ins for
+# the platform's standard headers, tests/unit the assertion header of the test programs.
+include:
+  - tests/unit/host
+  - tests/unit
+  - tests/integration/doubles
+  - src/windowpos
+  - src/antipinch
+  - reused/windowcmd
+  - reused/motordrive
+
+# Components taken over as received: the version integrated and its files.
+delivered:
+  CMP-0002:
+    version: "window lifter platform 3.2.0, WindowCmd"
+    files: [reused/windowcmd/WindowCmd.c]
+  CMP-0005:
+    version: "window lifter platform 3.2.0, MotorDrive"
+    files: [reused/motordrive/MotorDrive.c]
+
+# The double that stands in for a component in a step that names it under `doubles`.
+doubles:
+  CMP-0002: tests/integration/doubles/WindowCmd_double.c
+  CMP-0005: tests/integration/doubles/MotorDrive_double.c
+  CMP-0006: tests/integration/doubles/Platform_double.c
