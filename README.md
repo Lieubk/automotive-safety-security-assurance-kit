@@ -9,6 +9,11 @@ files in the repository - one item per file - and a trace engine checks them.
 
 The toolkit drafts and checks. People decide, review and are accountable.
 
+**New here?** The [user guide](docs/user-guide.md) walks through a project from the first
+session to a delivered release: setting the scope, the daily loop of drafting and review,
+tests and evidence, baselines and changes, safety, cybersecurity, documents, and what to
+do when the toolkit refuses something.
+
 ## At a glance
 
 | Scale | What it covers |
@@ -145,6 +150,7 @@ tools/             trace engine, record writer, validators, tests
 .claude/agents/    roles with boundaries; the reviewing agent cannot write
 .claude/hooks/     protection and checks on every write
 .claude/docs/      working agreement, command reference, review checklists
+docs/              user guide
 .claude-plugin/    plugin manifest and marketplace; hooks/hooks.json runs the hooks from the plugin
 examples/          power-window (software supplier), door-control-unit (system supplier)
 ci/                pipeline templates for projects (GitHub Actions, GitLab CI)
