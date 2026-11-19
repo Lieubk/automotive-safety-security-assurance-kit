@@ -1,6 +1,6 @@
 ---
 name: documents
-description: "Generate the documents a customer, an assessor or a reviewer expects - specifications, architecture and design descriptions (SAD, SDD), test specifications and reports, traceability, review, release, quality, problem, change, project, risk and supplier reports, TARA report and worksheet, cybersecurity plan and case - as HTML, Word or Excel, from the items of the project, in a neutral style or in the customer's Word template, for the working state or for a baseline. Use before a delivery or a milestone, when a review is held with people who do not read the item files, or when someone asks for a document of the project."
+description: "Generate the documents a customer, an assessor or a reviewer expects - specifications, architecture and design descriptions (SAD, SDD), test specifications and reports, traceability, review, release, quality, problem, change, project, risk and supplier reports, TARA report and worksheet, cybersecurity plan and case - as HTML, PDF, Word or Excel, from the items of the project, in a neutral style or in the customer's Word template, for the working state or for a baseline. Use before a delivery or a milestone, when a review is held with people who do not read the item files, or when someone asks for a document of the project."
 argument-hint: "[document kind, 'list', or nothing to see what can be generated]"
 allowed-tools: Read, Glob, Grep, AskUserQuestion, Bash(python tools/document.py *), Bash(python tools/traceability.py *), Bash(git status *), Bash(git log *), Bash(git tag *)
 ---
@@ -24,7 +24,8 @@ changes.
 | Management | `project-plan`, `project-status-report`, `risk-management-report`, `supplier-monitoring-report`, `self-assessment-report` |
 | Cybersecurity | `cybersecurity-plan`, `tara-report`, `tara-worksheet`, `cybersecurity-concept`, `vulnerability-report`, `cybersecurity-case-report` |
 
-Formats: HTML (one file), Word (neutral or the customer's template) and Excel (a sheet per
+Formats: HTML (one file), PDF (printed from the HTML, or converted from the Word document
+when a template applies), Word (neutral or the customer's template) and Excel (a sheet per
 chapter; the usual form of test specifications with results, and of TARA worksheets).
 A test report lists every test case with its steps, expected result and the verdict of
 the latest run that has it; a TARA worksheet has one row per attack path, from asset
@@ -51,8 +52,9 @@ items of each type the project has.
   - for a review or a discussion: the working state, approved items only, or with
     `--include-drafts` the items in work too, marked DRAFT.
 - Ask for the format: HTML (one file, opens anywhere; Mermaid diagrams are drawn when
-  the reader is online, otherwise their source shows), Word, or Excel for tabular
-  documents such as test specifications and reports or the TARA worksheet.
+  the reader is online, otherwise their source shows), PDF for a delivery that must not
+  change in the reader's hands, Word, or Excel for tabular documents such as test
+  specifications and reports or the TARA worksheet.
 
 ### 2. Template
 - Ask whether the customer gave a Word template (.docx or .dotx). If not, say that a
@@ -63,11 +65,14 @@ items of each type the project has.
   `project.yaml` so that every document uses it.
 
 ### 3. Generate
-- Run `python tools/document.py build <kind> --format html|docx|xlsx [--baseline BL-ID]
+- Run `python tools/document.py build <kind> --format html|pdf|docx|xlsx [--baseline BL-ID]
   [--template <file>] [--include-drafts] [--as-of <date>]`. The file goes to `build/documents/` unless
   `--out` names another place. Quote the line the tool prints, with its DRAFT reasons.
 - DOCX needs the package python-docx. If the tool says it is missing, report that the
   Word version is NOT ASSESSED and offer the HTML version.
+- PDF needs Edge, Chrome or Chromium for the HTML route, and LibreOffice or Word for the
+  route through a template (`--pdf-from docx`). When the tool says NOT ASSESSED, quote
+  its reason and offer the HTML or Word version; do not convert by hand.
 
 ### 4. Hand over
 - Name the file, the commit or baseline and the number of items. A document for a

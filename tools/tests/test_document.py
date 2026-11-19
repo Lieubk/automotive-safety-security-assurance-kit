@@ -123,6 +123,32 @@ class Documents(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("differ from baseline BL-0001", out)
 
+    def test_pdf_is_printed_from_the_html_or_reported_as_not_assessed(self):
+        sys.path.insert(0, str(ROOT / "tools"))
+        import document
+        out = Path(self.tmp.name) / "srs.pdf"
+        code, text = self.tool("document.py", "build", "software-requirements-specification", "--format", "pdf", "--out", out)
+        if document.find_browsers():
+            self.assertEqual(code, 0, text)
+            self.assertEqual(out.read_bytes()[:4], b"%PDF")
+        else:
+            self.assertEqual(code, 1)
+            self.assertIn("NOT ASSESSED", text)
+        found = document.find_browsers
+        document.find_browsers = lambda: []
+        try:
+            data, reason = document.html_to_pdf("<p>x</p>")
+        finally:
+            document.find_browsers = found
+        self.assertIsNone(data)
+        self.assertIn("no Chromium-family browser", reason)
+
+    def test_a_word_template_does_not_apply_to_a_pdf_printed_from_html(self):
+        code, text = self.tool("document.py", "build", "software-requirements-specification", "--format", "pdf",
+                               "--pdf-from", "html", "--template", Path(self.tmp.name) / "t.dotx")
+        self.assertEqual(code, 2)
+        self.assertIn("applies to --format docx", text)
+
     @unittest.skipIf(docx is None, "python-docx is not installed")
     def test_docx_in_neutral_style_and_in_the_customer_template(self):
         out = Path(self.tmp.name) / "sdd.docx"
