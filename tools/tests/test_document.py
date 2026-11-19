@@ -16,6 +16,10 @@ try:
     import docx
 except ImportError:                                   # DOCX is optional; the HTML tests still run
     docx = None
+try:
+    import openpyxl
+except ImportError:                                   # needed only for the customer's Excel templates
+    openpyxl = None
 
 
 class Documents(unittest.TestCase):
@@ -170,6 +174,80 @@ class Documents(unittest.TestCase):
         self.assertEqual(paragraphs[0], "Customer cover: Software detailed design for Power window control")
         self.assertEqual(paragraphs[-1], "Customer closing page")                  # content went where {{content}} was
         self.assertNotIn("{{content}}", paragraphs)
+
+    @unittest.skipIf(openpyxl is None, "openpyxl is not installed")
+    def test_the_customer_excel_template_is_filled_and_keeps_its_form(self):
+        from openpyxl.formatting.rule import CellIsRule
+        from openpyxl.styles import PatternFill
+        from openpyxl.worksheet.datavalidation import DataValidation
+        folder = Path(self.tmp.name) / "templates"
+        folder.mkdir()
+        book = openpyxl.Workbook()
+        cover = book.active
+        cover.title = "Cover"
+        cover.merge_cells("B2:E2")
+        cover["B2"] = "Integration test report"
+        spec = book.create_sheet("Specification")
+        spec.append(["Customer form"])
+        spec.append([])
+        spec.append(["Test ID", "Description", "Expected result", "Result", "Remark", "No"])
+        spec.append(["EXAMPLE-1", "sample row of an earlier report", "", "Pass", "old remark", "=ROW()-3"])
+        green = PatternFill("solid", start_color="FFC6EFCE")
+        for cell in spec[4]:
+            cell.fill = green
+        verdicts = DataValidation(type="list", formula1='"Pass,Fail"')
+        spec.add_data_validation(verdicts)
+        verdicts.add("D4:D200")
+        spec.conditional_formatting.add("D4:D200", CellIsRule(operator="equal", formula=['"Fail"'], fill=green))
+        reqs = book.create_sheet("Requirements")
+        reqs.append(["ID", "Requirement", "Derived from", "Status", "No"])
+        book.save(str(folder / "customer.xlsx"))
+        (folder / "report.yaml").write_text(
+            "template: customer.xlsx\n"
+            "cells:\n  - {sheet: Cover, cell: B4, value: 'Project {{project}}, commit {{commit}}'}\n"
+            "tables:\n"
+            "  - {sheet: Specification, header_row: 3, from: table,\n"
+            "     columns: {Test ID: test case, Description: title, Expected result: expected result, Result: verdict},\n"
+            "     values: {Result: {passed: Pass, failed: Fail}}}\n",
+            encoding="utf-8")
+        out = Path(self.tmp.name) / "report.xlsx"
+        code, text = self.tool("document.py", "build", "software-integration-test-report", "--format", "xlsx",
+                               "--template", folder / "report.yaml", "--out", out)
+        self.assertEqual(code, 0, text)
+        filled = openpyxl.load_workbook(str(out))
+        sheet = filled["Specification"]
+        self.assertRegex(str(sheet["A4"].value), r"^[A-Z]+-\d{4}$")         # the first test case, not the sample
+        self.assertIn(sheet["D4"].value, ("Pass", "Fail"))                   # in the words of the drop-down list
+        self.assertIsNone(sheet["E4"].value)                    # the earlier report's rows are cleared in every column
+        self.assertEqual(sheet["F4"].value, "=ROW()-3")                       # formulas stay
+        self.assertEqual(sheet["A5"].fill.start_color.rgb, "FFC6EFCE")       # later rows take the form's style
+        self.assertEqual(len(sheet.data_validations.dataValidation), 1)
+        self.assertEqual(len(sheet.conditional_formatting), 1)
+        self.assertIn("B2:E2", [str(r) for r in filled["Cover"].merged_cells.ranges])
+        self.assertTrue(str(filled["Cover"]["B4"].value).startswith("Project Power window control, commit "))
+        self.assertIn("Document information", filled.sheetnames)
+
+        (folder / "srs.yaml").write_text(
+            "template: customer.xlsx\n"
+            "tables:\n  - {sheet: Requirements, header_row: 1, from: items, types: [software-requirement],\n"
+            "     columns: {No: '#', ID: id, Requirement: 'section:Statement', Derived from: 'link:derived_from',\n"
+            "               Status: status}}\n",
+            encoding="utf-8")
+        code, text = self.tool("document.py", "build", "software-requirements-specification", "--format", "xlsx",
+                               "--template", folder / "srs.yaml", "--out", out)
+        self.assertEqual(code, 0, text)
+        rows = list(openpyxl.load_workbook(str(out))["Requirements"].values)
+        self.assertEqual(rows[1][0], "SWR-0001")
+        self.assertTrue(rows[1][1] and rows[1][2] and rows[1][3] == "approved")
+        self.assertEqual([r[4] for r in rows[1:4]], [1, 2, 3])               # the header No stays a word
+
+        (folder / "bad.yaml").write_text(
+            "template: customer.xlsx\ntables:\n  - {sheet: Specification, header_row: 3, from: table,\n"
+            "     columns: {Test ID: test case, Priority: priority}}\n", encoding="utf-8")
+        code, text = self.tool("document.py", "build", "software-integration-test-report", "--format", "xlsx",
+                               "--template", folder / "bad.yaml", "--out", out)
+        self.assertEqual(code, 1)
+        self.assertIn("has no header 'Priority'", text)
 
 
 if __name__ == "__main__":

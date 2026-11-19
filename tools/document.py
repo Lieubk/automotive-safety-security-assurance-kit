@@ -1017,10 +1017,20 @@ def cmd_build(project, args):
     if fmt not in ("html", "pdf", "docx", "xlsx"):
         print("--format must be html, pdf, docx or xlsx")
         return 2
+    settings = project.config.get("documents") or {}
+    if fmt == "xlsx":                                     # an Excel template is named through its map file
+        template = args.template or (settings.get("excel_maps") or {}).get(args.kind) or None
+        if template and Path(template).suffix.lower() not in (".yaml", ".yml"):
+            print("an Excel template is named through its map file (.yaml), which names the workbook and says "
+                  "where the document goes: see tools/excel_template.py")
+            return 2
     word = fmt == "docx" or (fmt == "pdf" and args.pdf_from != "html")
-    template = args.template or ((project.config.get("documents") or {}).get("template") if word else None) or None
+    if fmt != "xlsx":
+        template = args.template or (settings.get("template") if word else None) or None
     pdf_from = args.pdf_from or ("docx" if template else "html")
-    if template:
+    if template and fmt == "xlsx":
+        template = Path(template) if Path(template).is_absolute() else (project.root / template)
+    elif template:
         template = Path(template) if Path(template).is_absolute() else (project.root / template)
         if fmt not in ("docx", "pdf") or pdf_from == "html":
             print("a Word template applies to --format docx, and to pdf made from the Word document")
@@ -1055,6 +1065,12 @@ def cmd_build(project, args):
         if data is None:
             print("PDF from the HTML: %s: NOT ASSESSED\nno document written" % reason)
             return 1
+    elif fmt == "xlsx" and template:
+        import excel_template
+        data, problems = excel_template.fill(doc, info, project, template, plain, value_text)
+        if problems:
+            print("\n".join(problems) + "\nno document written")
+            return 1
     elif fmt == "xlsx":
         data = to_xlsx(doc, info)
     else:
@@ -1087,7 +1103,9 @@ def main():
     b.add_argument("--pdf-from", choices=["html", "docx"],
                    help="what the PDF is made from; default: docx when a Word template applies, html otherwise")
     b.add_argument("--out")
-    b.add_argument("--template", help="a .docx or .dotx file of the customer; default: documents.template of project.yaml")
+    b.add_argument("--template", help="a .docx or .dotx file of the customer (default: documents.template of project.yaml); "
+                                      "for xlsx the map file (.yaml) of the customer's workbook (default: "
+                                      "documents.excel_maps of project.yaml)")
     b.add_argument("--baseline", help="show only the items of this baseline; refused when they changed since")
     b.add_argument("--include-drafts", action="store_true", help="show items that are not approved, marked DRAFT")
     b.add_argument("--no-script", action="store_true", help="HTML without the script that draws Mermaid diagrams")

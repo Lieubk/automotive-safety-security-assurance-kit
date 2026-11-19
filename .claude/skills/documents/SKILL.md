@@ -57,16 +57,18 @@ items of each type the project has.
   specifications and reports or the TARA worksheet.
 
 ### 2. Template
-- Ask whether the customer gave a Word template (.docx or .dotx). If not, say that a
-  neutral style is used and suggest asking the customer for theirs: cover page,
-  headers and footers, styles. Read `references/templates.md` for what a template needs.
+- Ask whether the customer gave a Word template (.docx or .dotx) or an Excel workbook to
+  fill. If not, say that a neutral style is used and suggest asking the customer for
+  theirs: cover page, headers and footers, styles; for Excel, the sheet and columns they
+  expect. Read `references/templates.md` for what a template needs; an Excel workbook is
+  filled through a map file, which is shown to the user before it is used.
 - A template the customer gave is kept in the project, for example under `templates/`,
   and named with `--template`; `/aspice-start` records it as `documents.template` in
   `project.yaml` so that every document uses it.
 
 ### 3. Generate
 - Run `python tools/document.py build <kind> --format html|pdf|docx|xlsx [--baseline BL-ID]
-  [--template <file>] [--include-drafts] [--as-of <date>]`. The file goes to `build/documents/` unless
+  [--template <file.docx|file.dotx|map.yaml>] [--include-drafts] [--as-of <date>]`. The file goes to `build/documents/` unless
   `--out` names another place. Quote the line the tool prints, with its DRAFT reasons.
 - DOCX needs the package python-docx. If the tool says it is missing, report that the
   Word version is NOT ASSESSED and offer the HTML version.
