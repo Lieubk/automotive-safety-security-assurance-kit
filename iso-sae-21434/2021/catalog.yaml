@@ -1,0 +1,414 @@
+# ISO/SAE 21434:2021 Road vehicles - Cybersecurity engineering: catalog of clauses,
+# subclauses, requirement identifiers and work products.
+#
+# Identifiers and official titles only. The objectives are written in our own words;
+# the text of the standard is not reproduced. Requirement identifiers are listed so that
+# a project can trace its evidence to them: RQ marks a requirement, RC a recommendation,
+# PM a permission. Read the standard itself for what each one asks.
+#
+# A project declares the clauses it is responsible for under `scope.cybersecurity` in
+# project.yaml. The schema refers to a subclause as "21434:<subclause>" and to a work
+# product as "21434:<WP-ID>".
+
+standard: ISO/SAE 21434
+edition: "2021"
+title: Road vehicles - Cybersecurity engineering
+clauses:
+  - id: "5"
+    name: Organizational cybersecurity management
+    level: organization
+    objective: >-
+      The organization keeps a cybersecurity policy with rules and processes, assigns responsibility and resources, builds competence and a culture that learns, decides what is shared with whom, runs the management systems engineering relies on, manages tools and has itself audited. Projects build on this; they do not produce it.
+    subclauses:
+      - id: "5.4.1"
+        name: Cybersecurity governance
+        objective: "Policy, rules and processes exist, management stands behind them, and responsibility and resources are assigned."
+        requirements: [RQ-05-01, RQ-05-02, RQ-05-03, RQ-05-04, RQ-05-05]
+        work_products: [WP-05-01]
+      - id: "5.4.2"
+        name: Cybersecurity culture
+        objective: "The people involved are competent and aware, and the organization improves from what it learns."
+        requirements: [RQ-05-06, RQ-05-07, RQ-05-08]
+        work_products: [WP-05-01, WP-05-02]
+      - id: "5.4.3"
+        name: Information sharing
+        objective: "It is decided which cybersecurity information goes to whom, inside and outside the organization."
+        requirements: [RQ-05-09, RC-05-10]
+        work_products: [WP-05-01]
+      - id: "5.4.4"
+        name: Management systems
+        objective: "Quality, configuration and requirements management support cybersecurity engineering."
+        requirements: [RQ-05-11, RQ-05-12, RC-05-13]
+        work_products: [WP-05-03]
+      - id: "5.4.5"
+        name: Tool management
+        objective: "Tools that can influence the cybersecurity of a product are under management."
+        requirements: [RQ-05-14, RC-05-15]
+        work_products: [WP-05-04]
+      - id: "5.4.6"
+        name: Information security management
+        objective: "The organization manages its information security."
+        requirements: [RC-05-16]
+        work_products: [WP-05-03]
+      - id: "5.4.7"
+        name: Organizational cybersecurity audit
+        objective: "An independent audit judges whether the organizational processes reach the objectives of the standard."
+        requirements: [RQ-05-17]
+        work_products: [WP-05-05]
+  - id: "6"
+    name: Project dependent cybersecurity management
+    level: project
+    objective: >-
+      A project assigns and plans its cybersecurity activities, tailors them with reasons, handles reuse, components developed out of context and off-the-shelf components, argues the result in a cybersecurity case, has it judged by an assessment where needed and releases the item or component for post-development.
+    subclauses:
+      - id: "6.4.1"
+        name: Cybersecurity responsibilities
+        objective: "Who is responsible for each cybersecurity activity of the project is decided and made known."
+        requirements: [RQ-06-01]
+        work_products: [WP-06-01]
+      - id: "6.4.2"
+        name: Cybersecurity planning
+        objective: "A plan names the activities, who performs them, when, and what they produce, and is kept up to date."
+        requirements: [RQ-06-02, RQ-06-03, RQ-06-04, RQ-06-05, RQ-06-06, RQ-06-07, PM-06-08, RQ-06-09, RQ-06-10, RQ-06-11, RQ-06-12]
+        work_products: [WP-06-01]
+      - id: "6.4.3"
+        name: Tailoring
+        objective: "An activity done differently or left out is named with a reason why the objectives are still reached."
+        requirements: [PM-06-13, RQ-06-14]
+        work_products: [WP-06-01]
+      - id: "6.4.4"
+        name: Reuse
+        objective: "Before an item or component is reused, its changes and its new environment are analysed to decide what has to be done again."
+        requirements: [RQ-06-15, RQ-06-16, RQ-06-17]
+        work_products: [WP-06-01]
+      - id: "6.4.5"
+        name: Component out-of-context
+        objective: "A component developed without a specific item states what it assumes about its use and context, and those assumptions are checked when it is used."
+        requirements: [RQ-06-18, RQ-06-19, RQ-06-20]
+        work_products: [WP-06-01]
+      - id: "6.4.6"
+        name: Off-the-shelf component
+        objective: "An off-the-shelf component comes with cybersecurity information that is checked to be enough for its use."
+        requirements: [RQ-06-21, RQ-06-22]
+        work_products: [WP-06-01]
+      - id: "6.4.7"
+        name: Cybersecurity case
+        objective: "An argument, resting on the work products, that the item or component is cybersecure enough."
+        requirements: [RQ-06-23]
+        work_products: [WP-06-02]
+      - id: "6.4.8"
+        name: Cybersecurity assessment
+        objective: "An independent judgement of that cybersecurity, where the plan calls for one."
+        requirements: [RQ-06-24, RQ-06-25, RQ-06-26, RQ-06-27, RQ-06-28, PM-06-29, RQ-06-30, RQ-06-31, RQ-06-32]
+        work_products: [WP-06-03]
+      - id: "6.4.9"
+        name: Release for post-development
+        objective: "Release for production and operation once the case, and the assessment if there is one, support it."
+        requirements: [RQ-06-33, RQ-06-34]
+        work_products: [WP-06-04]
+  - id: "7"
+    name: Distributed cybersecurity activities
+    level: project
+    objective: >-
+      Customer and supplier find out whether the supplier can do the work, state what they expect when asking for a quotation, and agree in writing who performs which cybersecurity activity and what they exchange.
+    subclauses:
+      - id: "7.4.1"
+        name: Supplier capability
+        objective: "Whether a supplier can perform the cybersecurity activities is evaluated before it is chosen."
+        requirements: [RQ-07-01, RC-07-02]
+        work_products: []
+      - id: "7.4.2"
+        name: Request for quotation
+        objective: "The request for quotation states what is expected of the supplier in cybersecurity."
+        requirements: [RQ-07-03]
+        work_products: []
+      - id: "7.4.3"
+        name: Alignment of responsibilities
+        objective: "A cybersecurity interface agreement records who does what, who is informed and what is exchanged."
+        requirements: [RQ-07-04, RC-07-05, RQ-07-06, RQ-07-07, RC-07-08]
+        work_products: [WP-07-01]
+  - id: "8"
+    name: Continual cybersecurity activities
+    level: lifecycle
+    objective: >-
+      For as long as the item is supported, information about threats and weaknesses is watched, events are examined, weaknesses are analysed for exploitability and the vulnerabilities found are treated.
+    subclauses:
+      - id: "8.3"
+        name: Cybersecurity monitoring
+        objective: "Sources of information and triggers are chosen, and what comes in is collected and sorted."
+        requirements: [RQ-08-01, RQ-08-02, RQ-08-03]
+        work_products: [WP-08-01, WP-08-02, WP-08-03]
+      - id: "8.4"
+        name: Cybersecurity event evaluation
+        objective: "An event is examined for weaknesses of the item or component."
+        requirements: [RQ-08-04]
+        work_products: [WP-08-04]
+      - id: "8.5"
+        name: Vulnerability analysis
+        objective: "Each weakness is analysed to decide whether it is a vulnerability; one that is not gets a reason."
+        requirements: [RQ-08-05, RQ-08-06]
+        work_products: [WP-08-05]
+      - id: "8.6"
+        name: Vulnerability management
+        objective: "Each vulnerability is dealt with according to its risk, with incident response where that is needed."
+        requirements: [RQ-08-07, RQ-08-08]
+        work_products: [WP-08-06]
+  - id: "9"
+    name: Concept
+    level: project
+    objective: >-
+      The item is described, its risks are assessed, the treatment of each risk is decided, risks to be reduced become cybersecurity goals and the rest are argued in claims; a concept turns the goals into requirements on the item, its components and its environment.
+    subclauses:
+      - id: "9.3"
+        name: Item definition
+        objective: "Boundary, functions, preliminary architecture and operational environment of the item are described."
+        requirements: [RQ-09-01, RQ-09-02]
+        work_products: [WP-09-01]
+      - id: "9.4"
+        name: Cybersecurity goals
+        objective: "A TARA of the item decides how each risk is treated; risks to be reduced give cybersecurity goals, retained or shared ones give claims; goals and claims are verified."
+        requirements: [RQ-09-03, RQ-09-04, RQ-09-05, RQ-09-06, RQ-09-07]
+        work_products: [WP-09-02, WP-09-03, WP-09-04, WP-09-05]
+      - id: "9.5"
+        name: Cybersecurity concept
+        objective: "Controls and requirements that achieve the goals are defined, allocated to the item, its components or its environment, and verified."
+        requirements: [RQ-09-08, RQ-09-09, RQ-09-10, RQ-09-11]
+        work_products: [WP-09-06, WP-09-07]
+  - id: "10"
+    name: Product development
+    level: project
+    objective: >-
+      The cybersecurity requirements and architecture are refined level by level down to design and code, weaknesses are looked for, and integration and verification show that the specifications are met.
+    subclauses:
+      - id: "10.4.1"
+        name: Design
+        objective: "Specifications are refined from the level above, notations and coding rules fit for cybersecurity are chosen, weaknesses are looked for, and the specifications are verified."
+        requirements: [RQ-10-01, RQ-10-02, RQ-10-03, RQ-10-04, RQ-10-05, RC-10-06, RQ-10-07, RQ-10-08]
+        work_products: [WP-10-01, WP-10-02, WP-10-03, WP-10-04, WP-10-05]
+      - id: "10.4.2"
+        name: Integration and verification
+        objective: "Integration and verification, with methods chosen for the need, show that the specifications are met."
+        requirements: [RQ-10-09, RQ-10-10, RQ-10-11, RC-10-12, RQ-10-13]
+        work_products: [WP-10-05, WP-10-06, WP-10-07]
+  - id: "11"
+    name: Cybersecurity validation
+    level: project
+    objective: >-
+      On the vehicle, it is confirmed that the goals are the right ones, that they are achieved and that no unreasonable risk remains.
+    subclauses:
+      - id: "11"
+        name: Cybersecurity validation
+        objective: "The goals are shown to be adequate and achieved on the vehicle, without unreasonable remaining risk."
+        requirements: [RQ-11-01, RQ-11-02]
+        work_products: [WP-11-01]
+  - id: "12"
+    name: Production
+    level: lifecycle
+    objective: >-
+      Manufacturing keeps the cybersecurity requirements for post-development in place by a production control plan.
+    subclauses:
+      - id: "12"
+        name: Production
+        objective: "A production control plan keeps the requirements for post-development in place during manufacture."
+        requirements: [RQ-12-01, RQ-12-02, RQ-12-03]
+        work_products: [WP-12-01]
+  - id: "13"
+    name: Operations and maintenance
+    level: lifecycle
+    objective: >-
+      Incidents in the field are handled by a response plan, and updates are made under the same processes as development.
+    subclauses:
+      - id: "13.3"
+        name: Cybersecurity incident response
+        objective: "When an incident occurs, it is handled by an incident response plan."
+        requirements: [RQ-13-01, RQ-13-02]
+        work_products: [WP-13-01]
+      - id: "13.4"
+        name: Updates
+        objective: "Updates are developed and delivered under the cybersecurity processes."
+        requirements: [RQ-13-03]
+        work_products: []
+  - id: "14"
+    name: End of cybersecurity support and decommissioning
+    level: lifecycle
+    objective: >-
+      Customers learn in a defined way when cybersecurity support ends, and the item can be taken out of service without opening new risks.
+    subclauses:
+      - id: "14.3"
+        name: End of cybersecurity support
+        objective: "A defined procedure tells customers when cybersecurity support ends."
+        requirements: [RQ-14-01]
+        work_products: [WP-14-01]
+      - id: "14.4"
+        name: Decommissioning
+        objective: "Decommissioning is done so that it does not open new risks, where that matters."
+        requirements: [RQ-14-02]
+        work_products: []
+  - id: "15"
+    name: Threat analysis and risk assessment methods
+    level: method
+    objective: >-
+      Building blocks of the TARA, called from the concept, from development and from vulnerability analysis: assets and damage scenarios, threat scenarios, impact ratings, attack paths, feasibility, risk values and treatment decisions, all from the viewpoint of road users.
+    subclauses:
+      - id: "15.3"
+        name: Asset identification
+        objective: "Damage scenarios are named, and the assets whose loss of a cybersecurity property leads to them."
+        requirements: [RQ-15-01, RQ-15-02]
+        work_products: [WP-15-01, WP-15-02]
+      - id: "15.4"
+        name: Threat scenario identification
+        objective: "Threat scenarios are named: what is attacked, which property is lost, and how."
+        requirements: [RQ-15-03]
+        work_products: [WP-15-03]
+      - id: "15.5"
+        name: Impact rating
+        objective: "Each damage scenario is rated per impact category - safety, financial, operational, privacy - as severe, major, moderate or negligible."
+        requirements: [RQ-15-04, RQ-15-05, RQ-15-06, PM-15-07]
+        work_products: [WP-15-04]
+      - id: "15.6"
+        name: Attack path analysis
+        objective: "The attack paths that realize each threat scenario are worked out."
+        requirements: [RQ-15-08, RQ-15-09]
+        work_products: [WP-15-05]
+      - id: "15.7"
+        name: Attack feasibility rating
+        objective: "Each attack path gets a feasibility rating - high, medium, low or very low - by one approach: attack potential, CVSS or attack vector."
+        requirements: [RQ-15-10, RC-15-11, RC-15-12, RC-15-13, RC-15-14]
+        work_products: [WP-15-06]
+      - id: "15.8"
+        name: Risk value determination
+        objective: "Each threat scenario gets a risk value from 1 to 5 from the impact of its damage and the feasibility of its attack paths."
+        requirements: [RQ-15-15, RQ-15-16]
+        work_products: [WP-15-07]
+      - id: "15.9"
+        name: Risk treatment decision
+        objective: "For each threat scenario it is decided to avoid, reduce, share or retain the risk."
+        requirements: [RQ-15-17]
+        work_products: [WP-15-08]
+work_products:
+  - id: WP-05-01
+    name: "Cybersecurity policy, rules and processes"
+    subclauses: ["5.4.1", "5.4.2", "5.4.3"]
+  - id: WP-05-02
+    name: "Evidence of competence management, awareness management and continuous improvement"
+    subclauses: ["5.4.2"]
+  - id: WP-05-03
+    name: "Evidence of the organization's management systems"
+    subclauses: ["5.4.4", "5.4.6"]
+  - id: WP-05-04
+    name: "Evidence of tool management"
+    subclauses: ["5.4.5"]
+  - id: WP-05-05
+    name: "Organizational cybersecurity audit report"
+    subclauses: ["5.4.7"]
+  - id: WP-06-01
+    name: "Cybersecurity plan"
+    subclauses: ["6.4.1", "6.4.2", "6.4.3", "6.4.4", "6.4.5", "6.4.6"]
+  - id: WP-06-02
+    name: "Cybersecurity case"
+    subclauses: ["6.4.7"]
+  - id: WP-06-03
+    name: "Cybersecurity assessment report"
+    subclauses: ["6.4.8"]
+  - id: WP-06-04
+    name: "Release for post-development report"
+    subclauses: ["6.4.9"]
+  - id: WP-07-01
+    name: "Cybersecurity interface agreement"
+    subclauses: ["7.4.3"]
+  - id: WP-08-01
+    name: "Sources for cybersecurity information"
+    subclauses: ["8.3"]
+  - id: WP-08-02
+    name: "Triggers"
+    subclauses: ["8.3"]
+  - id: WP-08-03
+    name: "Cybersecurity events"
+    subclauses: ["8.3"]
+  - id: WP-08-04
+    name: "Weaknesses from cybersecurity events"
+    subclauses: ["8.4"]
+  - id: WP-08-05
+    name: "Vulnerability analysis"
+    subclauses: ["8.5"]
+  - id: WP-08-06
+    name: "Evidence of managed vulnerabilities"
+    subclauses: ["8.6"]
+  - id: WP-09-01
+    name: "Item definition"
+    subclauses: ["9.3"]
+  - id: WP-09-02
+    name: "TARA"
+    subclauses: ["9.4"]
+  - id: WP-09-03
+    name: "Cybersecurity goals"
+    subclauses: ["9.4"]
+  - id: WP-09-04
+    name: "Cybersecurity claims"
+    subclauses: ["9.4"]
+  - id: WP-09-05
+    name: "Verification report for cybersecurity goals"
+    subclauses: ["9.4"]
+  - id: WP-09-06
+    name: "Cybersecurity concept"
+    subclauses: ["9.5"]
+  - id: WP-09-07
+    name: "Verification report for the cybersecurity concept"
+    subclauses: ["9.5"]
+  - id: WP-10-01
+    name: "Cybersecurity specifications"
+    subclauses: ["10.4.1"]
+  - id: WP-10-02
+    name: "Cybersecurity requirements for post-development"
+    subclauses: ["10.4.1"]
+  - id: WP-10-03
+    name: "Documentation of the modelling, design or programming languages and coding guidelines"
+    subclauses: ["10.4.1"]
+  - id: WP-10-04
+    name: "Verification report for the cybersecurity specifications"
+    subclauses: ["10.4.1"]
+  - id: WP-10-05
+    name: "Weaknesses found during product development"
+    subclauses: ["10.4.1", "10.4.2"]
+  - id: WP-10-06
+    name: "Integration and verification specification"
+    subclauses: ["10.4.2"]
+  - id: WP-10-07
+    name: "Integration and verification report"
+    subclauses: ["10.4.2"]
+  - id: WP-11-01
+    name: "Validation report"
+    subclauses: ["11"]
+  - id: WP-12-01
+    name: "Production control plan"
+    subclauses: ["12"]
+  - id: WP-13-01
+    name: "Cybersecurity incident response plan"
+    subclauses: ["13.3"]
+  - id: WP-14-01
+    name: "Procedures to communicate the end of cybersecurity support"
+    subclauses: ["14.3"]
+  - id: WP-15-01
+    name: "Damage scenarios"
+    subclauses: ["15.3"]
+  - id: WP-15-02
+    name: "Assets with cybersecurity properties"
+    subclauses: ["15.3"]
+  - id: WP-15-03
+    name: "Threat scenarios"
+    subclauses: ["15.4"]
+  - id: WP-15-04
+    name: "Impact ratings with associated impact categories"
+    subclauses: ["15.5"]
+  - id: WP-15-05
+    name: "Attack paths"
+    subclauses: ["15.6"]
+  - id: WP-15-06
+    name: "Attack feasibility ratings"
+    subclauses: ["15.7"]
+  - id: WP-15-07
+    name: "Risk values"
+    subclauses: ["15.8"]
+  - id: WP-15-08
+    name: "Risk treatment decisions"
+    subclauses: ["15.9"]

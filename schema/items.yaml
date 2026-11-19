@@ -22,7 +22,9 @@
 #     function of a unit: UNT-0012#Debounce_Step.
 #
 # `supports` names the base practices and work products of the process catalog
-# (aspice/3.1/) that an element of this schema provides evidence for.
+# (aspice/3.1/) that an element of this schema provides evidence for, and the
+# subclauses ("21434:9.4") and work products ("21434:WP-09-03") of ISO/SAE 21434
+# (iso-sae-21434/2021/catalog.yaml).
 
 schema_version: 2
 aspice_version: "3.1"
@@ -205,6 +207,32 @@ structures:
     keys: [actual_start, actual_effort, completed_on, as_of, note]
     dates: [actual_start, completed_on, as_of]
     note: "stated by the owner of the work package; actual_effort in person-days up to as_of"
+  tara-method:                     # plan.tara_method when kind is cybersecurity
+    shape: mapping
+    mandatory: [impact_categories, feasibility_approach, risk_matrix]
+    keys: [impact_meaning, feasibility_meaning, retain_up_to]
+    note: "impact_categories: the categories a damage scenario is rated in, for example [safety, financial, operational, privacy]; feasibility_approach: attack-potential, cvss or attack-vector; risk_matrix: for each impact level (severe, major, moderate, negligible) the risk values 1 to 5 for the feasibility levels [very-low, low, medium, high], in that order; retain_up_to: the highest risk value the project retains without a decision by a named person. The values are the project's; the standard leaves the method to the organization"
+  cybersecurity-activities:        # plan.cybersecurity_activities when kind is cybersecurity
+    mandatory: [subclause, decision, responsible]
+    keys: [rationale, work_products, due]
+    dates: [due]
+    note: "one entry per subclause of ISO/SAE 21434 in the clauses of scope.cybersecurity (COV-53); decision is performed, tailored, not-applicable, by-customer or by-supplier; tailored and not-applicable need a rationale that says why the objectives are still reached; by-customer and by-supplier are agreed in the cybersecurity interface agreement"
+  shared-activities:               # plan.shared_activities when kind is cybersecurity-interface-agreement
+    mandatory: [activity, customer, supplier]
+    keys: [exchange, note]
+    note: "activity: a subclause or a named activity; customer and supplier: R (performs), A (approves), S (supports), I (is informed) or - ; exchange: what is handed over, and when"
+  monitoring-sources:              # plan.monitoring_sources when kind is cybersecurity-monitoring
+    mandatory: [name, kind]
+    keys: [reviewed, note]
+    note: "kind internal or external, for example the project's own tests and field data, supplier notices, vulnerability databases, research; reviewed says how often the source is read"
+  monitoring-triggers:             # plan.triggers when kind is cybersecurity-monitoring
+    mandatory: [name, condition]
+    keys: [action]
+    note: "condition: what in the collected information makes it a cybersecurity event for the item, for example a component and version of the item named in an advisory; action: what follows"
+  attack-paths:                    # threat-scenario.attack_paths, weakness.attack_paths
+    mandatory: [path, feasibility]
+    keys: [factors, vector, note]
+    note: "path: the steps of the attack from its entry point to the asset; feasibility: high, medium, low or very-low by the approach of the cybersecurity plan; factors: the ratings that led to it (attack potential: elapsed_time, expertise, knowledge, window, equipment; CVSS: the exploitability metrics); vector: the attack vector for the attack-vector approach"
   data-elements:                   # software-interface.elements
     mandatory: [name, direction, type]
     keys: [unit, min, max, resolution, initial, invalid, period_ms, timeout_ms, description]
@@ -266,7 +294,7 @@ types:
     prefix: SYR
     folder: spec/system/requirements
     lifecycle: engineering
-    supports: [SYS.2.BP1, SYS.2.BP2, SYS.2.BP3, SYS.2.BP4, SYS.2.BP5, "17-12", "17-50"]
+    supports: [SYS.2.BP1, SYS.2.BP2, SYS.2.BP3, SYS.2.BP4, SYS.2.BP5, "17-12", "17-50", "21434:10.4.1", "21434:WP-10-01"]
     attributes: {use: [common, criticality, requirement]}
     sections:
       Statement: before-review
@@ -278,7 +306,7 @@ types:
     prefix: SYE
     folder: spec/system/architecture
     lifecycle: engineering
-    supports: [SYS.3.BP1, SYS.3.BP4, "04-06"]
+    supports: [SYS.3.BP1, SYS.3.BP4, "04-06", "21434:10.4.1", "21434:WP-10-01"]
     attributes:
       use: [common, criticality]
       kind: {values: [hardware, software, mechanical, external], required: before-review}
@@ -290,7 +318,7 @@ types:
     prefix: SYI
     folder: spec/system/architecture
     lifecycle: engineering
-    supports: [SYS.3.BP3, "04-06", "17-08"]
+    supports: [SYS.3.BP3, "04-06", "17-08", "21434:10.4.1", "21434:WP-10-01"]
     attributes:
       use: [common, criticality]
       kind: {values: [hardware-software, bus, electrical, mechanical, diagnostic, external], required: before-review}
@@ -302,7 +330,7 @@ types:
     prefix: SWR
     folder: spec/software/requirements
     lifecycle: engineering
-    supports: [SWE.1.BP1, SWE.1.BP2, SWE.1.BP3, SWE.1.BP4, SWE.1.BP5, "17-11", "17-50"]
+    supports: [SWE.1.BP1, SWE.1.BP2, SWE.1.BP3, SWE.1.BP4, SWE.1.BP5, "17-11", "17-50", "21434:10.4.1", "21434:WP-10-01"]
     attributes: {use: [common, criticality, requirement]}
     sections:
       Statement: before-review
@@ -314,7 +342,7 @@ types:
     prefix: CMP
     folder: spec/software/architecture
     lifecycle: engineering
-    supports: [SWE.2.BP1, SWE.2.BP4, SWE.2.BP5, "04-04"]
+    supports: [SWE.2.BP1, SWE.2.BP4, SWE.2.BP5, "04-04", "21434:10.4.1", "21434:WP-10-01"]
     attributes:
       use: [common, criticality]
       kind: {values: [composition, application, sensor-actuator, service, complex-driver, ecu-abstraction, parameter, basic-software, library, other], required: before-review}
@@ -333,7 +361,7 @@ types:
     prefix: IFC
     folder: spec/software/architecture
     lifecycle: engineering
-    supports: [SWE.2.BP3, "04-04", "17-08"]
+    supports: [SWE.2.BP3, "04-04", "17-08", "21434:10.4.1", "21434:WP-10-01"]
     attributes:
       use: [common, criticality]
       kind: {values: [sender-receiver, client-server, mode-switch, parameter, non-volatile-data, trigger, function-call, debug, other], required: before-review}
@@ -377,7 +405,7 @@ types:
     prefix: CDS
     folder: spec/software/design
     lifecycle: engineering
-    supports: [SWE.3.BP1, SWE.3.BP3, SWE.3.BP4, "04-05"]
+    supports: [SWE.3.BP1, SWE.3.BP3, SWE.3.BP4, "04-05", "21434:10.4.1", "21434:WP-10-01"]
     attributes: {use: [common]}
     sections:
       Design concept: before-review
@@ -389,7 +417,7 @@ types:
     prefix: UNT
     folder: spec/software/design
     lifecycle: engineering
-    supports: [SWE.3.BP1, SWE.3.BP2, SWE.3.BP3, SWE.3.BP8, "04-05", "11-05"]
+    supports: [SWE.3.BP1, SWE.3.BP2, SWE.3.BP3, SWE.3.BP8, "04-05", "11-05", "21434:10.4.1", "21434:WP-10-01"]
     attributes:
       use: [common, criticality]
       origin: {values: [handwritten, generated, reused, third-party], required: before-review}
@@ -413,7 +441,7 @@ types:
     supports: [MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6, MAN.3.BP7, SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1, SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1, "08-12", "08-52", "08-04", "08-13", "08-27", "08-28"]
     attributes:
       use: [common]
-      kind: {values: [project, unit-verification, software-integration, software-qualification-test, system-integration, system-qualification-test, configuration-management, quality-assurance, problem-resolution, change-request-management, risk-management], required: always}
+      kind: {values: [project, unit-verification, software-integration, software-qualification-test, system-integration, system-qualification-test, configuration-management, quality-assurance, problem-resolution, change-request-management, risk-management, cybersecurity, cybersecurity-interface-agreement, cybersecurity-monitoring, cybersecurity-incident-response, production-control, end-of-cybersecurity-support], required: always}
       milestones: {structure: milestones, required: optional, note: "project plans: the milestones of the life cycle, each with its date and the baseline purpose that marks it"}
       coverage_targets: {required: optional, note: "unit-verification plans: structural coverage a unit must reach, per ASIL, as {<ASIL>: {statement_percent, branch_percent, mcdc_percent}} with any subset of the metrics; an ASIL without an entry has no target"}
       integration_steps: {structure: integration-steps, required: optional, note: "software-integration and system-integration plans: the integration steps in order (conditions)"}
@@ -423,6 +451,11 @@ types:
       risk_categories: {required: optional, note: "risk-management plans: the kinds of risk the project manages, for example technical, schedule, cost, supplier, safety (conditions)"}
       risk_scale: {structure: risk-scale, required: optional, note: "risk-management plans: the rating scales and the acceptance threshold (conditions)"}
       escalation: {structure: escalation-rules, required: optional, note: "quality-assurance plans: when an overdue non-conformance goes to which level (conditions)"}
+      tara_method: {structure: tara-method, required: optional, note: "cybersecurity plans: impact categories, feasibility approach and risk matrix of the TARA (conditions)"}
+      cybersecurity_activities: {structure: cybersecurity-activities, required: optional, note: "cybersecurity plans: the activities per subclause of ISO/SAE 21434 in scope, with tailoring (conditions, COV-53)"}
+      shared_activities: {structure: shared-activities, required: optional, note: "cybersecurity interface agreements: who performs, approves, supports and is informed of each activity (conditions)"}
+      monitoring_sources: {structure: monitoring-sources, required: optional, note: "cybersecurity-monitoring plans: where cybersecurity information is collected (conditions)"}
+      triggers: {structure: monitoring-triggers, required: optional, note: "cybersecurity-monitoring plans: what makes collected information a cybersecurity event (conditions)"}
     sections:
       Scope: before-review         # what the plan covers and what it leaves to others
       Approach: before-review      # methods, their order, and how they depend on ASIL
@@ -466,7 +499,7 @@ types:
     prefix: SIT
     folder: verification/software-integration
     lifecycle: engineering
-    supports: [SWE.5.BP3, SWE.5.BP5, "08-50"]
+    supports: [SWE.5.BP3, SWE.5.BP5, "08-50", "21434:10.4.2", "21434:WP-10-06"]
     attributes:
       use: [common, test-case]
       step: {required: before-review, note: "name of the integration step of the software-integration plan whose build the case is run on first; later builds may repeat it as regression"}
@@ -476,7 +509,7 @@ types:
     prefix: SQT
     folder: verification/software-qualification
     lifecycle: engineering
-    supports: [SWE.6.BP2, SWE.6.BP3, "08-50"]
+    supports: [SWE.6.BP2, SWE.6.BP3, "08-50", "21434:10.4.2", "21434:WP-10-06"]
     attributes: {use: [common, test-case]}
     sections: {Preconditions: optional, Steps: before-review, Expected result: before-review}
 
@@ -484,7 +517,7 @@ types:
     prefix: SYIT
     folder: verification/system-integration
     lifecycle: engineering
-    supports: [SYS.4.BP3, SYS.4.BP5, "08-50"]
+    supports: [SYS.4.BP3, SYS.4.BP5, "08-50", "21434:10.4.2", "21434:WP-10-06"]
     attributes:
       use: [common, test-case]
       step: {required: before-review, note: "name of the integration step of the system-integration plan whose build the case is run on first"}
@@ -494,15 +527,149 @@ types:
     prefix: SYQT
     folder: verification/system-qualification
     lifecycle: engineering
-    supports: [SYS.5.BP2, SYS.5.BP3, "08-50"]
+    supports: [SYS.5.BP2, SYS.5.BP3, "08-50", "21434:11", "21434:WP-11-01"]
     attributes: {use: [common, test-case]}
     sections: {Preconditions: optional, Steps: before-review, Expected result: before-review}
+
+  # ---- ISO/SAE 21434 (cybersecurity); active only for clauses under scope.cybersecurity
+
+  item-definition:                 # the item: what is protected, its boundary, functions and environment
+    prefix: ITM
+    folder: spec/cybersecurity/item
+    lifecycle: engineering
+    supports: ["21434:9.3", "21434:WP-09-01"]
+    attributes: {use: [common]}
+    sections:
+      Boundary and functions: before-review     # what belongs to the item, what lies outside, what it does
+      Preliminary architecture: before-review   # its elements and interfaces; the system elements where SYS.3 has them
+      Operational environment: before-review    # what surrounds the item in use and what it relies on there
+      Assumptions: optional
+
+  asset:                           # something of value whose loss of a cybersecurity property leads to damage
+    prefix: AST
+    folder: spec/cybersecurity/tara
+    lifecycle: engineering
+    supports: ["21434:15.3", "21434:WP-15-02"]
+    attributes:
+      use: [common]
+      properties: {required: always, note: "list of the cybersecurity properties that matter: confidentiality, integrity, availability, authenticity, authorization, non-repudiation"}
+    sections:
+      Description: always          # what the asset is and where it is held, processed or carried
+
+  damage-scenario:                 # an adverse consequence for road users, rated per impact category
+    prefix: DMG
+    folder: spec/cybersecurity/tara
+    lifecycle: engineering
+    supports: ["21434:15.3", "21434:15.5", "21434:WP-15-01", "21434:WP-15-04"]
+    attributes:
+      use: [common]
+      impact: {required: before-review, note: "{<impact category of the cybersecurity plan>: severe | major | moderate | negligible}; the safety rating follows from the severity of the hazard where ISO 26262 applies (COV-55)"}
+    sections:
+      Description: always          # the consequence, for whom, and how it comes about
+      Impact rationale: before-review
+
+  threat-scenario:                 # a way the property of an asset is lost, its attack paths, risk and treatment
+    prefix: THR
+    folder: spec/cybersecurity/tara
+    lifecycle: engineering
+    supports: ["21434:15.4", "21434:15.6", "21434:15.7", "21434:15.8", "21434:15.9", "21434:9.4", "21434:WP-09-02", "21434:WP-15-03", "21434:WP-15-05", "21434:WP-15-06", "21434:WP-15-07", "21434:WP-15-08"]
+    attributes:
+      use: [common]
+      property: {values: [confidentiality, integrity, availability, authenticity, authorization, non-repudiation], required: always, note: "the property of the threatened asset that is lost"}
+      attack_paths: {structure: attack-paths, required: before-review}
+      feasibility: {values: [high, medium, low, very-low], required: before-review, note: "of the threat scenario: the highest feasibility of its attack paths (COV-56)"}
+      risk_value: {values: [1, 2, 3, 4, 5], required: before-review, note: "from the risk matrix of the cybersecurity plan (COV-57); 1 is the lowest risk"}
+      treatment: {required: before-review, note: "list of avoid, reduce, share, retain (COV-58)"}
+      decision: {required: optional, note: "who decided to retain a risk above retain_up_to of the plan, when and why"}
+    sections:
+      Description: always          # the attacker's aim, the asset and property, the cause
+      Treatment rationale: before-review
+
+  cybersecurity-goal:              # a top-level requirement that protects assets against a threat scenario
+    prefix: CSG
+    folder: spec/cybersecurity/goals
+    lifecycle: engineering
+    supports: ["21434:9.4", "21434:WP-09-03"]
+    attributes:
+      use: [common]
+      cal: {values: [CAL1, CAL2, CAL3, CAL4], required: optional, note: "cybersecurity assurance level, where the project uses them"}
+    sections:
+      Statement: before-review
+      Rationale: optional
+
+  cybersecurity-claim:             # the argument for retaining or sharing a risk
+    prefix: CLM
+    folder: spec/cybersecurity/goals
+    lifecycle: engineering
+    supports: ["21434:9.4", "21434:WP-09-04"]
+    attributes:
+      use: [common]
+      monitored_by: {required: before-approval, note: "how the claim is watched by the continual activities, for example a trigger of the cybersecurity-monitoring plan"}
+    sections:
+      Claim: before-review
+      Rationale: before-review
+
+  weakness:                        # a weakness found in development or in the field, and whether it is a vulnerability
+    prefix: WKN
+    folder: records/cybersecurity
+    lifecycle: problem-report
+    supports: ["21434:8.4", "21434:8.5", "21434:8.6", "21434:10.4.1", "21434:WP-08-04", "21434:WP-08-05", "21434:WP-08-06", "21434:WP-10-05"]
+    attributes:
+      use: [common]
+      reported_at: {format: date, required: always}
+      found_by: {values: [monitoring, event-evaluation, design, review, test, supplier, customer, field, other], required: always}
+      source: {required: always, note: "where it came from: the advisory, notice, test run, review or event, with its identifier"}
+      vulnerability: {values: [true, false], required: before-review, note: "the result of the vulnerability analysis"}
+      attack_paths: {structure: attack-paths, required: optional, note: "for a vulnerability: how it can be exploited"}
+      risk_value: {values: [1, 2, 3, 4, 5], required: optional, note: "mandatory for a vulnerability from state analysed on"}
+      treatment: {required: optional, note: "list of avoid, reduce, share, retain; mandatory for a vulnerability from state analysed on (COV-61)"}
+      closure: {structure: closure, required: optional, note: "mandatory in state closed"}
+    sections:
+      Description: always          # what was found, in which version, by whom
+      Analysis: before-review      # why it is or is not a vulnerability; for one: exploitability, risk and treatment
+
+  cybersecurity-case:              # the argument that the cybersecurity is adequate, over the work products
+    prefix: CSE
+    folder: records/cybersecurity
+    lifecycle: record
+    supports: ["21434:6.4.7", "21434:WP-06-02"]
+    attributes:
+      id: {required: always}
+      type: {required: always}
+      status: {required: always}
+      title: {required: optional}
+      as_of: {format: date, required: always}
+      prepared_by: {required: always, note: "the person who stands behind the argument"}
+      clauses: {required: always, note: "the clauses of ISO/SAE 21434 the case covers"}
+      work_products: {required: always, note: "generated: per work product of those clauses, the items that provide it with state and hash"}
+      findings: {required: always, may_be_empty: true, note: "generated: the open findings of the rules of those clauses at the time"}
+    sections:
+      Argument: always             # why the cybersecurity is adequate, resting on the work products listed
+
+  cybersecurity-assessment:        # the judgement of an independent assessor on a cybersecurity case
+    prefix: CSA
+    folder: records/cybersecurity
+    lifecycle: record
+    supports: ["21434:6.4.8", "21434:WP-06-03"]
+    attributes:
+      id: {required: always}
+      type: {required: always}
+      status: {required: always}
+      title: {required: optional}
+      as_of: {format: date, required: always}
+      assessor: {required: always, note: "the person who gives the judgement"}
+      independence: {required: always, note: "how the assessor is independent of the project, as the cybersecurity plan requires"}
+      case: {required: always, note: "the cybersecurity case assessed"}
+      judgement: {values: [accepted, conditionally-accepted, rejected], required: always}
+      conditions: {required: optional, note: "what has to happen for a conditional acceptance to hold"}
+    sections:
+      Report: always               # what was assessed, how, what was found, and the judgement in the assessor's words
 
   test-run:                        # written by tooling from test reports, not by hand
     prefix: RUN
     folder: verification/runs
     lifecycle: record
-    supports: [SWE.4.BP4, SWE.5.BP5, SWE.5.BP6, SWE.6.BP3, SWE.6.BP4, SYS.4.BP5, SYS.4.BP6, SYS.5.BP3, SYS.5.BP4, "13-50"]   # a run records which test cases were selected and what they showed
+    supports: [SWE.4.BP4, SWE.5.BP5, SWE.5.BP6, SWE.6.BP3, SWE.6.BP4, SYS.4.BP5, SYS.4.BP6, SYS.5.BP3, SYS.5.BP4, "13-50", "21434:WP-10-07", "21434:WP-11-01"]   # a run records which test cases were selected and what they showed
     attributes:
       id: {required: always}
       type: {required: always}
@@ -556,7 +723,7 @@ types:
     prefix: REV
     folder: records/reviews
     lifecycle: record
-    supports: [SUP.1.BP2, SUP.4.BP4, "13-19"]
+    supports: [SUP.1.BP2, SUP.4.BP4, "13-19", "21434:WP-09-05", "21434:WP-09-07", "21434:WP-10-04"]
     attributes:
       id: {required: always}
       type: {required: always}
@@ -810,7 +977,8 @@ types:
 
 # ---------------------------------------------------------------------------
 # Plan kinds and the strategy practices they answer. A process in scope needs an
-# approved plan of every kind that names one of its base practices (COV-27).
+# approved plan of every kind that names one of its base practices (COV-27); a
+# clause of ISO/SAE 21434 in scope, one of every kind that names one of its subclauses.
 # ---------------------------------------------------------------------------
 plan_kinds:
   project: [MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6, MAN.3.BP7]
@@ -824,6 +992,12 @@ plan_kinds:
   problem-resolution: [SUP.9.BP1]
   risk-management: [MAN.5.BP1, MAN.5.BP2]
   change-request-management: [SUP.10.BP1]
+  cybersecurity: ["21434:6.4.1", "21434:6.4.2", "21434:6.4.3", "21434:6.4.4", "21434:6.4.5", "21434:6.4.6", "21434:15.8", "21434:WP-06-01"]
+  cybersecurity-interface-agreement: ["21434:7.4.3", "21434:WP-07-01"]
+  cybersecurity-monitoring: ["21434:8.3", "21434:WP-08-01", "21434:WP-08-02"]
+  cybersecurity-incident-response: ["21434:13.3", "21434:WP-13-01"]
+  production-control: ["21434:12", "21434:WP-12-01"]
+  end-of-cybersecurity-support: ["21434:14.3", "21434:WP-14-01"]
 
 # ---------------------------------------------------------------------------
 # Conditional requirements: attributes or sections that become mandatory when
@@ -854,6 +1028,13 @@ conditions:
   - {types: [risk], when: {status: [in-treatment]}, attributes: [indicators], structure: risk-indicators, stage: always}
   - {types: [plan], when: {kind: [quality-assurance]}, attributes: [quality_checks], structure: quality-checks, stage: before-review}
   - {types: [plan], when: {kind: [quality-assurance]}, attributes: [escalation], structure: escalation-rules, stage: before-review}
+  - {types: [plan], when: {kind: [cybersecurity]}, attributes: [tara_method], structure: tara-method, stage: before-review}
+  - {types: [plan], when: {kind: [cybersecurity]}, attributes: [cybersecurity_activities], structure: cybersecurity-activities, stage: before-review}
+  - {types: [plan], when: {kind: [cybersecurity-interface-agreement]}, attributes: [shared_activities], structure: shared-activities, stage: before-review}
+  - {types: [plan], when: {kind: [cybersecurity-monitoring]}, attributes: [monitoring_sources], structure: monitoring-sources, stage: before-review}
+  - {types: [plan], when: {kind: [cybersecurity-monitoring]}, attributes: [triggers], structure: monitoring-triggers, stage: before-review}
+  - {types: [weakness], when: {status: [closed]}, attributes: [closure], structure: closure, stage: always}
+  - {types: [weakness], when: {vulnerability: [true]}, attributes: [risk_value, treatment], stage: before-review}
   - {types: any, when: {status: [rejected]}, attributes: [rejection_reason], stage: always}
   - {types: [change-request], when: {status: [approved, rejected, implemented, verified, closed]}, attributes: [decision], stage: always}
 
@@ -866,6 +1047,8 @@ links:
     pairs:
       - {from: system-requirement, to: [stakeholder-requirement], supports: [SYS.2.BP6, SYS.2.BP7]}
       - {from: software-requirement, to: [system-requirement, system-element, system-interface], supports: [SWE.1.BP6, SWE.1.BP7]}
+      - {from: system-requirement, to: [cybersecurity-goal], supports: ["21434:9.5", "21434:WP-09-06"]}
+      - {from: software-requirement, to: [cybersecurity-goal], supports: ["21434:9.5", "21434:10.4.1", "21434:WP-09-06"]}
   fulfils:
     meaning: "the requirement is allocated to this architectural element. The link is stored on the element because the element depends on the requirement: when the requirement changes, the element becomes suspect"
     pairs:
@@ -913,6 +1096,7 @@ links:
       - {from: software-qualification-test, to: [software-requirement], supports: [SWE.6.BP5, SWE.6.BP6]}
       - {from: system-integration-test, to: [system-element, system-interface, architecture-view], supports: [SYS.4.BP7, SYS.4.BP8]}
       - {from: system-qualification-test, to: [system-requirement], supports: [SYS.5.BP5, SYS.5.BP6]}
+      - {from: system-qualification-test, to: [cybersecurity-goal], supports: ["21434:11", "21434:WP-11-01"]}
   concerns:
     meaning: "the decision shapes the target"
     pairs:
@@ -926,6 +1110,7 @@ links:
     pairs:
       - {from: change-request, to: any, supports: [SUP.10.BP8]}
       - {from: problem-report, to: any, supports: [SUP.9.BP4]}
+      - {from: weakness, to: any, supports: ["21434:8.5", "21434:8.6"]}
   delivers:
     meaning: "the work package produces the target; its progress is read from the target's state"
     pairs:
@@ -935,13 +1120,28 @@ links:
     pairs:
       - {from: work-package, to: [work-package], supports: [MAN.3.BP4, MAN.3.BP8], evidence: none}
   addresses:
-    meaning: "the corrective action deals with a deviation in the target"
+    meaning: "the item deals with the target: a corrective action with a deviation in it, a cybersecurity goal or claim with the risk of a threat scenario or a vulnerability"
     pairs:
       - {from: corrective-action, to: any, supports: [MAN.3.BP10], evidence: none}
+      - {from: cybersecurity-goal, to: [threat-scenario], supports: ["21434:9.4", "21434:15.9"]}
+      - {from: cybersecurity-claim, to: [threat-scenario, weakness], supports: ["21434:9.4", "21434:15.9", "21434:8.6"]}
   resolves:
-    meaning: "the change request carries the resolution of the problem"
+    meaning: "the change request carries the resolution of the problem or the vulnerability"
     pairs:
       - {from: change-request, to: [problem-report], supports: [SUP.10.BP8]}
+      - {from: change-request, to: [weakness], supports: [SUP.10.BP8, "21434:8.6"]}
+  located_in:
+    meaning: "the asset is held, processed or carried by the target; a change of the target makes the asset suspect"
+    pairs:
+      - {from: asset, to: [item-definition, system-element, system-interface, software-component, software-interface], supports: ["21434:15.3"]}
+  threatens:
+    meaning: "the threat scenario takes a cybersecurity property of the target asset"
+    pairs:
+      - {from: threat-scenario, to: [asset], supports: ["21434:15.4"]}
+  leads_to:
+    meaning: "the threat scenario, once realized, causes the target damage scenario"
+    pairs:
+      - {from: threat-scenario, to: [damage-scenario], supports: ["21434:15.4", "21434:15.8"]}
 
 # Links that live inside records rather than as link attributes:
 #   test-run.results[].test          test result -> test case
@@ -983,7 +1183,7 @@ coverage:
   - {id: COV-16, subject: system-requirement, expect: "verification_method test -> at least one system-qualification-test verifies it; otherwise a final review-record covers it", waiver: "none", supports: [SYS.5.BP5]}
   - {id: COV-17, subject: test-case, expect: "at least one verifies link, to an item that is not rejected or obsolete", waiver: "none", supports: [SWE.4.BP5, SWE.5.BP7, SWE.6.BP5, SYS.4.BP7, SYS.5.BP5]}
   - {id: COV-18, subject: test-case, expect: "a verdict in the latest final test-run of its level for the baseline under assessment; for an integration test (software or system), in the latest final run on a build of its step; a failed verdict is named by a problem report (affects the case or what it verifies, or found_in the run) until a later run passes it", waiver: "recorded as not-run with a reason accepted in the test summary; a failed verdict stays reported (warning while its problem report is unresolved, information once resolved)", supports: [SWE.4.BP5, SWE.5.BP7, SWE.6.BP5, SYS.4.BP7, SYS.5.BP5]}
-  - {id: COV-19, subject: any-engineering-item, expect: "a final review-record with verdict approved covers the current content hash and all its findings are closed", waiver: "none", supports: [SUP.1.BP2, SYS.2.BP7, SYS.3.BP7, SYS.4.BP8, SYS.5.BP6, SWE.1.BP7, SWE.2.BP8, SWE.3.BP6, SWE.4.BP6, SWE.5.BP8, SWE.6.BP6]}
+  - {id: COV-19, subject: any-engineering-item, expect: "a final review-record with verdict approved covers the current content hash and all its findings are closed", waiver: "none", supports: [SUP.1.BP2, SYS.2.BP7, SYS.3.BP7, SYS.4.BP8, SYS.5.BP6, SWE.1.BP7, SWE.2.BP8, SWE.3.BP6, SWE.4.BP6, SWE.5.BP8, SWE.6.BP6, "21434:9.4", "21434:9.5", "21434:10.4.1"]}
   - {id: COV-20, subject: change-request, expect: "from state analysed on: at least one affects link", waiver: "none", supports: [SUP.10.BP8]}
   - {id: COV-21, subject: software-interface, expect: "provided by a component with origin developed -> at least one software-unit of that component realizes it", waiver: "none", supports: [SWE.3.BP2, SWE.3.BP5]}
   - {id: COV-22, subject: software-unit, expect: "every function of category public, scheduled or callback is defined in the listed source files, no function is defined there without a design entry, and wherever the design states types the parameter types and the return type equal those in the code", waiver: "origin generated or third-party", supports: [SWE.3.BP5, SWE.3.BP8]}
@@ -1016,6 +1216,16 @@ coverage:
   - {id: COV-50, subject: risk, expect: "from state analysed on: probability and impact lie within the scales of the approved risk-management plan, and the category is one the plan names", waiver: "none", supports: [MAN.5.BP4, MAN.5.BP1]}
   - {id: COV-51, subject: risk, expect: "a live risk whose exposure (probability times impact) is above acceptable_up_to of the plan is in treatment, closed, or accepted with a decision that names who accepted it", waiver: "none", supports: [MAN.5.BP5]}
   - {id: COV-52, subject: risk, expect: "a risk in treatment has at least one indicator with a threshold", waiver: "none", supports: [MAN.5.BP6]}
+  - {id: COV-53, subject: project, expect: "the approved cybersecurity plan has an entry in cybersecurity_activities for every subclause of the clauses under scope.cybersecurity, each with a decision of performed, tailored, not-applicable, by-customer or by-supplier; tailored and not-applicable carry a rationale", waiver: "none", supports: ["21434:6.4.2", "21434:6.4.3"]}
+  - {id: COV-54, subject: asset, expect: "at least one threat-scenario threatens it; for a damage-scenario: at least one threat-scenario leads_to it", waiver: "none", supports: ["21434:15.3", "21434:15.4"]}
+  - {id: COV-55, subject: damage-scenario, expect: "from state in-review on: an impact rating severe, major, moderate or negligible for every impact category of the approved cybersecurity plan, and none for a category it does not name", waiver: "none", supports: ["21434:15.5"]}
+  - {id: COV-56, subject: threat-scenario, expect: "threatens at least one asset and leads_to at least one damage-scenario; its property is one of the asset's properties; from in-review on: at least one attack path, each rated, and feasibility the highest of them", waiver: "none", supports: ["21434:15.4", "21434:15.6", "21434:15.7"]}
+  - {id: COV-57, subject: threat-scenario, expect: "from in-review on: risk_value equals the risk_matrix of the approved cybersecurity plan for the highest impact of the damage scenarios it leads to and its feasibility", waiver: "none", supports: ["21434:15.8"]}
+  - {id: COV-58, subject: threat-scenario, expect: "from in-review on: a treatment of avoid, reduce, share or retain; reduce -> a cybersecurity-goal addresses it; share or retain -> a cybersecurity-claim addresses it; retain above retain_up_to of the plan -> a decision naming who accepted it", waiver: "none", supports: ["21434:15.9", "21434:9.4"]}
+  - {id: COV-59, subject: cybersecurity-goal, expect: "at least one system-requirement or software-requirement derived_from it; also for a goal received from the customer", waiver: "none", supports: ["21434:9.5", "21434:10.4.1"]}
+  - {id: COV-60, subject: any-engineering-item, expect: "derived from a cybersecurity goal or a security-relevant requirement, or fulfilling a security-relevant requirement -> security_relevant true", waiver: "none", supports: ["21434:9.5", "21434:10.4.1"]}
+  - {id: COV-61, subject: weakness, expect: "from state analysed on: vulnerability decided; a vulnerability has a risk value and a treatment; reduce -> from in-resolution on a change-request resolves it; share or retain -> a cybersecurity-claim addresses it", waiver: "none", supports: ["21434:8.5", "21434:8.6"]}
+  - {id: COV-62, subject: cybersecurity-goal, expect: "at least one system-qualification-test verifies it", waiver: "none; where the customer validates on the vehicle, clause 11 is not under scope.cybersecurity", supports: ["21434:11"]}
   - {id: COV-26, subject: baseline, expect: "at least one final communication-record names the baseline as subject", waiver: "baseline purpose marked internal in the project configuration", supports: [SYS.2.BP8, SYS.3.BP8, SYS.4.BP9, SYS.5.BP7, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7, SWE.4.BP7, SWE.5.BP9, SWE.6.BP7]}
 
 # ---------------------------------------------------------------------------

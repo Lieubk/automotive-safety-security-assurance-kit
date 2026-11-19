@@ -1269,6 +1269,169 @@ SUPPLIED = ({"type": "software-component", "title": "Platform", "status": "appro
              "Dynamic behavior": "Not applicable: services only."})
 
 
+CS_SUBCLAUSES = ["6.4.%d" % n for n in range(1, 10)] + ["9.3", "9.4", "9.5"] + ["15.%d" % n for n in range(3, 10)]
+CS_CONFIG = {"scope": {"processes": SCOPE, "cybersecurity": [6, 9, 15]}}
+PLAN_SECTIONS = {"Scope": "The window lifter.", "Approach": "TARA, then goals and concept.", "Criteria": "Reviewed.",
+                 "Environment and tools": "Repository.", "Responsibilities": "Cybersecurity lead."}
+
+
+def cs_items():
+    """The base thread with a small TARA on top: one asset, one damage, one threat reduced by one goal."""
+    items = copy.deepcopy(base_items())
+    for front, _ in items.values():
+        if "security_relevant" in front:
+            front["security_relevant"] = True
+    items["SWR-0001"][0]["links"]["derived_from"].append("CSG-0001")
+    items["PLN-0009"] = ({"type": "plan", "title": "Cybersecurity plan", "status": "approved", "kind": "cybersecurity",
+                          "tara_method": {"impact_categories": ["safety", "financial", "operational", "privacy"],
+                                          "feasibility_approach": "attack-vector", "retain_up_to": 2,
+                                          "risk_matrix": {"severe": [2, 3, 4, 5], "major": [1, 2, 3, 4],
+                                                          "moderate": [1, 2, 2, 3], "negligible": [1, 1, 1, 1]}},
+                          "cybersecurity_activities": [{"subclause": s, "decision": "performed",
+                                                        "responsible": "Cybersecurity lead"} for s in CS_SUBCLAUSES]},
+                         PLAN_SECTIONS)
+    items["ITM-0001"] = ({"type": "item-definition", "title": "Window lifter", "status": "approved"},
+                         {"Boundary and functions": "Door module and motor.", "Preliminary architecture": "One ECU.",
+                          "Operational environment": "Body bus."})
+    items["AST-0001"] = ({"type": "asset", "title": "Close command on the bus", "status": "approved",
+                          "properties": ["integrity", "authenticity"], "links": {"located_in": ["ITM-0001"]}},
+                         {"Description": "The frame that asks the window to close."})
+    items["DMG-0001"] = ({"type": "damage-scenario", "title": "Window closes on a hand", "status": "approved",
+                          "impact": {"safety": "major", "financial": "negligible", "operational": "moderate",
+                                     "privacy": "negligible"}},
+                         {"Description": "A passenger is hurt.", "Impact rationale": "Pinching, bounded force."})
+    items["THR-0001"] = ({"type": "threat-scenario", "title": "Spoofed close command", "status": "approved",
+                          "property": "integrity", "feasibility": "medium", "risk_value": 3, "treatment": ["reduce"],
+                          "attack_paths": [{"path": "diagnostic port, forged frame", "feasibility": "medium"},
+                                           {"path": "telematics unit, then the bus", "feasibility": "low"}],
+                          "links": {"threatens": ["AST-0001"], "leads_to": ["DMG-0001"]}},
+                         {"Description": "A forged frame closes the window.", "Treatment rationale": "Reduce: authenticate."})
+    items["CSG-0001"] = ({"type": "cybersecurity-goal", "title": "Close commands are authentic", "status": "approved",
+                          "links": {"addresses": ["THR-0001"]}}, {"Statement": "Only authentic commands move the window."})
+    return items
+
+
+class Cybersecurity(Case):
+    CS_RULES = {"COV-%d" % n for n in range(53, 63)}
+
+    def make(self, items=None, config=CS_CONFIG, **kwargs):
+        return super().make(cs_items() if items is None else items, config=config, **kwargs)
+
+    def cs_findings(self, fixture, level="error"):
+        return sorted({(f["rule"], f["item"]) for f in fixture.findings(level)
+                       if f["rule"] in self.CS_RULES or f["rule"] in ("SCHEMA", "LINK")})
+
+    def test_a_consistent_tara_has_no_findings(self):
+        fixture = self.make()
+        self.assertEqual(fixture.findings("error"), [])
+        self.assertEqual(self.cs_findings(fixture, "warning"), [])
+
+    def test_out_of_scope_the_rules_stay_silent(self):
+        fixture = self.make(config={})
+        self.assertFalse({r for r, _ in fixture.rules()} & self.CS_RULES)
+        items = cs_items()
+        del items["PLN-0009"]
+        self.assertNotIn(("COV-27", "project"), self.make(items, config={}).rules())
+
+    def test_a_clause_in_scope_needs_the_cybersecurity_plan(self):
+        items = cs_items()
+        del items["PLN-0009"]
+        messages = [f["message"] for f in self.make(items).findings("error") if f["rule"] == "COV-27"]
+        self.assertIn("no approved plan of kind cybersecurity", messages)
+
+    def test_the_plan_decides_every_subclause_in_scope(self):
+        items = cs_items()
+        activities = items["PLN-0009"][0]["cybersecurity_activities"]
+        activities[:] = [a for a in activities if a["subclause"] != "15.9"]
+        activities[0].update(decision="tailored")
+        messages = [f["message"] for f in self.make(items).findings("error") if f["rule"] == "COV-53"]
+        self.assertTrue(any("subclause 15.9 Risk treatment decision" in m for m in messages), messages)
+        self.assertTrue(any("6.4.1 is tailored without a rationale" in m for m in messages), messages)
+
+    def test_damage_is_rated_in_every_category_of_the_plan(self):
+        items = cs_items()
+        del items["DMG-0001"][0]["impact"]["privacy"]
+        items["DMG-0001"][0]["impact"]["reputation"] = "major"
+        messages = [f["message"] for f in self.make(items).findings("error") if f["rule"] == "COV-55"]
+        self.assertEqual(len(messages), 2, messages)
+
+    def test_feasibility_is_the_highest_of_the_attack_paths(self):
+        fixture = self.make(changed(cs_items(), "THR-0001", feasibility="low", risk_value=2))
+        messages = [f["message"] for f in fixture.findings("error") if f["rule"] == "COV-56"]
+        self.assertTrue(messages and "highest of its attack paths is medium" in messages[0], messages)
+
+    def test_risk_value_follows_the_matrix_of_the_plan(self):
+        fixture = self.make(changed(cs_items(), "THR-0001", risk_value=4))
+        messages = [f["message"] for f in fixture.findings("error") if f["rule"] == "COV-57"]
+        self.assertTrue(messages and "gives 3 for impact major and feasibility medium" in messages[0], messages)
+
+    def test_a_tara_without_method_is_not_assessed(self):
+        items = cs_items()
+        del items["PLN-0009"][0]["tara_method"]
+        fixture = self.make(items)
+        warnings = [f for f in fixture.findings("warning") if f["rule"] == "COV-57"]
+        self.assertTrue(warnings and "not assessed" in warnings[0]["message"], warnings)
+
+    def test_reduce_needs_a_goal_and_retain_a_claim(self):
+        items = cs_items()
+        items["CSG-0001"][0]["links"]["addresses"] = []
+        self.assertIn(("COV-58", "THR-0001"), self.make(items).rules())
+        fixture = self.make(changed(cs_items(), "THR-0001", treatment=["retain"]))
+        messages = [f["message"] for f in fixture.findings("error") if f["rule"] == "COV-58"]
+        self.assertTrue(any("no cybersecurity claim" in m for m in messages), messages)
+        self.assertTrue(any("above 2 (retain_up_to of PLN-0009)" in m for m in messages), messages)
+
+    def test_a_goal_is_refined_into_requirements(self):
+        items = cs_items()
+        items["SWR-0001"][0]["links"]["derived_from"] = ["SYR-0001"]
+        self.assertIn(("COV-59", "CSG-0001"), self.make(items).rules())
+
+    def test_what_is_derived_from_a_goal_is_security_relevant(self):
+        fixture = self.make(changed(cs_items(), "SWR-0001", security_relevant=False))
+        self.assertIn(("COV-60", "SWR-0001"), fixture.rules())
+        self.assertNotIn(("COV-60", "CMP-0002"), fixture.rules())          # it fulfils a requirement that is not
+
+    def test_listed_values_are_checked(self):
+        fixture = self.make(changed(cs_items(), "AST-0001", properties=["integrity", "secrecy"]))
+        self.assertIn(("SCHEMA", "AST-0001"), fixture.rules())
+
+    def test_a_vulnerability_to_reduce_needs_its_change(self):
+        items = cs_items()
+        items["WKN-0001"] = ({"type": "weakness", "title": "Old library version", "status": "in-resolution",
+                              "reported_at": "2026-03-01", "found_by": "monitoring", "source": "advisory 2026-17",
+                              "vulnerability": True, "risk_value": 3, "treatment": ["reduce"],
+                              "links": {"affects": ["UNT-0001"]}},
+                             {"Description": "The unit uses an affected version.", "Analysis": "Reachable from the bus."})
+        monitoring = {"scope": {"processes": SCOPE, "cybersecurity": [8]}}
+        self.assertIn(("COV-61", "WKN-0001"), self.make(items, config=monitoring).rules())
+        self.assertNotIn(("COV-61", "WKN-0001"), self.make(items).rules())     # clause 8 not in scope
+        items["CR-0001"] = ({"type": "change-request", "title": "Update the library", "status": "approved",
+                             "requester": "Cybersecurity lead", "decision": "CCB, 2026-03-02",
+                             "links": {"resolves": ["WKN-0001"], "affects": ["UNT-0001"]}},
+                            {"Description": "Update.", "Impact analysis": "One unit."})
+        self.assertNotIn(("COV-61", "WKN-0001"), self.make(items, config=monitoring).rules())
+
+    def test_tara_lists_threats_with_what_their_risk_rests_on(self):
+        from traceability import tara
+        fixture = self.make(changed(cs_items(), "THR-0001", risk_value=4))
+        data = tara(Project(fixture.root))
+        entry = data["threat_scenarios"][0]
+        self.assertEqual((entry["impact"], entry["feasibility"], entry["risk_value"], entry["matrix_value"]),
+                         ("major", "medium", 4, 3))
+        self.assertEqual(entry["goals"], ["CSG-0001"])
+        self.assertEqual(data["figures"]["risk_value_differs"], 1)
+
+    def test_clauses_show_the_evidence_per_work_product(self):
+        from traceability import clause_rows
+        rows = {r["subclause"]: r for r in clause_rows(Project(self.make().root))}
+        self.assertEqual(set(rows), set(CS_SUBCLAUSES))
+        goals = {w["work_product"]: w for w in rows["9.4"]["work_products"]}
+        self.assertEqual((goals["WP-09-03"]["items"], goals["WP-09-02"]["items"]), (1, 1))
+        concept = {w["work_product"]: w for w in rows["9.5"]["work_products"]}
+        self.assertEqual(concept["WP-09-06"]["items"], 1)                  # SWR-0001, derived from the goal
+        self.assertEqual(rows["6.4.2"]["decision"], "performed")
+
+
 class Integration(Case):
     def make(self, items=None, **kwargs):
         kwargs.setdefault("scope", INTEGRATION_SCOPE)

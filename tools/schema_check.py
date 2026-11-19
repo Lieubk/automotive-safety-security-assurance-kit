@@ -4,9 +4,11 @@
 Verifies that `schema/items.yaml` parses without values a YAML 1.1 parser turns
 into booleans by accident, that every lifecycle, attribute set, structure and
 item type it refers to is defined, and that every base practice and work
-product named under `supports` exists in the catalog. Also lists the base
-practices of the engineering processes that no schema element supports, so
-gaps in evidence structure stay visible.
+product named under `supports` exists in the catalog - the process catalog
+under aspice/, or for references "21434:..." the catalog of ISO/SAE 21434. Also
+lists the base practices of the engineering processes and the subclauses of the
+project-level clauses of ISO/SAE 21434 that no schema element supports, so gaps
+in evidence structure stay visible.
 
 Usage:
     python tools/schema_check.py [--version 3.1]
@@ -37,7 +39,8 @@ def stray_booleans(node, path=""):
     elif isinstance(node, list):
         for i, value in enumerate(node):
             found += stray_booleans(value, "%s[%d]" % (path, i))
-    elif isinstance(node, bool) and "/values[" not in path and not path.endswith("/may_be_empty"):
+    elif isinstance(node, bool) and "/values[" not in path and "/when/" not in path \
+            and not path.endswith("/may_be_empty"):
         found.append(path)
     return found
 
@@ -67,12 +70,22 @@ def main():
             practices[bp["id"]] = bp["name"]
         products |= {wp["id"] for wp in proc["output_work_products"]}
 
+    cybersecurity, cs_levels = {}, {}
+    cs_file = ROOT / "iso-sae-21434" / "2021" / "catalog.yaml"
+    if cs_file.exists():
+        catalog = yaml.safe_load(cs_file.read_text(encoding="utf-8"))
+        for clause in catalog["clauses"]:
+            for sub in clause["subclauses"]:
+                cybersecurity["21434:" + str(sub["id"])] = sub["name"]
+                cs_levels["21434:" + str(sub["id"])] = clause["level"]
+        cybersecurity.update({"21434:" + wp["id"]: wp["name"] for wp in catalog["work_products"]})
+
     errors, used = [], set()
 
     def supports(where, refs):
         for ref in map(str, refs or []):
             used.add(ref)
-            known = products if WP_ID.match(ref) else practices
+            known = cybersecurity if ref.startswith("21434:") else products if WP_ID.match(ref) else practices
             if ref not in known:
                 errors.append("%s: '%s' is not in the catalog" % (where, ref))
 
@@ -183,6 +196,11 @@ def main():
         print("engineering base practices no schema element supports (%d):" % len(unsupported))
         for bp in unsupported:
             print("  %s %s" % (bp, practices[bp]))
+    uncovered = [ref for ref in cybersecurity if cs_levels.get(ref) in ("project", "method") and ref not in used]
+    if uncovered:
+        print("ISO/SAE 21434 subclauses of project and method clauses no schema element supports (%d):" % len(uncovered))
+        for ref in uncovered:
+            print("  %s %s" % (ref, cybersecurity[ref]))
     for e in errors:
         print("error: " + e)
     print("%d errors" % len(errors))

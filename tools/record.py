@@ -1216,6 +1216,86 @@ def cmd_baseline(project, args):
     return 0
 
 
+def cmd_cybersecurity_case(project, args):
+    as_of = trace.as_date(args.as_of) if args.as_of else datetime.date.today()
+    problems = [] if as_of else ["--as-of must be a date YYYY-MM-DD"]
+    argument = read_text_file(args.argument, "argument")
+    if not argument:
+        problems.append("--argument names no file with text: the case is the argument of the person who prepares it, "
+                        "in their words")
+    clauses = [str(c) for c in (args.clause or sorted((c[len(trace.CS_PREFIX):] for c in project.cs_scope), key=int))]
+    known = {str(c["id"]) for c in trace.cs_catalog()["clauses"]}
+    if not clauses:
+        problems.append("no clause of ISO/SAE 21434 is under scope.cybersecurity in project.yaml; name them with --clause")
+    problems += ["%s is not a clause of ISO/SAE 21434" % c for c in clauses if c not in known]
+    if problems:
+        return stop(problems)
+    rows = [r for c in clauses for r in trace.clause_rows(project, c)]
+    products, findings, seen = [], [], set()
+    for row in rows:
+        for wp in row["work_products"]:
+            if wp["work_product"] in seen:
+                continue
+            seen.add(wp["work_product"])
+            products.append({"work_product": wp["work_product"], "name": wp["name"], "subclause": row["subclause"],
+                             "items": [{k: e[k] for k in ("item", "status", "hash")} for e in wp["evidence"]]})
+        for f in row["findings"]:
+            entry = {"rule": f["rule"], "item": f["item"], "level": f["level"], "message": f["message"]}
+            if entry not in findings:
+                findings.append(entry)
+    front = {
+        "id": next_id(project, "cybersecurity-case"),
+        "type": "cybersecurity-case",
+        "status": "final",
+        "title": "Cybersecurity case as of %s" % as_of,
+        "as_of": str(as_of),
+        "prepared_by": args.prepared_by,
+        "clauses": clauses,
+        "work_products": products,
+        "findings": findings,
+    }
+    path = write_item(project, "cybersecurity-case", front, "\n## Argument\n\n%s\n" % argument)
+    empty = [p["work_product"] for p in products if not p["items"]]
+    print("wrote %s: %d work products of clauses %s, %d without evidence%s, %d open findings"
+          % (path, len(products), ", ".join(clauses), len(empty), (" (%s)" % ", ".join(empty)) if empty else "",
+             len(findings)))
+    return 0
+
+
+def cmd_cybersecurity_assessment(project, args):
+    as_of = trace.as_date(args.as_of) if args.as_of else datetime.date.today()
+    problems = [] if as_of else ["--as-of must be a date YYYY-MM-DD"]
+    case = project.items.get(args.case)
+    if case is None or case.type != "cybersecurity-case":
+        problems.append("--case %s is not a cybersecurity case" % args.case)
+    elif str(case.front.get("prepared_by", "")).strip().lower() == args.assessor.strip().lower():
+        problems.append("the assessor %s prepared %s: an assessment is independent of the case it judges"
+                        % (args.assessor, args.case))
+    report = read_text_file(args.report, "report")
+    if not report:
+        problems.append("--report names no file with text: the report is the assessor's, in their words")
+    if args.judgement == "conditionally-accepted" and not args.conditions:
+        problems.append("a conditional acceptance names its conditions (--conditions)")
+    if problems:
+        return stop(problems)
+    front = {
+        "id": next_id(project, "cybersecurity-assessment"),
+        "type": "cybersecurity-assessment",
+        "status": "final",
+        "title": "Cybersecurity assessment of %s" % args.case,
+        "as_of": str(as_of),
+        "assessor": args.assessor,
+        "independence": args.independence,
+        "case": args.case,
+        "judgement": args.judgement,
+    }
+    if args.conditions:
+        front["conditions"] = args.conditions
+    path = write_item(project, "cybersecurity-assessment", front, "\n## Report\n\n%s\n" % report)
+    print("wrote %s: %s judged %s by %s" % (path, args.case, args.judgement, args.assessor))
+    return 0
+
+
 def cmd_communication(project, args):
     problems = ["no such item: %s" % s for s in args.subject if s not in project.items]
     if args.sent_at:
@@ -1323,6 +1403,19 @@ def main():
     baseline.add_argument("--purpose", required=True)
     baseline.add_argument("--leave-out-reason", help="why items of processes in scope that are not approved stay out "
                           "of a baseline that is not internal")
+    case = sub.add_parser("cybersecurity-case")
+    case.add_argument("--prepared-by", required=True)
+    case.add_argument("--argument", required=True, help="file with the argument, in the words of the person preparing it")
+    case.add_argument("--clause", action="append", help="clause of ISO/SAE 21434 the case covers (default: scope.cybersecurity)")
+    case.add_argument("--as-of")
+    judged = sub.add_parser("cybersecurity-assessment")
+    judged.add_argument("--case", required=True)
+    judged.add_argument("--assessor", required=True)
+    judged.add_argument("--independence", required=True, help="how the assessor is independent of the project")
+    judged.add_argument("--judgement", required=True, choices=["accepted", "conditionally-accepted", "rejected"])
+    judged.add_argument("--conditions")
+    judged.add_argument("--report", required=True, help="file with the assessor's report")
+    judged.add_argument("--as-of")
     told = sub.add_parser("communication")
     told.add_argument("--subject", required=True, action="append")
     told.add_argument("--audience", required=True, action="append")
@@ -1334,6 +1427,7 @@ def main():
     project = Project(args.project)
     commands = {"next-id": cmd_next_id, "test-run": cmd_test_run, "analysis-run": cmd_analysis_run,
                 "review": cmd_review, "baseline": cmd_baseline, "communication": cmd_communication,
+                "cybersecurity-case": cmd_cybersecurity_case, "cybersecurity-assessment": cmd_cybersecurity_assessment,
                 "status-report": cmd_status_report, "build": cmd_build,
                 "problem-trends": cmd_problem_trends, "quality-check": cmd_quality_check,
                 "quality-report": cmd_quality_report, "self-assessment": cmd_self_assessment,

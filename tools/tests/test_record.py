@@ -642,6 +642,56 @@ class StatusReports(RecordCase):
         self.assertIn("## Assessment", record_text)
 
 
+class CybersecurityRecords(unittest.TestCase):
+    """The case and the assessment, on the engine's TARA fixture."""
+
+    def setUp(self):
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from test_traceability import CS_CONFIG, Fixture, cs_items
+        self.fixture = Fixture(cs_items(), config=CS_CONFIG)
+        self.addCleanup(self.fixture.tmp.cleanup)
+        self.project = self.fixture.root
+        self.text = self.project / "argument.md"
+        self.text.write_text("The goal covers the only threat above risk 2; see the TARA.", encoding="utf-8")
+
+    def record(self, *arguments):
+        done = subprocess.run([sys.executable, str(ROOT / "tools" / "record.py"), "--project", str(self.project)]
+                              + [str(a) for a in arguments], capture_output=True, text=True)
+        return done.returncode, done.stdout
+
+    def front(self, relative):
+        return yaml.safe_load((self.project / relative).read_text(encoding="utf-8").split("---")[1])
+
+    def test_the_case_lists_the_evidence_per_work_product(self):
+        code, out = self.record("cybersecurity-case", "--prepared-by", "C. Lead", "--argument", self.text)
+        self.assertEqual(code, 0, out)
+        case = self.front("records/cybersecurity/CSE-0001.md")
+        self.assertEqual(case["clauses"], ["6", "9", "15"])
+        products = {w["work_product"]: w for w in case["work_products"]}
+        self.assertEqual([i["item"] for i in products["WP-09-03"]["items"]], ["CSG-0001"])
+        self.assertEqual([i["item"] for i in products["WP-06-01"]["items"]], ["PLN-0009"])
+        self.assertEqual(products["WP-06-03"]["items"], [])                  # no assessment yet
+        self.assertIn("## Argument", (self.project / "records/cybersecurity/CSE-0001.md").read_text(encoding="utf-8"))
+
+    def test_the_assessment_is_independent_of_the_case(self):
+        self.record("cybersecurity-case", "--prepared-by", "C. Lead", "--argument", self.text)
+        base = ["cybersecurity-assessment", "--case", "CSE-0001", "--independence", "other department",
+                "--report", self.text]
+        code, out = self.record(*base, "--assessor", "C. Lead", "--judgement", "accepted")
+        self.assertEqual(code, 1)
+        self.assertIn("an assessment is independent", out)
+        code, out = self.record(*base, "--assessor", "I. Assessor", "--judgement", "conditionally-accepted")
+        self.assertEqual(code, 1)
+        self.assertIn("names its conditions", out)
+        code, out = self.record(*base, "--assessor", "I. Assessor", "--judgement", "conditionally-accepted",
+                                "--conditions", "authentication tested on the bench before SOP")
+        self.assertEqual(code, 0, out)
+        sys.path.insert(0, str(ROOT / "tools"))
+        from traceability import Project
+        findings = [f for f in Project(self.project).check() if f["item"] == "CSA-0001"]
+        self.assertEqual(findings, [])
+
+
 class Baselines(RecordCase):
     def test_baseline_lists_approved_engineering_items_only(self):
         code, out = self.record("baseline", "--tag", "design-1", "--purpose", "design freeze")

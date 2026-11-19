@@ -16,7 +16,7 @@ Four checks, all deterministic:
 4. verbatim   Any run of `--min-run` or more consecutive words that also occurs
               in a source document under `.confidential/sources/`. Catches both
               proprietary text and copyrighted model text. Official identifiers
-              (`id` + `name` pairs in the catalogs under `aspice/`, plus lines in
+              (`id` + `name` pairs in the catalogs under `aspice/` and `iso-sae-21434/`, plus lines in
               `tools/verbatim-allow.txt`) are exempt, alone or listed one after
               another; a run that continues past them is still reported.
 
@@ -150,7 +150,8 @@ def load_sources(n):
 def load_allowed():
     """Official identifier phrases (as word tuples) that may be used verbatim."""
     phrases = []
-    for cat in (ROOT / "aspice").rglob("*.yaml") if (ROOT / "aspice").is_dir() else []:
+    catalogs = [c for d in ("aspice", "iso-sae-21434") if (ROOT / d).is_dir() for c in (ROOT / d).rglob("*.yaml")]
+    for cat in catalogs:
         last_id = ""
         for line in cat.read_text(encoding="utf-8", errors="replace").splitlines():
             pairs = INLINE_PAIR.findall(line)

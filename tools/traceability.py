@@ -79,6 +79,23 @@ INTEGRATION_LEVELS = {  # integration at software level (SWE.5, SWE.6) and at sy
                "practices": ("SYS.4.BP6", "SYS.5.BP4"), "name": "system"},
 }
 LEVEL_OF_TEST = {spec["test"]: level for level, spec in INTEGRATION_LEVELS.items()}
+CS_PREFIX = "21434:"                       # references to ISO/SAE 21434 in `supports`
+IMPACT_LEVELS = ["negligible", "moderate", "major", "severe"]         # lowest first
+FEASIBILITY_LEVELS = ["very-low", "low", "medium", "high"]            # lowest first; the columns of risk_matrix
+CS_PROPERTIES = {"confidentiality", "integrity", "availability", "authenticity", "authorization", "non-repudiation"}
+CS_TREATMENTS = ("avoid", "reduce", "share", "retain")
+CS_DECISIONS = ("performed", "tailored", "not-applicable", "by-customer", "by-supplier")
+_CS_CATALOG = None
+
+
+def cs_catalog():
+    """The catalog of ISO/SAE 21434: clauses, subclauses, requirement and work product identifiers."""
+    global _CS_CATALOG
+    if _CS_CATALOG is None:
+        path = ROOT / "iso-sae-21434" / "2021" / "catalog.yaml"
+        _CS_CATALOG = yaml.safe_load(path.read_text(encoding="utf-8")) if path.exists() \
+            else {"clauses": [], "work_products": []}
+    return _CS_CATALOG
 VERDICTS = {"passed", "failed", "blocked", "not-run"}
 FRONT_MATTER = re.compile(r"\A---\n(.*?)\n---[ \t]*(?:\n|\Z)(.*)\Z", re.S)
 HEADING = re.compile(r"^##\s+(.+?)\s*$")
@@ -214,6 +231,19 @@ def as_list(value):
     return value if isinstance(value, list) else [value]
 
 
+def process_of(ref):
+    """The process a reference of `supports` belongs to: SWE.1 for SWE.1.BP3, the clause 21434:9 for a
+    subclause 21434:9.4 or a work product 21434:WP-09-03; None for a work product of the process catalog."""
+    ref = str(ref)
+    if ".BP" in ref:
+        return ref.split(".BP")[0]
+    if ref.startswith(CS_PREFIX):
+        rest = ref[len(CS_PREFIX):]
+        number = rest[3:5] if rest.startswith("WP-") else rest.split(".")[0]
+        return CS_PREFIX + str(int(number)) if number.isdigit() else None
+    return None
+
+
 # --------------------------------------------------------------------------- project
 
 class Project:
@@ -223,7 +253,9 @@ class Project:
         cfg = self.root / "project.yaml"
         self.config = (yaml.safe_load(cfg.read_text(encoding="utf-8")) or {}) if cfg.exists() else {}
         processes = (self.config.get("scope") or {}).get("processes")
-        self.scope = set(processes) if processes else None      # None = everything in scope
+        self.scope = set(processes) if processes else None      # None = every process of the catalog in scope
+        # clauses of ISO/SAE 21434 count only where the project declares them
+        self.cs_scope = {CS_PREFIX + str(c) for c in as_list((self.config.get("scope") or {}).get("cybersecurity"))}
         self.types = self.schema["types"]
         self.rules = {r["id"]: r for r in self.schema["coverage"]}
         self.items, self.findings = {}, []
@@ -270,8 +302,7 @@ class Project:
     # ---- helpers
 
     def add(self, level, rule, subject, message, supports=None):
-        supports = [s for s in (supports or [])
-                    if self.scope is None or str(s).split(".BP")[0] in self.scope]   # only what is in scope
+        supports = [s for s in (supports or []) if process_of(s) and self.covers(process_of(s))]   # only what is in scope
         self.findings.append({"level": level, "rule": rule, "item": subject, "message": message,
                               "supports": supports})
 
@@ -344,10 +375,14 @@ class Project:
         found = [self.items[t] for t, _ in element.targets("fulfils") if t in self.items] if element else []
         return [r for r in found if self.live(r) and (types is None or r.type in types)]
 
+    def covers(self, process):
+        """Whether a process (SWE.1) or a clause of ISO/SAE 21434 (21434:9) is in the project's scope."""
+        if str(process).startswith(CS_PREFIX):
+            return process in self.cs_scope
+        return self.scope is None or process in self.scope
+
     def in_scope(self, supports):
-        if self.scope is None:
-            return True
-        return bool({str(s).split(".BP")[0] for s in supports if ".BP" in str(s)} & self.scope)
+        return any(self.covers(p) for p in {process_of(s) for s in supports} if p)
 
     def active(self, rule_id):
         return self.in_scope(self.rules[rule_id]["supports"])
@@ -371,10 +406,10 @@ class Project:
             refs = self.schema["plan_kinds"].get(item.front.get("kind"), [])
         else:
             refs = self.types.get(item.type, {}).get("supports") or []
-        processes = {str(r).split(".BP")[0] for r in refs if ".BP" in str(r)}
-        own = [s for s in supports if str(s).split(".BP")[0] in processes]
+        processes = {process_of(r) for r in refs} - {None}
+        own = [s for s in supports if process_of(s) in processes]
         if not own and fallback == "subject":
-            own = [str(r) for r in refs if ".BP" in str(r)]
+            own = [str(r) for r in refs if process_of(r)]
         return own or supports
 
     def gap(self, rule_id, item, message, fallback="rule"):
@@ -499,6 +534,7 @@ class Project:
             self.check_attributes(item)
             self.check_links(item)
         self.check_records()
+        self.check_cybersecurity_values()
 
     def check_attributes(self, item):
         attrs = self.attributes(item.type)
@@ -1484,7 +1520,7 @@ class Project:
     def cov_27(self, rule):
         have = {p.front.get("kind") for p in self.of_type("plan") if p.status == "approved"}
         for kind, practices in self.schema["plan_kinds"].items():
-            needed = [bp for bp in practices if self.scope is None or bp.split(".BP")[0] in self.scope]
+            needed = [bp for bp in practices if self.covers(process_of(bp))]
             if needed and kind not in have:
                 self.add("error", rule, "project", "no approved plan of kind %s" % kind, needed)
 
@@ -1625,6 +1661,249 @@ class Project:
                     self.add("warning", "PROBLEM", target_id, "problem report %s (%s, %s) concerns this approved item"
                              % (problem.id, problem.front.get("severity"), problem.status))
 
+
+    # ---- ISO/SAE 21434
+
+    def cs_plan(self):
+        """The approved plan of kind cybersecurity, or None."""
+        return next((p for p in sorted(self.of_type("plan"), key=lambda p: record_number(p.id))
+                     if p.status == "approved" and p.front.get("kind") == "cybersecurity"), None)
+
+    def tara_method(self, rule):
+        """The tara_method of the approved cybersecurity plan; reports once per rule when there is none."""
+        plan = self.cs_plan()
+        method = plan.front.get("tara_method") if plan else None
+        if isinstance(method, dict):
+            return plan, method
+        if any(self.live(t) and not t.imported for t in self.of_type("damage-scenario", "threat-scenario")):
+            self.add("warning", rule, plan.id if plan else "project",
+                     "no approved cybersecurity plan with a tara_method: ratings and risk values are not assessed",
+                     self.rules[rule]["supports"])
+        return plan, None
+
+    def tara_items(self, *types):
+        return [i for i in self.of_type(*types) if self.live(i) and not i.imported]
+
+    def highest_impact(self, threat):
+        """The highest impact rating of the damage scenarios a threat scenario leads to, or None."""
+        levels = [str(level) for target, _ in threat.targets("leads_to") if target in self.items
+                  for level in (self.items[target].front.get("impact") or {}).values()
+                  if isinstance(self.items[target].front.get("impact"), dict) and str(level) in IMPACT_LEVELS]
+        return max(levels, key=IMPACT_LEVELS.index) if levels else None
+
+    def matrix_value(self, method, impact, feasibility):
+        row = (method.get("risk_matrix") or {}).get(impact) if isinstance(method.get("risk_matrix"), dict) else None
+        if not isinstance(row, list) or len(row) != len(FEASIBILITY_LEVELS) or feasibility not in FEASIBILITY_LEVELS:
+            return None
+        return row[FEASIBILITY_LEVELS.index(feasibility)]
+
+    def cs_related(self, item, seen=None):
+        """Whether an item is cybersecurity evidence: of a type only ISO/SAE 21434 uses, security-relevant,
+        derived from a cybersecurity goal, or a test case, review or run of such an item."""
+        seen = seen if seen is not None else set()
+        if item.id in seen:
+            return False
+        seen.add(item.id)
+        refs = [str(r) for r in self.types.get(item.type, {}).get("supports") or []]
+        if refs and all(r.startswith(CS_PREFIX) for r in refs) or item.front.get("security_relevant") is True:
+            return True
+        if any(getattr(self.items.get(t), "type", None) == "cybersecurity-goal" for t, _ in item.targets("derived_from")):
+            return True
+        related = [t for t, _ in item.targets("verifies")]
+        if item.type == "review-record":
+            related = [str(e.get("item")) for e in as_list(item.front.get("subject")) if isinstance(e, dict)]
+        elif item.type == "test-run":
+            related = [str(e.get("test")) for e in as_list(item.front.get("results")) if isinstance(e, dict)]
+        return any(self.cs_related(self.items[t], seen) for t in related if t in self.items)
+
+    def cov_53(self, rule):
+        plan = self.cs_plan()
+        if plan is None:
+            return                                        # COV-27 reports the missing plan
+        supports = self.rules[rule]["supports"]
+        entries = {}
+        for entry in as_list(plan.front.get("cybersecurity_activities")):
+            if isinstance(entry, dict):
+                entries[str(entry.get("subclause"))] = entry
+        known = set()
+        for clause in cs_catalog()["clauses"]:
+            known |= {str(s["id"]) for s in clause["subclauses"]}
+            if CS_PREFIX + str(clause["id"]) not in self.cs_scope:
+                continue
+            for sub in clause["subclauses"]:
+                entry = entries.get(str(sub["id"]))
+                if entry is None:
+                    self.add("error", rule, plan.id, "cybersecurity_activities has no entry for subclause %s %s"
+                             % (sub["id"], sub["name"]), supports)
+                elif entry.get("decision") not in CS_DECISIONS:
+                    self.add("error", rule, plan.id, "subclause %s: decision %r, allowed: %s"
+                             % (sub["id"], entry.get("decision"), ", ".join(CS_DECISIONS)), supports)
+                elif entry.get("decision") in ("tailored", "not-applicable") and not entry.get("rationale"):
+                    self.add("error", rule, plan.id, "subclause %s is %s without a rationale"
+                             % (sub["id"], entry.get("decision")), supports)
+        for name in sorted(set(entries) - known):
+            self.add("warning", rule, plan.id, "cybersecurity_activities names %s, which is not a subclause of "
+                     "ISO/SAE 21434 (write it in quotes, for example \"9.4\")" % name, supports)
+
+    def cov_54(self, rule):
+        for asset in self.tara_items("asset"):
+            if not self.sources(asset.id, "threatens", ["threat-scenario"]):
+                self.gap(rule, asset, "no threat scenario threatens it")
+        for damage in self.tara_items("damage-scenario"):
+            if not self.sources(damage.id, "leads_to", ["threat-scenario"]):
+                self.gap(rule, damage, "no threat scenario leads to it")
+
+    def cov_55(self, rule):
+        plan, method = self.tara_method(rule)
+        if method is None:
+            return
+        categories = [str(c) for c in as_list(method.get("impact_categories"))]
+        for damage in self.tara_items("damage-scenario"):
+            impact = damage.front.get("impact")
+            if not self.due(damage, "before-review") and not impact:
+                continue
+            if not isinstance(impact, dict):
+                self.gap(rule, damage, "impact is not rated per category of %s (%s)" % (plan.id, ", ".join(categories)))
+                continue
+            for category in categories:
+                if impact.get(category) is None:
+                    self.gap(rule, damage, "no impact rating for category %s of %s" % (category, plan.id))
+                elif str(impact.get(category)) not in IMPACT_LEVELS:
+                    self.gap(rule, damage, "impact %s is %r; allowed: %s"
+                             % (category, impact.get(category), ", ".join(reversed(IMPACT_LEVELS))))
+            for category in sorted(set(map(str, impact)) - set(categories)):
+                self.gap(rule, damage, "rated in category %s, which %s does not name" % (category, plan.id))
+
+    def cov_56(self, rule):
+        for threat in self.tara_items("threat-scenario"):
+            assets = [self.items[t] for t, _ in threat.targets("threatens") if t in self.items]
+            if not assets:
+                self.gap(rule, threat, "threatens no asset")
+            if not threat.targets("leads_to"):
+                self.gap(rule, threat, "leads to no damage scenario")
+            prop = threat.front.get("property")
+            if assets and prop and not any(prop in as_list(a.front.get("properties")) for a in assets):
+                self.gap(rule, threat, "property %s is not a property of %s" % (prop, ", ".join(a.id for a in assets)))
+            if not self.due(threat, "before-review"):
+                continue
+            paths = [p for p in as_list(threat.front.get("attack_paths")) if isinstance(p, dict)]
+            if not paths:
+                self.gap(rule, threat, "no attack path")
+                continue
+            for n, path in enumerate(paths, 1):
+                if path.get("feasibility") not in FEASIBILITY_LEVELS:
+                    self.gap(rule, threat, "attack path %d: feasibility %r; allowed: %s"
+                             % (n, path.get("feasibility"), ", ".join(reversed(FEASIBILITY_LEVELS))))
+            rated = [p["feasibility"] for p in paths if p.get("feasibility") in FEASIBILITY_LEVELS]
+            stated = threat.front.get("feasibility")
+            if rated and stated in FEASIBILITY_LEVELS and stated != max(rated, key=FEASIBILITY_LEVELS.index):
+                self.gap(rule, threat, "feasibility %s, but the highest of its attack paths is %s"
+                         % (stated, max(rated, key=FEASIBILITY_LEVELS.index)))
+
+    def cov_57(self, rule):
+        plan, method = self.tara_method(rule)
+        if method is None:
+            return
+        for impact in IMPACT_LEVELS:
+            row = (method.get("risk_matrix") or {}).get(impact) if isinstance(method.get("risk_matrix"), dict) else None
+            if not isinstance(row, list) or len(row) != len(FEASIBILITY_LEVELS) \
+                    or any(v not in (1, 2, 3, 4, 5) for v in row):
+                self.add("error", rule, plan.id, "risk_matrix needs for impact %s four risk values 1 to 5, for "
+                         "feasibility %s" % (impact, ", ".join(FEASIBILITY_LEVELS)), self.rules[rule]["supports"])
+        for threat in self.tara_items("threat-scenario"):
+            if not self.due(threat, "before-review"):
+                continue
+            impact, feasibility = self.highest_impact(threat), threat.front.get("feasibility")
+            if impact is None:
+                self.gap(rule, threat, "no damage scenario it leads to is rated: the risk value cannot be checked")
+                continue
+            expected = self.matrix_value(method, impact, feasibility)
+            if expected is not None and threat.front.get("risk_value") != expected:
+                self.gap(rule, threat, "risk value %s, but the risk matrix of %s gives %s for impact %s and feasibility %s"
+                         % (threat.front.get("risk_value"), plan.id, expected, impact, feasibility))
+
+    def cov_58(self, rule):
+        plan = self.cs_plan()
+        method = plan.front.get("tara_method") if plan and isinstance(plan.front.get("tara_method"), dict) else {}
+        limit = method.get("retain_up_to")
+        for threat in self.tara_items("threat-scenario"):
+            treatment = [str(t) for t in as_list(threat.front.get("treatment"))]
+            if not treatment or not self.due(threat, "before-review"):
+                continue
+            goals = self.sources(threat.id, "addresses", ["cybersecurity-goal"])
+            claims = self.sources(threat.id, "addresses", ["cybersecurity-claim"])
+            if "reduce" in treatment and not goals:
+                self.gap(rule, threat, "treatment reduce, but no cybersecurity goal addresses it")
+            kept = [t for t in treatment if t in ("share", "retain")]
+            if kept and not claims:
+                self.gap(rule, threat, "treatment %s, but no cybersecurity claim addresses it" % " and ".join(kept))
+            value = threat.front.get("risk_value")
+            if "retain" in treatment and isinstance(limit, int) and isinstance(value, int) and value > limit \
+                    and not threat.front.get("decision"):
+                self.gap(rule, threat, "retains risk value %s, above %s (retain_up_to of %s), without a decision "
+                         "naming who accepted it" % (value, limit, plan.id))
+
+    def cov_59(self, rule):
+        for goal in self.of_type("cybersecurity-goal"):
+            if self.live(goal) and not self.sources(goal.id, "derived_from", ["system-requirement", "software-requirement"]):
+                self.gap(rule, goal, "no system or software requirement is derived from it")
+
+    def cov_60(self, rule):
+        for item in self.items.values():
+            if not self.live(item) or item.imported or "security_relevant" not in self.attributes(item.type):
+                continue
+            reasons = []
+            for target_id, _ in item.targets("derived_from"):
+                target = self.items.get(target_id)
+                if target is None:
+                    continue
+                if target.type == "cybersecurity-goal":
+                    reasons.append("derived from the cybersecurity goal %s" % target_id)
+                elif target.front.get("security_relevant") is True:
+                    reasons.append("derived from %s, which is security-relevant" % target_id)
+            if item.type in ("software-component", "software-interface", "system-element", "system-interface"):
+                reasons += ["fulfils %s, which is security-relevant" % r.id for r in self.allocated_requirements(item.id)
+                            if r.front.get("security_relevant") is True]
+            if reasons and item.front.get("security_relevant") is not True:
+                self.gap(rule, item, "security_relevant is %s, but it is %s"
+                         % (item.front.get("security_relevant"), "; ".join(reasons)))
+
+    def cov_61(self, rule):
+        for weakness in self.of_type("weakness"):
+            if not self.live(weakness) or not self.due(weakness, "before-review") \
+                    or weakness.front.get("vulnerability") is not True:
+                continue
+            treatment = [str(t) for t in as_list(weakness.front.get("treatment"))]
+            if "reduce" in treatment and self.due(weakness, "before-approval") \
+                    and not self.sources(weakness.id, "resolves", ["change-request"]) \
+                    and not self.sources(weakness.id, "affects", ["problem-report"]):
+                self.gap(rule, weakness, "treatment reduce, but no change request resolves it and no problem report "
+                         "carries the correction")
+            kept = [t for t in treatment if t in ("share", "retain")]
+            if kept and not self.sources(weakness.id, "addresses", ["cybersecurity-claim"]):
+                self.gap(rule, weakness, "treatment %s, but no cybersecurity claim addresses it" % " and ".join(kept))
+
+    def cov_62(self, rule):
+        for goal in self.of_type("cybersecurity-goal"):
+            if self.live(goal) and not self.sources(goal.id, "verifies", ["system-qualification-test"]):
+                self.gap(rule, goal, "no system qualification test validates it")
+
+    def check_cybersecurity_values(self):
+        """Values of list attributes the schema cannot state as `values`, and references inside records."""
+        for asset in self.of_type("asset"):
+            wrong = [p for p in as_list(asset.front.get("properties")) if p not in CS_PROPERTIES]
+            if wrong:
+                self.add("error", "SCHEMA", asset.id, "properties %s; allowed: %s" % (wrong, ", ".join(sorted(CS_PROPERTIES))))
+        for item in self.of_type("threat-scenario", "weakness"):
+            wrong = [t for t in as_list(item.front.get("treatment")) if t not in CS_TREATMENTS]
+            if wrong:
+                self.add("error", "SCHEMA", item.id, "treatment %s; allowed: %s" % (wrong, ", ".join(CS_TREATMENTS)))
+        for record in self.of_type("cybersecurity-assessment"):
+            case = self.items.get(str(record.front.get("case")))
+            if case is None or case.type != "cybersecurity-case":
+                self.add("error", "LINK", record.id, "case names %s, which is not a cybersecurity case"
+                         % record.front.get("case"))
+
     def check(self):
         self.check_structure()
         self.check_coverage()
@@ -1647,6 +1926,8 @@ def cmd_check(project, args):
             tail = "  [%s]" % ", ".join(f["supports"]) if f["supports"] else ""
             print("%-7s %-11s %-10s %s%s" % (f["level"], f["rule"], f["item"], f["message"], tail))
         scope = ", ".join(sorted(project.scope)) if project.scope else "all processes"
+        if project.cs_scope:
+            scope += "; ISO/SAE 21434 clauses %s" % ", ".join(sorted((c[len(CS_PREFIX):] for c in project.cs_scope), key=int))
         active = [r for r in sorted(project.rules) if project.active(r)]
         print("%d items | scope: %s | %d of %d coverage rules active | %d errors, %d warnings, %d on drafts%s"
               % (len(project.items), scope, len(active), len(project.rules), counts["error"], counts["warning"],
@@ -2073,6 +2354,136 @@ def cmd_risks(project, args):
     print("%d live risks, %d above the threshold, %d in treatment, %d treatment actions overdue, %d indicators at "
           "their threshold" % (f["live"], f["above_threshold"], f["in_treatment"], f["actions_overdue"],
                                f["indicators_at_threshold"]))
+    return 0
+
+
+def tara(project):
+    """The threat scenarios with what their risk value rests on, highest risk first."""
+    plan = project.cs_plan()
+    method = plan.front.get("tara_method") if plan and isinstance(plan.front.get("tara_method"), dict) else None
+    entries = []
+    for threat in project.of_type("threat-scenario"):
+        if not project.live(threat):
+            continue
+        impact, feasibility = project.highest_impact(threat), threat.front.get("feasibility")
+        entries.append({
+            "item": threat.id, "title": threat.title, "state": threat.status, "property": threat.front.get("property"),
+            "assets": [t for t, _ in threat.targets("threatens")],
+            "damage_scenarios": [t for t, _ in threat.targets("leads_to")],
+            "impact": impact, "feasibility": feasibility,
+            "attack_paths": len([p for p in as_list(threat.front.get("attack_paths")) if isinstance(p, dict)]),
+            "risk_value": threat.front.get("risk_value"),
+            "matrix_value": project.matrix_value(method, impact, feasibility) if method and impact else None,
+            "treatment": [str(t) for t in as_list(threat.front.get("treatment"))],
+            "goals": [g.id for g in project.sources(threat.id, "addresses", ["cybersecurity-goal"])],
+            "claims": [c.id for c in project.sources(threat.id, "addresses", ["cybersecurity-claim"])],
+            "imported": threat.imported})
+    entries.sort(key=lambda e: (-(e["risk_value"] if isinstance(e["risk_value"], int) else 0), e["item"]))
+    by_value = {str(v): sum(1 for e in entries if e["risk_value"] == v) for v in (5, 4, 3, 2, 1)}
+    figures = {"threat_scenarios": len(entries), "by_risk_value": by_value,
+               "untreated": sum(1 for e in entries if not e["treatment"]),
+               "reduce_without_goal": sum(1 for e in entries if "reduce" in e["treatment"] and not e["goals"]),
+               "kept_without_claim": sum(1 for e in entries if {"share", "retain"} & set(e["treatment"]) and not e["claims"]),
+               "risk_value_differs": sum(1 for e in entries if e["matrix_value"] is not None
+                                         and e["matrix_value"] != e["risk_value"]),
+               "assets": len([a for a in project.of_type("asset") if project.live(a)]),
+               "damage_scenarios": len([d for d in project.of_type("damage-scenario") if project.live(d)]),
+               "goals": len([g for g in project.of_type("cybersecurity-goal") if project.live(g)]),
+               "claims": len([c for c in project.of_type("cybersecurity-claim") if project.live(c)])}
+    return {"plan": plan.id if plan else None, "feasibility_approach": (method or {}).get("feasibility_approach"),
+            "threat_scenarios": entries, "figures": figures}
+
+
+def cmd_tara(project, args):
+    data = tara(project)
+    if args.json:
+        print(json.dumps(data, indent=2))
+        return 0
+    print("TARA (plan %s, feasibility approach %s)" % (data["plan"] or "none approved", data["feasibility_approach"] or "-"))
+    for e in data["threat_scenarios"]:
+        value = "%s" % e["risk_value"]
+        if e["matrix_value"] is not None and e["matrix_value"] != e["risk_value"]:
+            value += " (matrix %s)" % e["matrix_value"]
+        handled = ", ".join(e["goals"] + e["claims"]) or "-"
+        print("%-9s %-10s risk %-12s impact %-10s feasibility %-8s %-14s by %-20s %s" % (
+            e["item"], e["state"], value, e["impact"] or "-", e["feasibility"] or "-",
+            "/".join(e["treatment"]) or "untreated", handled, e["title"]))
+    f = data["figures"]
+    print("%d threat scenarios (risk 5..1: %s), %d assets, %d damage scenarios, %d goals, %d claims | %d untreated, "
+          "%d reduce without a goal, %d retained or shared without a claim, %d risk values differ from the matrix"
+          % (f["threat_scenarios"], " ".join(str(f["by_risk_value"][k]) for k in ("5", "4", "3", "2", "1")),
+             f["assets"], f["damage_scenarios"], f["goals"], f["claims"], f["untreated"], f["reduce_without_goal"],
+             f["kept_without_claim"], f["risk_value_differs"]))
+    return 0
+
+
+def clause_rows(project, only=None):
+    """Per subclause of ISO/SAE 21434 in scope (or the clause asked for): the decision of the cybersecurity plan,
+    the items that provide each work product, and the open findings of the rules behind the subclause."""
+    findings = project.check()
+    plan = project.cs_plan()
+    decisions = {str(e.get("subclause")): e for e in as_list(plan.front.get("cybersecurity_activities") if plan else [])
+                 if isinstance(e, dict)}
+    plans = defaultdict(list)
+    for p in project.of_type("plan"):
+        for ref in project.schema["plan_kinds"].get(p.front.get("kind"), []):
+            plans[str(ref)].append(p)
+    rows = []
+    for clause in cs_catalog()["clauses"]:
+        key = CS_PREFIX + str(clause["id"])
+        if (only and str(clause["id"]) != str(only)) or (not only and key not in project.cs_scope):
+            continue
+        for sub in clause["subclauses"]:
+            ref = CS_PREFIX + str(sub["id"])
+            products = []
+            for wp in sub["work_products"]:
+                wref = CS_PREFIX + wp
+                types = [t for t, spec in project.types.items() if wref in map(str, spec.get("supports") or [])]
+                items = [i for i in project.items.values() if i.type in types and project.live(i)
+                         and i.type != "plan" and project.cs_related(i)] + plans.get(wref, [])
+                for role, link in project.schema["links"].items():       # evidence carried by a link, e.g. the concept
+                    for pair in link["pairs"]:
+                        if wref in map(str, pair.get("supports") or []):
+                            types.append(pair["from"])
+                            items += [i for i in project.of_type(pair["from"]) if project.live(i) and i not in items
+                                      and any(pair["to"] == "any" or getattr(project.items.get(t), "type", None) in pair["to"]
+                                              for t, _ in i.targets(role))]
+                types = sorted(set(types))
+                products.append({"work_product": wp, "name": next((w["name"] for w in cs_catalog()["work_products"]
+                                                                   if w["id"] == wp), ""),
+                                 "items": len(items), "approved_or_final": sum(1 for i in items if i.status in ("approved", "final")),
+                                 "types": sorted({i.type for i in items}) or types,
+                                 "evidence": [{"item": i.id, "status": i.status, "hash": i.hash}
+                                              for i in sorted(items, key=lambda i: i.id)]})
+            open_findings = [f for f in findings if ref in map(str, f["supports"]) and f["level"] != "info"]
+            entry = decisions.get(str(sub["id"])) or {}
+            rows.append({"subclause": str(sub["id"]), "name": sub["name"], "in_scope": key in project.cs_scope,
+                         "decision": entry.get("decision"), "responsible": entry.get("responsible"),
+                         "work_products": products,
+                         "findings": [{"rule": f["rule"], "item": f["item"], "level": f["level"], "message": f["message"]}
+                                      for f in open_findings]})
+    return rows
+
+
+def cmd_clauses(project, args):
+    rows = clause_rows(project, args.clause)
+    if args.json:
+        print(json.dumps(rows, indent=2))
+        return 0
+    if not rows:
+        print("no clause of ISO/SAE 21434 is under scope.cybersecurity in project.yaml" if not args.clause
+              else "%s is not a clause of ISO/SAE 21434 (5 to 15)" % args.clause)
+        return 0
+    for row in rows:
+        decision = "%s, %s" % (row["decision"], row["responsible"]) if row["decision"] else "no entry in the cybersecurity plan"
+        print("21434:%-7s %s  [%s]" % (row["subclause"], row["name"], decision))
+        for wp in row["work_products"]:
+            print("    %s %s: %s" % (wp["work_product"], wp["name"], "%d items (%d approved or final; %s)"
+                                    % (wp["items"], wp["approved_or_final"], ", ".join(wp["types"]))
+                                    if wp["items"] else "none" + (" (types: %s)" % ", ".join(wp["types"]) if wp["types"]
+                                                                  else " (no item type of the toolkit)")))
+        for f in row["findings"]:
+            print("    %-7s %-7s %-10s %s" % (f["level"], f["rule"], f["item"], f["message"]))
     return 0
 
 
@@ -2535,13 +2946,18 @@ def main():
     practices = sub.add_parser("practices")
     practices.add_argument("process", nargs="?")
     practices.add_argument("--json", action="store_true")
+    tara_parser = sub.add_parser("tara")
+    tara_parser.add_argument("--json", action="store_true")
+    clauses = sub.add_parser("clauses")
+    clauses.add_argument("clause", nargs="?", help="a clause number of ISO/SAE 21434; default: the clauses in scope")
+    clauses.add_argument("--json", action="store_true")
     args = ap.parse_args()
     project = Project(args.project)
     return {"check": cmd_check, "matrix": cmd_matrix, "show": cmd_show, "impact": cmd_impact,
             "hash": cmd_hash, "status": cmd_status, "list": cmd_list, "audit": cmd_audit, "practices": cmd_practices,
             "diff": cmd_diff, "progress": cmd_progress,
             "problems": cmd_problems, "history": cmd_history, "quality": cmd_quality, "generic": cmd_generic,
-            "suppliers": cmd_suppliers, "risks": cmd_risks}[args.command](project, args)
+            "suppliers": cmd_suppliers, "risks": cmd_risks, "tara": cmd_tara, "clauses": cmd_clauses}[args.command](project, args)
 
 
 if __name__ == "__main__":
