@@ -27,6 +27,9 @@ class RecordCase(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         self.project = Path(self.tmp.name) / "p"
         shutil.copytree(str(EXAMPLE), str(self.project), ignore=shutil.ignore_patterns("build"))
+        # The example extends the toolkit's software-requirements checklist; the tests of the toolkit's
+        # checklists run without it, ProjectChecklists puts checklists of a project back in place.
+        shutil.rmtree(str(self.project / "checklists"), ignore_errors=True)
 
     def record(self, *arguments):
         done = subprocess.run([sys.executable, str(ROOT / "tools" / "record.py"), "--project", str(self.project)]
@@ -76,7 +79,7 @@ class Review(RecordCase):
     def test_unknown_checklist_is_refused(self):
         code, out = self.review("--checks", self.all_checks(), checklist="my own list v1")
         self.assertEqual(code, 1)
-        self.assertIn("cites no checklist of this toolkit", out)
+        self.assertIn("cites no checklist", out)
 
     def test_the_record_keeps_the_hash_of_the_checklist_applied(self):
         code, out = self.review("--checks", self.all_checks())
@@ -252,6 +255,109 @@ class Review(RecordCase):
         named = self.front("records/reviews/" + self.records("records/reviews")[-1])
         self.assertNotIn("sources", without)
         self.assertEqual(sorted(s["file"] for s in named["sources"]), ["src/antipinch/AntiPinch.c", "src/antipinch/AntiPinch.h"])
+
+
+class ProjectChecklists(RecordCase):
+    """Checklists a project keeps under checklists/: extending, replacing, or covering a type of its own."""
+
+    OWN = ("| ID | Check | How to check | Kind |\n|---|---|---|---|\n"
+           "| CUS-01 | Time values are in milliseconds | read the statement | semantic |\n"
+           "| CUS-02 | Deviations from the customer's text are agreed | ask the project lead | accountable |\n")
+
+    def write(self, name, head, rows=None):
+        folder = self.project / "checklists"
+        folder.mkdir(exist_ok=True)
+        text = "# %s review checklist\n\n%s\n\n## Checks\n\n%s" % (name.replace("-", " ").capitalize(), head,
+                                                                  self.OWN if rows is None else rows)
+        (folder / (name + ".md")).write_text(text, encoding="utf-8")
+
+    def review(self, checklist, checks, ids=("SWR-0001",)):
+        return self.record("review", "--checklist", checklist, "--reviewer", REVIEWER, "--verdict", "approved",
+                           "--checks", self.json_file("c.json", checks), *ids)
+
+    def results(self, ids, result="pass"):
+        return [{"check": i, "result": result, "note": "test"} for i in ids]
+
+    def toolkit_ids(self):
+        return re.findall(r"(?m)^\|\s*([A-Z]{2,5}-\d+)\s*\|", CHECKLIST.read_text(encoding="utf-8"))
+
+    def test_the_example_extends_the_toolkit_checklist_for_software_requirements(self):
+        shutil.copytree(str(EXAMPLE / "checklists"), str(self.project / "checklists"))
+        code, out = self.record("checklists", "--type", "software-requirement")
+        self.assertEqual(code, 0, out)
+        self.assertIn("cite 'customer-software-requirements v1'", out)
+        self.assertNotIn("cite 'software-requirements v2'", out)
+
+    def test_an_extension_needs_the_checks_of_both_and_names_what_it_extends(self):
+        self.write("customer-swr", "Version 1. Applies to: `software-requirement`. Extends: software-requirements v2.")
+        code, out = self.review("customer-swr v1", self.results(self.toolkit_ids()))
+        self.assertEqual(code, 1)
+        self.assertIn("none for: CUS-01, CUS-02", out)
+        code, out = self.review("customer-swr v1", self.results(self.toolkit_ids() + ["CUS-01", "CUS-02"]))
+        self.assertEqual(code, 0, out)
+        record = self.front("records/reviews/" + self.records("records/reviews")[-1])
+        self.assertEqual(record["checklist_source"], "project")
+        self.assertEqual(record["checklist_extends"]["checklist"], "software-requirements v2")
+        self.assertRegex(record["checklist_extends"]["hash"], r"^[0-9a-f]{12}$")
+        self.assertEqual(len(record["checks"]), len(self.toolkit_ids()) + 2)
+
+    def test_the_toolkit_checklist_cannot_be_cited_alone_once_the_project_extends_or_replaces_it(self):
+        self.write("customer-swr", "Version 1. Applies to: `software-requirement`. Replaces: software-requirements v2.")
+        code, out = self.review("software-requirements v2", self.results(self.toolkit_ids()))
+        self.assertEqual(code, 1)
+        self.assertIn("replaces software-requirements.md with its own checklist", out)
+        self.assertIn("cite 'customer-swr v1'", out)
+
+    def test_a_replacement_applies_only_its_own_checks(self):
+        self.write("customer-swr", "Version 1. Applies to: `software-requirement`. Replaces: software-requirements v2.")
+        code, out = self.review("customer-swr v1", self.results(["CUS-01", "CUS-02"]))
+        self.assertEqual(code, 0, out)
+        record = self.front("records/reviews/" + self.records("records/reviews")[-1])
+        self.assertEqual(record["checklist_replaces"], "software-requirements v2")
+        self.assertNotIn("checklist_extends", record)
+        code, out = self.review("customer-swr v1", self.results(["CUS-01", "CUS-02", "SWR-04"]))
+        self.assertEqual(code, 1)
+        self.assertIn("check SWR-04 is not in", out)
+
+    def test_an_extension_of_an_older_toolkit_version_is_refused_and_reported_by_the_check(self):
+        self.write("customer-swr", "Version 1. Applies to: `software-requirement`. Extends: software-requirements v1.")
+        code, out = self.review("customer-swr v1", self.results(self.toolkit_ids() + ["CUS-01", "CUS-02"]))
+        self.assertEqual(code, 1)
+        self.assertIn("the toolkit's software-requirements.md is at version 2", out)
+        done = subprocess.run([sys.executable, str(ROOT / "tools" / "traceability.py"), "--project", str(self.project),
+                               "check"], capture_output=True, text=True)
+        self.assertIn("CHECKLIST", done.stdout)
+        self.assertIn("checklists/customer-swr.md", done.stdout)
+
+    def test_check_ids_shared_with_the_extended_checklist_are_refused(self):
+        rows = self.OWN.replace("CUS-01", "SWR-04")
+        self.write("customer-swr", "Version 1. Applies to: `software-requirement`. Extends: software-requirements v2.",
+                   rows)
+        code, out = self.record("checklists")
+        self.assertEqual(code, 1)
+        self.assertIn("check IDs SWR-04 are also IDs of software-requirements.md", out)
+
+    def test_a_project_checklist_may_not_take_the_name_of_a_toolkit_checklist(self):
+        self.write("software-requirements", "Version 1. Applies to: `software-requirement`.")
+        code, out = self.record("checklists")
+        self.assertEqual(code, 1)
+        self.assertIn("has the name of the toolkit checklist software-requirements.md", out)
+
+    def test_a_checklist_for_a_type_the_toolkit_has_none_for(self):
+        self.write("query-answers", "Version 3. Applies to: `query`.")
+        code, out = self.record("checklists", "--type", "query")
+        self.assertEqual(code, 0, out)
+        self.assertIn("cite 'query-answers v3'", out)
+        out_file = Path(self.tmp.name) / "t.json"
+        code, text = self.record("checks-template", "--checklist", "query-answers v3", "--out", out_file)
+        self.assertEqual(code, 0, text)
+        self.assertEqual([e["check"] for e in json.loads(out_file.read_text(encoding="utf-8"))], ["CUS-01", "CUS-02"])
+
+    def test_a_project_checklist_without_a_version_line_is_reported(self):
+        self.write("customer-swr", "Applies to: `software-requirement`.")
+        code, out = self.record("checklists")
+        self.assertEqual(code, 1)
+        self.assertIn("no 'Version <n>' line", out)
 
 
 class Runs(RecordCase):

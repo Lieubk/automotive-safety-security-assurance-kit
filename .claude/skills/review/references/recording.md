@@ -259,7 +259,9 @@ wrote records/reviews/REV-0007.md: rework, 2 items, 3 references, 2 findings
 |---|---|
 | `id` | the next free review record number |
 | `status: final` | a record is final when written |
-| `checklist_source` | `toolkit`, `external` with `--external-criteria`, or `reconfirmation` with `--reconfirm` |
+| `checklist_source` | `toolkit` or `project` from where the cited checklist lies, `external` with `--external-criteria`, or `reconfirmation` with `--reconfirm` |
+| `checklist_hash` | the hash of the cited checklist file |
+| `checklist_extends`, `checklist_replaces` | only for a project checklist that extends or replaces a toolkit checklist: that checklist with its version (and, when extended, its hash) |
 | `rests_on` | only with `--reconfirm`: the approving records of the subjects whose checks the reconfirmation does not repeat |
 | `reviewed_at` | the date of the command |
 | `subject` | the IDs given, each with its content hash at this moment |

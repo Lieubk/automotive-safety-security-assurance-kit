@@ -44,7 +44,7 @@ Say with the list:
 
 | Generic practice | What a person would look for, per process | Where the repository gives a starting point |
 |---|---|---|
-| GP 2.2.1 | what each work product type of this process has to contain and how it is structured; quality criteria; criteria for review and approval, defined before the review | the type in `schema/items.yaml` with its attributes, sections and lifecycle; the checklists under `.claude/docs/checklists/` with their versions |
+| GP 2.2.1 | what each work product type of this process has to contain and how it is structured; quality criteria; criteria for review and approval, defined before the review | the type in `schema/items.yaml` with its attributes, sections and lifecycle; the checklists under `.claude/docs/checklists/` and the project's under `checklists/`, with their versions |
 | GP 2.2.2 | rules for identification, versioning, storage, status, approval and distribution of the work products; how they depend on each other | the `plan` of kind `configuration-management`; `schema/item-format.md`; the link roles of the schema |
 | GP 2.2.3 | which work products are controlled; their history and change records; baselines that tie versions to a product configuration; access; a revision status anyone can find | version control history; `baseline` records; `change-request` items; `status` and `hash` |
 | GP 2.2.4 | reviews held as planned, against the criteria defined for the work product; findings followed to closure; rework and renewed approval | `review-record` items that name checklist and version, the date, the result of every check and the findings with their state; `quality-record` items of kind `work-product` where SUP.1 is in scope; whether the reviews were held as planned is not in the repository |

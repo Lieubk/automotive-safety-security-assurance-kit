@@ -70,6 +70,10 @@ the output by name. A check that cannot report that it did not run is not a chec
 - One item per file, in the folder and format of `schema/item-format.md`.
 - A requirement states one need, can be verified, and says what, not how.
 - A section that does not apply is written as `Not applicable:` with the reason.
+- Where a skill or an agent applies a checklist of the toolkit, it looks under
+  `checklists/` of the project as well: a checklist there that says `Extends:` it is
+  applied with it, one that says `Replaces:` it instead of it
+  (`python tools/record.py checklists --type <type>` names them).
 - Names of people, customers and products of real projects stay out of anything that
   could be published.
 

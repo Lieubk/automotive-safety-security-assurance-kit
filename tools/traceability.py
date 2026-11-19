@@ -60,6 +60,9 @@ from pathlib import Path
 
 import yaml
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import checklists  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 ASIL_ORDER = {"QM": 0, "A": 1, "B": 2, "C": 3, "D": 4}
 TEST_TYPES = {  # type -> (process that owns it, level name used by test runs)
@@ -2295,8 +2298,15 @@ class Project:
                 self.add("warning", "SCHEMA", "project.yaml", "inputs entry %d (%s) has no %s: what was received is "
                          "recorded with its version and date" % (n, entry.get("source") or "-", ", ".join(missing)))
 
+    def check_checklists(self):
+        """Review checklists of the project (checklists/): their format, and that what they extend or replace is
+        the toolkit's present version. A review cannot cite a checklist with such a problem."""
+        for path, message in checklists.Catalog(self.root).problems():
+            self.add("error", "CHECKLIST", path, message)
+
     def check(self):
         self.check_inputs()
+        self.check_checklists()
         self.check_structure()
         self.check_coverage()
         self.check_upstream()
@@ -3377,14 +3387,16 @@ def generic_rows_31(project, process_id, version):
         or {str(s) for s in as_list(c.front.get("subject"))} & (product_ids | {listed.get(i) for i in product_ids}))]
     asked = [q for q in project.of_type("query") if {x for x, _ in q.targets("about")} & product_ids]
     row("GP 2.1.7", *held(told + asked, "communication records and queries about the items of the process"))
-    checklists = []
-    for path in sorted((ROOT / ".claude" / "docs" / "checklists").glob("*.md")):
-        head = path.read_text(encoding="utf-8").split("\n\n## ")[0]
-        if any("`%s`" % name in head for name in types + (["plan"] if kinds else [])):
-            checklists.append(path.stem)
-    row("GP 2.2.1", "evidence present" if types or kinds else "no evidence structure", checklists,
-        "the item types of the schema and the review checklists %s; the project's own criteria, where it has any, are "
-        "for a person" % (", ".join(checklists) or "-"))
+    catalog = checklists.Catalog(project.root)
+    criteria = []
+    for name in types + (["plan"] if kinds else []):
+        for entry in catalog.for_type(name):
+            label = checklists.citation(entry) + (" (project)" if entry["source"] == "project" else "")
+            if label not in criteria:
+                criteria.append(label)
+    row("GP 2.2.1", "evidence present" if types or kinds else "no evidence structure", criteria,
+        "the item types of the schema and the review checklists %s; criteria of the project outside checklists/, "
+        "where it has any, are for a person" % (", ".join(criteria) or "-"))
     cm = [pl for pl in live if pl.type == "plan" and pl.front.get("kind") == "configuration-management"]
     row("GP 2.2.2", *held(cm, "the configuration management plan; identification, versions and links come from the "
                               "item format and the schema"))

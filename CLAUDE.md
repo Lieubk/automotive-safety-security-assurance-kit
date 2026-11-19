@@ -15,6 +15,7 @@ trace engine checks them.
 |---|---|
 | `project.yaml` | scope of the project: role, processes the team is responsible for, paths. Written by `/aspice-start`. Absent in a fresh copy of the toolkit |
 | `plans/`, `spec/`, `verification/`, `records/` | the project's items, in the folders `schema/items.yaml` names |
+| `checklists/` | the project's own review checklists, extending or replacing the toolkit's (`python tools/record.py checklists`) |
 | `src/`, `tests/` | code and test code |
 | `aspice/3.1/` | process catalog (`processes/`) and notes per process (`notes/`) |
 | `aspice/4.0/` | catalog of Automotive SPICE 4.0 built from the draft 3.991, each practice mapped to 3.1 (`maps_to`); chosen by `aspice.version` in `project.yaml` |

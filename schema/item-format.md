@@ -120,10 +120,13 @@ interface that names it under `provided_by` or `used_by`; these two relations ar
 stated on the interface and are treated like links of the component.
 
 `checklist_source` says what the verdict rests on: `toolkit` (a checklist of the
-toolkit at the cited version, with a result per check), `external` (criteria from
-outside the toolkit, named in `checklist`), or `reconfirmation` (the subjects did not
-change since their last approving review and were compared with new versions of what
-they build on).
+toolkit at the cited version, with a result per check), `project` (a checklist under
+`checklists/` of the project at the cited version, with a result per check; for one
+that extends a toolkit checklist, `checklist_extends` names that one with its hash and
+the checks of both have a result, for one that replaces it `checklist_replaces` names
+it), `external` (criteria from outside the toolkit and the project, named in
+`checklist`), or `reconfirmation` (the subjects did not change since their last
+approving review and were compared with new versions of what they build on).
 
 ## Imported items
 

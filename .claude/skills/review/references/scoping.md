@@ -53,17 +53,26 @@ table says what to expect.
 | Software component qualifications | `component-qualification` | `component-qualification.md` |
 | Anything else of the `engineering` lifecycle | for example `system-requirement` written by the project, `software-integration-test` | whichever checklist names the type; if none does, the semantic part is NOT ASSESSED |
 
+The project may have checklists of its own under `checklists/` that extend or replace
+one of these, or cover a type none of them names (`project-checklists.md`).
+`python tools/record.py checklists --type <type>` prints what to cite for the type in
+this project; it overrules the table.
+
 Cite a checklist as its file name without `.md`, followed by `v` and the number of its
 version line: `software-requirements v2`, `software-unit-code v2`, `plan v13`. The tool
-looks the file up and refuses a citation it cannot find or whose version is not the one
-in the file. It also accepts the title without the word "checklist"
-(`software requirements review v2`); use the file name, it cannot be mistyped as easily.
+looks the file up - under `.claude/docs/checklists/` and under `checklists/` of the
+project - and refuses a citation it cannot find or whose version is not the one in the
+file, and a toolkit checklist that the project extends or replaces. It also accepts the
+title without the word "checklist" (`software requirements review v2`); use the file
+name, it cannot be mistyped as easily.
 
-When the toolkit has no checklist for the type and the reviewers use criteria of their
-own, `--checklist` names those criteria as the user states them, and the command gets
-`--external-criteria`. The record then says `checklist_source: external`, and the tool
-asks for no check results. Use this only for criteria the user names; never to get
-around a checklist that exists.
+When neither the toolkit nor the project has a checklist for the type and the
+reviewers use criteria that stay outside the project, `--checklist` names those
+criteria as the user states them, and the command gets `--external-criteria`. The
+record then says `checklist_source: external`, and the tool asks for no check results.
+Use this only for criteria the user names; never to get around a checklist that
+exists. Criteria the user can hand over are better made a checklist of the project:
+then every check gets a result.
 
 ## Units and their code
 

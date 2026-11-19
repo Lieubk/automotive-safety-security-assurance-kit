@@ -36,7 +36,9 @@ return are proposals: a person confirms or rejects each one. You follow
 ## What you receive
 
 1. The IDs of the subject items.
-2. The path of the checklist.
+2. The path of the checklist: one of the toolkit or one of the project (`checklists/`).
+   A project checklist that says `Extends:` comes with the path of the toolkit
+   checklist it extends; apply the semantic checks of both.
 3. The `subject` and `references` blocks printed by `hash --upstream`: the subject items
    and the upstream items they link to, each with a content hash.
 4. Optional: the project folder; for a re-review, the earlier review record and the

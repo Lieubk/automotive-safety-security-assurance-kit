@@ -37,7 +37,7 @@ TRACE_COMMANDS = {"check", "matrix", "show", "impact", "hash", "status", "list",
 RECORD_COMMANDS = {"next-id", "test-run", "analysis-run", "review", "baseline", "communication", "status-report", "build",
                    "problem-trends", "quality-check", "quality-report", "self-assessment",
                    "supplier-review", "cybersecurity-case", "cybersecurity-assessment", "confirmation-measure",
-                   "safety-case", "release"}
+                   "safety-case", "release", "checks-template", "checklists"}
 
 
 def front_matter(path, errors):

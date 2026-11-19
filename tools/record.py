@@ -77,6 +77,20 @@ Commands
         Findings are attributed to software units through `source_files`. A live
         unit none of whose C files was analysed stops the command.
 
+    checklists [--type TYPE]
+        the review checklists of the toolkit and of the project (checklists/ in
+        its root), with what each project checklist extends or replaces; with
+        --type, the ones to cite for that item type (`imported` for an input
+        acceptance). Exit 1 while a project checklist has a problem: a format
+        error, a name of the toolkit's, a version it extends or replaces that
+        is not the toolkit's present one, check IDs it shares with the one it
+        extends.
+
+    checks-template --checklist "NAME vN" [--plan-kind KIND] [--out FILE]
+        a file of check results to fill in for a review: one entry per check,
+        for a project checklist that extends one of the toolkit the checks of
+        both.
+
     review --checklist "NAME vN" --reviewer NAME [--reviewer NAME ...] --verdict approved|rework
            [--findings FILE] [--checks FILE] [--item-under-test REF] [--external-criteria] ID [ID ...]
     review --reconfirm --reviewer NAME [--reviewer NAME ...] --verdict approved|rework
@@ -98,9 +112,13 @@ Commands
         A finding names an item that is a subject of the review, or none for a
         finding on the set.
         The checklist is cited as "<name> v<N>", <name> being a file under
-        .claude/docs/checklists (without .md) or its title without the word
-        "checklist"; the version must be the one in the file. Criteria from
-        outside the toolkit are recorded with --external-criteria.
+        .claude/docs/checklists or under checklists/ of the project (without
+        .md), or its title without the word "checklist"; the version must be
+        the one in the file. A project checklist that extends one of the toolkit
+        needs a result for the checks of both, and the record names the one it
+        extends with its hash; a toolkit checklist that the project extends or
+        replaces cannot be cited on its own. Criteria from outside the toolkit
+        and the project are recorded with --external-criteria.
         Verdict approved is refused while a finding is open; while a check of
         the checklist has no result or is not assessed; while an item the
         subject links to is still in draft or in review; while an accountable
@@ -202,6 +220,7 @@ from pathlib import Path
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import checklists  # noqa: E402
 import traceability as trace  # noqa: E402
 from traceability import TEST_TYPES, VERDICTS, Project, file_hash  # noqa: E402
 
@@ -616,56 +635,67 @@ def cmd_analysis_run(project, args):
     return 0
 
 
-CHECKLISTS = Path(__file__).resolve().parent.parent / ".claude" / "docs" / "checklists"
 RESULTS = ("pass", "finding", "not-applicable", "not-assessed")
+plain = checklists.plain
+NOT_A_CHECKLIST = ("'%s' cites no checklist: expected '<name> v<N>' for a file under .claude/docs/checklists or "
+                   "under checklists/ of the project (`record.py checklists` lists them)")
 
 
-def plain(text):
-    return " ".join(re.findall(r"[a-z0-9]+", str(text).lower()))
+def find_checklist(project, citation):
+    """The checklist that '<name> v<N>' cites - the toolkit's or the project's - as a review applies it, and
+    the problems that forbid citing it. (None, []) when the citation names no checklist.
 
-
-def find_checklist(citation):
-    """The toolkit checklist that '<name> v<N>' cites, as {file, version, cited, checks: {ID: kind}}, or None.
-
-    <name> is the file name without extension or the title without the word "checklist";
-    spaces and hyphens are interchangeable.
+    <name> is the file name without extension or the title without the word "checklist"; spaces and hyphens
+    are interchangeable. A project checklist that extends one of the toolkit brings that one's checks along.
     """
-    cited = re.match(r"^(.*?)\s+v(\d+)$", str(citation).strip(), re.I)
-    if not cited:
-        return None
-    for path in sorted(CHECKLISTS.glob("*.md")):
-        text = path.read_text(encoding="utf-8")
-        title = re.search(r"^#\s+(.+)$", text, re.M)
-        names = {plain(path.stem)}
-        if title:
-            names.add(plain(re.sub(r"(?i)\bchecklist\b", " ", title.group(1))))
-        if plain(cited.group(1)) in names:
-            version = re.search(r"^Version (\d+)", text, re.M)
-            rows = re.findall(r"(?m)^\|\s*([A-Z]{2,5}-\d+)\s*\|.*\|\s*(script|semantic|accountable)\s*\|\s*$", text)
-            sections, kinds, heading, kind = {}, {}, None, None
-            for line in text.splitlines():
-                if line.startswith("## "):
-                    heading = plain(line[3:])
-                    named = re.match(r"^## Kind (\S+)", line)       # a part that applies to one kind of plan only
-                    kind = named.group(1) if named else None
-                found = re.match(r"^\|\s*([A-Z]{2,5}-\d+)\s*\|", line)
-                if found and heading:
-                    sections.setdefault(heading, []).append(found.group(1))
-                    if kind:
-                        kinds.setdefault(kind, []).append(found.group(1))
-            return {"file": path.name, "version": version.group(1) if version else None, "cited": cited.group(2),
-                    "checks": dict(rows), "sections": sections, "kinds": kinds, "hash": file_hash(path)}
-    return None
+    return checklists.Catalog(project.root).resolve(citation)
+
+
+def cmd_checklists(project, args):
+    """The review checklists of the toolkit and of the project, with what each project checklist extends or
+    replaces; with --type only those to cite for that item type. Exit 1 when a project checklist has a problem."""
+    catalog = checklists.Catalog(project.root)
+    if args.type:
+        rows = catalog.for_type(args.type)
+        if not rows:
+            print("no checklist names `%s`: neither the toolkit nor checklists/ of the project. A review records "
+                  "the criteria its reviewers name, with --external-criteria" % args.type)
+        for entry in rows:
+            line = "cite '%s'  %s  (%s)  applies to: %s" % (checklists.citation(entry), entry["path"], entry["source"],
+                                                             entry["applies"] or "-")
+            if entry.get("relation"):
+                line += "; %s %s v%s" % (entry["relation"], entry["base_name"], entry["base_version"])
+            print(line)
+            if entry.get("relation") == "extends":
+                print("    apply also %s: a review of this checklist answers the checks of both" % entry["base"]["path"]
+                      if entry.get("base") else "    the checklist it extends was not found")
+    else:
+        for entry in catalog.toolkit + catalog.project:
+            own = catalog.overridden.get(entry["file"]) if entry["source"] == "toolkit" else None
+            note = ""
+            if own:
+                note = "  - %s by %s: cite that one" % ("extended" if own["relation"] == "extends" else "replaced",
+                                                         own["path"])
+            elif entry.get("relation"):
+                note = "  - %s %s v%s" % (entry["relation"], entry["base_name"], entry["base_version"])
+            print("%-8s %-40s %3d checks  %s%s" % (entry["source"], checklists.citation(entry), len(entry["checks"]),
+                                                   entry["path"], note))
+        print("%d toolkit checklists, %d of the project" % (len(catalog.toolkit), len(catalog.project)))
+    problems = catalog.problems()
+    for path, message in problems:
+        print("problem: %s: %s" % (path, message))
+    return 1 if problems else 0
 
 
 def cmd_checks_template(project, args):
     """A file of check results to fill in for a review: one entry per check of the checklist, its kind shown,
     result and note empty. With --plan-kind the parts of the plan checklist for other kinds are left out
     (record.py review fills them in as not-applicable)."""
-    listed = find_checklist(args.checklist)
+    listed, problems = find_checklist(project, args.checklist)
     if listed is None:
-        return stop(["'%s' cites no checklist of this toolkit: expected '<name> v<N>' for a file under "
-                     ".claude/docs/checklists" % args.checklist])
+        return stop([NOT_A_CHECKLIST % args.checklist])
+    if problems:
+        return stop(problems)
     if listed["version"] != listed["cited"]:
         return stop(["%s is at version %s, the citation says v%s" % (listed["file"], listed["version"], listed["cited"])])
     other = {c for kind, ids in listed["kinds"].items() if args.plan_kind and kind != args.plan_kind for c in ids}
@@ -728,14 +758,17 @@ def cmd_review(project, args):
         if sectioned:
             problems.append("a section entry needs a checklist of the toolkit; list the checks one by one")
     else:
-        source, citation = "toolkit", args.checklist
-        listed = find_checklist(citation) if citation else None
+        citation = args.checklist
+        listed, refused = find_checklist(project, citation) if citation else (None, [])
+        source = listed["source"] if listed else "toolkit"
+        problems += refused
         if not citation:
-            problems.append("--checklist is needed: '<name> v<N>' of a file under .claude/docs/checklists")
+            problems.append("--checklist is needed: '<name> v<N>' of a file under .claude/docs/checklists or under "
+                            "checklists/ of the project")
         elif listed is None:
-            problems.append("'%s' cites no checklist of this toolkit: expected '<name> v<N>' for a file under "
-                            ".claude/docs/checklists. For criteria from outside the toolkit pass --external-criteria; "
-                            "to confirm unchanged items after a change upstream pass --reconfirm." % citation)
+            problems.append((NOT_A_CHECKLIST % citation) + ". For criteria from outside the toolkit and the project "
+                            "pass --external-criteria; to confirm unchanged items after a change upstream pass "
+                            "--reconfirm.")
         else:
             given_ids = {str(c.get("check")) for c in checks}
             for entry in sectioned:
@@ -815,6 +848,11 @@ def cmd_review(project, args):
     }
     if front["checklist_hash"] is None:
         del front["checklist_hash"]
+    base = listed.get("base") if listed else None
+    if base and listed["relation"] == "extends":           # the checks of both files were applied
+        front["checklist_extends"] = {"checklist": checklists.citation(base), "hash": base["hash"]}
+    elif base:                                              # the project's checks were applied in place of these
+        front["checklist_replaces"] = checklists.citation(base)
     if checks:
         front["checks"] = checks
     if args.reconfirm:
@@ -1593,8 +1631,11 @@ def main():
     analysis = sub.add_parser("analysis-run")
     analysis.add_argument("--results", required=True)
     analysis.add_argument("--item-under-test", required=True)
+    listing = sub.add_parser("checklists", help="the review checklists of the toolkit and of the project")
+    listing.add_argument("--type", help="only those to cite for this item type, or `imported`")
     template = sub.add_parser("checks-template", help="a file of check results to fill in for a review")
-    template.add_argument("--checklist", required=True, help="'<name> v<N>' of a file under .claude/docs/checklists")
+    template.add_argument("--checklist", required=True,
+                          help="'<name> v<N>' of a file under .claude/docs/checklists or checklists/ of the project")
     template.add_argument("--plan-kind", help="for the plan checklist: the kind of the plans under review")
     template.add_argument("--out", help="the file to write; default: print")
     review = sub.add_parser("review")
@@ -1710,7 +1751,7 @@ def main():
     project = Project(args.project)
     commands = {"next-id": cmd_next_id, "test-run": cmd_test_run, "analysis-run": cmd_analysis_run,
                 "review": cmd_review, "baseline": cmd_baseline, "communication": cmd_communication,
-                "checks-template": cmd_checks_template,
+                "checks-template": cmd_checks_template, "checklists": cmd_checklists,
                 "cybersecurity-case": cmd_cybersecurity_case, "cybersecurity-assessment": cmd_cybersecurity_assessment,
                 "confirmation-measure": cmd_confirmation_measure, "safety-case": cmd_safety_case,
                 "release": cmd_release,

@@ -979,8 +979,10 @@ types:
       findings: {required: always, may_be_empty: true, note: "list of {id, item, text, severity: major | minor, state: open | closed, closes: <REV-ID>#<finding id>}; an empty list states that there were none; closes marks an entry that settles an open finding of an earlier review of the same content"}
       reviewed_at: {required: optional}
       checks: {required: optional, note: "list of {check: <checklist ID>, result: pass | finding | not-applicable | not-assessed, note}: what each check of the checklist gave, including the answers to accountable checks"}
-      checklist_source: {values: [toolkit, external, reconfirmation], required: optional, note: "toolkit: a checklist under .claude/docs/checklists at the cited version; external: criteria from outside the toolkit, named in `checklist`; reconfirmation: unchanged items confirmed against new versions of what they build on"}
-      checklist_hash: {required: optional, note: "file hash of the toolkit checklist that was applied; written by tooling"}
+      checklist_source: {values: [toolkit, project, external, reconfirmation], required: optional, note: "toolkit: a checklist under .claude/docs/checklists at the cited version; project: a checklist under checklists/ of the project at the cited version; external: criteria from outside the toolkit and the project, named in `checklist`; reconfirmation: unchanged items confirmed against new versions of what they build on"}
+      checklist_hash: {required: optional, note: "file hash of the checklist that was applied; written by tooling"}
+      checklist_extends: {required: optional, note: "project checklist that extends one of the toolkit: {checklist: <name> v<N>, hash} of the toolkit checklist whose checks were applied as well; written by tooling"}
+      checklist_replaces: {required: optional, note: "project checklist that replaces one of the toolkit: <name> v<N> of the toolkit checklist that was not applied; written by tooling"}
       item_under_test: {required: optional, note: "commit, tag or baseline ID of the code that was reviewed"}
       sources: {required: optional, note: "list of {file, hash} of the source files of the units reviewed; written by tooling"}
       rests_on: {required: optional, note: "reconfirmation only: the earlier approving review records of the subjects, whose checks the reconfirmation does not repeat"}

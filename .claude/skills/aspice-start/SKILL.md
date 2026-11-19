@@ -113,6 +113,10 @@ customer demands of the design notation and of review independence per ASIL, the
 naming convention, the limits for functions. Record what the user states and where it
 is written; for "nothing" or "not known yet" leave the value empty and say which
 toolkit default applies until someone states otherwise.
+Ask whether the customer or the organization prescribes review checklists. If so, list
+them as open work for the hand-over: before the first review of those types they become
+checklists of the project under `checklists/`, extending or replacing the toolkit's;
+`/review` says how. This skill writes none of them.
 
 ### 7. Platform and toolchain
 Ask: AUTOSAR Classic or not (if not, what instead); microcontroller; language
@@ -186,7 +190,8 @@ Report, in this order:
 1. The base practice table with what was recorded in this session.
 2. The scope as written: role, processes, assessment scope, target level, and every
    warning the user decided to live with.
-3. The starting point of step 10, and the open answers (empty values).
+3. The starting point of step 10, and the open answers (empty values), with the
+   prescribed review checklists that are still to become checklists of the project.
 4. Next: `/import-inputs` for the boundary inputs; if there are none, the first
    authoring skill of step 10. `/next-step` says at any time where the project stands.
 

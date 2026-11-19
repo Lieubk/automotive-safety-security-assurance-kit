@@ -129,6 +129,14 @@ check that refers to a rule of the project names where it is found - normally un
 check that can only be answered from a document the toolkit has no place for stops
 every review that meets it: give the document a place first.
 
+A project can keep checklists of its own under `checklists/` in its root, in this
+format, that extend or replace a toolkit checklist (`Extends:` or `Replaces:` with its
+name and version) or cover a type the toolkit has none for
+(`.claude/skills/review/references/project-checklists.md`). A skill that applies a
+toolkit checklist to its drafts names the toolkit file; what the project adds or uses
+instead lies under `checklists/`, as the working agreement says. A check that the project's checklists may need is not a reason to add it to the
+toolkit's: the toolkit's hold what every project needs.
+
 ## Agents
 
 A pattern in `tools`, such as `Bash(python tools/traceability.py *)`, is not enforced by

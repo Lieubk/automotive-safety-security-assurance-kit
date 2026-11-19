@@ -97,6 +97,14 @@ A real project replaces the review fixtures with reviews by named people against
 checklists under `.claude/docs/checklists/`, and adds the guideline check its coding
 standard requires.
 
+The example also has a review checklist of its own:
+`checklists/customer-software-requirements.md` adds three checks the (invented)
+customer asks for to the toolkit's `software-requirements` v2. A review of software
+requirements in this project cites `customer-software-requirements v1` and gives a
+result for the checks of both; `record.py review` refuses the toolkit's checklist on its
+own here. `python tools/record.py --project examples/power-window checklists --type
+software-requirement` shows it. No review has applied it yet: the fixtures predate it.
+
 `python tools/traceability.py --project examples/power-window practices` shows what the
 example does not have at all: no baseline exists, so the "communicate" practices of the
 SWE processes are reported as `no evidence yet`. SUP.9.BP5 shows `evidence present`

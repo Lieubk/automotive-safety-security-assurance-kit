@@ -63,14 +63,14 @@ assurance plan says how independent that person must be. The agent is never that
   Steps 2 to 8 are done for one review at a time.
 
 ### 2. Pick the checklist
-- Imported items: `.claude/docs/checklists/input-acceptance.md`. Otherwise the checklist
-  whose `Applies to:` sentence names the item type (Grep it in
-  `.claude/docs/checklists/`). Read it. Cite it as `"<file name without .md> v<N>"`,
-  with the number of its version line: `software-requirements v2`.
-- No checklist for the type: say "Semantic checks: NOT ASSESSED - the toolkit has no
-  checklist for <type>". Do not write one on the spot. Ask which criteria the
-  reviewers use; the record names them and is written with `--external-criteria`.
-  Without stated criteria, stop.
+- `python tools/record.py checklists --type <type>` (`imported` for inputs) names the
+  toolkit's checklist or the project's that extends or replaces it; of two, `Applies to:`
+  decides. Read it (an extension: both files) and cite it as printed. A `problem:` line
+  stops the review until it is fixed (`references/project-checklists.md`).
+- No checklist: "Semantic checks: NOT ASSESSED - no checklist for <type>". Do not write
+  one. Ask which criteria the reviewers use: a checklist the user hands over becomes the
+  project's (`references/project-checklists.md`); criteria kept elsewhere are named in
+  the record with `--external-criteria`. Without stated criteria, stop.
 
 ### 3. Set the items to in-review
 - Ask: "May I set these N items to `in-review`?" Then change the `status` line only.
@@ -100,11 +100,11 @@ assurance plan says how independent that person must be. The agent is never that
   in this session is cheaper and not independent; it is allowed for at most three
   items, or when the agent is not available (agent definitions load when a session
   starts). Then use the format of `.claude/agents/aspice-reviewer.md` and say, here and
-  in the hand-over: "No independent pass took place." Say also when this session
-  drafted the items.
-- Hand the agent the subject IDs, the path of the checklist, the output of
-  `hash --upstream`, and the project folder if it is not the current one. In a
-  re-review add the earlier record and, per subject, the output of
+  in the hand-over: "No independent pass took place", and whether this session drafted
+  the items.
+- Hand the agent the subject IDs, the checklist path (both, for an extension), the
+  output of `hash --upstream`, and the project folder if it is not the current one. In
+  a re-review add the earlier record and, per subject, the output of
   `python tools/traceability.py diff <ID> --since <REV-ID>` (`references/re-review.md`).
   Hand over nothing else: no explanation by the author, no hoped-for result.
 - It returns a result for every semantic check - `pass`, `finding` with the text it
