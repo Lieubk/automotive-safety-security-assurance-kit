@@ -581,6 +581,7 @@ types:
       risk_value: {values: [1, 2, 3, 4, 5], required: before-review, note: "from the risk matrix of the cybersecurity plan (COV-57); 1 is the lowest risk"}
       treatment: {required: before-review, note: "list of avoid, reduce, share, retain (COV-58)"}
       decision: {required: optional, note: "who decided to retain a risk above retain_up_to of the plan, when and why"}
+      residual_risk_value: {values: [1, 2, 3, 4, 5], required: optional, note: "the risk value expected once the controls of the goals act, rated with the same method; a judgement until verification shows the controls effective"}
     sections:
       Description: always          # the attacker's aim, the asset and property, the cause
       Treatment rationale: before-review

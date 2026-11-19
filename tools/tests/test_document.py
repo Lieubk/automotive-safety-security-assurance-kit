@@ -48,6 +48,33 @@ class Documents(unittest.TestCase):
         self.assertIn("Items in this document", page)
         self.assertNotIn('class="banner"', page)                  # everything shown is approved
 
+    def test_every_kind_of_the_definitions_builds_on_the_example(self):
+        sys.path.insert(0, str(ROOT / "tools"))
+        from document import definitions
+        for kind in definitions():
+            out = Path(self.tmp.name) / ("%s.html" % kind)
+            code, text = self.tool("document.py", "build", kind, "--out", out, "--as-of", "2026-06-05")
+            self.assertEqual(code, 0, "%s: %s" % (kind, text))
+
+    def test_test_reports_show_every_case_with_its_verdict(self):
+        page = self.html("software-integration-test-report")
+        self.assertIn("result summary", page)
+        self.assertIn("<td>SIT-0001</td>", page.replace('<a href="#SIT-0001">SIT-0001</a>', "SIT-0001"))
+        self.assertIn("<td>passed</td>", page)
+
+    def test_xlsx_has_a_sheet_per_chapter_and_a_row_per_attack_path(self):
+        import re
+        import zipfile
+        out = Path(self.tmp.name) / "tara.xlsx"
+        code, text = self.tool("document.py", "build", "tara-worksheet", "--out", out)
+        self.assertEqual(code, 0, text)
+        with zipfile.ZipFile(out) as z:
+            names = re.findall(r'<sheet name="([^"]+)"', z.read("xl/workbook.xml").decode("utf-8"))
+            self.assertEqual(names, ["Document", "Method", "TARA worksheet", "Items"])
+            sheet = z.read("xl/worksheets/sheet3.xml").decode("utf-8")
+        self.assertEqual(sheet.count("THR-0001"), 2)                      # two attack paths, two rows
+        self.assertIn("CSG-0001", sheet)
+
     def test_the_tara_report_shows_the_method_and_the_risks(self):
         page = self.html("tara-report")
         self.assertIn("risk matrix", page)

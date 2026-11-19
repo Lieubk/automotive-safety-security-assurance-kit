@@ -10,6 +10,21 @@
 #            `incoming: true`), as a two-column table
 #   tara:    the threat scenarios with what their risk rests on (traceability.py tara)
 #   method:  the TARA method of the approved cybersecurity plan
+#   findings: the errors and warnings of the trace check for the processes named
+#   figures: what a command of the trace engine shows (`source`: progress, problems,
+#            quality, risks, suppliers, tara; `summary: true` for its figures only)
+#   trace:   the traceability matrix of every link of the processes named
+#   testcases: one row per test case of the types: steps, expected result, and the verdict
+#            of the latest final run of its level that has it, with a result summary
+#   tara_sheet: one row per attack path, from asset and damage to risk, treatment, goal,
+#            requirements, allocation and verification
+#   baseline: the content of the baseline asked for (or the latest) and what changed
+#            against the baseline before it
+# Selection: `types`, `where` (attribute values), `latest: true` (the newest record
+# only), `imported: true|false`, `all_states: true` (rejected and obsolete too).
+# Engineering items that are not approved and records that are not final are shown
+# only with --include-drafts; problems, changes, risks, actions, queries and
+# weaknesses are shown in the state they are in.
 # `text` is a lead paragraph in our own words. Names of chapters and documents are
 # generic: a customer template brings its own cover page, styles and headers.
 
@@ -85,3 +100,384 @@ documents:
         items: {types: [cybersecurity-goal]}
       - title: Cybersecurity claims
         items: {types: [cybersecurity-claim]}
+
+  tara-worksheet:
+    title: TARA worksheet
+    supports: ["21434:15.3", "21434:15.4", "21434:15.5", "21434:15.6", "21434:15.7", "21434:15.8", "21434:15.9", "21434:WP-09-02"]
+    chapters:
+      - title: Method
+        method: {}
+      - title: TARA worksheet
+        text: "One row per attack path: from the asset and the damage it leads to, through the threat and its feasibility, to the risk, its treatment and how the treatment is carried into requirements, architecture and verification."
+        tara_sheet: {}
+
+  # ---- inputs
+
+  input-acceptance-report:
+    title: Received inputs and their acceptance
+    supports: [SYS.1.BP1, SYS.1.BP2, SYS.1.BP3, SYS.1.BP6, "17-03", "13-04"]
+    chapters:
+      - title: Received items
+        text: "What the customer delivered, as registered unchanged with its source, version and identifier."
+        table: {types: [stakeholder-requirement, system-requirement, system-element, system-interface, software-requirement, item-definition, threat-scenario, cybersecurity-goal], imported: true, columns: [id, type, title, status, assessment]}
+      - title: Questions to the source
+        table: {types: [query], columns: [id, title, status, to, asked_at, answered_by]}
+      - title: Query details
+        items: {types: [query]}
+      - title: Open findings
+        findings: {processes: [SYS.1]}
+
+  # ---- system level
+
+  system-requirements-specification:
+    title: System requirements specification
+    supports: [SYS.2.BP1, SYS.2.BP6, "17-12"]
+    chapters:
+      - title: System requirements
+        items: {types: [system-requirement]}
+      - title: Traceability to the stakeholder requirements
+        matrix: {of: system-requirement, role: derived_from}
+      - title: Allocation to the system architecture
+        matrix: {of: system-requirement, role: fulfils, incoming: true}
+      - title: Open findings
+        findings: {processes: [SYS.2]}
+
+  system-architecture-description:
+    title: System architecture description
+    supports: [SYS.3.BP1, SYS.3.BP2, SYS.3.BP3, SYS.3.BP4, SYS.3.BP5, "04-06"]
+    chapters:
+      - title: Context and structure
+        items: {types: [architecture-view], where: {level: [system], kind: [context, structure]}}
+      - title: System elements
+        table: {types: [system-element], columns: [id, title, kind, asil, security_relevant]}
+      - title: Element descriptions
+        items: {types: [system-element]}
+      - title: System interfaces
+        items: {types: [system-interface]}
+      - title: Dynamic behavior
+        items: {types: [architecture-view], where: {level: [system], kind: [state-machine, sequence, fault-reaction, communication, execution-model, resource-summary, memory-layout, other]}}
+      - title: Design decisions
+        items: {types: [design-decision], where: {level: [system]}}
+      - title: Allocation of the system requirements
+        matrix: {of: system-requirement, role: fulfils, incoming: true}
+
+  system-integration-test-specification:
+    title: System integration test specification
+    supports: [SYS.4.BP1, SYS.4.BP2, SYS.4.BP3, "08-50"]
+    chapters:
+      - title: Integration and test strategy
+        items: {types: [plan], where: {kind: [system-integration]}}
+      - title: Test cases
+        table: {types: [system-integration-test], columns: [id, title, step, execution, environment, verifies]}
+      - title: Test case descriptions
+        items: {types: [system-integration-test]}
+
+  system-integration-test-report:
+    title: System integration test report
+    supports: [SYS.4.BP4, SYS.4.BP5, SYS.4.BP6, SYS.4.BP7, "13-50"]
+    chapters:
+      - title: Test cases and results
+        testcases: {types: [system-integration-test]}
+      - title: System builds
+        items: {types: [build-record], where: {level: [system]}}
+      - title: Test runs
+        items: {types: [test-run], where: {level: [system-integration]}}
+      - title: Open findings
+        findings: {processes: [SYS.4]}
+
+  system-qualification-test-specification:
+    title: System qualification test specification
+    supports: [SYS.5.BP1, SYS.5.BP2, "08-50"]
+    chapters:
+      - title: Qualification test strategy
+        items: {types: [plan], where: {kind: [system-qualification-test]}}
+      - title: Test cases
+        items: {types: [system-qualification-test]}
+      - title: Coverage of the system requirements
+        matrix: {of: system-requirement, role: verifies, incoming: true}
+
+  system-qualification-test-report:
+    title: System qualification test report
+    supports: [SYS.5.BP3, SYS.5.BP4, SYS.5.BP5, "13-50"]
+    chapters:
+      - title: Test cases and results
+        testcases: {types: [system-qualification-test]}
+      - title: Latest test run
+        items: {types: [test-run], where: {level: [system-qualification]}, latest: true}
+      - title: Coverage of the system requirements
+        matrix: {of: system-requirement, role: verifies, incoming: true}
+      - title: Open findings
+        findings: {processes: [SYS.5]}
+
+  # ---- software level: verification
+
+  unit-test-specification:
+    title: Software unit test specification
+    supports: [SWE.4.BP1, SWE.4.BP2, "08-50", "08-52"]
+    chapters:
+      - title: Unit verification strategy
+        items: {types: [plan], where: {kind: [unit-verification]}}
+      - title: Unit test cases
+        table: {types: [unit-test], columns: [id, title, asil, execution, script, verifies]}
+      - title: Test case descriptions
+        items: {types: [unit-test]}
+      - title: Coverage of the units
+        matrix: {of: software-unit, role: verifies, incoming: true}
+
+  unit-verification-report:
+    title: Software unit verification report
+    supports: [SWE.4.BP3, SWE.4.BP4, SWE.4.BP5, "13-50", "13-25"]
+    chapters:
+      - title: Test cases and results
+        text: "Every unit test case with its steps, the expected result and its verdict in the latest run that has it."
+        testcases: {types: [unit-test]}
+      - title: Latest unit test run
+        text: "The run with its structural coverage and the files it was run on."
+        items: {types: [test-run], where: {level: [unit]}, latest: true}
+      - title: Static verification
+        items: {types: [static-analysis-run], latest: true}
+      - title: Open findings
+        findings: {processes: [SWE.4]}
+
+  software-integration-test-specification:
+    title: Software integration test specification
+    supports: [SWE.5.BP1, SWE.5.BP2, SWE.5.BP3, "08-50"]
+    chapters:
+      - title: Integration and test strategy
+        items: {types: [plan], where: {kind: [software-integration]}}
+      - title: Test cases
+        table: {types: [software-integration-test], columns: [id, title, step, execution, environment, verifies]}
+      - title: Test case descriptions
+        items: {types: [software-integration-test]}
+
+  software-integration-test-report:
+    title: Software integration test report
+    supports: [SWE.5.BP4, SWE.5.BP5, SWE.5.BP6, SWE.5.BP7, "13-50"]
+    chapters:
+      - title: Test cases and results
+        testcases: {types: [software-integration-test]}
+      - title: Builds of the integration steps
+        items: {types: [build-record], where: {level: [null, software]}}
+      - title: Test runs
+        items: {types: [test-run], where: {level: [software-integration]}}
+      - title: Open findings
+        findings: {processes: [SWE.5]}
+
+  software-qualification-test-specification:
+    title: Software qualification test specification
+    supports: [SWE.6.BP1, SWE.6.BP2, "08-50"]
+    chapters:
+      - title: Qualification test strategy
+        items: {types: [plan], where: {kind: [software-qualification-test]}}
+      - title: Test cases
+        items: {types: [software-qualification-test]}
+      - title: Coverage of the software requirements
+        matrix: {of: software-requirement, role: verifies, incoming: true}
+
+  software-qualification-test-report:
+    title: Software qualification test report
+    supports: [SWE.6.BP3, SWE.6.BP4, SWE.6.BP5, "13-50"]
+    chapters:
+      - title: Test cases and results
+        testcases: {types: [software-qualification-test]}
+      - title: Latest test run
+        items: {types: [test-run], where: {level: [software-qualification]}, latest: true}
+      - title: Coverage of the software requirements
+        matrix: {of: software-requirement, role: verifies, incoming: true}
+      - title: Open findings
+        findings: {processes: [SWE.6]}
+
+  # ---- across the V
+
+  traceability-report:
+    title: Traceability report
+    supports: [SYS.2.BP6, SYS.3.BP6, SWE.1.BP6, SWE.2.BP7, SWE.3.BP5, SWE.4.BP5, SWE.5.BP7, SWE.6.BP5, SYS.4.BP7, SYS.5.BP5]
+    chapters:
+      - title: Traceability matrices
+        text: "For every kind of link of the processes in scope: each target and the items that link to it."
+        trace: {}
+      - title: Open findings of the coverage rules
+        findings: {}
+
+  review-report:
+    title: Review report
+    supports: [SUP.1.BP2, SYS.2.BP7, SYS.3.BP7, SWE.1.BP7, SWE.2.BP8, SWE.3.BP6, "13-19"]
+    chapters:
+      - title: Reviews
+        table: {types: [review-record], columns: [id, verdict, checklist, reviewers, reviewed_at]}
+      - title: Review records
+        items: {types: [review-record]}
+
+  # ---- support
+
+  configuration-management-plan:
+    title: Configuration management plan
+    supports: [SUP.8.BP1, "08-04"]
+    chapters:
+      - title: Plan
+        items: {types: [plan], where: {kind: [configuration-management]}}
+
+  release-note:
+    title: Release note
+    supports: [SUP.8.BP6, SUP.8.BP7, "13-08"]
+    chapters:
+      - title: Baseline
+        text: "What the baseline contains, and what changed since the baseline before it."
+        baseline: {}
+      - title: Open problems
+        table: {types: [problem-report], where: {status: [open, analysed, in-resolution, resolved]}, columns: [id, title, status, severity, affects]}
+      - title: Open change requests
+        table: {types: [change-request], where: {status: [submitted, analysed, approved, implemented]}, columns: [id, title, status, affects]}
+      - title: Open findings
+        findings: {}
+
+  quality-assurance-report:
+    title: Quality assurance report
+    supports: [SUP.1.BP1, SUP.1.BP2, SUP.1.BP3, SUP.1.BP4, "13-18"]
+    chapters:
+      - title: Quality assurance plan
+        items: {types: [plan], where: {kind: [quality-assurance]}}
+      - title: State of the checks
+        figures: {source: quality}
+      - title: Quality records
+        items: {types: [quality-record]}
+      - title: Corrective actions
+        table: {types: [corrective-action], columns: [id, title, status, owner, due, addresses]}
+      - title: Open findings
+        findings: {processes: [SUP.1]}
+
+  problem-status-report:
+    title: Problem status report
+    supports: [SUP.9.BP3, SUP.9.BP8, SUP.9.BP9, "15-12", "13-07"]
+    chapters:
+      - title: Problem resolution strategy
+        items: {types: [plan], where: {kind: [problem-resolution]}}
+      - title: Problems
+        figures: {source: problems}
+      - title: Problem reports
+        items: {types: [problem-report], all_states: true}
+      - title: Trend reports
+        items: {types: [problem-trend-report]}
+      - title: Open findings
+        findings: {processes: [SUP.9]}
+
+  change-request-report:
+    title: Change request report
+    supports: [SUP.10.BP2, SUP.10.BP7, SUP.10.BP8, "13-16", "13-21"]
+    chapters:
+      - title: Change request management plan
+        items: {types: [plan], where: {kind: [change-request-management]}}
+      - title: Change requests
+        table: {types: [change-request], all_states: true, columns: [id, title, status, requester, decision, affects]}
+      - title: Change request details
+        items: {types: [change-request], all_states: true}
+      - title: Open findings
+        findings: {processes: [SUP.10]}
+
+  # ---- management
+
+  project-plan:
+    title: Project plan
+    supports: [MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP4, MAN.3.BP5, MAN.3.BP6, MAN.3.BP7, MAN.3.BP8, "08-12", "14-09"]
+    chapters:
+      - title: Plan
+        items: {types: [plan], where: {kind: [project]}}
+      - title: Work breakdown and schedule
+        table: {types: [work-package], columns: [id, title, owner, category, estimate, planned_start, planned_finish, part_of, depends_on]}
+      - title: Work packages
+        items: {types: [work-package]}
+
+  project-status-report:
+    title: Project status report
+    supports: [MAN.3.BP10, "15-06"]
+    chapters:
+      - title: Latest status report
+        items: {types: [project-status-report], latest: true}
+      - title: Progress as of the report date
+        figures: {source: progress}
+      - title: Risks
+        figures: {source: risks}
+      - title: Corrective actions
+        table: {types: [corrective-action], columns: [id, title, status, owner, due, addresses]}
+
+  risk-management-report:
+    title: Risk management plan and register
+    supports: [MAN.5.BP1, MAN.5.BP2, MAN.5.BP4, MAN.5.BP6, "08-14", "15-08"]
+    chapters:
+      - title: Risk management plan
+        items: {types: [plan], where: {kind: [risk-management]}}
+      - title: Risks by exposure
+        figures: {source: risks}
+      - title: Risk descriptions
+        items: {types: [risk], all_states: true}
+      - title: Open findings
+        findings: {processes: [MAN.5]}
+
+  supplier-monitoring-report:
+    title: Supplier monitoring report
+    supports: [ACQ.4.BP1, ACQ.4.BP2, ACQ.4.BP3, ACQ.4.BP4, ACQ.4.BP5, "02-01", "13-09"]
+    chapters:
+      - title: Supplier agreements
+        items: {types: [supplier-agreement]}
+      - title: State of the agreements
+        figures: {source: suppliers}
+      - title: Supplier reviews
+        items: {types: [supplier-review]}
+      - title: Open findings
+        findings: {processes: [ACQ.4]}
+
+  self-assessment-report:
+    title: Self-assessment report
+    supports: []
+    chapters:
+      - title: Self-assessments
+        text: "Ratings that named people gave in a rehearsal of an assessment; not an assessment."
+        items: {types: [self-assessment]}
+
+  # ---- cybersecurity (ISO/SAE 21434)
+
+  cybersecurity-plan:
+    title: Cybersecurity plan
+    supports: ["21434:6.4.1", "21434:6.4.2", "21434:6.4.3", "21434:WP-06-01", "21434:WP-07-01"]
+    chapters:
+      - title: Plan
+        items: {types: [plan], where: {kind: [cybersecurity]}}
+      - title: Interface agreements
+        items: {types: [plan], where: {kind: [cybersecurity-interface-agreement]}}
+      - title: Post-development
+        items: {types: [plan], where: {kind: [cybersecurity-monitoring, cybersecurity-incident-response, production-control, end-of-cybersecurity-support]}}
+
+  cybersecurity-concept:
+    title: Cybersecurity goals and concept
+    supports: ["21434:9.4", "21434:9.5", "21434:WP-09-03", "21434:WP-09-04", "21434:WP-09-06"]
+    chapters:
+      - title: Cybersecurity goals
+        items: {types: [cybersecurity-goal]}
+      - title: Cybersecurity claims
+        items: {types: [cybersecurity-claim]}
+      - title: Requirements derived from the goals
+        matrix: {of: cybersecurity-goal, role: derived_from, incoming: true}
+      - title: Open findings
+        findings: {processes: ["21434:9", "21434:10"]}
+
+  vulnerability-report:
+    title: Weaknesses and vulnerabilities
+    supports: ["21434:8.4", "21434:8.5", "21434:8.6", "21434:WP-08-05", "21434:WP-08-06"]
+    chapters:
+      - title: Overview
+        table: {types: [weakness], all_states: true, columns: [id, title, status, found_by, source, vulnerability, risk_value, treatment]}
+      - title: Weaknesses
+        items: {types: [weakness], all_states: true}
+      - title: Open findings
+        findings: {processes: ["21434:8"]}
+
+  cybersecurity-case-report:
+    title: Cybersecurity case
+    supports: ["21434:6.4.7", "21434:6.4.8", "21434:WP-06-02", "21434:WP-06-03"]
+    chapters:
+      - title: Cybersecurity case
+        items: {types: [cybersecurity-case], latest: true}
+      - title: Assessment
+        items: {types: [cybersecurity-assessment]}
+      - title: Risk figures of the TARA
+        figures: {source: tara, summary: true}

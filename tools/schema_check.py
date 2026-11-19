@@ -188,8 +188,28 @@ def main():
             errors.append("%s: unknown subject '%s'" % (rule["id"], rule["subject"]))
         supports(rule["id"], rule.get("supports"))
 
-    print("schema v%s | %d types | %d link roles, %d pairs | %d coverage rules | %d structures"
-          % (schema["schema_version"], len(types), len(schema["links"]), pairs, len(rule_ids), len(schema["structures"])))
+    documents_file = ROOT / "schema" / "documents.yaml"
+    documents = yaml.safe_load(documents_file.read_text(encoding="utf-8"))["documents"] if documents_file.exists() else {}
+    for name, spec in documents.items():
+        where = "document " + name
+        supports(where, spec.get("supports"))
+        for chapter in spec["chapters"]:
+            for key in ("items", "table"):
+                for type_name in (chapter.get(key) or {}).get("types", []):
+                    if type_name not in types:
+                        errors.append("%s: unknown type '%s'" % (where, type_name))
+            matrix = chapter.get("matrix")
+            if matrix and (matrix.get("of") not in types or matrix.get("role") not in schema["links"]):
+                errors.append("%s: matrix of '%s' by '%s' names an unknown type or link role" % (where, matrix.get("of"), matrix.get("role")))
+            for column in (chapter.get("table") or {}).get("columns", []):
+                known = {"id", "title", "type", "status"} | set(schema["links"]) | {
+                    a for t in chapter["table"]["types"] if t in types for a in attribute_names(schema, t)}
+                if column not in known:
+                    errors.append("%s: column '%s' is no attribute or link role of %s" % (where, column, chapter["table"]["types"]))
+
+    print("schema v%s | %d types | %d link roles, %d pairs | %d coverage rules | %d structures | %d documents"
+          % (schema["schema_version"], len(types), len(schema["links"]), pairs, len(rule_ids), len(schema["structures"]),
+             len(documents)))
     unsupported = [bp for bp in sorted(practices, key=lambda b: (b.split(".BP")[0], int(b.split(".BP")[1])))
                    if bp.split(".")[0] in ("SYS", "SWE") and bp not in used]
     if unsupported:

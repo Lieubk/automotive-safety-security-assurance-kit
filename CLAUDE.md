@@ -57,7 +57,7 @@ repository - one item per file - and a trace engine checks them.
 | `/tara` | ISO/SAE 21434 cl. 9.3, 9.4, 15 | item definition, assets, damage and threat scenarios, attack paths, ratings, risk values, treatment, goals and claims |
 | `/cybersecurity-concept` | ISO/SAE 21434 cl. 9.5, 10, 11 | requirements derived from goals, security relevance down the levels, verification and validation |
 | `/vulnerability-management` | ISO/SAE 21434 cl. 8 | monitoring plan, events, weaknesses, vulnerability analysis and treatment |
-| `/documents` | all | SRS, SAD, SDD, TARA report as HTML or Word, neutral or in the customer's template, for the working state or a baseline |
+| `/documents` | all | 34 kinds of documents from the items - specifications, SAD, SDD, test specifications and reports, traceability, release, QA, problem, project, risk, TARA and cybersecurity reports - as HTML, Word or Excel, neutral or in the customer's template |
 | `/next-step` | - | where the project stands and what to do next |
 
 Processes without a skill of their own are still in the catalog and covered by the

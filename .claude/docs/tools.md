@@ -164,7 +164,7 @@ Generates documents from the items; the kinds and their chapters are in
 | Command | Use it to | Result |
 |---|---|---|
 | `list` | see the document kinds and how many items of their types the project has | one line per kind |
-| `build KIND [--format html\|docx] [--out FILE] [--template FILE] [--baseline BL-ID] [--include-drafts] [--no-script] [--json]` | write a document: HTML (one file; Mermaid diagrams drawn when online) or Word, neutral or in a `.docx`/`.dotx` template (default `documents.template` of `project.yaml`); with `--baseline` only the baseline's items, refused when one changed since; without `--include-drafts` only approved items | the file under `build/documents/` unless `--out`; marked DRAFT when it shows items not approved or comes from uncommitted changes. DOCX needs python-docx: without it the tool says NOT ASSESSED |
+| `build KIND [--format html\|docx\|xlsx] [--out FILE] [--template FILE] [--baseline BL-ID] [--include-drafts] [--as-of DATE] [--no-script] [--json]` | write a document: HTML (one file; Mermaid diagrams drawn when online), Excel (a sheet per chapter, no other package needed) or Word, neutral or in a `.docx`/`.dotx` template (default `documents.template` of `project.yaml`); with `--baseline` only the baseline's items, refused when one changed since; without `--include-drafts` only approved items | the file under `build/documents/` unless `--out`; marked DRAFT when it shows items not approved or comes from uncommitted changes. DOCX needs python-docx: without it the tool says NOT ASSESSED |
 
 ## Continuous integration
 

@@ -78,6 +78,8 @@ def vocabulary():
         "roles": set(schema["links"]),
         # terms that resemble type names without being typos of them
         "other": set(schema["plan_kinds"]) | set(schema["structures"]) | set(schema["lifecycles"])
+                 | set((yaml.safe_load((ROOT / "schema" / "documents.yaml").read_text(encoding="utf-8")) or {}).get("documents", {})
+                       if (ROOT / "schema" / "documents.yaml").is_file() else [])
                  | {state for lc in schema["lifecycles"].values() for state in lc["states"]}
                  | {name for spec in schema["types"].values() for name in spec.get("attributes", {}) if name != "use"}
                  | {name for group in schema["attribute_sets"].values() for name in group}

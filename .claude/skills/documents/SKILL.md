@@ -1,6 +1,6 @@
 ---
 name: documents
-description: "Generate the documents a customer, an assessor or a reviewer expects - software requirements specification, software architecture description (SAD), software detailed design (SDD), TARA report - as HTML or Word, from the items of the project, in a neutral style or in the customer's Word template, for the working state or for a baseline. Use before a delivery or a milestone, when a review is held with people who do not read the item files, or when someone asks for a document of the project."
+description: "Generate the documents a customer, an assessor or a reviewer expects - specifications, architecture and design descriptions (SAD, SDD), test specifications and reports, traceability, review, release, quality, problem, change, project, risk and supplier reports, TARA report and worksheet, cybersecurity plan and case - as HTML, Word or Excel, from the items of the project, in a neutral style or in the customer's Word template, for the working state or for a baseline. Use before a delivery or a milestone, when a review is held with people who do not read the item files, or when someone asks for a document of the project."
 argument-hint: "[document kind, 'list', or nothing to see what can be generated]"
 allowed-tools: Read, Glob, Grep, AskUserQuestion, Bash(python tools/document.py *), Bash(python tools/traceability.py *), Bash(git status *), Bash(git log *), Bash(git tag *)
 ---
@@ -14,12 +14,23 @@ not committed, baseline, the items with their states and content hashes - and is
 marked DRAFT when it shows items that are not approved or comes from uncommitted
 changes.
 
-| Document | Built from | Typical use |
-|---|---|---|
-| `software-requirements-specification` | software requirements, their upstream and allocation | agreement of requirements with the customer (the agreement itself is a communication record, not the document) |
-| `software-architecture-description` | views, components, interfaces, design decisions, allocation | the SAD of SWE.2, design freeze |
-| `software-detailed-design` | component designs, software units, detailed design decisions | the SDD of SWE.3 |
-| `tara-report` | item definition, the plan's method, assets, damage and threat scenarios, goals, claims | the TARA of ISO/SAE 21434 for the customer |
+| Group | Kinds (`python tools/document.py list`) |
+|---|---|
+| Inputs | `input-acceptance-report` |
+| System level | `system-requirements-specification`, `system-architecture-description`, `system-integration-test-specification`, `system-integration-test-report`, `system-qualification-test-specification`, `system-qualification-test-report` |
+| Software level | `software-requirements-specification`, `software-architecture-description` (SAD), `software-detailed-design` (SDD), `unit-test-specification`, `unit-verification-report`, `software-integration-test-specification`, `software-integration-test-report`, `software-qualification-test-specification`, `software-qualification-test-report` |
+| Across the V | `traceability-report`, `review-report` |
+| Support | `configuration-management-plan`, `release-note`, `quality-assurance-report`, `problem-status-report`, `change-request-report` |
+| Management | `project-plan`, `project-status-report`, `risk-management-report`, `supplier-monitoring-report`, `self-assessment-report` |
+| Cybersecurity | `cybersecurity-plan`, `tara-report`, `tara-worksheet`, `cybersecurity-concept`, `vulnerability-report`, `cybersecurity-case-report` |
+
+Formats: HTML (one file), Word (neutral or the customer's template) and Excel (a sheet per
+chapter; the usual form of test specifications with results, and of TARA worksheets).
+A test report lists every test case with its steps, expected result and the verdict of
+the latest run that has it; a TARA worksheet has one row per attack path, from asset
+and damage to risk, treatment, goal, requirements, allocation and verification. Every
+document carries a revision history built from the baselines and reviews of its items.
+A kind that a project needs and the list lacks is added to `schema/documents.yaml`.
 
 `python tools/document.py list` shows the kinds of `schema/documents.yaml` and how many
 items of each type the project has.
@@ -40,7 +51,8 @@ items of each type the project has.
   - for a review or a discussion: the working state, approved items only, or with
     `--include-drafts` the items in work too, marked DRAFT.
 - Ask for the format: HTML (one file, opens anywhere; Mermaid diagrams are drawn when
-  the reader is online, otherwise their source shows) or Word.
+  the reader is online, otherwise their source shows), Word, or Excel for tabular
+  documents such as test specifications and reports or the TARA worksheet.
 
 ### 2. Template
 - Ask whether the customer gave a Word template (.docx or .dotx). If not, say that a
@@ -51,8 +63,8 @@ items of each type the project has.
   `project.yaml` so that every document uses it.
 
 ### 3. Generate
-- Run `python tools/document.py build <kind> --format html|docx [--baseline BL-ID]
-  [--template <file>] [--include-drafts]`. The file goes to `build/documents/` unless
+- Run `python tools/document.py build <kind> --format html|docx|xlsx [--baseline BL-ID]
+  [--template <file>] [--include-drafts] [--as-of <date>]`. The file goes to `build/documents/` unless
   `--out` names another place. Quote the line the tool prints, with its DRAFT reasons.
 - DOCX needs the package python-docx. If the tool says it is missing, report that the
   Word version is NOT ASSESSED and offer the HTML version.
