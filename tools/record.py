@@ -1296,6 +1296,85 @@ def cmd_cybersecurity_assessment(project, args):
     return 0
 
 
+def cmd_confirmation_measure(project, args):
+    as_of = trace.as_date(args.as_of) if args.as_of else datetime.date.today()
+    problems = [] if as_of else ["--as-of must be a date YYYY-MM-DD"]
+    report = read_text_file(args.report, "report")
+    if not report:
+        problems.append("--report names no file with text: the report is the words of the person who performed the measure")
+    problems += ["no such item: %s" % i for i in args.item or [] if i not in project.items]
+    if args.result == "conditionally-accepted" and not args.conditions:
+        problems.append("a conditional acceptance names its conditions (--conditions)")
+    plan = project.safety_plan()
+    planned = [e for e in trace.as_list(plan.front.get("confirmation_measures") if plan else None)
+               if isinstance(e, dict) and e.get("measure") == args.kind and str(e.get("subject")) == args.subject]
+    if plan and not planned:
+        problems.append("the safety plan %s plans no %s of '%s'; the subject is named as the plan names it" % (plan.id, args.kind, args.subject))
+    if problems:
+        return stop(problems)
+    items = [project.items[i] for i in args.item or []]
+    front = {
+        "id": next_id(project, "confirmation-measure"),
+        "type": "confirmation-measure",
+        "status": "final",
+        "title": "%s of %s" % (args.kind.replace("-", " ").capitalize(), args.subject),
+        "kind": args.kind,
+        "subject": args.subject,
+        "items": [{"item": i.id, "status": i.status, "hash": i.hash} for i in items],
+        "performed_by": args.performed_by,
+        "independence": args.independence,
+        "as_of": str(as_of),
+        "result": args.result,
+    }
+    if args.conditions:
+        front["conditions"] = args.conditions
+    path = write_item(project, "confirmation-measure", front, "\n## Report\n\n%s\n" % report)
+    wanted = planned[0].get("independence") if planned else None
+    print("wrote %s: %s of %s by %s, independence %s%s, %s" % (
+        path, args.kind, args.subject, args.performed_by, args.independence,
+        " (planned %s)" % wanted if wanted else "", args.result))
+    return 0
+
+
+def cmd_safety_case(project, args):
+    as_of = trace.as_date(args.as_of) if args.as_of else datetime.date.today()
+    problems = [] if as_of else ["--as-of must be a date YYYY-MM-DD"]
+    argument = read_text_file(args.argument, "argument")
+    if not argument:
+        problems.append("--argument names no file with text: the safety case is the argument of the person who prepares it")
+    parts = [str(p) for p in (args.part or sorted((p[len(trace.FS_PREFIX):] for p in project.fs_scope), key=int))]
+    known = {str(p["id"]) for p in trace.fs_catalog()["parts"] if p["clauses"]}
+    if not parts:
+        problems.append("no part of ISO 26262 is under scope.safety in project.yaml; name them with --part")
+    problems += ["%s is not a part of ISO 26262 with clauses" % p for p in parts if p not in known]
+    if problems:
+        return stop(problems)
+    rows = [r for p in parts for r in trace.safety_rows(project, p)]
+    findings = []
+    for row in rows:
+        for f in row["findings"]:
+            entry = {k: f[k] for k in ("rule", "item", "level", "message")}
+            if entry not in findings:
+                findings.append(entry)
+    front = {
+        "id": next_id(project, "safety-case"),
+        "type": "safety-case",
+        "status": "final",
+        "title": "Safety case as of %s" % as_of,
+        "as_of": str(as_of),
+        "prepared_by": args.prepared_by,
+        "parts": parts,
+        "clauses": [{"clause": r["clause"], "name": r["name"], "decision": r["decision"],
+                     "items": [e for e in r["evidence"] if e["item"] != "SFC"]} for r in rows],
+        "findings": findings,
+    }
+    path = write_item(project, "safety-case", front, "\n## Argument\n\n%s\n" % argument)
+    empty = [r["clause"] for r in rows if not r["evidence"] and r["decision"] in (None, "performed", "tailored")]
+    print("wrote %s: %d clauses of parts %s, %d without evidence%s, %d open findings"
+          % (path, len(rows), ", ".join(parts), len(empty), (" (%s)" % ", ".join(empty)) if empty else "", len(findings)))
+    return 0
+
+
 def cmd_communication(project, args):
     problems = ["no such item: %s" % s for s in args.subject if s not in project.items]
     if args.sent_at:
@@ -1416,6 +1495,22 @@ def main():
     judged.add_argument("--conditions")
     judged.add_argument("--report", required=True, help="file with the assessor's report")
     judged.add_argument("--as-of")
+    measure = sub.add_parser("confirmation-measure")
+    measure.add_argument("--kind", required=True, choices=["confirmation-review", "functional-safety-audit", "functional-safety-assessment"])
+    measure.add_argument("--subject", required=True, help="what the measure covers, as confirmation_measures of the safety plan names it")
+    measure.add_argument("--item", action="append", help="an item the measure covered; recorded with its hash")
+    measure.add_argument("--performed-by", required=True)
+    measure.add_argument("--independence", required=True, choices=["I0", "I1", "I2", "I3"])
+    measure.add_argument("--result", required=True, choices=["passed", "passed-with-findings", "failed", "accepted",
+                                                            "conditionally-accepted", "rejected"])
+    measure.add_argument("--conditions")
+    measure.add_argument("--report", required=True, help="file with the report of the person who performed the measure")
+    measure.add_argument("--as-of")
+    case_fs = sub.add_parser("safety-case")
+    case_fs.add_argument("--prepared-by", required=True)
+    case_fs.add_argument("--argument", required=True)
+    case_fs.add_argument("--part", action="append", help="part of ISO 26262 the case covers (default: scope.safety)")
+    case_fs.add_argument("--as-of")
     told = sub.add_parser("communication")
     told.add_argument("--subject", required=True, action="append")
     told.add_argument("--audience", required=True, action="append")
@@ -1428,6 +1523,7 @@ def main():
     commands = {"next-id": cmd_next_id, "test-run": cmd_test_run, "analysis-run": cmd_analysis_run,
                 "review": cmd_review, "baseline": cmd_baseline, "communication": cmd_communication,
                 "cybersecurity-case": cmd_cybersecurity_case, "cybersecurity-assessment": cmd_cybersecurity_assessment,
+                "confirmation-measure": cmd_confirmation_measure, "safety-case": cmd_safety_case,
                 "status-report": cmd_status_report, "build": cmd_build,
                 "problem-trends": cmd_problem_trends, "quality-check": cmd_quality_check,
                 "quality-report": cmd_quality_report, "self-assessment": cmd_self_assessment,

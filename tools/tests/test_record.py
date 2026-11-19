@@ -692,6 +692,46 @@ class CybersecurityRecords(unittest.TestCase):
         self.assertEqual(findings, [])
 
 
+class SafetyRecords(unittest.TestCase):
+    """Confirmation measures and the safety case, on the engine's ISO 26262 fixture."""
+
+    def setUp(self):
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from test_traceability import FS_CONFIG, Fixture, fs_items
+        items = fs_items()
+        del items["CFM-0001"]
+        self.fixture = Fixture(items, config=FS_CONFIG)
+        self.addCleanup(self.fixture.tmp.cleanup)
+        self.project = self.fixture.root
+        self.text = self.project / "text.md"
+        self.text.write_text("Demonstration text.", encoding="utf-8")
+
+    def record(self, *arguments):
+        done = subprocess.run([sys.executable, str(ROOT / "tools" / "record.py"), "--project", str(self.project)]
+                              + [str(a) for a in arguments], capture_output=True, text=True)
+        return done.returncode, done.stdout
+
+    def test_a_confirmation_measure_is_one_the_plan_names(self):
+        base = ["confirmation-measure", "--kind", "confirmation-review", "--performed-by", "R. Reviewer",
+                "--independence", "I1", "--result", "passed", "--report", self.text, "--item", "PLN-0009"]
+        code, out = self.record(*base, "--subject", "hazard analysis")
+        self.assertEqual(code, 1)
+        self.assertIn("plans no confirmation-review of 'hazard analysis'", out)
+        code, out = self.record(*base, "--subject", "safety plan")
+        self.assertEqual(code, 0, out)
+        sys.path.insert(0, str(ROOT / "tools"))
+        from traceability import Project
+        self.assertFalse([f for f in Project(self.project).check() if f["rule"] == "COV-73"])
+
+    def test_the_safety_case_lists_the_evidence_per_clause(self):
+        code, out = self.record("safety-case", "--prepared-by", "S. Manager", "--argument", self.text)
+        self.assertEqual(code, 0, out)
+        case = yaml.safe_load((self.project / "records/safety/SFC-0001.md").read_text(encoding="utf-8").split("---")[1])
+        self.assertEqual(case["parts"], ["2", "3", "6", "8", "9"])
+        clauses = {c["clause"]: c for c in case["clauses"]}
+        self.assertIn("SAN-0001", [i["item"] for i in clauses["9:8"]["items"]])
+
+
 class Baselines(RecordCase):
     def test_baseline_lists_approved_engineering_items_only(self):
         code, out = self.record("baseline", "--tag", "design-1", "--purpose", "design freeze")

@@ -80,12 +80,23 @@ def main():
                 cs_levels["21434:" + str(sub["id"])] = clause["level"]
         cybersecurity.update({"21434:" + wp["id"]: wp["name"] for wp in catalog["work_products"]})
 
+    fs_file = ROOT / "iso-26262" / "2018" / "catalog.yaml"
+    if fs_file.exists():
+        catalog = yaml.safe_load(fs_file.read_text(encoding="utf-8"))
+        for part in catalog["parts"]:
+            for clause in part["clauses"]:
+                key = "26262-%s:%s" % (part["id"], clause["id"])
+                cybersecurity[key] = clause["name"]
+                cs_levels[key] = "project" if part["level"] in ("concept", "system", "software", "analyses")                     or (part["id"] == "2" and clause["id"] == "6") else part["level"]
+                for wp in clause["work_products"]:
+                    cybersecurity["26262-%s:%s" % (part["id"], wp["id"])] = wp["name"]
+
     errors, used = [], set()
 
     def supports(where, refs):
         for ref in map(str, refs or []):
             used.add(ref)
-            known = cybersecurity if ref.startswith("21434:") else products if WP_ID.match(ref) else practices
+            known = cybersecurity if ref.startswith(("21434:", "26262-")) else products if WP_ID.match(ref) else practices
             if ref not in known:
                 errors.append("%s: '%s' is not in the catalog" % (where, ref))
 
@@ -218,7 +229,8 @@ def main():
             print("  %s %s" % (bp, practices[bp]))
     uncovered = [ref for ref in cybersecurity if cs_levels.get(ref) in ("project", "method") and ref not in used]
     if uncovered:
-        print("ISO/SAE 21434 subclauses of project and method clauses no schema element supports (%d):" % len(uncovered))
+        print("subclauses of ISO/SAE 21434 and clauses of ISO 26262 at project level that no schema element supports (%d):"
+              % len(uncovered))
         for ref in uncovered:
             print("  %s %s" % (ref, cybersecurity[ref]))
     for e in errors:

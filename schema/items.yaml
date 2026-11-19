@@ -24,7 +24,8 @@
 # `supports` names the base practices and work products of the process catalog
 # (aspice/3.1/) that an element of this schema provides evidence for, and the
 # subclauses ("21434:9.4") and work products ("21434:WP-09-03") of ISO/SAE 21434
-# (iso-sae-21434/2021/catalog.yaml).
+# (iso-sae-21434/2021/catalog.yaml), and the clauses (\"26262-6:7\") and work products
+# (\"26262-6:7.5.2\") of ISO 26262 (iso-26262/2018/catalog.yaml).
 
 schema_version: 2
 aspice_version: "3.1"
@@ -233,6 +234,28 @@ structures:
     mandatory: [path, feasibility]
     keys: [factors, vector, note]
     note: "path: the steps of the attack from its entry point to the asset; feasibility: high, medium, low or very-low by the approach of the cybersecurity plan; factors: the ratings that led to it (attack potential: elapsed_time, expertise, knowledge, window, equipment; CVSS: the exploitability metrics); vector: the attack vector for the attack-vector approach"
+  safety-activities:               # plan.safety_activities when kind is safety
+    mandatory: [clause, decision, responsible]
+    keys: [rationale, work_products, due]
+    dates: [due]
+    note: "one entry per clause of the parts of ISO 26262 under scope.safety, written \"<part>:<clause>\" (\"6:7\"); decision performed, tailored, not-applicable, by-customer, by-supplier or by-organization; tailored and not-applicable need a rationale that says how the purpose of the clause is still reached (COV-63)"
+  method-selection:                # plan.method_selection when kind is safety
+    mandatory: [table, decision]
+    keys: [asil, methods, applied_in, rationale]
+    note: "one entry per table of ISO 26262 parts 4, 5, 6 and 8 under scope.safety, written \"<part>:<table>\" (\"6:7\"); decision applied or not-applicable; methods: what the project applies for which ASIL, in its own words; applied_in: the plan or strategy that carries the methods; the content of the tables is in the standard and is not copied here (COV-64)"
+  confirmation-plan:               # plan.confirmation_measures when kind is safety
+    mandatory: [measure, subject, independence]
+    keys: [asil, by, when]
+    note: "measure confirmation-review, functional-safety-audit or functional-safety-assessment; subject: what it covers, as the confirmation-measure record names it; independence: the level I0 to I3 the project requires, as it reads the standard; by: the role (COV-73)"
+  analysis-findings:               # safety-analysis.findings
+    mandatory: [id, fault, effect, state]
+    keys: [measure, carried_by, rationale, severity]
+    note: "fault: the failure mode, cause or initiator; effect: on the element and up to the safety goal; measure: what prevents, detects or controls it; carried_by: the ID of the requirement or element that carries the measure; state open or closed; a closed finding names carried_by or a rationale (COV-68)"
+  decomposition:                   # design-decision.decomposition
+    shape: mapping
+    mandatory: [requirement, into, independence]
+    keys: [note]
+    note: "requirement: the safety requirement decomposed; into: the requirements it is decomposed into; independence: the dependent failures analysis (safety-analysis of method dfa) that argues their independence (COV-70)"
   data-elements:                   # software-interface.elements
     mandatory: [name, direction, type]
     keys: [unit, min, max, resolution, initial, invalid, period_ms, timeout_ms, description]
@@ -294,7 +317,7 @@ types:
     prefix: SYR
     folder: spec/system/requirements
     lifecycle: engineering
-    supports: [SYS.2.BP1, SYS.2.BP2, SYS.2.BP3, SYS.2.BP4, SYS.2.BP5, "17-12", "17-50", "21434:10.4.1", "21434:WP-10-01"]
+    supports: [SYS.2.BP1, SYS.2.BP2, SYS.2.BP3, SYS.2.BP4, SYS.2.BP5, "17-12", "17-50", "21434:10.4.1", "21434:WP-10-01", "26262-3:7", "26262-4:6", "26262-4:6.5.1"]
     attributes: {use: [common, criticality, requirement]}
     sections:
       Statement: before-review
@@ -306,7 +329,7 @@ types:
     prefix: SYE
     folder: spec/system/architecture
     lifecycle: engineering
-    supports: [SYS.3.BP1, SYS.3.BP4, "04-06", "21434:10.4.1", "21434:WP-10-01"]
+    supports: [SYS.3.BP1, SYS.3.BP4, "04-06", "21434:10.4.1", "21434:WP-10-01", "26262-4:6", "26262-4:6.5.3"]
     attributes:
       use: [common, criticality]
       kind: {values: [hardware, software, mechanical, external], required: before-review}
@@ -318,7 +341,7 @@ types:
     prefix: SYI
     folder: spec/system/architecture
     lifecycle: engineering
-    supports: [SYS.3.BP3, "04-06", "17-08", "21434:10.4.1", "21434:WP-10-01"]
+    supports: [SYS.3.BP3, "04-06", "17-08", "21434:10.4.1", "21434:WP-10-01", "26262-4:6", "26262-4:6.5.4"]
     attributes:
       use: [common, criticality]
       kind: {values: [hardware-software, bus, electrical, mechanical, diagnostic, external], required: before-review}
@@ -330,7 +353,7 @@ types:
     prefix: SWR
     folder: spec/software/requirements
     lifecycle: engineering
-    supports: [SWE.1.BP1, SWE.1.BP2, SWE.1.BP3, SWE.1.BP4, SWE.1.BP5, "17-11", "17-50", "21434:10.4.1", "21434:WP-10-01"]
+    supports: [SWE.1.BP1, SWE.1.BP2, SWE.1.BP3, SWE.1.BP4, SWE.1.BP5, "17-11", "17-50", "21434:10.4.1", "21434:WP-10-01", "26262-6:6", "26262-6:6.5.1"]
     attributes: {use: [common, criticality, requirement]}
     sections:
       Statement: before-review
@@ -342,7 +365,7 @@ types:
     prefix: CMP
     folder: spec/software/architecture
     lifecycle: engineering
-    supports: [SWE.2.BP1, SWE.2.BP4, SWE.2.BP5, "04-04", "21434:10.4.1", "21434:WP-10-01"]
+    supports: [SWE.2.BP1, SWE.2.BP4, SWE.2.BP5, "04-04", "21434:10.4.1", "21434:WP-10-01", "26262-6:7", "26262-6:7.5.1"]
     attributes:
       use: [common, criticality]
       kind: {values: [composition, application, sensor-actuator, service, complex-driver, ecu-abstraction, parameter, basic-software, library, other], required: before-review}
@@ -361,7 +384,7 @@ types:
     prefix: IFC
     folder: spec/software/architecture
     lifecycle: engineering
-    supports: [SWE.2.BP3, "04-04", "17-08", "21434:10.4.1", "21434:WP-10-01"]
+    supports: [SWE.2.BP3, "04-04", "17-08", "21434:10.4.1", "21434:WP-10-01", "26262-6:7", "26262-6:7.5.1"]
     attributes:
       use: [common, criticality]
       kind: {values: [sender-receiver, client-server, mode-switch, parameter, non-volatile-data, trigger, function-call, debug, other], required: before-review}
@@ -394,6 +417,7 @@ types:
     attributes:
       use: [common]
       level: {values: [system, software, detailed-design], required: always}
+      decomposition: {structure: decomposition, required: optional, note: "an ASIL decomposition the decision makes (COV-70)"}
     sections:
       Context: before-review
       Evaluation criteria: before-review
@@ -405,7 +429,7 @@ types:
     prefix: CDS
     folder: spec/software/design
     lifecycle: engineering
-    supports: [SWE.3.BP1, SWE.3.BP3, SWE.3.BP4, "04-05", "21434:10.4.1", "21434:WP-10-01"]
+    supports: [SWE.3.BP1, SWE.3.BP3, SWE.3.BP4, "04-05", "21434:10.4.1", "21434:WP-10-01", "26262-6:8", "26262-6:8.5.1"]
     attributes: {use: [common]}
     sections:
       Design concept: before-review
@@ -417,7 +441,7 @@ types:
     prefix: UNT
     folder: spec/software/design
     lifecycle: engineering
-    supports: [SWE.3.BP1, SWE.3.BP2, SWE.3.BP3, SWE.3.BP8, "04-05", "11-05", "21434:10.4.1", "21434:WP-10-01"]
+    supports: [SWE.3.BP1, SWE.3.BP2, SWE.3.BP3, SWE.3.BP8, "04-05", "11-05", "21434:10.4.1", "21434:WP-10-01", "26262-6:8", "26262-6:8.5.1", "26262-6:8.5.2"]
     attributes:
       use: [common, criticality]
       origin: {values: [handwritten, generated, reused, third-party], required: before-review}
@@ -441,7 +465,7 @@ types:
     supports: [MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6, MAN.3.BP7, SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1, SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1, "08-12", "08-52", "08-04", "08-13", "08-27", "08-28"]
     attributes:
       use: [common]
-      kind: {values: [project, unit-verification, software-integration, software-qualification-test, system-integration, system-qualification-test, configuration-management, quality-assurance, problem-resolution, change-request-management, risk-management, cybersecurity, cybersecurity-interface-agreement, cybersecurity-monitoring, cybersecurity-incident-response, production-control, end-of-cybersecurity-support], required: always}
+      kind: {values: [project, unit-verification, software-integration, software-qualification-test, system-integration, system-qualification-test, configuration-management, quality-assurance, problem-resolution, change-request-management, risk-management, cybersecurity, cybersecurity-interface-agreement, cybersecurity-monitoring, cybersecurity-incident-response, production-control, end-of-cybersecurity-support, safety], required: always}
       milestones: {structure: milestones, required: optional, note: "project plans: the milestones of the life cycle, each with its date and the baseline purpose that marks it"}
       coverage_targets: {required: optional, note: "unit-verification plans: structural coverage a unit must reach, per ASIL, as {<ASIL>: {statement_percent, branch_percent, mcdc_percent}} with any subset of the metrics; an ASIL without an entry has no target"}
       integration_steps: {structure: integration-steps, required: optional, note: "software-integration and system-integration plans: the integration steps in order (conditions)"}
@@ -456,6 +480,11 @@ types:
       shared_activities: {structure: shared-activities, required: optional, note: "cybersecurity interface agreements: who performs, approves, supports and is informed of each activity (conditions)"}
       monitoring_sources: {structure: monitoring-sources, required: optional, note: "cybersecurity-monitoring plans: where cybersecurity information is collected (conditions)"}
       triggers: {structure: monitoring-triggers, required: optional, note: "cybersecurity-monitoring plans: what makes collected information a cybersecurity event (conditions)"}
+      safety_activities: {structure: safety-activities, required: optional, note: "safety plans: the activities per clause of ISO 26262 in scope, with tailoring (conditions, COV-63)"}
+      method_selection: {structure: method-selection, required: optional, note: "safety plans: the methods applied per table of parts 4, 5, 6 and 8 in scope (COV-64)"}
+      confirmation_measures: {structure: confirmation-plan, required: optional, note: "safety plans: the confirmation reviews, audits and assessment with their independence (COV-73)"}
+      asil_determination: {required: optional, note: "safety plans: {S<n>E<n>C<n>: <ASIL>} as the project applies the standard, so that the ASILs of hazardous events are checked (COV-65); absent: not checked"}
+      tcl_determination: {required: optional, note: "safety plans: {TI<n>-TD<n>: TCL<n>} as the project applies the standard, so that tool confidence levels are checked (COV-71)"}
     sections:
       Scope: before-review         # what the plan covers and what it leaves to others
       Approach: before-review      # methods, their order, and how they depend on ASIL
@@ -491,7 +520,7 @@ types:
     prefix: UT
     folder: verification/unit
     lifecycle: engineering
-    supports: [SWE.4.BP2, "08-50"]
+    supports: [SWE.4.BP2, "08-50", "26262-6:9", "26262-6:9.5.1"]
     attributes: {use: [common, test-case]}
     sections: {Preconditions: optional, Steps: before-review, Expected result: before-review}
 
@@ -499,7 +528,7 @@ types:
     prefix: SIT
     folder: verification/software-integration
     lifecycle: engineering
-    supports: [SWE.5.BP3, SWE.5.BP5, "08-50", "21434:10.4.2", "21434:WP-10-06"]
+    supports: [SWE.5.BP3, SWE.5.BP5, "08-50", "21434:10.4.2", "21434:WP-10-06", "26262-6:10", "26262-6:10.5.1"]
     attributes:
       use: [common, test-case]
       step: {required: before-review, note: "name of the integration step of the software-integration plan whose build the case is run on first; later builds may repeat it as regression"}
@@ -509,7 +538,7 @@ types:
     prefix: SQT
     folder: verification/software-qualification
     lifecycle: engineering
-    supports: [SWE.6.BP2, SWE.6.BP3, "08-50", "21434:10.4.2", "21434:WP-10-06"]
+    supports: [SWE.6.BP2, SWE.6.BP3, "08-50", "21434:10.4.2", "21434:WP-10-06", "26262-6:11", "26262-6:11.5.1"]
     attributes: {use: [common, test-case]}
     sections: {Preconditions: optional, Steps: before-review, Expected result: before-review}
 
@@ -517,7 +546,7 @@ types:
     prefix: SYIT
     folder: verification/system-integration
     lifecycle: engineering
-    supports: [SYS.4.BP3, SYS.4.BP5, "08-50", "21434:10.4.2", "21434:WP-10-06"]
+    supports: [SYS.4.BP3, SYS.4.BP5, "08-50", "21434:10.4.2", "21434:WP-10-06", "26262-4:7"]
     attributes:
       use: [common, test-case]
       step: {required: before-review, note: "name of the integration step of the system-integration plan whose build the case is run on first"}
@@ -527,9 +556,116 @@ types:
     prefix: SYQT
     folder: verification/system-qualification
     lifecycle: engineering
-    supports: [SYS.5.BP2, SYS.5.BP3, "08-50", "21434:11", "21434:WP-11-01"]
+    supports: [SYS.5.BP2, SYS.5.BP3, "08-50", "21434:11", "21434:WP-11-01", "26262-4:7", "26262-4:8", "26262-4:8.5.1"]
     attributes: {use: [common, test-case]}
     sections: {Preconditions: optional, Steps: before-review, Expected result: before-review}
+
+  # ---- ISO 26262 (functional safety); active only for the parts under scope.safety
+
+  hazardous-event:                 # a hazard in an operational situation, classified, with its ASIL
+    prefix: HZE
+    folder: spec/safety/hara
+    lifecycle: engineering
+    supports: ["26262-3:6", "26262-3:6.5.1"]
+    attributes:
+      use: [common]
+      malfunction: {required: before-review, note: "the malfunctioning behaviour of the item at vehicle level"}
+      hazard: {required: before-review}
+      operational_situation: {required: before-review}
+      severity: {values: [S0, S1, S2, S3], required: before-review}
+      exposure: {values: [E0, E1, E2, E3, E4], required: before-review}
+      controllability: {values: [C0, C1, C2, C3], required: before-review}
+      asil: {values: [QM, A, B, C, D], required: before-review, note: "as the ASIL determination the safety plan states gives it (COV-65)"}
+    sections:
+      Description: always
+      Classification rationale: before-review
+
+  safety-goal:                     # a top-level safety requirement for one or more hazardous events
+    prefix: SG
+    folder: spec/safety/goals
+    lifecycle: engineering
+    supports: ["26262-3:6", "26262-3:6.5.1"]
+    attributes:
+      use: [common]
+      asil: {values: [QM, A, B, C, D], required: always, note: "not lower than any hazardous event it addresses (COV-66)"}
+      safe_state: {required: optional}
+      ftti_ms: {required: optional, note: "fault tolerant time interval in milliseconds, where one applies"}
+    sections:
+      Statement: before-review
+      Rationale: optional
+
+  safety-analysis:                 # FMEA, FTA, DFA or another safety analysis of elements at one level
+    prefix: SAN
+    folder: spec/safety/analyses
+    lifecycle: engineering
+    supports: ["26262-9:8", "26262-9:7", "26262-9:6", "26262-9:8.5.1", "26262-9:7.5.1", "26262-6:7", "26262-6:7.5.2", "26262-6:7.5.3", "26262-4:6", "26262-4:6.5.7"]
+    attributes:
+      use: [common]
+      method: {values: [fmea, fta, dfa, fmeda, hazop, stpa, other], required: always}
+      level: {values: [system, software, hardware], required: always}
+      findings: {structure: analysis-findings, required: before-review, may_be_empty: true}
+    sections:
+      Scope: before-review           # what is analysed, to which depth, against which safety goals or requirements
+      Method: before-review          # how, with which guide words, fault models or initiators
+      Results: before-review         # what the analysis shows, beyond the single findings
+
+  tool-evaluation:                 # confidence in the use of a software tool: impact, detection, confidence level
+    prefix: TEV
+    folder: plans/tools
+    lifecycle: engineering
+    supports: ["26262-8:11", "26262-8:11.5.1", "26262-8:11.5.2"]
+    attributes:
+      use: [common]
+      tool: {required: always, note: "name and version, as the build, test and analysis records name it (COV-72)"}
+      impact: {values: [TI1, TI2], required: before-review}
+      detection: {values: [TD1, TD2, TD3], required: before-review}
+      confidence: {values: [TCL1, TCL2, TCL3], required: before-review, note: "as the determination the safety plan states gives it (COV-71)"}
+      asil: {values: [QM, A, B, C, D], required: before-review, note: "highest ASIL of the work the tool takes part in"}
+      qualification_method: {required: optional, note: "mandatory for TCL2 and TCL3 (COV-71)"}
+      evidence: {required: optional, note: "the report, test run or record that shows the qualification; mandatory for TCL2 and TCL3"}
+    sections:
+      Use cases: before-review       # what the tool is used for, on which work products, and which errors it could introduce or fail to detect
+      Classification rationale: before-review
+      Qualification: optional
+
+  confirmation-measure:            # a confirmation review, a functional safety audit or assessment, by an independent person
+    prefix: CFM
+    folder: records/safety
+    lifecycle: record
+    supports: ["26262-2:6", "26262-2:6.5.5"]
+    attributes:
+      id: {required: always}
+      type: {required: always}
+      status: {required: always}
+      title: {required: optional}
+      kind: {values: [confirmation-review, functional-safety-audit, functional-safety-assessment], required: always}
+      subject: {required: always, note: "what the measure covers, as the safety plan's confirmation_measures name it"}
+      items: {required: always, may_be_empty: true, note: "generated: the items covered, with state and content hash"}
+      performed_by: {required: always}
+      independence: {values: [I0, I1, I2, I3], required: always, note: "how independent the person is of the work, as they state it"}
+      as_of: {format: date, required: always}
+      result: {values: [passed, passed-with-findings, failed, accepted, conditionally-accepted, rejected], required: always}
+      conditions: {required: optional}
+    sections:
+      Report: always
+
+  safety-case:                     # the argument that functional safety is achieved, over the evidence per clause
+    prefix: SFC
+    folder: records/safety
+    lifecycle: record
+    supports: ["26262-2:6", "26262-2:6.5.4"]
+    attributes:
+      id: {required: always}
+      type: {required: always}
+      status: {required: always}
+      title: {required: optional}
+      as_of: {format: date, required: always}
+      prepared_by: {required: always}
+      parts: {required: always, note: "the parts of ISO 26262 the case covers"}
+      clauses: {required: always, note: "generated: per clause the decision of the safety plan and the items that give evidence, with state and hash"}
+      findings: {required: always, may_be_empty: true, note: "generated: the open findings of the rules of those parts"}
+    sections:
+      Argument: always
 
   # ---- ISO/SAE 21434 (cybersecurity); active only for clauses under scope.cybersecurity
 
@@ -537,7 +673,7 @@ types:
     prefix: ITM
     folder: spec/cybersecurity/item
     lifecycle: engineering
-    supports: ["21434:9.3", "21434:WP-09-01"]
+    supports: ["21434:9.3", "21434:WP-09-01", "26262-3:5", "26262-3:5.5.1"]
     attributes: {use: [common]}
     sections:
       Boundary and functions: before-review     # what belongs to the item, what lies outside, what it does
@@ -670,7 +806,7 @@ types:
     prefix: RUN
     folder: verification/runs
     lifecycle: record
-    supports: [SWE.4.BP4, SWE.5.BP5, SWE.5.BP6, SWE.6.BP3, SWE.6.BP4, SYS.4.BP5, SYS.4.BP6, SYS.5.BP3, SYS.5.BP4, "13-50", "21434:WP-10-07", "21434:WP-11-01"]   # a run records which test cases were selected and what they showed
+    supports: [SWE.4.BP4, SWE.5.BP5, SWE.5.BP6, SWE.6.BP3, SWE.6.BP4, SYS.4.BP5, SYS.4.BP6, SYS.5.BP3, SYS.5.BP4, "13-50", "21434:WP-10-07", "21434:WP-11-01", "26262-6:9.5.2", "26262-6:10.5.3", "26262-6:11.5.2"]   # a run records which test cases were selected and what they showed
     attributes:
       id: {required: always}
       type: {required: always}
@@ -724,7 +860,7 @@ types:
     prefix: REV
     folder: records/reviews
     lifecycle: record
-    supports: [SUP.1.BP2, SUP.4.BP4, "13-19", "21434:WP-09-05", "21434:WP-09-07", "21434:WP-10-04"]
+    supports: [SUP.1.BP2, SUP.4.BP4, "13-19", "21434:WP-09-05", "21434:WP-09-07", "21434:WP-10-04", "26262-3:6.5.2", "26262-3:7.5.2", "26262-6:6.5.3", "26262-6:7.5.4", "26262-9:7.5.2", "26262-9:8.5.2", "26262-8:9.5.3"]
     attributes:
       id: {required: always}
       type: {required: always}
@@ -777,7 +913,7 @@ types:
     prefix: CR
     folder: records/changes
     lifecycle: change-request
-    supports: [SUP.10.BP2, SUP.10.BP3, SUP.10.BP4, SUP.10.BP5, SUP.10.BP6, SUP.10.BP7, SYS.1.BP5, "13-16", "13-21"]
+    supports: [SUP.10.BP2, SUP.10.BP3, SUP.10.BP4, SUP.10.BP5, SUP.10.BP6, SUP.10.BP7, SYS.1.BP5, "13-16", "13-21", "26262-8:8", "26262-8:8.5.2"]
     attributes:
       use: [common]
       requester: {required: always}
@@ -964,7 +1100,7 @@ types:
     prefix: BL
     folder: records/baselines
     lifecycle: record
-    supports: [SUP.8.BP6, SUP.8.BP7, SYS.1.BP4, "13-08"]   # the record lists every item with hash and status
+    supports: [SUP.8.BP6, SUP.8.BP7, SYS.1.BP4, "13-08", "26262-8:7"]   # the record lists every item with hash and status
     attributes:
       id: {required: always}
       type: {required: always}
@@ -983,22 +1119,23 @@ types:
 # ---------------------------------------------------------------------------
 plan_kinds:
   project: [MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6, MAN.3.BP7]
-  unit-verification: [SWE.4.BP1]
-  software-integration: [SWE.5.BP1, SWE.5.BP2]
-  software-qualification-test: [SWE.6.BP1]
-  system-integration: [SYS.4.BP1, SYS.4.BP2]
+  unit-verification: [SWE.4.BP1, "26262-6:9"]
+  software-integration: [SWE.5.BP1, SWE.5.BP2, "26262-6:10"]
+  software-qualification-test: [SWE.6.BP1, "26262-6:11"]
+  system-integration: [SYS.4.BP1, SYS.4.BP2, "26262-4:7"]
   system-qualification-test: [SYS.5.BP1]
-  configuration-management: [SUP.8.BP1]
+  configuration-management: [SUP.8.BP1, "26262-8:7", "26262-8:7.5.1"]
   quality-assurance: [SUP.1.BP1]
   problem-resolution: [SUP.9.BP1]
   risk-management: [MAN.5.BP1, MAN.5.BP2]
-  change-request-management: [SUP.10.BP1]
+  change-request-management: [SUP.10.BP1, "26262-8:8", "26262-8:8.5.1"]
   cybersecurity: ["21434:6.4.1", "21434:6.4.2", "21434:6.4.3", "21434:6.4.4", "21434:6.4.5", "21434:6.4.6", "21434:15.8", "21434:WP-06-01"]
   cybersecurity-interface-agreement: ["21434:7.4.3", "21434:WP-07-01"]
   cybersecurity-monitoring: ["21434:8.3", "21434:WP-08-01", "21434:WP-08-02"]
   cybersecurity-incident-response: ["21434:13.3", "21434:WP-13-01"]
   production-control: ["21434:12", "21434:WP-12-01"]
   end-of-cybersecurity-support: ["21434:14.3", "21434:WP-14-01"]
+  safety: ["26262-2:6", "26262-2:6.5.3", "26262-4:5", "26262-5:5", "26262-6:5"]
 
 # ---------------------------------------------------------------------------
 # Conditional requirements: attributes or sections that become mandatory when
@@ -1035,6 +1172,10 @@ conditions:
   - {types: [plan], when: {kind: [cybersecurity-monitoring]}, attributes: [monitoring_sources], structure: monitoring-sources, stage: before-review}
   - {types: [plan], when: {kind: [cybersecurity-monitoring]}, attributes: [triggers], structure: monitoring-triggers, stage: before-review}
   - {types: [weakness], when: {status: [closed]}, attributes: [closure], structure: closure, stage: always}
+  - {types: [plan], when: {kind: [safety]}, attributes: [safety_activities], structure: safety-activities, stage: before-review}
+  - {types: [plan], when: {kind: [safety]}, attributes: [method_selection], structure: method-selection, stage: before-review}
+  - {types: [plan], when: {kind: [safety]}, attributes: [confirmation_measures], structure: confirmation-plan, stage: before-review}
+  - {types: [tool-evaluation], when: {confidence: [TCL2, TCL3]}, attributes: [qualification_method, evidence], stage: before-review}
   - {types: [weakness], when: {vulnerability: [true]}, attributes: [risk_value, treatment], stage: before-review}
   - {types: any, when: {status: [rejected]}, attributes: [rejection_reason], stage: always}
   - {types: [change-request], when: {status: [approved, rejected, implemented, verified, closed]}, attributes: [decision], stage: always}
@@ -1050,6 +1191,8 @@ links:
       - {from: software-requirement, to: [system-requirement, system-element, system-interface], supports: [SWE.1.BP6, SWE.1.BP7]}
       - {from: system-requirement, to: [cybersecurity-goal], supports: ["21434:9.5", "21434:WP-09-06"]}
       - {from: software-requirement, to: [cybersecurity-goal], supports: ["21434:9.5", "21434:10.4.1", "21434:WP-09-06"]}
+      - {from: system-requirement, to: [safety-goal], supports: ["26262-3:7", "26262-3:7.5.1"]}
+      - {from: software-requirement, to: [safety-goal], supports: ["26262-6:6", "26262-6:6.5.1"]}
   fulfils:
     meaning: "the requirement is allocated to this architectural element. The link is stored on the element because the element depends on the requirement: when the requirement changes, the element becomes suspect"
     pairs:
@@ -1098,6 +1241,7 @@ links:
       - {from: system-integration-test, to: [system-element, system-interface, architecture-view], supports: [SYS.4.BP7, SYS.4.BP8]}
       - {from: system-qualification-test, to: [system-requirement], supports: [SYS.5.BP5, SYS.5.BP6]}
       - {from: system-qualification-test, to: [cybersecurity-goal], supports: ["21434:11", "21434:WP-11-01"]}
+      - {from: system-qualification-test, to: [safety-goal], supports: ["26262-4:8", "26262-4:8.5.2"]}
   concerns:
     meaning: "the decision shapes the target"
     pairs:
@@ -1126,11 +1270,20 @@ links:
       - {from: corrective-action, to: any, supports: [MAN.3.BP10], evidence: none}
       - {from: cybersecurity-goal, to: [threat-scenario], supports: ["21434:9.4", "21434:15.9"]}
       - {from: cybersecurity-claim, to: [threat-scenario, weakness], supports: ["21434:9.4", "21434:15.9", "21434:8.6"]}
+      - {from: safety-goal, to: [hazardous-event], supports: ["26262-3:6"]}
   resolves:
     meaning: "the change request carries the resolution of the problem or the vulnerability"
     pairs:
       - {from: change-request, to: [problem-report], supports: [SUP.10.BP8]}
       - {from: change-request, to: [weakness], supports: [SUP.10.BP8, "21434:8.6"]}
+  arises_in:
+    meaning: "the hazardous event is one of the item's; a change of the item definition makes it suspect"
+    pairs:
+      - {from: hazardous-event, to: [item-definition], supports: ["26262-3:6"]}
+  analyses:
+    meaning: "the safety analysis examines the target; a change of the target makes the analysis suspect"
+    pairs:
+      - {from: safety-analysis, to: [item-definition, system-element, system-interface, software-component, software-interface, software-unit, architecture-view, design-decision], supports: ["26262-9:8", "26262-9:7", "26262-6:7", "26262-4:6"]}
   located_in:
     meaning: "the asset is held, processed or carried by the target; a change of the target makes the asset suspect"
     pairs:
@@ -1184,11 +1337,11 @@ coverage:
   - {id: COV-16, subject: system-requirement, expect: "verification_method test -> at least one system-qualification-test verifies it; otherwise a final review-record covers it", waiver: "none", supports: [SYS.5.BP5]}
   - {id: COV-17, subject: test-case, expect: "at least one verifies link, to an item that is not rejected or obsolete", waiver: "none", supports: [SWE.4.BP5, SWE.5.BP7, SWE.6.BP5, SYS.4.BP7, SYS.5.BP5]}
   - {id: COV-18, subject: test-case, expect: "a verdict in the latest final test-run of its level for the baseline under assessment; for an integration test (software or system), in the latest final run on a build of its step; a failed verdict is named by a problem report (affects the case or what it verifies, or found_in the run) until a later run passes it", waiver: "recorded as not-run with a reason accepted in the test summary; a failed verdict stays reported (warning while its problem report is unresolved, information once resolved)", supports: [SWE.4.BP5, SWE.5.BP7, SWE.6.BP5, SYS.4.BP7, SYS.5.BP5]}
-  - {id: COV-19, subject: any-engineering-item, expect: "a final review-record with verdict approved covers the current content hash and all its findings are closed", waiver: "none", supports: [SUP.1.BP2, SYS.2.BP7, SYS.3.BP7, SYS.4.BP8, SYS.5.BP6, SWE.1.BP7, SWE.2.BP8, SWE.3.BP6, SWE.4.BP6, SWE.5.BP8, SWE.6.BP6, "21434:9.4", "21434:9.5", "21434:10.4.1"]}
+  - {id: COV-19, subject: any-engineering-item, expect: "a final review-record with verdict approved covers the current content hash and all its findings are closed", waiver: "none", supports: [SUP.1.BP2, SYS.2.BP7, SYS.3.BP7, SYS.4.BP8, SYS.5.BP6, SWE.1.BP7, SWE.2.BP8, SWE.3.BP6, SWE.4.BP6, SWE.5.BP8, SWE.6.BP6, "21434:9.4", "21434:9.5", "21434:10.4.1", "26262-8:9"]}
   - {id: COV-20, subject: change-request, expect: "from state analysed on: at least one affects link", waiver: "none", supports: [SUP.10.BP8]}
   - {id: COV-21, subject: software-interface, expect: "provided by a component with origin developed -> at least one software-unit of that component realizes it", waiver: "none", supports: [SWE.3.BP2, SWE.3.BP5]}
   - {id: COV-22, subject: software-unit, expect: "every function of category public, scheduled or callback is defined in the listed source files, no function is defined there without a design entry, and wherever the design states types the parameter types and the return type equal those in the code", waiver: "origin generated or third-party", supports: [SWE.3.BP5, SWE.3.BP8]}
-  - {id: COV-23, subject: any-engineering-item, expect: "ASIL not lower than that of any item it is derived from or implements; a unit not lower than its component; a component or interface not lower than any requirement allocated to it", waiver: "an approved design-decision that documents the decomposition concerns the item", supports: [SWE.2.BP8, SWE.3.BP6]}
+  - {id: COV-23, subject: any-engineering-item, expect: "ASIL not lower than that of any item it is derived from or implements; a unit not lower than its component; a component or interface not lower than any requirement allocated to it", waiver: "an approved design-decision that documents the decomposition concerns the item", supports: [SWE.2.BP8, SWE.3.BP6, "26262-9:5", "26262-8:6"]}
   - {id: COV-24, subject: architecture-view, expect: "at least one shows link, and every shown item exists and is not rejected or obsolete", waiver: "none", supports: [SWE.2.BP4, SYS.3.BP4]}
   - {id: COV-25, subject: project, expect: "at software level one approved architecture-view exists for each of the kinds structure, execution-model and resource-summary, and at least one of kind state-machine or sequence", waiver: "a kind declared not applicable in the project configuration, with the reason", supports: [SWE.2.BP1, SWE.2.BP4, SWE.2.BP5]}
   - {id: COV-27, subject: project, expect: "for every process in scope, an approved plan exists of each kind that plan_kinds maps to one of its base practices", waiver: "none", supports: [SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1, SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1]}
@@ -1227,6 +1380,17 @@ coverage:
   - {id: COV-60, subject: any-engineering-item, expect: "derived from a cybersecurity goal or a security-relevant requirement, or fulfilling a security-relevant requirement -> security_relevant true", waiver: "none", supports: ["21434:9.5", "21434:10.4.1"]}
   - {id: COV-61, subject: weakness, expect: "from state analysed on: vulnerability decided; a vulnerability has a risk value and a treatment; reduce -> from in-resolution on a change-request resolves it; share or retain -> a cybersecurity-claim addresses it", waiver: "none", supports: ["21434:8.5", "21434:8.6"]}
   - {id: COV-62, subject: cybersecurity-goal, expect: "at least one system-qualification-test verifies it", waiver: "none; where the customer validates on the vehicle, clause 11 is not under scope.cybersecurity", supports: ["21434:11"]}
+  - {id: COV-63, subject: project, expect: "the approved safety plan has an entry in safety_activities for every clause of the parts under scope.safety, each with a decision of performed, tailored, not-applicable, by-customer, by-supplier or by-organization; tailored and not-applicable carry a rationale", waiver: "none", supports: ["26262-2:6"]}
+  - {id: COV-64, subject: project, expect: "the approved safety plan has an entry in method_selection for every table of parts 4, 5, 6 and 8 under scope.safety; applied entries name the methods or where they are applied, not-applicable entries carry a rationale", waiver: "none", supports: ["26262-2:6", "26262-4:5", "26262-5:5", "26262-6:5", "26262-8:9"]}
+  - {id: COV-65, subject: hazardous-event, expect: "from in-review on: its ASIL is the one the asil_determination of the approved safety plan gives for its severity, exposure and controllability", waiver: "none; without an asil_determination the ASILs are not assessed (warning)", supports: ["26262-3:6"]}
+  - {id: COV-66, subject: hazardous-event, expect: "ASIL A to D -> at least one safety-goal addresses it, with an ASIL not lower than the event's", waiver: "none", supports: ["26262-3:6"]}
+  - {id: COV-67, subject: safety-goal, expect: "at least one system-requirement or software-requirement derived_from it; also for a goal received from the customer", waiver: "none", supports: ["26262-3:7", "26262-4:6", "26262-6:6"]}
+  - {id: COV-68, subject: safety-analysis, expect: "from in-review on: every finding is open or closed; a closed one names an existing item under carried_by or gives a rationale; an approved analysis has no open finding", waiver: "none", supports: ["26262-9:8", "26262-9:7", "26262-6:7", "26262-4:6"]}
+  - {id: COV-69, subject: project, expect: "every software component (not a composition) with ASIL A to D is analysed by a software-level safety-analysis; every system element with ASIL A to D by a system-level one; where software components of different ASILs coexist, a dependent failures analysis (method dfa) exists at software level", waiver: "none", supports: ["26262-6:7", "26262-4:6", "26262-9:6", "26262-9:7"]}
+  - {id: COV-70, subject: design-decision, expect: "a decomposition names an existing requirement, the requirements it is decomposed into, and a live safety-analysis of method dfa under independence; no part has an ASIL above the decomposed requirement", waiver: "none", supports: ["26262-9:5"]}
+  - {id: COV-71, subject: tool-evaluation, expect: "from in-review on: TCL2 and TCL3 name a qualification method and its evidence; the confidence level is the one the tcl_determination of the approved safety plan gives, where the plan states one", waiver: "none", supports: ["26262-8:11"]}
+  - {id: COV-72, subject: project, expect: "every tool named in a final build-record or static-analysis-run is covered by a live tool-evaluation", waiver: "none", supports: ["26262-8:11"]}
+  - {id: COV-73, subject: project, expect: "for every entry of confirmation_measures of the approved safety plan, a final confirmation-measure record of that kind and subject exists with at least the independence planned and a result other than failed or rejected", waiver: "none", supports: ["26262-2:6"]}
   - {id: COV-26, subject: baseline, expect: "at least one final communication-record names the baseline as subject", waiver: "baseline purpose marked internal in the project configuration", supports: [SYS.2.BP8, SYS.3.BP8, SYS.4.BP9, SYS.5.BP7, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7, SWE.4.BP7, SWE.5.BP9, SWE.6.BP7]}
 
 # ---------------------------------------------------------------------------

@@ -80,6 +80,23 @@ INTEGRATION_LEVELS = {  # integration at software level (SWE.5, SWE.6) and at sy
 }
 LEVEL_OF_TEST = {spec["test"]: level for level, spec in INTEGRATION_LEVELS.items()}
 CS_PREFIX = "21434:"                       # references to ISO/SAE 21434 in `supports`
+FS_PREFIX = "26262:"                       # scope key of a part of ISO 26262; references read "26262-<part>:<clause>"
+ASIL_RANK = {"QM": 0, "A": 1, "B": 2, "C": 3, "D": 4}
+INDEPENDENCE = {"I0": 0, "I1": 1, "I2": 2, "I3": 3}
+FS_DECISIONS = ("performed", "tailored", "not-applicable", "by-customer", "by-supplier", "by-organization")
+METHOD_TABLE_PARTS = ("4", "5", "6", "8")
+_FS_CATALOG = None
+
+
+def fs_catalog():
+    """The catalog of ISO 26262: parts, clauses, requirement numbers, work products, table titles."""
+    global _FS_CATALOG
+    if _FS_CATALOG is None:
+        path = ROOT / "iso-26262" / "2018" / "catalog.yaml"
+        _FS_CATALOG = yaml.safe_load(path.read_text(encoding="utf-8")) if path.exists() else {"parts": []}
+    return _FS_CATALOG
+
+
 IMPACT_LEVELS = ["negligible", "moderate", "major", "severe"]         # lowest first
 FEASIBILITY_LEVELS = ["very-low", "low", "medium", "high"]            # lowest first; the columns of risk_matrix
 CS_PROPERTIES = {"confidentiality", "integrity", "availability", "authenticity", "authorization", "non-repudiation"}
@@ -239,6 +256,9 @@ def process_of(ref):
     ref = str(ref)
     if ".BP" in ref:
         return ref.split(".BP")[0]
+    if ref.startswith("26262-"):
+        part = ref[len("26262-"):].split(":")[0]
+        return FS_PREFIX + part if part.isdigit() else None
     if ref.startswith(CS_PREFIX):
         rest = ref[len(CS_PREFIX):]
         number = rest[3:5] if rest.startswith("WP-") else rest.split(".")[0]
@@ -258,6 +278,8 @@ class Project:
         self.scope = set(processes) if processes else None      # None = every process of the catalog in scope
         # clauses of ISO/SAE 21434 count only where the project declares them
         self.cs_scope = {CS_PREFIX + str(c) for c in as_list((self.config.get("scope") or {}).get("cybersecurity"))}
+        # parts of ISO 26262 likewise
+        self.fs_scope = {FS_PREFIX + str(p) for p in as_list((self.config.get("scope") or {}).get("safety"))}
         self.types = self.schema["types"]
         self.rules = {r["id"]: r for r in self.schema["coverage"]}
         self.items, self.findings = {}, []
@@ -381,6 +403,8 @@ class Project:
         """Whether a process (SWE.1) or a clause of ISO/SAE 21434 (21434:9) is in the project's scope."""
         if str(process).startswith(CS_PREFIX):
             return process in self.cs_scope
+        if str(process).startswith(FS_PREFIX):
+            return process in self.fs_scope
         return self.scope is None or process in self.scope
 
     def in_scope(self, supports):
@@ -1664,6 +1688,220 @@ class Project:
                              % (problem.id, problem.front.get("severity"), problem.status))
 
 
+    # ---- ISO 26262
+
+    def safety_plan(self):
+        """The approved plan of kind safety, or None."""
+        return next((p for p in sorted(self.of_type("plan"), key=lambda p: record_number(p.id))
+                     if p.status == "approved" and p.front.get("kind") == "safety"), None)
+
+    def safety_parts(self):
+        return [p for p in fs_catalog()["parts"] if FS_PREFIX + str(p["id"]) in self.fs_scope]
+
+    def safety_entries(self, plan, attribute, key):
+        entries = {}
+        for entry in as_list(plan.front.get(attribute) if plan else None):
+            if isinstance(entry, dict):
+                entries[str(entry.get(key))] = entry
+        return entries
+
+    def cov_63(self, rule):
+        plan = self.safety_plan()
+        if plan is None:
+            return                                        # COV-27 reports the missing plan
+        supports, entries = self.rules[rule]["supports"], self.safety_entries(plan, "safety_activities", "clause")
+        known = set()
+        for part in fs_catalog()["parts"]:
+            known |= {"%s:%s" % (part["id"], c["id"]) for c in part["clauses"]}
+        for part in self.safety_parts():
+            for clause in part["clauses"]:
+                key = "%s:%s" % (part["id"], clause["id"])
+                entry = entries.get(key)
+                if entry is None:
+                    self.add("error", rule, plan.id, "safety_activities has no entry for clause %s %s"
+                             % (key, clause["name"]), supports)
+                elif entry.get("decision") not in FS_DECISIONS:
+                    self.add("error", rule, plan.id, "clause %s: decision %r, allowed: %s"
+                             % (key, entry.get("decision"), ", ".join(FS_DECISIONS)), supports)
+                elif entry.get("decision") in ("tailored", "not-applicable") and not entry.get("rationale"):
+                    self.add("error", rule, plan.id, "clause %s is %s without a rationale" % (key, entry["decision"]), supports)
+        for name in sorted(set(entries) - known):
+            self.add("warning", rule, plan.id, "safety_activities names %s, which is not a clause of ISO 26262 "
+                     "(write \"<part>:<clause>\", for example \"6:7\")" % name, supports)
+
+    def cov_64(self, rule):
+        plan = self.safety_plan()
+        if plan is None:
+            return
+        supports, entries = self.rules[rule]["supports"], self.safety_entries(plan, "method_selection", "table")
+        for part in self.safety_parts():
+            if str(part["id"]) not in METHOD_TABLE_PARTS:
+                continue
+            for table in part.get("tables") or []:
+                key = "%s:%s" % (part["id"], table["id"])
+                entry = entries.get(key)
+                if entry is None:
+                    self.add("error", rule, plan.id, "method_selection has no entry for table %s (%s)" % (key, table["name"]), supports)
+                elif entry.get("decision") not in ("applied", "not-applicable"):
+                    self.add("error", rule, plan.id, "table %s: decision %r, allowed: applied, not-applicable"
+                             % (key, entry.get("decision")), supports)
+                elif entry["decision"] == "applied" and not (entry.get("methods") or entry.get("applied_in")):
+                    self.add("error", rule, plan.id, "table %s is applied, but names neither methods nor where they are applied" % key, supports)
+                elif entry["decision"] == "not-applicable" and not entry.get("rationale"):
+                    self.add("error", rule, plan.id, "table %s is not-applicable without a rationale" % key, supports)
+
+    def cov_65(self, rule):
+        events = [e for e in self.of_type("hazardous-event") if self.live(e) and not e.imported]
+        if not events:
+            return
+        plan = self.safety_plan()
+        table = plan.front.get("asil_determination") if plan else None
+        if not isinstance(table, dict):
+            self.add("warning", rule, plan.id if plan else "project", "no approved safety plan with an asil_determination: "
+                     "the ASILs of hazardous events are not assessed", self.rules[rule]["supports"])
+            return
+        for event in events:
+            if not self.due(event, "before-review"):
+                continue
+            key = "%s%s%s" % (event.front.get("severity"), event.front.get("exposure"), event.front.get("controllability"))
+            expected = table.get(key)
+            if expected is None:
+                self.gap(rule, event, "the asil_determination of %s has no entry for %s" % (plan.id, key))
+            elif str(expected) != str(event.front.get("asil")):
+                self.gap(rule, event, "ASIL %s, but the asil_determination of %s gives %s for %s"
+                         % (event.front.get("asil"), plan.id, expected, key))
+
+    def cov_66(self, rule):
+        for event in self.of_type("hazardous-event"):
+            rank = ASIL_RANK.get(str(event.front.get("asil")))
+            if not self.live(event) or event.imported or not rank:
+                continue
+            goals = self.sources(event.id, "addresses", ["safety-goal"])
+            if not goals:
+                self.gap(rule, event, "ASIL %s, but no safety goal addresses it" % event.front.get("asil"))
+            for goal in goals:
+                if ASIL_RANK.get(str(goal.front.get("asil")), -1) < rank:
+                    self.gap(rule, goal, "ASIL %s is lower than ASIL %s of %s, which it addresses"
+                             % (goal.front.get("asil"), event.front.get("asil"), event.id))
+
+    def cov_67(self, rule):
+        for goal in self.of_type("safety-goal"):
+            if self.live(goal) and not self.sources(goal.id, "derived_from", ["system-requirement", "software-requirement"]):
+                self.gap(rule, goal, "no system or software requirement is derived from it")
+
+    def cov_68(self, rule):
+        for analysis in self.of_type("safety-analysis"):
+            if not self.live(analysis) or analysis.imported or not self.due(analysis, "before-review"):
+                continue
+            for finding in as_list(analysis.front.get("findings")):
+                if not isinstance(finding, dict):
+                    continue
+                label, state = finding.get("id"), finding.get("state")
+                if state not in ("open", "closed"):
+                    self.gap(rule, analysis, "finding %s: state %r, allowed: open, closed" % (label, state))
+                elif state == "closed":
+                    carrier = finding.get("carried_by")
+                    if carrier and str(carrier).split("#")[0] not in self.items:
+                        self.gap(rule, analysis, "finding %s: carried_by %s does not exist" % (label, carrier))
+                    elif not carrier and not finding.get("rationale"):
+                        self.gap(rule, analysis, "finding %s is closed without carried_by or a rationale" % label)
+                elif analysis.status == "approved":
+                    self.gap(rule, analysis, "approved with finding %s open" % label)
+
+    def cov_69(self, rule):
+        supports = self.rules[rule]["supports"]
+
+        def analysed(element, level, method=None):
+            for analysis in self.sources(element.id, "analyses", ["safety-analysis"]):
+                if analysis.front.get("level") == level and (method is None or analysis.front.get("method") == method):
+                    return True
+            return False
+
+        if self.covers(FS_PREFIX + "6"):
+            for component in self.of_type("software-component"):
+                if self.live(component) and component.front.get("kind") != "composition" \
+                        and ASIL_RANK.get(str(component.front.get("asil")), 0) > 0 and not analysed(component, "software"):
+                    self.add("error" if component.status == "approved" else "warning", rule, component.id,
+                             "ASIL %s, but no software-level safety analysis analyses it" % component.front.get("asil"), supports)
+            asils = {str(c.front.get("asil")) for c in self.of_type("software-component")
+                     if self.live(c) and c.front.get("kind") != "composition" and c.front.get("asil") in ASIL_RANK}
+            dfa = [a for a in self.of_type("safety-analysis") if self.live(a) and a.front.get("method") == "dfa"
+                   and a.front.get("level") == "software"]
+            if len(asils) > 1 and not dfa:
+                self.add("error", rule, "project", "software components of ASIL %s coexist, but no software-level dependent "
+                         "failures analysis exists" % ", ".join(sorted(asils, key=lambda a: ASIL_RANK[a])), supports)
+        if self.covers(FS_PREFIX + "4"):
+            for element in self.of_type("system-element"):
+                if self.live(element) and element.front.get("kind") != "external" \
+                        and ASIL_RANK.get(str(element.front.get("asil")), 0) > 0 and not analysed(element, "system"):
+                    self.add("error" if element.status == "approved" else "warning", rule, element.id,
+                             "ASIL %s, but no system-level safety analysis analyses it" % element.front.get("asil"), supports)
+
+    def cov_70(self, rule):
+        for decision in self.of_type("design-decision"):
+            split = decision.front.get("decomposition")
+            if not self.live(decision) or not isinstance(split, dict):
+                continue
+            original = self.items.get(str(split.get("requirement")))
+            parts = [self.items.get(str(r)) for r in as_list(split.get("into"))]
+            dfa = self.items.get(str(split.get("independence")))
+            if original is None:
+                self.gap(rule, decision, "decomposition names requirement %s, which does not exist" % split.get("requirement"))
+            if not parts or None in parts:
+                self.gap(rule, decision, "decomposition names requirements under into that do not exist: %s" % split.get("into"))
+            if dfa is None or dfa.type != "safety-analysis" or dfa.front.get("method") != "dfa" or not self.live(dfa):
+                self.gap(rule, decision, "decomposition names %s under independence, which is not a live dependent failures "
+                         "analysis" % split.get("independence"))
+            if original is not None:
+                top = ASIL_RANK.get(str(original.front.get("asil")), 0)
+                for part in [p for p in parts if p is not None]:
+                    if ASIL_RANK.get(str(part.front.get("asil")), 0) > top:
+                        self.gap(rule, decision, "%s has an ASIL above the decomposed requirement %s" % (part.id, original.id))
+
+    def cov_71(self, rule):
+        plan = self.safety_plan()
+        table = plan.front.get("tcl_determination") if plan and isinstance(plan.front.get("tcl_determination"), dict) else None
+        for tool in self.of_type("tool-evaluation"):
+            if not self.live(tool) or not self.due(tool, "before-review"):
+                continue
+            if table:
+                key = "%s-%s" % (tool.front.get("impact"), tool.front.get("detection"))
+                expected = table.get(key)
+                if expected is not None and str(expected) != str(tool.front.get("confidence")):
+                    self.gap(rule, tool, "%s, but the tcl_determination of %s gives %s for %s"
+                             % (tool.front.get("confidence"), plan.id, expected, key))
+
+    def cov_72(self, rule):
+        evaluated = [str(t.front.get("tool") or "").lower() for t in self.of_type("tool-evaluation") if self.live(t)]
+        named = {}
+        for record in self.of_type("build-record", "static-analysis-run"):
+            if record.status == "final" and record.front.get("tool"):
+                named.setdefault(str(record.front.get("tool")), record.id)
+        for tool, record in sorted(named.items()):
+            low = tool.lower()
+            if not any(e and (e in low or e.split()[0] == low.split()[0]) for e in evaluated):
+                self.add("error", rule, record, "tool '%s' is used, but no tool evaluation covers it" % tool,
+                         self.rules[rule]["supports"])
+
+    def cov_73(self, rule):
+        plan = self.safety_plan()
+        if plan is None:
+            return
+        records = [r for r in self.of_type("confirmation-measure") if r.status == "final"]
+        for entry in as_list(plan.front.get("confirmation_measures")):
+            if not isinstance(entry, dict):
+                continue
+            wanted = INDEPENDENCE.get(str(entry.get("independence")), 0)
+            done = [r for r in records if r.front.get("kind") == entry.get("measure")
+                    and str(r.front.get("subject")) == str(entry.get("subject"))]
+            good = [r for r in done if INDEPENDENCE.get(str(r.front.get("independence")), -1) >= wanted
+                    and r.front.get("result") not in ("failed", "rejected")]
+            if not good:
+                why = ("records %s do not reach independence %s or did not pass" % (", ".join(r.id for r in done), entry.get("independence"))
+                       if done else "no final confirmation-measure record")
+                self.add("error", rule, plan.id, "%s of %s: %s" % (entry.get("measure"), entry.get("subject"), why),
+                         self.rules[rule]["supports"])
+
     # ---- ISO/SAE 21434
 
     def cs_plan(self):
@@ -1930,6 +2168,8 @@ def cmd_check(project, args):
         scope = ", ".join(sorted(project.scope)) if project.scope else "all processes"
         if project.cs_scope:
             scope += "; ISO/SAE 21434 clauses %s" % ", ".join(sorted((c[len(CS_PREFIX):] for c in project.cs_scope), key=int))
+        if project.fs_scope:
+            scope += "; ISO 26262 parts %s" % ", ".join(sorted((c[len(FS_PREFIX):] for c in project.fs_scope), key=int))
         active = [r for r in sorted(project.rules) if project.active(r)]
         print("%d items | scope: %s | %d of %d coverage rules active | %d errors, %d warnings, %d on drafts%s"
               % (len(project.items), scope, len(active), len(project.rules), counts["error"], counts["warning"],
@@ -2394,6 +2634,70 @@ def tara(project):
                "claims": len([c for c in project.of_type("cybersecurity-claim") if project.live(c)])}
     return {"plan": plan.id if plan else None, "feasibility_approach": (method or {}).get("feasibility_approach"),
             "threat_scenarios": entries, "figures": figures}
+
+
+def safety_rows(project, only=None):
+    """Per clause of ISO 26262 under scope.safety (or of the part asked for): the decision of the safety plan,
+    the items whose types give evidence for it, and the open findings of the rules behind it."""
+    findings = project.check()
+    plan = project.safety_plan()
+    decisions = project.safety_entries(plan, "safety_activities", "clause")
+    rows = []
+    for part in fs_catalog()["parts"]:
+        key = FS_PREFIX + str(part["id"])
+        if (only and str(part["id"]) != str(only)) or (not only and key not in project.fs_scope):
+            continue
+        for clause in part["clauses"]:
+            ref = "26262-%s:%s" % (part["id"], clause["id"])
+            types = sorted(t for t, spec in project.types.items()
+                           if any(str(s) == ref or str(s).startswith(ref + ".") for s in spec.get("supports") or []))
+            kinds = sorted(k for k, refs in project.schema["plan_kinds"].items() if any(str(r) == ref or str(r).startswith(ref + ".") for r in refs))
+            items = [i for i in project.items.values() if project.live(i) and (
+                (i.type in types and i.type != "plan") or (i.type == "plan" and i.front.get("kind") in kinds))]
+            if types and set(types) & {"system-requirement", "software-requirement", "software-component", "software-interface",
+                                       "software-unit", "component-design", "system-element", "system-interface"}:
+                items = [i for i in items if i.type not in ("system-requirement", "software-requirement", "software-component",
+                                                            "software-interface", "software-unit", "component-design",
+                                                            "system-element", "system-interface")
+                         or ASIL_RANK.get(str(i.front.get("asil")), 0) > 0]
+            entry = decisions.get("%s:%s" % (part["id"], clause["id"])) or {}
+            open_findings = [f for f in findings if f["level"] != "info"
+                             and any(str(s) == ref or str(s).startswith(ref + ".") for s in f["supports"])]
+            rows.append({"clause": "%s:%s" % (part["id"], clause["id"]), "name": clause["name"],
+                         "in_scope": key in project.fs_scope, "decision": entry.get("decision"),
+                         "responsible": entry.get("responsible"),
+                         "items": len(items), "approved_or_final": sum(1 for i in items if i.status in ("approved", "final")),
+                         "types": sorted({i.type for i in items}) or types + ["plan of kind %s" % k for k in kinds],
+                         "evidence": [{"item": i.id, "status": i.status, "hash": i.hash} for i in sorted(items, key=lambda i: i.id)],
+                         "findings": [{"rule": f["rule"], "item": f["item"], "level": f["level"], "message": f["message"]}
+                                      for f in open_findings]})
+    return rows
+
+
+def cmd_safety(project, args):
+    rows = safety_rows(project, args.part)
+    if args.json:
+        print(json.dumps(rows, indent=2))
+        return 0
+    if not rows:
+        print("no part of ISO 26262 is under scope.safety in project.yaml" if not args.part
+              else "%s is not a part of ISO 26262 with clauses (2 to 9, 12)" % args.part)
+        return 0
+    for row in rows:
+        decision = "%s, %s" % (row["decision"], row["responsible"]) if row["decision"] else "no entry in the safety plan"
+        evidence = "%d items (%d approved or final; %s)" % (row["items"], row["approved_or_final"], ", ".join(row["types"])) \
+            if row["items"] else "no evidence (%s)" % (", ".join(row["types"]) or "no item type of the toolkit")
+        print("26262-%-6s %s  [%s]\n    %s" % (row["clause"], row["name"], decision, evidence))
+        for f in row["findings"]:
+            print("    %-7s %-7s %-10s %s" % (f["level"], f["rule"], f["item"], f["message"]))
+    events = [e for e in project.of_type("hazardous-event") if project.live(e)]
+    if events:
+        print("\nHazardous events by ASIL:")
+        for event in sorted(events, key=lambda e: (-ASIL_RANK.get(str(e.front.get("asil")), 0), e.id)):
+            goals = [g.id for g in project.sources(event.id, "addresses", ["safety-goal"])]
+            print("  %-9s ASIL %-3s %s%s%s  goals: %s  %s" % (event.id, event.front.get("asil"), event.front.get("severity"),
+                  event.front.get("exposure"), event.front.get("controllability"), ", ".join(goals) or "-", event.title))
+    return 0
 
 
 def cmd_tara(project, args):
@@ -2948,6 +3252,9 @@ def main():
     practices = sub.add_parser("practices")
     practices.add_argument("process", nargs="?")
     practices.add_argument("--json", action="store_true")
+    safety = sub.add_parser("safety")
+    safety.add_argument("part", nargs="?", help="a part of ISO 26262; default: the parts in scope")
+    safety.add_argument("--json", action="store_true")
     tara_parser = sub.add_parser("tara")
     tara_parser.add_argument("--json", action="store_true")
     clauses = sub.add_parser("clauses")
@@ -2959,7 +3266,8 @@ def main():
             "hash": cmd_hash, "status": cmd_status, "list": cmd_list, "audit": cmd_audit, "practices": cmd_practices,
             "diff": cmd_diff, "progress": cmd_progress,
             "problems": cmd_problems, "history": cmd_history, "quality": cmd_quality, "generic": cmd_generic,
-            "suppliers": cmd_suppliers, "risks": cmd_risks, "tara": cmd_tara, "clauses": cmd_clauses}[args.command](project, args)
+            "suppliers": cmd_suppliers, "risks": cmd_risks, "tara": cmd_tara, "clauses": cmd_clauses,
+            "safety": cmd_safety}[args.command](project, args)
 
 
 if __name__ == "__main__":

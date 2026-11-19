@@ -37,3 +37,8 @@ Automotive SPICE is a registered trademark of the Verband der Automobilindustrie
 
 # Generic technical terms that sources happen to share
 software in the loop hardware in the loop
+
+# The three confirmation measures of ISO 26262, named together
+confirmation review
+functional safety audit
+functional safety assessment

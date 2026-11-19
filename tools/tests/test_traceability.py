@@ -1432,6 +1432,164 @@ class Cybersecurity(Case):
         self.assertEqual(rows["6.4.2"]["decision"], "performed")
 
 
+FS_CONFIG = {"scope": {"processes": SCOPE, "safety": [2, 3, 6, 8, 9]}}
+
+
+def fs_items():
+    """The base thread under ISO 26262: a hazardous event, its goal, the goal refined into SWR-0001, a safety
+    analysis of the ASIL B component, the analyser evaluated, a confirmation review. The ASIL determination
+    is a test value, not the one of the standard."""
+    import yaml as _yaml
+    catalog = _yaml.safe_load((Path(__file__).resolve().parents[2] / "iso-26262" / "2018" / "catalog.yaml").read_text(encoding="utf-8"))
+    parts = {str(p["id"]): p for p in catalog["parts"]}
+    clauses = ["%s:%s" % (n, c["id"]) for n in ("2", "3", "6", "8", "9") for c in parts[n]["clauses"]]
+    tables = ["%s:%s" % (n, tb["id"]) for n in ("6", "8") for tb in parts[n]["tables"]]
+    items = copy.deepcopy(base_items())
+    items["SWR-0001"][0]["links"]["derived_from"].append("SG-0001")
+    items["PLN-0009"] = ({"type": "plan", "title": "Safety plan", "status": "approved", "kind": "safety",
+                          "safety_activities": [{"clause": c, "decision": "performed", "responsible": "Safety manager"}
+                                                for c in clauses],
+                          "method_selection": [{"table": tb, "decision": "applied", "applied_in": "PLN-0001"} for tb in tables],
+                          "confirmation_measures": [{"measure": "confirmation-review", "subject": "safety plan",
+                                                     "independence": "I1"}],
+                          "asil_determination": {"S1E4C2": "B"}},
+                         {"Scope": "The window software.", "Approach": "Per clause.", "Criteria": "Reviewed.",
+                          "Environment and tools": "Repository.", "Responsibilities": "Safety manager."})
+    items["ITM-0001"] = ({"type": "item-definition", "title": "Window lifter", "status": "approved"},
+                         {"Boundary and functions": "Door module.", "Preliminary architecture": "One ECU.",
+                          "Operational environment": "Vehicle."})
+    for plan_id, kind, extra in (("PLN-0010", "software-integration", {"integration_steps": [{"name": "all", "components": ["CMP-0002"]}]}),
+                                 ("PLN-0011", "software-qualification-test", {}), ("PLN-0012", "change-request-management", {})):
+        items[plan_id] = ({"type": "plan", "title": kind, "status": "approved", "kind": kind, **extra},
+                          {"Scope": "x", "Approach": "x", "Criteria": "x", "Environment and tools": "x", "Responsibilities": "x"})
+    items["HZE-0001"] = ({"type": "hazardous-event", "title": "Arm trapped while closing", "status": "approved",
+                          "malfunction": "closes against an obstacle", "hazard": "trapping", "operational_situation": "parked, child inside",
+                          "severity": "S1", "exposure": "E4", "controllability": "C2", "asil": "B",
+                          "links": {"arises_in": ["ITM-0001"]}},
+                         {"Description": "The window does not reverse.", "Classification rationale": "Test values."})
+    items["SG-0001"] = ({"type": "safety-goal", "title": "No trapping by the window", "status": "approved", "asil": "B",
+                         "links": {"addresses": ["HZE-0001"]}}, {"Statement": "The window shall not trap an occupant."})
+    items["SAN-0001"] = ({"type": "safety-analysis", "title": "FMEA of the detection", "status": "approved",
+                          "method": "fmea", "level": "software",
+                          "findings": [{"id": "F1", "fault": "obstacle not reported", "effect": "no reversal",
+                                        "measure": "plausibility of the speed", "carried_by": "SWR-0001", "state": "closed"}],
+                          "links": {"analyses": ["CMP-0002"]}},
+                         {"Scope": "CMP-0002.", "Method": "Guide words per output.", "Results": "One finding, closed."})
+    items["TEV-0001"] = ({"type": "tool-evaluation", "title": "Static analyser", "status": "approved", "tool": "analyser 1.0",
+                           "impact": "TI2", "detection": "TD1", "confidence": "TCL1", "asil": "B"},
+                          {"Use cases": "Defect analysis of the units.", "Classification rationale": "Findings are reviewed."})
+    items["CFM-0001"] = ({"type": "confirmation-measure", "status": "final", "kind": "confirmation-review",
+                          "subject": "safety plan", "items": [], "performed_by": "Independent reviewer",
+                          "independence": "I1", "as_of": "2026-02-01", "result": "passed"}, {"Report": "Consistent."})
+    return items
+
+
+class FunctionalSafety(Case):
+    FS_RULES = {"COV-%d" % n for n in range(63, 74)}
+
+    def make(self, items=None, config=FS_CONFIG, **kwargs):
+        return super().make(fs_items() if items is None else items, config=config, **kwargs)
+
+    def fs_rules(self, fixture, level="error"):
+        return sorted((r, i) for r, i in fixture.rules(level) if r in self.FS_RULES or r in ("SCHEMA", "LINK"))
+
+    def messages(self, fixture, rule, level="error"):
+        return [f["message"] for f in fixture.findings(level) if f["rule"] == rule]
+
+    def test_a_consistent_safety_thread_has_no_findings(self):
+        fixture = self.make()
+        self.assertEqual(fixture.findings("error"), [])
+        self.assertEqual(self.fs_rules(fixture, "warning"), [])
+
+    def test_out_of_scope_the_rules_stay_silent(self):
+        items = fs_items()
+        del items["PLN-0009"], items["TEV-0001"]
+        fixture = self.make(items, config={})
+        self.assertFalse({r for r, _ in fixture.rules()} & (self.FS_RULES | {"COV-27"}))
+
+    def test_the_plan_decides_every_clause_and_every_method_table(self):
+        items = fs_items()
+        plan = items["PLN-0009"][0]
+        plan["safety_activities"] = [a for a in plan["safety_activities"] if a["clause"] != "6:7"]
+        plan["method_selection"] = [m for m in plan["method_selection"] if m["table"] != "6:9"]
+        plan["method_selection"][0].update(decision="not-applicable")
+        fixture = self.make(items)
+        self.assertTrue(any("clause 6:7 Software architectural design" in m for m in self.messages(fixture, "COV-63")))
+        self.assertTrue(any("table 6:9" in m for m in self.messages(fixture, "COV-64")))
+        self.assertTrue(any("not-applicable without a rationale" in m for m in self.messages(fixture, "COV-64")))
+
+    def test_the_asil_follows_the_determination_the_plan_states(self):
+        fixture = self.make(changed(fs_items(), "HZE-0001", asil="A"))
+        self.assertTrue(any("gives B for S1E4C2" in m for m in self.messages(fixture, "COV-65")))
+        items = fs_items()
+        del items["PLN-0009"][0]["asil_determination"]
+        warnings = self.messages(self.make(items), "COV-65", "warning")
+        self.assertTrue(warnings and "not assessed" in warnings[0], warnings)
+
+    def test_a_hazardous_event_needs_a_goal_of_its_asil(self):
+        fixture = self.make(changed(fs_items(), "SG-0001", asil="A"))
+        self.assertIn(("COV-66", "SG-0001"), fixture.rules())
+        items = fs_items()
+        items["SG-0001"][0]["links"]["addresses"] = []
+        self.assertIn(("COV-66", "HZE-0001"), self.make(items).rules())
+
+    def test_a_goal_is_refined_into_requirements(self):
+        items = fs_items()
+        items["SWR-0001"][0]["links"]["derived_from"] = ["SYR-0001"]
+        self.assertIn(("COV-67", "SG-0001"), self.make(items).rules())
+
+    def test_findings_of_an_analysis_are_carried_or_argued(self):
+        items = fs_items()
+        items["SAN-0001"][0]["findings"][0].pop("carried_by")
+        self.assertTrue(any("without carried_by or a rationale" in m for m in self.messages(self.make(items), "COV-68")))
+        items = fs_items()
+        items["SAN-0001"][0]["findings"][0]["state"] = "open"
+        self.assertTrue(any("approved with finding F1 open" in m for m in self.messages(self.make(items), "COV-68")))
+
+    def test_safety_relevant_components_are_analysed_and_mixed_asils_need_a_dfa(self):
+        items = fs_items()
+        items["SAN-0001"][0]["links"]["analyses"] = ["IFC-0001"]
+        self.assertIn(("COV-69", "CMP-0002"), self.make(items).rules())
+        items = fs_items()
+        items["CMP-0003"] = ({"type": "software-component", "title": "Diagnostics", "status": "approved", "asil": "QM",
+                              "security_relevant": False, "kind": "application", "layer": "application", "origin": "developed",
+                              "resource_budget": {"rom_bytes": 512}, "links": {"part_of": ["CMP-0001"]}},
+                             {"Purpose": "Logs.", "Responsibility": "Logs.", "Dynamic behavior": "On request."})
+        self.assertTrue(any("no software-level dependent failures analysis" in m
+                            for m in self.messages(self.make(items), "COV-69")))
+
+    def test_a_decomposition_rests_on_a_dependent_failures_analysis(self):
+        items = fs_items()
+        items["ADR-0001"] = ({"type": "design-decision", "title": "Split the detection", "status": "approved",
+                              "level": "software", "decomposition": {"requirement": "SWR-0001", "into": ["SWR-0001"],
+                                                                     "independence": "SAN-0001"},
+                              "links": {"concerns": ["CMP-0002"]}},
+                             {"Context": "x", "Evaluation criteria": "x", "Alternatives": "x", "Decision": "x", "Consequences": "x"})
+        self.assertTrue(any("not a live dependent failures analysis" in m for m in self.messages(self.make(items), "COV-70")))
+
+    def test_tools_are_evaluated_and_their_confidence_follows_the_plan(self):
+        fixture = self.make(changed(fs_items(), "TEV-0001", tool="other analyser 2"))
+        self.assertTrue(any("analyser 1.0" in m for m in self.messages(fixture, "COV-72")))
+        items = fs_items()
+        items["PLN-0009"][0]["tcl_determination"] = {"TI2-TD1": "TCL2"}
+        self.assertIn(("COV-71", "TEV-0001"), self.make(items).rules())
+        fixture = self.make(changed(fs_items(), "TEV-0001", confidence="TCL2"))
+        self.assertIn(("SCHEMA", "TEV-0001"), fixture.rules())                # a qualification method is due
+
+    def test_confirmation_measures_need_their_records_with_enough_independence(self):
+        fixture = self.make(changed(fs_items(), "CFM-0001", independence="I0"))
+        self.assertTrue(any("do not reach independence I1" in m for m in self.messages(fixture, "COV-73")))
+
+    def test_safety_rows_show_decision_and_evidence_per_clause(self):
+        from traceability import safety_rows
+        rows = {r["clause"]: r for r in safety_rows(Project(self.make().root))}
+        self.assertEqual(rows["6:7"]["decision"], "performed")
+        evidence = {e["item"] for e in rows["6:7"]["evidence"]}
+        self.assertIn("CMP-0002", evidence)
+        self.assertIn("SAN-0001", evidence)
+        self.assertIn("HZE-0001", {e["item"] for e in rows["3:6"]["evidence"]})
+
+
 class Integration(Case):
     def make(self, items=None, **kwargs):
         kwargs.setdefault("scope", INTEGRATION_SCOPE)
