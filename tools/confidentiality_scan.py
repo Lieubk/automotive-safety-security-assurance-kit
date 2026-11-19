@@ -16,7 +16,7 @@ Four checks, all deterministic:
 4. verbatim   Any run of `--min-run` or more consecutive words that also occurs
               in a source document under `.confidential/sources/`. Catches both
               proprietary text and copyrighted model text. Official identifiers
-              (`id` + `name` pairs in the catalogs under `aspice/` and `iso-sae-21434/`, plus lines in
+              (`id` + `name` pairs in the catalogs under `aspice/`, `iso-sae-21434/` and `iso-26262/`, plus lines in
               `tools/verbatim-allow.txt`) are exempt, alone or listed one after
               another; a run that continues past them is still reported.
 
@@ -52,7 +52,8 @@ WORD = re.compile(r"[a-z0-9]+")
 IDENT = re.compile(r"[A-Za-z_][A-Za-z0-9_]{3,}")
 NAME_LINE = re.compile(r"^\s*(?:-\s+)?name:\s*(.+?)\s*(?:#.*)?$")
 ID_LINE = re.compile(r"^\s*(?:-\s+)?id:\s*(.+?)\s*(?:#.*)?$")
-INLINE_PAIR = re.compile(r'\bid:\s*"?([^,"}]+)"?\s*,\s*name:\s*"?([^,"}]+)')
+YAML_KEY = re.compile(r"^\s*(?:-\s+)?[A-Za-z_][\w-]*:(?=\s|$)")
+INLINE_PAIR = re.compile(r'\bid:\s*"?([^,"}]+)"?\s*,\s*name:\s*(?:"([^"]+)"|([^,}]+))')
 
 
 def words(text):
@@ -150,13 +151,14 @@ def load_sources(n):
 def load_allowed():
     """Official identifier phrases (as word tuples) that may be used verbatim."""
     phrases = []
-    catalogs = [c for d in ("aspice", "iso-sae-21434") if (ROOT / d).is_dir() for c in (ROOT / d).rglob("*.yaml")]
+    catalogs = [c for d in ("aspice", "iso-sae-21434", "iso-26262") if (ROOT / d).is_dir() for c in (ROOT / d).rglob("*.yaml")]
     for cat in catalogs:
         last_id = ""
         for line in cat.read_text(encoding="utf-8", errors="replace").splitlines():
             pairs = INLINE_PAIR.findall(line)
             if pairs:
-                for ident, name in pairs:
+                for ident, quoted, bare in pairs:
+                    name = quoted or bare
                     phrases += [name, ident + " " + name]
                 continue
             m = ID_LINE.match(line)
@@ -252,7 +254,10 @@ def main():
                 for m in rx.finditer(line):
                     if not PATTERN_ALLOW.search(m.group(0)):
                         findings.append(("pattern:" + label, rel, lineno, m.group(0)))
-        for lineno, count, snippet, src in verbatim_runs(text, index, allowed, args.min_run):
+        prose = text
+        if f.suffix.lower() in (".yaml", ".yml"):          # keys are structure, not text: a run does not go through them
+            prose = "\n".join(YAML_KEY.sub(" yamlkeyboundary ", line) for line in text.splitlines())
+        for lineno, count, snippet, src in verbatim_runs(prose, index, allowed, args.min_run):
             findings.append(("verbatim", rel, lineno, "%d words shared with %s: %s" % (count, src, snippet)))
 
     for kind, rel, lineno, detail in findings:

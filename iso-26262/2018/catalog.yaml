@@ -1,0 +1,480 @@
+# ISO 26262:2018 Road vehicles - Functional safety: catalog of parts, clauses,
+# requirement numbers, work products and table titles.
+#
+# Identifiers and official titles only. The purpose of each clause is in our own words;
+# the text of the standard, its tables and their content are not reproduced. Where a
+# table of the standard decides something - ASIL determination, methods per ASIL,
+# independence of confirmation measures, tool confidence level - the project states
+# in its safety plan what it applies; read the standard for the content.
+#
+# A project declares the parts it is responsible for under `scope.safety` in
+# project.yaml. The schema refers to a clause as "26262-<part>:<clause>", for example
+# "26262-6:7", and to a work product as "26262-<part>:<clause>.5.<n>".
+
+standard: ISO 26262
+edition: "2018"
+title: Road vehicles - Functional safety
+parts:
+  - id: "1"
+    name: "Vocabulary"
+    level: vocabulary
+    clauses: []
+    tables: []
+  - id: "2"
+    name: "Management of functional safety"
+    level: management
+    clauses:
+      - id: "5"
+        name: "Overall safety management"
+        purpose: "The organization keeps rules and processes for functional safety, a safety culture, competence and quality management, and handles safety anomalies; projects build on them."
+        requirements: ["5.4.1", "5.4.2", "5.4.2.1", "5.4.2.2", "5.4.2.3", "5.4.2.4", "5.4.2.5", "5.4.2.6", "5.4.2.7", "5.4.3", "5.4.3.1", "5.4.3.2", "5.4.3.3", "5.4.3.4", "5.4.3.5", "5.4.4", "5.4.4.1", "5.4.5", "5.4.5.1", "5.4.6", "5.4.6.1"]
+        work_products:
+          - {id: "5.5.1", name: "Organization-specific rules and processes for functional safety"}
+          - {id: "5.5.2", name: "Evidence of competence management"}
+          - {id: "5.5.3", name: "Evidence of a quality management system"}
+          - {id: "5.5.4", name: "Identified safety anomaly reports, if applicable"}
+      - id: "6"
+        name: "Project dependent safety management"
+        purpose: "The project assigns safety roles, analyses what is new, changed or reused, plans and tailors the safety activities, argues the result in a safety case, has it confirmed by reviews, audit and assessment with the independence the ASIL calls for, and releases for production."
+        requirements: ["6.4.1", "6.4.2", "6.4.2.1", "6.4.2.2", "6.4.2.3", "6.4.2.4", "6.4.3", "6.4.3.1", "6.4.3.2", "6.4.3.3", "6.4.4", "6.4.5", "6.4.5.1", "6.4.5.2", "6.4.5.3", "6.4.5.4", "6.4.5.5", "6.4.5.6", "6.4.5.7", "6.4.5.8", "6.4.5.9", "6.4.6", "6.4.6.1", "6.4.6.2", "6.4.6.3", "6.4.6.4", "6.4.6.5", "6.4.6.6", "6.4.6.7", "6.4.6.8", "6.4.6.9", "6.4.6.10", "6.4.7", "6.4.7.1", "6.4.7.2", "6.4.8", "6.4.8.1", "6.4.8.2", "6.4.9", "6.4.9.1", "6.4.9.2", "6.4.9.3", "6.4.10", "6.4.10.1", "6.4.10.2", "6.4.10.3", "6.4.10.4", "6.4.10.5", "6.4.11", "6.4.11.1", "6.4.11.2", "6.4.11.3", "6.4.11.4", "6.4.12", "6.4.12.1", "6.4.12.2", "6.4.12.3", "6.4.12.4", "6.4.12.5", "6.4.12.6", "6.4.12.7", "6.4.12.8", "6.4.12.9", "6.4.12.10", "6.4.12.11", "6.4.12.12", "6.4.12.13", "6.4.13", "6.4.13.1", "6.4.13.2", "6.4.13.3", "6.4.13.4", "6.4.13.5"]
+        work_products:
+          - {id: "6.5.1", name: "Impact analysis at the item level"}
+          - {id: "6.5.2", name: "Impact analyses at element level, if applicable"}
+          - {id: "6.5.3", name: "Safety plan"}
+          - {id: "6.5.4", name: "Safety case"}
+          - {id: "6.5.5", name: "Confirmation measure reports"}
+          - {id: "6.5.6", name: "Release for production report"}
+      - id: "7"
+        name: "Safety management regarding production, operation, service and decommissioning"
+        purpose: "Responsibilities and processes keep functional safety after the release, through production, operation, service and decommissioning."
+        requirements: ["7.4.1", "7.4.2", "7.4.2.1", "7.4.2.2", "7.4.2.3", "7.4.2.4"]
+        work_products:
+          - {id: "7.5.1", name: "Evidence of safety management regarding production, operation, service and decommissioning"}
+    tables:
+      - {id: "1", name: "Required confirmation measures, including the required level of independence"}
+  - id: "3"
+    name: "Concept phase"
+    level: concept
+    clauses:
+      - id: "5"
+        name: "Item definition"
+        purpose: "The item is described: functions, boundary, interfaces, operating environment, legal requirements and what it depends on."
+        requirements: ["5.4.1", "5.4.2"]
+        work_products:
+          - {id: "5.5.1", name: "Item definition"}
+      - id: "6"
+        name: "Hazard analysis and risk assessment"
+        purpose: "Hazards from malfunctions of the item are found; each hazardous event is classified by severity, exposure and controllability, which give its ASIL; safety goals are stated for them."
+        requirements: ["6.4.1", "6.4.1.1", "6.4.1.2", "6.4.2", "6.4.2.1", "6.4.2.2", "6.4.2.3", "6.4.2.4", "6.4.2.5", "6.4.2.6", "6.4.2.7", "6.4.3", "6.4.3.1", "6.4.3.2", "6.4.3.3", "6.4.3.4", "6.4.3.5", "6.4.3.6", "6.4.3.7", "6.4.3.8", "6.4.3.9", "6.4.3.10", "6.4.3.11", "6.4.4", "6.4.4.1", "6.4.4.2", "6.4.4.3", "6.4.4.4", "6.4.5", "6.4.5.1", "6.4.5.2", "6.4.5.3", "6.4.5.4", "6.4.5.5", "6.4.5.6", "6.4.5.7", "6.4.6", "6.4.6.1"]
+        work_products:
+          - {id: "6.5.1", name: "Hazard analysis and risk assessment report"}
+          - {id: "6.5.2", name: "Verification report of the hazard analysis and risk assessment"}
+      - id: "7"
+        name: "Functional safety concept"
+        purpose: "The safety goals are refined into functional safety requirements, each allocated to an element of the preliminary architecture, with safe states, fault tolerance times and warnings."
+        requirements: ["7.4.1", "7.4.2", "7.4.2.1", "7.4.2.2", "7.4.2.3", "7.4.2.4", "7.4.2.5", "7.4.2.6", "7.4.2.7", "7.4.2.8", "7.4.2.9", "7.4.2.10", "7.4.3", "7.4.3.1", "7.4.4", "7.4.4.1"]
+        work_products:
+          - {id: "7.5.1", name: "Functional safety concept"}
+          - {id: "7.5.2", name: "Verification report of the functional safety concept"}
+    tables:
+      - {id: "1", name: "Classes of severity"}
+      - {id: "2", name: "Classes of probability of exposure regarding operational situations"}
+      - {id: "3", name: "Classes of controllability"}
+      - {id: "4", name: "ASIL determination"}
+  - id: "4"
+    name: "Product development at the system level"
+    level: system
+    clauses:
+      - id: "5"
+        name: "General topics for the product development at the system level"
+        purpose: "How development at the system level is planned and which work products it yields."
+        requirements: []
+        work_products: []
+      - id: "6"
+        name: "Technical safety concept"
+        purpose: "Technical safety requirements and a system architectural design implement the functional safety concept, with safety mechanisms, safety analyses and the hardware-software interface."
+        requirements: ["6.4.1", "6.4.1.1", "6.4.1.2", "6.4.1.3", "6.4.1.4", "6.4.2", "6.4.2.1", "6.4.2.2", "6.4.2.3", "6.4.2.4", "6.4.2.5", "6.4.3", "6.4.3.1", "6.4.3.2", "6.4.3.3", "6.4.3.4", "6.4.3.5", "6.4.3.6", "6.4.4", "6.4.4.1", "6.4.4.2", "6.4.4.3", "6.4.4.4", "6.4.4.5", "6.4.4.6", "6.4.4.7", "6.4.5", "6.4.5.1", "6.4.5.2", "6.4.5.3", "6.4.5.4", "6.4.6", "6.4.6.1", "6.4.6.2", "6.4.6.3", "6.4.6.4", "6.4.6.5", "6.4.7", "6.4.7.1", "6.4.7.2", "6.4.7.3", "6.4.7.4", "6.4.8", "6.4.8.1", "6.4.8.2", "6.4.8.3", "6.4.9", "6.4.9.1", "6.4.9.2"]
+        work_products:
+          - {id: "6.5.1", name: "Technical safety requirements specification"}
+          - {id: "6.5.2", name: "Technical safety concept"}
+          - {id: "6.5.3", name: "System architectural design specification"}
+          - {id: "6.5.4", name: "Hardware-software interface (HSI) specification"}
+          - {id: "6.5.5", name: "Specification of requirements for production, operation, service and decommissioning"}
+          - {id: "6.5.6", name: "Verification report for system architectural design, the hardware-software interface"}
+          - {id: "6.5.7", name: "Safety analyses report"}
+      - id: "7"
+        name: "System and item integration and testing"
+        purpose: "Elements are integrated into the system and the system into the vehicle, and tests show that the safety requirements are met at each level."
+        requirements: ["7.4.1", "7.4.1.1", "7.4.1.2", "7.4.1.3", "7.4.1.4", "7.4.1.5", "7.4.1.6", "7.4.2", "7.4.2.1", "7.4.2.1.1", "7.4.2.1.2", "7.4.2.2", "7.4.2.2.1", "7.4.2.2.2", "7.4.2.2.3", "7.4.2.2.4", "7.4.2.2.5", "7.4.2.2.6", "7.4.3", "7.4.3.1", "7.4.3.1.1", "7.4.3.2", "7.4.3.2.1", "7.4.3.2.2", "7.4.3.2.3", "7.4.3.2.4", "7.4.3.2.5", "7.4.4", "7.4.4.1", "7.4.4.1.1", "7.4.4.1.2", "7.4.4.2", "7.4.4.2.1", "7.4.4.2.2", "7.4.4.2.3", "7.4.4.2.4", "7.4.4.2.5"]
+        work_products:
+          - {id: "7.5.1", name: "Integration and test strategy"}
+          - {id: "7.5.2", name: "Integration and test report"}
+      - id: "8"
+        name: "Safety validation"
+        purpose: "Evidence on the vehicle shows that the safety goals are adequate and achieved."
+        requirements: ["8.4.1", "8.4.1.1", "8.4.1.2", "8.4.1.3", "8.4.2", "8.4.2.1", "8.4.3", "8.4.3.1", "8.4.3.2", "8.4.3.3", "8.4.3.4", "8.4.4", "8.4.4.1"]
+        work_products:
+          - {id: "8.5.1", name: "Safety validation specification including safety validation environment description"}
+          - {id: "8.5.2", name: "Safety validation report"}
+    tables:
+      - {id: "1", name: "System architectural design analysis"}
+      - {id: "2", name: "Verification"}
+      - {id: "3", name: "Methods for deriving test cases for integration testing"}
+      - {id: "4", name: "Correct implementation of technical safety requirements at the hardware-software level"}
+      - {id: "5", name: "Correct functional performance, accuracy and timing of safety mechanisms at the hardware-software level"}
+      - {id: "6", name: "Consistent and correct implementation of external and internal interfaces at the hardware-software level"}
+      - {id: "7", name: "Effectiveness of a safety mechanisms at the hardware-software level"}
+      - {id: "8", name: "Level of robustness at the hardware-software level"}
+      - {id: "9", name: "Correct implementation of functional safety and technical safety requirements at the system level"}
+      - {id: "10", name: "Correct functional performance, accuracy and timing of safety mechanisms at the system level"}
+      - {id: "11", name: "Consistent and correct implementation of external and internal interfaces at the system level"}
+      - {id: "12", name: "Level of robustness at the system level"}
+      - {id: "13", name: "Correct implementation of the functional safety requirements at the vehicle level"}
+      - {id: "14", name: "Correct functional performance, accuracy and timing of safety mechanisms at the vehicle level"}
+      - {id: "15", name: "Correct implementation of internal and external interfaces at the vehicle level"}
+      - {id: "16", name: "Level of robustness at the vehicle level"}
+  - id: "5"
+    name: "Product development at the hardware level"
+    level: hardware
+    clauses:
+      - id: "5"
+        name: "General topics for the product development at the hardware level"
+        purpose: "How development at the hardware level is planned and which work products it yields."
+        requirements: []
+        work_products: []
+      - id: "6"
+        name: "Specification of hardware safety requirements"
+        purpose: "Hardware safety requirements state what the technical safety concept and the system architecture ask of the hardware, and are verified."
+        requirements: ["6.4.1", "6.4.2", "6.4.3", "6.4.4", "6.4.5", "6.4.6", "6.4.7", "6.4.8", "6.4.9", "6.4.10", "6.4.11"]
+        work_products:
+          - {id: "6.5.1", name: "Hardware safety requirements specification (including test and evaluation criteria)"}
+          - {id: "6.5.2", name: "Hardware-software interface specification (HSI) (refined)"}
+          - {id: "6.5.3", name: "Hardware safety requirements verification report"}
+      - id: "7"
+        name: "Hardware design"
+        purpose: "The hardware design implements the hardware safety requirements and is analysed and verified."
+        requirements: ["7.4.1", "7.4.1.1", "7.4.1.2", "7.4.1.3", "7.4.1.4", "7.4.1.5", "7.4.1.6", "7.4.1.7", "7.4.2", "7.4.2.1", "7.4.2.2", "7.4.2.3", "7.4.2.4", "7.4.3", "7.4.3.1", "7.4.3.2", "7.4.3.3", "7.4.3.4", "7.4.3.5", "7.4.3.6", "7.4.4", "7.4.4.1", "7.4.4.2", "7.4.4.3", "7.4.5", "7.4.5.1", "7.4.5.2", "7.4.5.3", "7.4.5.4", "7.4.5.5"]
+        work_products:
+          - {id: "7.5.1", name: "Hardware design specification"}
+          - {id: "7.5.2", name: "Hardware safety analysis report"}
+          - {id: "7.5.3", name: "Hardware design verification report"}
+          - {id: "7.5.4", name: "Specification of requirements related to production, operation, service and decommissioning"}
+      - id: "8"
+        name: "Evaluation of the hardware architectural metrics"
+        purpose: "Metrics show whether the hardware architecture detects or controls random hardware faults well enough for the ASIL."
+        requirements: ["8.4.1", "8.4.2", "8.4.3", "8.4.4", "8.4.5", "8.4.6", "8.4.7", "8.4.8", "8.4.9"]
+        work_products:
+          - {id: "8.5.1", name: "Analysis of the effectiveness of the architecture of the item to cope with the random"}
+          - {id: "8.5.2", name: "Verification review report of evaluation of the effectiveness of the architecture of the item"}
+      - id: "9"
+        name: "Evaluation of safety goal violations due to random hardware failures"
+        purpose: "The remaining risk that random hardware failures violate a safety goal is shown to be low enough."
+        requirements: ["9.4.1", "9.4.1.1", "9.4.1.2", "9.4.1.3", "9.4.1.4", "9.4.2", "9.4.2.1", "9.4.2.2", "9.4.2.3", "9.4.2.4", "9.4.3", "9.4.3.1", "9.4.3.2", "9.4.3.3", "9.4.3.4", "9.4.3.5", "9.4.3.6", "9.4.3.7", "9.4.3.8", "9.4.3.9", "9.4.3.10", "9.4.3.11", "9.4.3.12", "9.4.3.13", "9.4.4"]
+        work_products:
+          - {id: "9.5.1", name: "Analysis of safety goal violations due to random hardware failures"}
+          - {id: "9.5.2", name: "Specification of dedicated measures for hardware, if needed, including the rationale regarding"}
+          - {id: "9.5.3", name: "Verification review report of evaluation of safety goal violations due to random hardware"}
+      - id: "10"
+        name: "Hardware integration and verification"
+        purpose: "The hardware is integrated and verified against its safety requirements."
+        requirements: ["10.4.1", "10.4.2", "10.4.3", "10.4.4", "10.4.5", "10.4.6"]
+        work_products:
+          - {id: "10.5.1", name: "Hardware integration and verification specification"}
+          - {id: "10.5.2", name: "Hardware integration and verification report"}
+    tables: []
+  - id: "6"
+    name: "Product development at the software level"
+    level: software
+    clauses:
+      - id: "5"
+        name: "General topics for the product development at the software level"
+        purpose: "The software development environment, modelling and coding guidelines, notations and tools are chosen to fit the ASIL."
+        requirements: ["5.4.1", "5.4.2", "5.4.3"]
+        work_products:
+          - {id: "5.5.1", name: "Documentation of the software development environment"}
+      - id: "6"
+        name: "Specification of software safety requirements"
+        purpose: "Software safety requirements are derived from the technical safety requirements and the hardware-software interface, and verified."
+        requirements: ["6.4.1", "6.4.2", "6.4.3", "6.4.4", "6.4.5", "6.4.6", "6.4.7"]
+        work_products:
+          - {id: "6.5.1", name: "Software safety requirements specification"}
+          - {id: "6.5.2", name: "Hardware-software interface (HSI) specification (refined)"}
+          - {id: "6.5.3", name: "Software verification report"}
+      - id: "7"
+        name: "Software architectural design"
+        purpose: "A software architecture implements the software safety requirements; safety-oriented analyses, freedom from interference and resource estimates are part of it, and it is verified."
+        requirements: ["7.4.1", "7.4.2", "7.4.3", "7.4.4", "7.4.5", "7.4.6", "7.4.7", "7.4.8", "7.4.9", "7.4.10", "7.4.11", "7.4.12", "7.4.13", "7.4.14"]
+        work_products:
+          - {id: "7.5.1", name: "Software architectural design specification"}
+          - {id: "7.5.2", name: "Safety analysis report"}
+          - {id: "7.5.3", name: "Dependent failures analysis report"}
+          - {id: "7.5.4", name: "Software verification report"}
+      - id: "8"
+        name: "Software unit design and implementation"
+        purpose: "Software units are designed and implemented following the design principles and guidelines the ASIL calls for."
+        requirements: ["8.4.1", "8.4.2", "8.4.3", "8.4.4", "8.4.5"]
+        work_products:
+          - {id: "8.5.1", name: "Software unit design specification"}
+          - {id: "8.5.2", name: "Software unit implementation"}
+      - id: "9"
+        name: "Software unit verification"
+        purpose: "Software units are verified against their design and requirements with methods and structural coverage fitting the ASIL."
+        requirements: ["9.4.1", "9.4.2", "9.4.3", "9.4.4", "9.4.5"]
+        work_products:
+          - {id: "9.5.1", name: "Software verification specification"}
+          - {id: "9.5.2", name: "Software verification report (refined)"}
+      - id: "10"
+        name: "Software integration and verification"
+        purpose: "The software is integrated and the integration verified against the architecture, with methods and coverage fitting the ASIL."
+        requirements: ["10.4.1", "10.4.2", "10.4.3", "10.4.4", "10.4.5", "10.4.6", "10.4.7"]
+        work_products:
+          - {id: "10.5.1", name: "Software verification specification (refined)"}
+          - {id: "10.5.2", name: "Embedded software"}
+          - {id: "10.5.3", name: "Software verification report (refined)"}
+      - id: "11"
+        name: "Testing of the embedded software"
+        purpose: "The embedded software is tested in its target environment against the software safety requirements."
+        requirements: ["11.4.1", "11.4.2", "11.4.3", "11.4.4"]
+        work_products:
+          - {id: "11.5.1", name: "Software verification specification (refined)"}
+          - {id: "11.5.2", name: "Software verification report (refined)"}
+    tables:
+      - {id: "1", name: "Topics to be covered by modelling and coding guidelines"}
+      - {id: "2", name: "Notations for software architectural design"}
+      - {id: "3", name: "Principles for software architectural design"}
+      - {id: "4", name: "Methods for the verification of the software architectural design"}
+      - {id: "5", name: "Notations for software unit design"}
+      - {id: "6", name: "Design principles for software unit design and implementation"}
+      - {id: "7", name: "Methods for software unit verification"}
+      - {id: "8", name: "Methods for deriving test cases for software unit testing"}
+      - {id: "9", name: "Structural coverage metrics at the software unit level"}
+      - {id: "10", name: "Methods for verification of software integration"}
+      - {id: "11", name: "Methods for deriving test cases for software integration testing"}
+      - {id: "12", name: "Structural coverage at the software architectural level"}
+      - {id: "13", name: "Test environments for conducting the software testing"}
+      - {id: "14", name: "Methods for tests of the embedded software"}
+      - {id: "15", name: "Methods for deriving test cases for the test of the embedded software"}
+  - id: "7"
+    name: "Production, operation, service and decommissioning"
+    level: production
+    clauses:
+      - id: "5"
+        name: "Planning for production, operation, service and decommissioning"
+        purpose: "Production, operation, service and decommissioning are planned so that the safety-related properties are kept."
+        requirements: ["5.4.1", "5.4.1.1", "5.4.1.2", "5.4.1.3", "5.4.1.4", "5.4.1.5", "5.4.1.6", "5.4.1.7", "5.4.1.8", "5.4.2", "5.4.2.1", "5.4.2.2", "5.4.3", "5.4.3.1", "5.4.3.2", "5.4.3.3", "5.4.3.4", "5.4.3.5", "5.4.3.6", "5.4.3.7"]
+        work_products:
+          - {id: "5.5.1", name: "Safety-related content of the production plan"}
+          - {id: "5.5.2", name: "Safety-related content of the production control plan, including the test plan"}
+          - {id: "5.5.3", name: "Producibility requirements specification"}
+          - {id: "5.5.4", name: "Production process capability report"}
+          - {id: "5.5.5", name: "Safety-related content of the service plan"}
+          - {id: "5.5.6", name: "Safety-related content of the service instructions"}
+          - {id: "5.5.7", name: "Safety-related content of the information made available to the user"}
+          - {id: "5.5.8", name: "Safety-related content of the decommissioning instructions"}
+          - {id: "5.5.9", name: "Operation, service and decommissioning requirements specification"}
+          - {id: "5.5.10", name: "Safety-related content of the rescue services instructions"}
+      - id: "6"
+        name: "Production"
+        purpose: "Production keeps the safety-related properties of the item, with controls and records."
+        requirements: ["6.4.1", "6.4.1.1", "6.4.1.2", "6.4.1.3", "6.4.1.4", "6.4.1.5", "6.4.1.6", "6.4.1.7"]
+        work_products:
+          - {id: "6.5.1", name: "Control measures report"}
+          - {id: "6.5.2", name: "Production process capability report"}
+      - id: "7"
+        name: "Operation, service and decommissioning"
+        purpose: "Operation, service and decommissioning keep functional safety, including field monitoring and instructions."
+        requirements: ["7.4.1", "7.4.1.1", "7.4.1.2", "7.4.1.3"]
+        work_products:
+          - {id: "7.5.1", name: "Field observation instructions"}
+    tables: []
+  - id: "8"
+    name: "Supporting processes"
+    level: supporting
+    clauses:
+      - id: "5"
+        name: "Interfaces within distributed developments"
+        purpose: "Customer and supplier agree in a development interface agreement on responsibilities, exchanged work products and safety activities."
+        requirements: ["5.4.1", "5.4.1.1", "5.4.1.2", "5.4.2", "5.4.2.1", "5.4.2.2", "5.4.3", "5.4.3.1", "5.4.3.2", "5.4.3.3", "5.4.4", "5.4.4.1", "5.4.4.2", "5.4.4.3", "5.4.4.4", "5.4.4.5", "5.4.4.6", "5.4.4.7", "5.4.4.8", "5.4.5", "5.4.5.1", "5.4.5.2", "5.4.5.3", "5.4.5.4", "5.4.6", "5.4.6.1", "5.4.6.2", "5.4.6.3", "5.4.6.4"]
+        work_products:
+          - {id: "5.5.1", name: "Supplier selection report"}
+          - {id: "5.5.2", name: "Development interface agreement (DIA)"}
+          - {id: "5.5.3", name: "Supplier's safety plan"}
+          - {id: "5.5.4", name: "Functional safety assessment report"}
+          - {id: "5.5.5", name: "Supply agreement"}
+      - id: "6"
+        name: "Specification and management of safety requirements"
+        purpose: "Safety requirements carry the attributes and properties they need, are traceable and are verified."
+        requirements: ["6.4.1", "6.4.2", "6.4.2.1", "6.4.2.2", "6.4.2.3", "6.4.2.4", "6.4.2.5", "6.4.3", "6.4.3.1", "6.4.3.2", "6.4.3.3", "6.4.3.4"]
+        work_products: []
+      - id: "7"
+        name: "Configuration management"
+        purpose: "Work products are under configuration management."
+        requirements: ["7.4.1", "7.4.2", "7.4.3", "7.4.4", "7.4.5"]
+        work_products:
+          - {id: "7.5.1", name: "Configuration management plan"}
+      - id: "8"
+        name: "Change management"
+        purpose: "Changes are analysed for their impact on safety, decided and carried out in a controlled way."
+        requirements: ["8.4.1", "8.4.1.1", "8.4.1.2", "8.4.1.3", "8.4.1.4", "8.4.2", "8.4.2.1", "8.4.2.2", "8.4.3", "8.4.3.1", "8.4.3.2", "8.4.4", "8.4.4.1", "8.4.4.2", "8.4.5", "8.4.5.1", "8.4.5.2", "8.4.5.3"]
+        work_products:
+          - {id: "8.5.1", name: "Change management plan"}
+          - {id: "8.5.2", name: "Change request"}
+          - {id: "8.5.3", name: "Impact analysis and change request plan"}
+          - {id: "8.5.4", name: "Change report"}
+      - id: "9"
+        name: "Verification"
+        purpose: "Verification is planned, specified, carried out and evaluated."
+        requirements: ["9.4.1", "9.4.1.1", "9.4.1.2", "9.4.2", "9.4.2.1", "9.4.2.2", "9.4.2.3", "9.4.2.4", "9.4.3", "9.4.3.1", "9.4.3.2", "9.4.3.3", "9.4.3.4"]
+        work_products:
+          - {id: "9.5.1", name: "Verification plan"}
+          - {id: "9.5.2", name: "Verification specification"}
+          - {id: "9.5.3", name: "Verification report"}
+      - id: "10"
+        name: "Documentation management"
+        purpose: "Documents are managed so that they are available, current and unambiguous."
+        requirements: ["10.4.1", "10.4.2", "10.4.3", "10.4.4", "10.4.5", "10.4.6"]
+        work_products:
+          - {id: "10.5.1", name: "Documentation management plan"}
+          - {id: "10.5.2", name: "Documentation guideline requirements"}
+      - id: "11"
+        name: "Confidence in the use of software tools"
+        purpose: "Software tools are classified by the impact of an error and the chance of detecting it; tools that need it are qualified."
+        requirements: ["11.4.1", "11.4.2", "11.4.3", "11.4.4", "11.4.4.1", "11.4.4.2", "11.4.5", "11.4.5.1", "11.4.5.2", "11.4.5.3", "11.4.5.4", "11.4.6", "11.4.6.1", "11.4.6.2", "11.4.7", "11.4.7.1", "11.4.7.2", "11.4.7.3", "11.4.7.4", "11.4.8", "11.4.8.1", "11.4.8.2", "11.4.8.3", "11.4.9", "11.4.9.1", "11.4.9.2"]
+        work_products:
+          - {id: "11.5.1", name: "Software tool criteria evaluation report"}
+          - {id: "11.5.2", name: "Software tool qualification report"}
+      - id: "12"
+        name: "Qualification of software components"
+        purpose: "Software components reused without being developed to the standard are qualified for their use."
+        requirements: ["12.4.1", "12.4.2", "12.4.2.1", "12.4.2.2", "12.4.2.3", "12.4.2.4", "12.4.2.5", "12.4.3"]
+        work_products:
+          - {id: "12.5.1", name: "Software component documentation"}
+          - {id: "12.5.2", name: "Software component qualification report"}
+          - {id: "12.5.3", name: "Software component qualification verification report"}
+      - id: "13"
+        name: "Evaluation of hardware elements"
+        purpose: "Hardware elements not developed to the standard are evaluated for their use."
+        requirements: ["13.4.1", "13.4.1.1", "13.4.1.2", "13.4.1.3", "13.4.1.4", "13.4.2", "13.4.3", "13.4.3.1", "13.4.3.2", "13.4.3.3", "13.4.3.3.1", "13.4.3.3.2", "13.4.3.3.3", "13.4.3.4", "13.4.3.4.1", "13.4.3.4.2", "13.4.3.5", "13.4.3.5.1", "13.4.3.5.2", "13.4.3.5.3", "13.4.3.5.4", "13.4.3.6", "13.4.3.6.1", "13.4.3.6.2", "13.4.4", "13.4.4.1", "13.4.4.2", "13.4.4.3"]
+        work_products:
+          - {id: "13.5.1", name: "Hardware element evaluation plan"}
+          - {id: "13.5.2", name: "Hardware element test plan if applicable"}
+          - {id: "13.5.3", name: "Hardware element evaluation report for hardware elements"}
+      - id: "14"
+        name: "Proven in use argument"
+        purpose: "Field experience is used as an argument instead of following the lifecycle, under defined conditions."
+        requirements: ["14.4.1", "14.4.2", "14.4.2.1", "14.4.2.2", "14.4.2.3", "14.4.2.4", "14.4.2.5", "14.4.2.6", "14.4.2.7", "14.4.3", "14.4.4", "14.4.4.1", "14.4.4.2", "14.4.4.3", "14.4.4.4", "14.4.5", "14.4.5.1", "14.4.5.2", "14.4.5.2.1", "14.4.5.2.2", "14.4.5.2.3", "14.4.5.2.4", "14.4.5.2.5", "14.4.5.2.6", "14.4.5.2.7", "14.4.5.3"]
+        work_products:
+          - {id: "14.5.1", name: "Description of candidate for proven in use argument"}
+          - {id: "14.5.2", name: "Proven in use analysis reports"}
+      - id: "15"
+        name: "Interfacing an application that is out of scope of ISO 26262"
+        purpose: "An application outside the scope of the standard is interfaced so that it does not endanger the item."
+        requirements: ["15.4.1", "15.4.2", "15.4.3"]
+        work_products:
+          - {id: "15.5.1", name: "Base Vehicle Manufacturer or Supplier guideline"}
+      - id: "16"
+        name: "Integration of safety-related systems not developed according to ISO 26262"
+        purpose: "Safety-related systems not developed to the standard are integrated with arguments for their safety."
+        requirements: ["16.4.1", "16.4.2", "16.4.3", "16.4.4"]
+        work_products:
+          - {id: "16.5.1", name: "Safety rationale"}
+    tables:
+      - {id: "1", name: "Specifying safety requirements"}
+      - {id: "2", name: "Methods for the verification of safety requirements"}
+      - {id: "3", name: "Determination of the Tool Confidence Level (TCL)"}
+      - {id: "4", name: "Qualification of software tools classified TCL3"}
+      - {id: "5", name: "Qualification of software tools classified TCL2"}
+      - {id: "6", name: "Limits for observable incident rate"}
+      - {id: "7", name: "Targets for minimum evaluation period of candidate"}
+      - {id: "8", name: "Limits for observable incident rate (interim period)"}
+  - id: "9"
+    name: "Automotive safety integrity level (ASIL)-oriented and safety-oriented analyses"
+    level: analyses
+    clauses:
+      - id: "5"
+        name: "Requirements decomposition with respect to ASIL tailoring"
+        purpose: "A safety requirement is decomposed into redundant requirements on sufficiently independent elements, each with an ASIL lower than or equal to the original."
+        requirements: ["5.4.1", "5.4.2", "5.4.3", "5.4.4", "5.4.5", "5.4.6", "5.4.7", "5.4.8", "5.4.9", "5.4.10", "5.4.11", "5.4.12"]
+        work_products:
+          - {id: "5.5.1", name: "Update of architectural information"}
+          - {id: "5.5.2", name: "Update of ASIL as attribute of safety requirements and elements"}
+      - id: "6"
+        name: "Criteria for coexistence of elements"
+        purpose: "Elements of different ASIL, or QM, coexist in one element when freedom from interference is shown."
+        requirements: ["6.4.1", "6.4.2", "6.4.3", "6.4.4"]
+        work_products:
+          - {id: "6.5.1", name: "Update of the ASIL attribute of the sub-elements of the element"}
+      - id: "7"
+        name: "Analysis of dependent failures"
+        purpose: "Dependent failures that could defeat independence or freedom from interference are identified and handled."
+        requirements: ["7.4.1", "7.4.2", "7.4.3", "7.4.4", "7.4.5", "7.4.6", "7.4.7", "7.4.8", "7.4.9"]
+        work_products:
+          - {id: "7.5.1", name: "Dependent Failures Analysis"}
+          - {id: "7.5.2", name: "Dependent Failures Analysis Verification Report"}
+      - id: "8"
+        name: "Safety analyses"
+        purpose: "Safety analyses - inductive and deductive, for example FMEA and FTA - examine the effects of faults and failures and lead to measures."
+        requirements: ["8.4.1", "8.4.2", "8.4.3", "8.4.4", "8.4.5", "8.4.6", "8.4.7", "8.4.8", "8.4.9", "8.4.10"]
+        work_products:
+          - {id: "8.5.1", name: "Safety analyses"}
+          - {id: "8.5.2", name: "Safety analyses verification report"}
+    tables: []
+  - id: "10"
+    name: "Guidelines on ISO 26262"
+    level: guideline
+    clauses: []
+    tables: []
+  - id: "11"
+    name: "Guidelines on application of ISO 26262 to semiconductors"
+    level: guideline
+    clauses: []
+    tables: []
+  - id: "12"
+    name: "Adaptation of ISO 26262 for motorcycles"
+    level: motorcycles
+    clauses:
+      - id: "5"
+        name: "General topics for adaptation for motorcycles"
+        purpose: "How the standard applies to motorcycles."
+        requirements: []
+        work_products: []
+      - id: "6"
+        name: "Safety culture"
+        purpose: "Safety culture for motorcycle development."
+        requirements: []
+        work_products: []
+      - id: "7"
+        name: "Confirmation measures"
+        purpose: "Confirmation measures for motorcycles."
+        requirements: []
+        work_products: []
+      - id: "8"
+        name: "Hazard analysis and risk assessment"
+        purpose: "Hazard analysis and risk assessment for motorcycles, with MSIL and its mapping to ASIL."
+        requirements: ["8.4.1", "8.4.1.1", "8.4.1.2", "8.4.2", "8.4.2.1", "8.4.2.2", "8.4.2.3", "8.4.2.4", "8.4.2.5", "8.4.2.6", "8.4.2.7", "8.4.3", "8.4.3.1", "8.4.3.2", "8.4.3.3", "8.4.3.4", "8.4.3.5", "8.4.3.6", "8.4.3.7", "8.4.3.8", "8.4.3.9", "8.4.3.10", "8.4.3.11", "8.4.4", "8.4.4.1", "8.4.4.2", "8.4.4.3", "8.4.4.4", "8.4.5", "8.4.5.1"]
+        work_products:
+          - {id: "8.5.1", name: "Hazard analysis and risk assessment report"}
+          - {id: "8.5.2", name: "Verification report of the hazard analysis and risk assessment"}
+      - id: "9"
+        name: "Vehicle integration and testing"
+        purpose: "Vehicle integration and testing for motorcycles."
+        requirements: []
+        work_products: []
+      - id: "10"
+        name: "Safety validation"
+        purpose: "Safety validation for motorcycles."
+        requirements: ["10.4.1", "10.4.1.1", "10.4.1.2", "10.4.1.3", "10.4.2", "10.4.2.1", "10.4.3", "10.4.3.1", "10.4.3.2", "10.4.3.3", "10.4.3.4", "10.4.4", "10.4.4.1"]
+        work_products:
+          - {id: "10.5.1", name: "Safety validation specification including safety validation environment description"}
+          - {id: "10.5.2", name: "Safety validation report"}
+    tables:
+      - {id: "1", name: "Required confirmation measures, including the required level of independence"}
+      - {id: "2", name: "Classes of severity"}
+      - {id: "3", name: "Classes of probability of exposure regarding operational situations"}
+      - {id: "4", name: "Classes of controllability"}
+      - {id: "5", name: "MSIL determination"}
+      - {id: "6", name: "Mapping of MSIL to ASIL"}
+      - {id: "7", name: "Correct implementation of the functional safety requirements at the vehicle level"}
+      - {id: "8", name: "Correct functional performance, accuracy and timing of safety mechanisms at the vehicle level"}
+      - {id: "9", name: "Correct implementation of internal and external interfaces at the vehicle level"}
+      - {id: "10", name: "Level of robustness at the vehicle level"}
