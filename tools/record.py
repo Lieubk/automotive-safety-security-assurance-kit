@@ -130,6 +130,21 @@ Commands
         reading of quality assurance from the file. It raises no findings of its own. It is communicated with
         `communication --subject <QAR-ID> --practice SUP.1.BP4` (COV-45).
 
+    self-assessment --ratings FILE --assessor NAME [--assessor NAME ...] [--process ID ...]
+                    --summary FILE [--as-of DATE] [--check-only]
+        final self-assessment record: the ratings N, P, L, F that the named
+        assessors gave per base practice (FILE is JSON {"practices": [{"practice",
+        "rating", "note"}], "attributes": [{"process", "attribute", "rating",
+        "note"}]}), the state of each practice in `practices` at the time, and
+        the consistency flags: a rating outside the band of what the toolkit
+        observes, and a rating above that of a practice it depends on in the
+        catalog. A flag from an observation or from a rule of the catalog needs
+        the reason in the note of the rating; a flag from a recommendation is
+        recorded. Every base practice of the processes needs a rating. The
+        processes are --process, else assessment_scope, else the scope.
+        --check-only lists the gaps and flags and writes nothing. The toolkit
+        rates nothing: the ratings are the assessors'.
+
     problem-trends --reported-by NAME --assessment FILE [--as-of DATE] [--period TEXT]
         final problem trend report: every problem report known on the date with
         its state, severity, origin, detection and age, and the counts by state,
@@ -869,6 +884,99 @@ def cmd_quality_report(project, args):
     return 0
 
 
+RATING_ORDER = {"N": 0, "P": 1, "L": 2, "F": 3}
+RATING_BANDS = {                                   # the ratings that agree with what the trace engine observes
+    "evidence present": ("L", "F"),
+    "warnings open": ("P", "L", "F"),
+    "evidence not settled": ("P", "L"),
+    "findings open": ("N", "P", "L"),
+    "no evidence yet": ("N", "P"),
+    "no evidence structure": (),                   # the toolkit cannot tell: every rating says where the evidence is
+}
+
+
+def assessment_findings(project, processes, data):
+    """Missing and wrong ratings, and the consistency flags with whether each one needs a note."""
+    problems, flags, observations, ratings = [], [], [], {}
+    for entry in data.get("practices", []):
+        if entry.get("rating") not in RATING_ORDER:
+            problems.append("%s: rating %r; one of N, P, L, F" % (entry.get("practice"), entry.get("rating")))
+        else:
+            ratings[str(entry.get("practice"))] = entry
+    catalog = trace.ROOT / "aspice" / str((project.config.get("aspice") or {}).get("version") or "3.1") / "processes"
+    relations = []
+    for pid in processes:
+        source = catalog / (pid + ".yaml")
+        if not source.is_file():
+            problems.append("%s is not a process of the catalog" % pid)
+            continue
+        relations += yaml.safe_load(source.read_text(encoding="utf-8")).get("depends_on") or []
+        for row in trace.practice_rows(Project(project.root), pid):
+            observations.append({"practice": row["practice"], "state": row["state"]})
+            entry = ratings.get(row["practice"])
+            if entry is None:
+                problems.append("%s has no rating" % row["practice"])
+                continue
+            band = RATING_BANDS.get(row["state"], ())
+            if entry["rating"] not in band:
+                flags.append({"practice": row["practice"], "kind": "observation", "needs_note": True,
+                              "text": "rated %s while the toolkit observes '%s'" % (entry["rating"], row["state"])})
+    known = {o["practice"] for o in observations}
+    problems += ["%s is not a base practice of %s" % (p, ", ".join(processes)) for p in ratings if p not in known]
+    for relation in relations:
+        source, target = ratings.get(str(relation.get("from"))), ratings.get(str(relation.get("to")))
+        if source and target and RATING_ORDER[source["rating"]] > RATING_ORDER[target["rating"]]:
+            flags.append({"practice": source["practice"], "kind": relation.get("kind"),
+                          "needs_note": relation.get("kind") == "rule",
+                          "text": "rated %s, above %s, which it depends on (%s), rated %s"
+                                  % (source["rating"], target["practice"], relation.get("kind"), target["rating"])})
+    for flag in flags:
+        flag["note"] = (ratings.get(flag["practice"]) or {}).get("note")
+        if flag["needs_note"] and not flag["note"]:
+            problems.append("%s %s: give the reason in its note" % (flag["practice"], flag["text"]))
+    return problems, flags, observations
+
+
+def cmd_self_assessment(project, args):
+    data = json.loads(Path(args.ratings).read_text(encoding="utf-8"))
+    processes = args.process or list(trace.as_list((project.config.get("scope") or {}).get("assessment_scope"))) \
+        or sorted(project.scope or [])
+    problems, flags, observations = assessment_findings(project, processes, data)
+    for entry in data.get("attributes", []):
+        if entry.get("rating") not in RATING_ORDER or not entry.get("process") or not entry.get("attribute"):
+            problems.append("attribute rating needs process, attribute and a rating N, P, L or F: %s" % entry)
+    if args.check_only:
+        for flag in flags:
+            print("%s %s%s" % (flag["practice"], flag["text"], " - note: %s" % flag["note"] if flag["note"] else ""))
+        print("\n".join(problems) if problems else "ratings complete; every flag that needs a note has one")
+        return 1 if problems else 0
+    summary = read_text_file(args.summary, "summary")
+    if not summary:
+        problems.append("--summary names no file with text: strengths, weaknesses and actions, in the assessors' words")
+    if problems:
+        return stop(problems)
+    as_of = args.as_of or datetime.date.today().isoformat()
+    front = {
+        "id": next_id(project, "self-assessment"),
+        "type": "self-assessment",
+        "status": "final",
+        "title": "Self-assessment of %s as of %s" % (", ".join(processes), as_of),
+        "as_of": as_of,
+        "assessors": args.assessor,
+        "processes": processes,
+        "target_level": (project.config.get("aspice") or {}).get("target_level"),
+        "ratings": sorted(data.get("practices", []), key=lambda e: str(e.get("practice"))),
+        "attribute_ratings": data.get("attributes", []),
+        "observations": observations,
+        "consistency": [{k: f[k] for k in ("practice", "kind", "text", "note")} for f in flags],
+    }
+    if not front["attribute_ratings"]:
+        del front["attribute_ratings"]
+    path = write_item(project, "self-assessment", front, "\n## Summary\n\n%s\n" % summary)
+    print("wrote %s: %d practices rated, %d consistency flags" % (path, len(front["ratings"]), len(flags)))
+    return 0
+
+
 def cmd_problem_trends(project, args):
     as_of = trace.as_date(args.as_of) if args.as_of else datetime.date.today()
     problems = [] if as_of else ["--as-of must be a date YYYY-MM-DD"]
@@ -1009,6 +1117,13 @@ def main():
     qa_report.add_argument("--summary", required=True)
     qa_report.add_argument("--as-of")
     qa_report.add_argument("--period")
+    sas = sub.add_parser("self-assessment")
+    sas.add_argument("--ratings", required=True, help='JSON: {"practices": [{practice, rating, note}], "attributes": [...]}')
+    sas.add_argument("--assessor", action="append", help="person who rated; repeat for several")
+    sas.add_argument("--process", action="append", help="process assessed (default: assessment_scope, else the scope)")
+    sas.add_argument("--summary", help="text file: strengths, weaknesses, actions")
+    sas.add_argument("--as-of")
+    sas.add_argument("--check-only", action="store_true", help="report missing ratings and flags, write nothing")
     trends = sub.add_parser("problem-trends")
     trends.add_argument("--reported-by", required=True)
     trends.add_argument("--assessment", required=True, help="text file with the analyst's reading")
@@ -1030,7 +1145,7 @@ def main():
                 "review": cmd_review, "baseline": cmd_baseline, "communication": cmd_communication,
                 "status-report": cmd_status_report, "build": cmd_build,
                 "problem-trends": cmd_problem_trends, "quality-check": cmd_quality_check,
-                "quality-report": cmd_quality_report}
+                "quality-report": cmd_quality_report, "self-assessment": cmd_self_assessment}
     return commands[args.command](project, args)
 
 

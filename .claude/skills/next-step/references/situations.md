@@ -202,7 +202,8 @@ and the notes of the process under `aspice/3.1/notes/`, and then goes to `/revie
 When `check --all` prints no finding and every item of the engineering types is
 `approved`: recommend `/process-gate` for each process in scope, in the order of the
 V, then `/baseline`. The toolkit keeps no record that a gate was run, so ask the user
-which gates have been held instead of assuming.
+which gates have been held instead of assuming. When an assessment is planned
+(`scope.assessment_scope`), recommend `/mock-assessment` after the gates.
 
 ## States printed by `practices`
 

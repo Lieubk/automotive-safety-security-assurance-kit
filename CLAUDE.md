@@ -38,6 +38,7 @@ repository - one item per file - and a trace engine checks them.
 | `/review` | all | the only way an item becomes approved |
 | `/trace-check` | all | explain what the trace engine reports |
 | `/process-gate` | all | readiness of a process, practice by practice |
+| `/mock-assessment` | all | rehearsal of an assessment: evidence pack, questions, ratings by named people, consistency |
 | `/baseline` | SUP.8 | baselines and their communication |
 | `/change-request` | SUP.10 | changes to baselined items |
 | `/problem-resolution` | SUP.9 | problems from recording to closure, urgent actions, alerts, trends |

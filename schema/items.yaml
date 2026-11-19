@@ -651,6 +651,27 @@ types:
     sections:
       Summary: always              # the verdict in the checker's words: what was looked at, what was found, what follows
 
+  self-assessment:                 # a mock assessment: ratings named people give, checked for consistency by tooling
+    prefix: SAS
+    folder: records/assessments
+    lifecycle: record
+    supports: []                   # preparation for an assessment, not evidence of a practice
+    attributes:
+      id: {required: always}
+      type: {required: always}
+      status: {required: always}
+      title: {required: optional}
+      as_of: {format: date, required: always}
+      assessors: {required: always, note: "the people who gave the ratings; a self-assessment of the team, not an assessment"}
+      processes: {required: always}
+      target_level: {required: optional}
+      ratings: {required: always, note: "list of {practice, rating: N | P | L | F, note}: one entry per base practice of the processes"}
+      attribute_ratings: {required: optional, note: "list of {process, attribute, rating, note}, for example PA 1.1"}
+      observations: {required: always, note: "generated: the state of each base practice in `practices` at the time"}
+      consistency: {required: always, may_be_empty: true, note: "generated: ratings that differ from the observation or exceed the rating of a practice they depend on, with the note the assessors gave"}
+    sections:
+      Summary: always              # strengths, weaknesses and the actions the assessors propose
+
   problem-trend-report:            # problem status and trends as of a date, with the analyst's reading
     prefix: PTR
     folder: records/problem-trends

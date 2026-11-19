@@ -444,6 +444,54 @@ class QualityChecks(RecordCase):
         self.assertEqual(report["subject"], [names[-2][:-3]])
 
 
+class SelfAssessments(RecordCase):
+    """Ratings of SUP.9 in the example, where every practice shows evidence present."""
+
+    def ratings(self, **changes):
+        practices = [{"practice": "SUP.9.BP%d" % n, "rating": "F"} for n in range(1, 10)]
+        for entry in practices:
+            entry.update(changes.get(entry["practice"].replace(".", "_"), {}))
+        return self.json_file("ratings.json", {"practices": practices})
+
+    def assess(self, ratings, *extra):
+        summary = Path(self.tmp.name) / "summary.txt"
+        summary.write_text("Strong tracking; trends from one problem only.", encoding="utf-8")
+        return self.record("self-assessment", "--ratings", ratings, "--assessor", "A. Assessor", "--process", "SUP.9",
+                           "--summary", summary, "--as-of", "2026-06-25", *extra)
+
+    def test_ratings_that_agree_with_the_observations_are_recorded(self):
+        code, out = self.assess(self.ratings())
+        self.assertEqual(code, 0, out)
+        record = self.front("records/assessments/" + self.records("records/assessments", "SAS-")[-1])
+        self.assertEqual(len(record["ratings"]), 9)
+        self.assertEqual(record["observations"][0], {"practice": "SUP.9.BP1", "state": "evidence present"})
+        self.assertEqual(record["consistency"], [])
+
+    def test_every_practice_needs_a_rating(self):
+        path = self.json_file("ratings.json", {"practices": [{"practice": "SUP.9.BP1", "rating": "F"}]})
+        code, out = self.assess(path, "--check-only")
+        self.assertEqual(code, 1)
+        self.assertIn("SUP.9.BP2 has no rating", out)
+
+    def test_a_rating_below_the_observation_needs_its_reason(self):
+        code, out = self.assess(self.ratings(SUP_9_BP4={"rating": "P"}))
+        self.assertEqual(code, 1)
+        self.assertIn("SUP.9.BP4 rated P while the toolkit observes 'evidence present': give the reason", out)
+        code, out = self.assess(self.ratings(SUP_9_BP4={"rating": "P", "note": "the cause restates the symptom"},
+                                             SUP_9_BP5={"note": "no urgent problem: nothing rested on the diagnosis"}))
+        self.assertEqual(code, 0, out)
+        record = self.front("records/assessments/" + self.records("records/assessments", "SAS-")[-1])
+        kinds = sorted(f["kind"] for f in record["consistency"])
+        self.assertEqual(kinds, ["observation", "recommendation", "recommendation", "rule"])
+
+    def test_a_rating_above_a_practice_it_depends_on_by_rule_needs_its_reason(self):
+        # SUP.9.BP3 depends on SUP.9.BP1 by a rule of the catalog
+        low = {"rating": "P", "note": "the strategy names no status model"}
+        code, out = self.assess(self.ratings(SUP_9_BP1=low), "--check-only")
+        self.assertEqual(code, 1)
+        self.assertIn("SUP.9.BP3 rated F, above SUP.9.BP1, which it depends on (rule), rated P: give the reason", out)
+
+
 class ProblemTrends(RecordCase):
     def add_problem(self):
         front = {"id": "PRB-0099", "type": "problem-report", "title": "Late stop", "status": "open", "severity": "major",
