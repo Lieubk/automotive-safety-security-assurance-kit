@@ -642,15 +642,19 @@ def find_checklist(citation):
         if plain(cited.group(1)) in names:
             version = re.search(r"^Version (\d+)", text, re.M)
             rows = re.findall(r"(?m)^\|\s*([A-Z]{2,5}-\d+)\s*\|.*\|\s*(script|semantic|accountable)\s*\|\s*$", text)
-            sections, heading = {}, None
+            sections, kinds, heading, kind = {}, {}, None, None
             for line in text.splitlines():
                 if line.startswith("## "):
                     heading = plain(line[3:])
+                    named = re.match(r"^## Kind (\S+)", line)       # a part that applies to one kind of plan only
+                    kind = named.group(1) if named else None
                 found = re.match(r"^\|\s*([A-Z]{2,5}-\d+)\s*\|", line)
                 if found and heading:
                     sections.setdefault(heading, []).append(found.group(1))
+                    if kind:
+                        kinds.setdefault(kind, []).append(found.group(1))
             return {"file": path.name, "version": version.group(1) if version else None, "cited": cited.group(2),
-                    "checks": dict(rows), "sections": sections, "hash": file_hash(path)}
+                    "checks": dict(rows), "sections": sections, "kinds": kinds, "hash": file_hash(path)}
     return None
 
 
@@ -718,6 +722,12 @@ def cmd_review(project, args):
                 else:
                     checks += [{"check": i, "result": "not-applicable", "note": "section %s: %s" % (entry["section"], entry["note"])}
                                for i in ids if i not in given_ids]
+            plan_kinds = {i.front.get("kind") for i in items if i.type == "plan"}
+            if listed["kinds"] and len(plan_kinds) == 1 and all(i.type == "plan" for i in items):
+                kind = next(iter(plan_kinds))                    # the parts for other kinds do not apply
+                given_ids = {str(c.get("check")) for c in checks}
+                checks += [{"check": i, "result": "not-applicable", "note": "plan of kind %s" % kind}
+                           for other, ids in listed["kinds"].items() if other != kind for i in ids if i not in given_ids]
             if listed["version"] != listed["cited"]:
                 problems.append("%s is at version %s, the citation says v%s" % (listed["file"], listed["version"], listed["cited"]))
             given = {str(c.get("check")): c for c in checks}
@@ -1477,7 +1487,9 @@ def cmd_communication(project, args):
     problems = ["no such item: %s" % s for s in args.subject if s not in project.items]
     if args.sent_at:
         try:
-            datetime.date.fromisoformat(args.sent_at)
+            if datetime.date.fromisoformat(args.sent_at) > datetime.date.today():
+                problems.append("--sent-at %s lies in the future: a communication is recorded once it was sent"
+                                % args.sent_at)
         except ValueError:
             problems.append("--sent-at must be a date as YYYY-MM-DD, got %r" % args.sent_at)
     if problems:

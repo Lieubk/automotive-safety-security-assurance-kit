@@ -80,6 +80,7 @@ INTEGRATION_LEVELS = {  # integration at software level (SWE.5, SWE.6) and at sy
 }
 LEVEL_OF_TEST = {spec["test"]: level for level, spec in INTEGRATION_LEVELS.items()}
 CS_PREFIX = "21434:"                       # references to ISO/SAE 21434 in `supports`
+STANDARD_PREFIXES = (CS_PREFIX, "26262-")  # types that only these standards use are evidence of each they name
 FS_PREFIX = "26262:"                       # scope key of a part of ISO 26262; references read "26262-<part>:<clause>"
 ASIL_RANK = {"QM": 0, "A": 1, "B": 2, "C": 3, "D": 4}
 INDEPENDENCE = {"I0": 0, "I1": 1, "I2": 2, "I3": 3}
@@ -1757,7 +1758,8 @@ class Project:
             return False
         seen.add(item.id)
         refs = [str(r) for r in self.types.get(item.type, {}).get("supports") or []]
-        if refs and all(r.startswith("26262-") for r in refs) or ASIL_RANK.get(str(item.front.get("asil")), 0) > 0:
+        if (refs and all(r.startswith(STANDARD_PREFIXES) for r in refs) and any(r.startswith("26262-") for r in refs)
+                or ASIL_RANK.get(str(item.front.get("asil")), 0) > 0):
             return True
         if item.type == "plan":
             return any(str(r).startswith("26262-") for r in self.schema["plan_kinds"].get(item.front.get("kind"), []))
@@ -2023,7 +2025,8 @@ class Project:
             return False
         seen.add(item.id)
         refs = [str(r) for r in self.types.get(item.type, {}).get("supports") or []]
-        if refs and all(r.startswith(CS_PREFIX) for r in refs) or item.front.get("security_relevant") is True:
+        if (refs and all(r.startswith(STANDARD_PREFIXES) for r in refs) and any(r.startswith(CS_PREFIX) for r in refs)
+                or item.front.get("security_relevant") is True):
             return True
         if any(getattr(self.items.get(t), "type", None) == "cybersecurity-goal" for t, _ in item.targets("derived_from")):
             return True
@@ -2756,15 +2759,7 @@ def safety_rows(project, only=None):
                 (i.type in types and i.type != "plan") or (i.type == "plan" and i.front.get("kind") in kinds))
                 and project.fs_related(i)]
             own = {i.id for i in items if i.type not in ("review-record", "test-run")}
-
-            def covers(record):
-                """A review or a run counts for the clause only when it covers items of the clause itself."""
-                if record.type == "review-record":
-                    return bool({str(e.get("item")) for e in as_list(record.front.get("subject")) if isinstance(e, dict)} & own)
-                if record.type == "test-run":
-                    return bool({str(e.get("test")) for e in as_list(record.front.get("results")) if isinstance(e, dict)} & own)
-                return True
-            items = [i for i in items if covers(i)]
+            items = [i for i in items if covers_own(i, own)]
             entry = decisions.get("%s:%s" % (part["id"], clause["id"])) or {}
             open_findings = [f for f in findings if f["level"] != "info"
                              and any(str(s) == ref or str(s).startswith(ref + ".") for s in f["supports"])]
@@ -2831,6 +2826,15 @@ def cmd_tara(project, args):
     return 0
 
 
+def covers_own(record, own):
+    """A review or a test run counts for a clause only when it covers items of the clause itself."""
+    if record.type == "review-record":
+        return bool({str(e.get("item")) for e in as_list(record.front.get("subject")) if isinstance(e, dict)} & own)
+    if record.type == "test-run":
+        return bool({str(e.get("test")) for e in as_list(record.front.get("results")) if isinstance(e, dict)} & own)
+    return True
+
+
 def clause_rows(project, only=None):
     """Per subclause of ISO/SAE 21434 in scope (or the clause asked for): the decision of the cybersecurity plan,
     the items that provide each work product, and the open findings of the rules behind the subclause."""
@@ -2849,7 +2853,7 @@ def clause_rows(project, only=None):
             continue
         for sub in clause["subclauses"]:
             ref = CS_PREFIX + str(sub["id"])
-            products = []
+            found = []
             for wp in sub["work_products"]:
                 wref = CS_PREFIX + wp
                 types = [t for t, spec in project.types.items() if wref in map(str, spec.get("supports") or [])]
@@ -2862,7 +2866,11 @@ def clause_rows(project, only=None):
                             items += [i for i in project.of_type(pair["from"]) if project.live(i) and i not in items
                                       and any(pair["to"] == "any" or getattr(project.items.get(t), "type", None) in pair["to"]
                                               for t, _ in i.targets(role))]
-                types = sorted(set(types))
+                found.append((wp, sorted(set(types)), items))
+            own = {i.id for _, _, items in found for i in items if i.type not in ("review-record", "test-run")}
+            products = []
+            for wp, types, items in found:
+                items = [i for i in items if covers_own(i, own)]       # a review of other items is not evidence here
                 products.append({"work_product": wp, "name": next((w["name"] for w in cs_catalog()["work_products"]
                                                                    if w["id"] == wp), ""),
                                  "items": len(items), "approved_or_final": sum(1 for i in items if i.status in ("approved", "final")),

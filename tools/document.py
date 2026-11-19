@@ -129,6 +129,11 @@ def inline_html(text, anchors=()):
     return "".join(out)
 
 
+def once(items):
+    """Items in their order, each once."""
+    return list({i.id: i for i in items}.values())
+
+
 def plain(text):
     """Inline Markdown reduced to its text, for DOCX runs."""
     s = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", str(text))
@@ -220,6 +225,30 @@ def unsettled(project, item):
     Problems, changes, risks, actions, queries and weaknesses are shown in the state they are in."""
     lifecycle = project.types.get(item.type, {}).get("lifecycle")
     return lifecycle in ("engineering", "record") and item.status not in SETTLED
+
+
+def withheld(project, spec, include_drafts, allowed):
+    """Items a selection matches but leaves out because they are not approved (or not final)."""
+    if include_drafts:
+        return []
+    where = spec.get("where") or {}
+    return [i for i in project.of_type(*spec.get("types", []))
+            if (project.live(i) or spec.get("all_states")) and (allowed is None or i.id in allowed)
+            and not any(i.front.get(k) not in v for k, v in where.items())
+            and ("imported" not in spec or i.imported == bool(spec["imported"])) and unsettled(project, i)]
+
+
+def note_withheld(doc, items, found_any, left_out):
+    """Say in the document which items of this chapter are left out, so that an empty or short chapter is not
+    read as the whole story."""
+    if not items:
+        if not found_any:
+            doc.add("para", "Nothing of this kind in the project.")
+        return
+    left_out.update(i.id for i in items)
+    doc.add("note", "%s left out because not yet approved: %s. Generate with --include-drafts to show them."
+            % ("Nothing approved of this kind yet;" if not found_any else "Also",
+               ", ".join("%s (%s, %s)" % (i.id, i.title[:60], i.status) for i in sorted(items, key=lambda i: i.id))))
 
 
 def selected(project, spec, include_drafts, allowed):
@@ -319,7 +348,7 @@ def build(project, kind, include_drafts=False, baseline=None, as_of=None):
                             % (len(changed), baseline, ", ".join(sorted(changed)[:8]), record.front.get("tag")))
     if problems:
         return None, None, problems
-    doc, shown = Doc(spec["title"]), []
+    doc, shown, left_out = Doc(spec["title"]), [], set()
     for chapter in spec["chapters"]:
         doc.add("heading", 1, chapter["title"], None)
         if chapter.get("text"):
@@ -329,15 +358,13 @@ def build(project, kind, include_drafts=False, baseline=None, as_of=None):
             for item in items:
                 render_item(doc, project, item, 2)
             shown += items
-            if not items:
-                doc.add("para", "Nothing of this kind in the project.")
+            note_withheld(doc, withheld(project, chapter["items"], include_drafts, allowed), bool(items), left_out)
         elif "table" in chapter:
             items = selected(project, chapter["table"], include_drafts, allowed)
             columns = chapter["table"]["columns"]
             if items:
                 doc.add("table", columns, [[column_value(project, i, c) for c in columns] for i in items])
-            else:
-                doc.add("para", "Nothing of this kind in the project.")
+            note_withheld(doc, withheld(project, chapter["table"], include_drafts, allowed), bool(items), left_out)
             shown += items
         elif "matrix" in chapter:
             m = chapter["matrix"]
@@ -348,7 +375,9 @@ def build(project, kind, include_drafts=False, baseline=None, as_of=None):
                     else [t for t, _ in item.targets(m["role"])]
                 rows.append(["%s %s" % (item.id, item.title), link_text(project, linked) or "-"])
             header = [m["of"], ("%s (from)" if m.get("incoming") else "%s") % m["role"]]
-            doc.add("table", header, rows) if rows else doc.add("para", "Nothing of this kind in the project.")
+            if rows:
+                doc.add("table", header, rows)
+            note_withheld(doc, withheld(project, {"types": [m["of"]]}, include_drafts, allowed), bool(rows), left_out)
         elif "tara" in chapter:
             data = trace.tara(project)
             rows = [[e["item"], e["title"], ", ".join(e["assets"]), ", ".join(e["damage_scenarios"]), e["impact"] or "-",
@@ -427,9 +456,9 @@ def build(project, kind, include_drafts=False, baseline=None, as_of=None):
                 damages = [project.items[t] for t, _ in threat.targets("leads_to") if t in project.items]
                 answers = project.sources(threat.id, "addresses", ["cybersecurity-goal", "cybersecurity-claim"])
                 goals = [a for a in answers if a.type == "cybersecurity-goal"]
-                requirements = [r for g in goals for r in project.sources(g.id, "derived_from")]
-                elements = [e for r in requirements for e in project.sources(r.id, "fulfils")]
-                tests = [c for r in requirements for c in project.sources(r.id, "verifies")]
+                requirements = once(r for g in goals for r in project.sources(g.id, "derived_from"))
+                elements = once(e for r in requirements for e in project.sources(r.id, "fulfils"))
+                tests = once(c for r in requirements for c in project.sources(r.id, "verifies"))
                 for n, path in enumerate([p for p in as_list(threat.front.get("attack_paths")) if isinstance(p, dict)] or [{}], 1):
                     impact = {c: max((str((d.front.get("impact") or {}).get(c, "")) for d in damages
                                       if str((d.front.get("impact") or {}).get(c, "")) in trace.IMPACT_LEVELS),
@@ -452,6 +481,7 @@ def build(project, kind, include_drafts=False, baseline=None, as_of=None):
                     + ["highest impact", "threat", "threat title", "property lost", "attack path", "factors",
                        "path feasibility", "feasibility", "risk value", "treatment", "decision", "goal or claim",
                        "requirements", "allocated to", "verified by", "residual risk"], rows)
+            note_withheld(doc, withheld(project, {"types": ["threat-scenario"]}, include_drafts, allowed), bool(rows), left_out)
         elif "method" in chapter:
             plan = project.cs_plan()
             method = plan.front.get("tara_method") if plan else None
@@ -471,10 +501,7 @@ def build(project, kind, include_drafts=False, baseline=None, as_of=None):
             shown.append(plan)
     shown = list({i.id: i for i in shown}.values())
     _FINDINGS.pop(id(project), None)
-    left_out = sorted({i.id for chapter in spec["chapters"] for key in ("items", "table") if key in chapter
-                       for i in project.of_type(*chapter[key].get("types", []))
-                       if project.live(i) and unsettled(project, i) and not include_drafts
-                       and (allowed is None or i.id in allowed)})
+    left_out = sorted(left_out - {i.id for i in shown})
     doc.anchors = {i.id for i in shown}
     info = provenance(project, kind, spec, shown, baseline)
     info["left_out"] = left_out
@@ -502,7 +529,7 @@ def git(project, *args):
 def provenance(project, kind, spec, shown, baseline):
     commit = git(project, "rev-parse", "--short", "HEAD")
     dirty = git(project, "status", "--porcelain", "--", ".")
-    record = project.items.get(baseline) if baseline else None
+    base = project.items.get(baseline) if baseline else None
     unsettled_ids = [i.id for i in shown if unsettled(project, i)]
     history = []
     shown_ids = {i.id for i in shown}
@@ -528,7 +555,7 @@ def provenance(project, kind, spec, shown, baseline):
         "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
         "commit": commit or "not under version control",
         "uncommitted_changes": bool(dirty),
-        "baseline": ("%s (tag %s)" % (baseline, record.front.get("tag"))) if record else "none",
+        "baseline": ("%s (tag %s)" % (baseline, base.front.get("tag"))) if base else "none",
         "items": [{"item": i.id, "title": i.title, "status": i.status, "hash": i.hash} for i in sorted(shown, key=lambda i: i.id)],
         "history": history,
         "draft": bool(unsettled_ids) or bool(dirty),

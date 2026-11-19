@@ -1284,7 +1284,9 @@ def cs_items():
     items["SWR-0001"][0]["links"]["derived_from"].append("CSG-0001")
     items["PLN-0009"] = ({"type": "plan", "title": "Cybersecurity plan", "status": "approved", "kind": "cybersecurity",
                           "tara_method": {"impact_categories": ["safety", "financial", "operational", "privacy"],
+                                          "impact_meaning": "severe: a road user can be hurt; major: ...",
                                           "feasibility_approach": "attack-vector", "retain_up_to": 2,
+                                          "feasibility_meaning": "high: remote; medium: ...",
                                           "risk_matrix": {"severe": [3, 4, 5, 5], "major": [2, 3, 4, 5],
                                                           "moderate": [1, 2, 3, 4], "negligible": [1, 1, 2, 2]}},
                           "cybersecurity_activities": [{"subclause": s, "decision": "performed",
@@ -1431,6 +1433,15 @@ class Cybersecurity(Case):
         self.assertEqual(concept["WP-09-06"]["items"], 1)                  # SWR-0001, derived from the goal
         self.assertEqual(rows["6.4.2"]["decision"], "performed")
         self.assertEqual(rows["9.4"]["state"], "evidence present")
+
+    def test_an_item_definition_counts_and_a_review_counts_only_for_its_own_subclause(self):
+        from traceability import clause_rows
+        example = Project(Path(__file__).resolve().parents[2] / "examples" / "power-window")
+        rows = {r["subclause"]: r for r in clause_rows(example, "9")}
+        item = {w["work_product"]: w for w in rows["9.3"]["work_products"]}["WP-09-01"]
+        self.assertEqual([e["item"] for e in item["evidence"]], ["ITM-0001"])     # used by ISO 26262 as well
+        concept = {w["work_product"]: w for w in rows["9.5"]["work_products"]}
+        self.assertEqual(concept["WP-09-07"]["items"], 0)          # the reviews of goals are no review of a concept
 
 
 FS_CONFIG = {"scope": {"processes": SCOPE, "safety": [2, 3, 6, 8, 9]}}

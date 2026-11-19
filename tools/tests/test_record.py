@@ -100,6 +100,21 @@ class Review(RecordCase):
         self.assertEqual(code, 1)
         self.assertIn("not assessed", out)
 
+    def test_the_parts_of_the_plan_checklist_for_other_kinds_are_filled_in(self):
+        text = (ROOT / ".claude" / "docs" / "checklists" / "plan.md").read_text(encoding="utf-8")
+        version = re.search(r"(?m)^Version (\d+)", text).group(1)
+        parts = re.split(r"(?m)^## ", text)
+        mine = [p for p in parts if p.startswith("Every plan") or p.startswith("Kind unit-verification")]
+        ids = [i for p in mine for i in re.findall(r"(?m)^\|\s*([A-Z]{2,5}-\d+)\s*\|", p)]
+        checks = self.json_file("plan.json", [{"check": i, "result": "pass", "note": "test"} for i in ids])
+        code, out = self.review("--checks", checks, checklist="plan v%s" % version, ids=("PLN-0001",))
+        self.assertEqual(code, 0, out)
+        record = self.front("records/reviews/" + self.records("records/reviews")[-1])
+        filled = [c for c in record["checks"] if c["result"] == "not-applicable"]
+        self.assertTrue(filled)
+        self.assertEqual({c["note"] for c in filled}, {"plan of kind unit-verification"})
+        self.assertEqual(len(record["checks"]), len(re.findall(r"(?m)^\|\s*([A-Z]{2,5}-\d+)\s*\|", text)))
+
     def test_not_applicable_needs_its_reason(self):
         checks = json.loads(self.all_checks().read_text(encoding="utf-8"))
         checks[0] = {"check": checks[0]["check"], "result": "not-applicable"}

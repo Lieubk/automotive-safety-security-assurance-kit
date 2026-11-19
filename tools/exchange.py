@@ -40,6 +40,42 @@ def check_records(records):
     return problems
 
 
+TRUE_WORDS = {"true", "yes", "y", "x", "1", "on", "ja", "relevant"}
+FALSE_WORDS = {"false", "no", "n", "0", "off", "nein", "-", "not relevant"}
+
+
+def coerce(spec, value):
+    """A delivered cell turned into a value the attribute accepts: (value, problem or None).
+    Only attributes with a list of `values` are converted; a yes/no column becomes true/false."""
+    allowed = spec.get("values") if isinstance(spec, dict) else None
+    if not allowed or isinstance(value, bool) or (value in allowed and not isinstance(value, str)):
+        return value, None
+    text = str(value).strip().lower()
+    if all(isinstance(a, bool) for a in allowed):
+        if text in TRUE_WORDS:
+            return True, None
+        if text in FALSE_WORDS:
+            return False, None
+    for a in allowed:
+        if str(a).lower() == text:
+            return a, None
+    return value, "value %r is not one of %s" % (value, ", ".join(str(a).lower() if isinstance(a, bool) else str(a)
+                                                                   for a in allowed))
+
+
+def received_problems(received):
+    """--received is the day the delivery arrived: a date, and not one in the future."""
+    if not received:
+        return []
+    try:
+        day = datetime.date.fromisoformat(str(received))
+    except ValueError:
+        return ["--received must be a date as YYYY-MM-DD, got %r" % received]
+    if day > datetime.date.today():
+        return ["--received %s lies in the future: an input is registered on or after the day it arrived" % received]
+    return []
+
+
 def register(project, type_name, source, version, received, records, dry_run=False):
     """Write one imported item per record. Returns (problems, written IDs)."""
     if type_name not in project.types:
@@ -52,6 +88,13 @@ def register(project, type_name, source, version, received, records, dry_run=Fal
     unknown = sorted({a for r in records for a in (r.get("attributes") or {}) if a not in attributes})
     if unknown:
         problems.append("type %s has no attribute %s" % (type_name, ", ".join(unknown)))
+    for rec in records:
+        for name, value in list((rec.get("attributes") or {}).items()):
+            if name in attributes:
+                rec["attributes"][name], problem = coerce(attributes[name], value)
+                if problem:
+                    problems.append("%s: %s %s" % (rec.get("source_id"), name, problem))
+    problems += received_problems(received)
     if problems:
         return problems, []
     section = first_section(project, type_name)

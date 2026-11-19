@@ -140,6 +140,8 @@ def cmd_import(project, args):
     if args.dry_run:
         for rec in records[:2]:
             print("--- %s (%s)\n%s" % (rec.get("title") or "-", rec["source_id"], str(rec["text"])[:400]))
+            for name, value in (rec.get("attributes") or {}).items():
+                print("    %s: %s" % (name, str(value).lower() if isinstance(value, bool) else value))
     print("%s %d %s items from %s, version %s: %s" % ("would write" if args.dry_run else "wrote", len(written), args.type,
                                                     args.source, args.version,
                                                     "%s to %s" % (written[0], written[-1]) if written else "-"))

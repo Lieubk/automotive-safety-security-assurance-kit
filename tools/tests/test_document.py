@@ -94,6 +94,8 @@ class Documents(unittest.TestCase):
         code, text = self.tool("document.py", "build", "tara-report", "--out", Path(self.tmp.name) / "t.html")
         self.assertEqual(code, 0, text)
         self.assertIn("left out: 1 items that are not approved (THR-0002)", text)
+        page = (Path(self.tmp.name) / "t.html").read_text(encoding="utf-8")
+        self.assertIn("left out because not yet approved: THR-0002", page)    # said in the document, not only here
 
     def test_the_tara_report_shows_the_method_and_the_risks(self):
         page = self.html("tara-report")
@@ -112,7 +114,8 @@ class Documents(unittest.TestCase):
     def test_a_document_of_a_baseline_is_refused_when_its_items_changed(self):
         code, out = self.tool("record.py", "baseline", "--tag", "design-1", "--purpose", "design freeze")
         self.assertEqual(code, 0, out)
-        self.html("software-requirements-specification", "--baseline", "BL-0001")
+        page = self.html("software-requirements-specification", "--baseline", "BL-0001")
+        self.assertIn("BL-0001 (tag design-1)", page)
         path = self.project / "spec" / "software" / "requirements" / "SWR-0001.md"
         path.write_text(path.read_text(encoding="utf-8") + "\nOne more sentence.\n", encoding="utf-8")
         code, out = self.tool("document.py", "build", "software-requirements-specification", "--baseline", "BL-0001",

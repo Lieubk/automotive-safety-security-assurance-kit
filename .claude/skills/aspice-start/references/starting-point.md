@@ -47,6 +47,15 @@ Compare the needs with what step 2 recorded and sort every case into one of thre
   is the set to analyse, and it is registered one level up. Say so here; the type is
   confirmed in `/import-inputs`.
 
+When SWE.1 is in scope and SYS.3 is not, the allocation of system requirements to
+software is part of the needed input. Rule COV-05 asks for a software requirement only
+for system requirements allocated to an element of kind `software`; without that
+allocation nothing checks that the delivered system requirements are covered. If the
+delivery has no system architecture, ask now for the allocation, or for a statement that
+all delivered requirements concern the software; `/import-inputs` then registers the
+software element with its `fulfils` (see its "Allocation" rules). Name the gap if neither
+comes.
+
 Supporting and management processes have no engineering input of this kind. If the
 client's configuration, change or problem management is used, those processes are out
 of scope and the team's work in them is evidence at the client.

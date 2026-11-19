@@ -16,7 +16,7 @@ Product release controls how a product version leaves the project and reaches th
 | BP | Official short name | What must be true | Typical evidence | Rating rule IDs |
 |---|---|---|---|---|
 | SPL.2.BP1 | Define the functional content of releases | A release plan states which functionality goes into which release. | Release plan mapping features or requirements to releases, including which application parameters take effect in which release | none |
-| SPL.2.BP2 | Define release products | The products that make up a release are defined. | Release content definition: software, documentation, accompanying tools where stated, sample stage | none |
+| SPL.2.BP2 | Define release products | What a release consists of is stated. | Release content definition: software, documentation, accompanying tools where stated, sample stage | none |
 | SPL.2.BP3 | Establish a product release classification and numbering scheme | Releases are classified and numbered by a scheme that reflects their purpose and what recipients may expect from them. | Versioning scheme description; release identifiers that follow it | none |
 | SPL.2.BP4 | Define the build activities and build environment | The build is reproducible: its steps and its environment are specified and maintained. | Build procedure or scripts; build environment definition under configuration control | none |
 | SPL.2.BP5 | Build the release from configured items | Only configuration-controlled items go into the build, which safeguards the integrity of the release. | Build log referencing a baseline; build manifest | none |

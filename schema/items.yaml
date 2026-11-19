@@ -210,9 +210,9 @@ structures:
     note: "stated by the owner of the work package; actual_effort in person-days up to as_of"
   tara-method:                     # plan.tara_method when kind is cybersecurity
     shape: mapping
-    mandatory: [impact_categories, feasibility_approach, risk_matrix]
-    keys: [impact_meaning, feasibility_meaning, retain_up_to]
-    note: "impact_categories: the categories a damage scenario is rated in, for example [safety, financial, operational, privacy]; feasibility_approach: attack-potential, cvss or attack-vector; risk_matrix: for each impact level (severe, major, moderate, negligible) the risk values 1 to 5 for the feasibility levels [very-low, low, medium, high], in that order; retain_up_to: the highest risk value the project retains without a decision by a named person. The values are the project's; the standard leaves the method to the organization"
+    mandatory: [impact_categories, impact_meaning, feasibility_approach, feasibility_meaning, risk_matrix]
+    keys: [retain_up_to]
+    note: "impact_categories: the categories a damage scenario is rated in, for example [safety, financial, operational, privacy]; impact_meaning: what each impact level (severe, major, moderate, negligible) means for this item; feasibility_approach: attack-potential, cvss or attack-vector; feasibility_meaning: what each feasibility level (very-low, low, medium, high) means under that approach; risk_matrix: for each impact level (severe, major, moderate, negligible) the risk values 1 to 5 for the feasibility levels [very-low, low, medium, high], in that order; retain_up_to: the highest risk value the project retains without a decision by a named person. The values are the project's; the standard leaves the method to the organization"
   cybersecurity-activities:        # plan.cybersecurity_activities when kind is cybersecurity
     mandatory: [subclause, decision, responsible]
     keys: [rationale, work_products, due]
@@ -373,7 +373,7 @@ types:
     attributes:
       use: [common, criticality]
       kind: {values: [composition, application, sensor-actuator, service, complex-driver, ecu-abstraction, parameter, basic-software, library, other], required: before-review}
-      layer: {values: [application, runtime-environment, services, ecu-abstraction, microcontroller-abstraction, complex-drivers], required: before-review}
+      layer: {values: [application, runtime-environment, services, ecu-abstraction, microcontroller-abstraction, complex-drivers, several], required: before-review, note: "several: one component stands for a supplied platform that spans layers"}
       origin: {values: [developed, reused, supplied, generated], required: before-review}
       supplier: {required: optional, note: "who delivers it and in which version and form; mandatory when origin is supplied or reused"}
       execution_context: {required: optional, note: "core, partition or operating system application the component runs in"}

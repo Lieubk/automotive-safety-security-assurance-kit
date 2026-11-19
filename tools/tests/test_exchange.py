@@ -70,6 +70,31 @@ class Spreadsheets(Case):
                               "--source", "Customer sheet", *columns)
         self.assertIn("1 new, 1 changed, 1 removed, 0 unchanged", out)
 
+    def test_yes_and_no_cells_become_true_and_false_and_dates_ahead_are_refused(self):
+        book = Path(self.tmp.name) / "req.xlsx"
+        workbook(book, "Requirements", ["Req ID", "Requirement text", "Security"],
+                 [["CUS-1", "The window shall close by one touch.", "Yes"], ["CUS-2", "The window shall open.", "no"]])
+        columns = ["--column", "source_id=Req ID", "--column", "text=Requirement text",
+                   "--column", "security_relevant=Security"]
+        base = ["import", book, "--sheet", "Requirements", "--header-row", "2", "--type", "stakeholder-requirement",
+                "--source", "Customer sheet", "--version", "1"] + columns
+        code, out = self.tool("xlsx.py", *base, "--dry-run")
+        self.assertEqual(code, 0, out)
+        self.assertIn("security_relevant: true", out)
+        code, out = self.tool("xlsx.py", *base, "--received", "2999-01-01")
+        self.assertNotEqual(code, 0)
+        self.assertIn("lies in the future", out)
+        code, out = self.tool("xlsx.py", *base)
+        self.assertEqual(code, 0, out)
+        texts = [(self.project / "spec" / "stakeholder" / ("STK-000%d.md" % n)).read_text(encoding="utf-8") for n in (1, 2)]
+        self.assertIn("security_relevant: true", texts[0])
+        self.assertIn("security_relevant: false", texts[1])
+        workbook(book, "Requirements", ["Req ID", "Requirement text", "Security"],
+                 [["CUS-9", "The window shall stop.", "maybe"]])
+        code, out = self.tool("xlsx.py", *base[:-len(columns) - 4], "--source", "Other sheet", "--version", "1", *columns)
+        self.assertNotEqual(code, 0)
+        self.assertIn("'maybe' is not one of true, false", out)
+
     def test_a_sheet_of_test_results_becomes_the_results_of_a_run(self):
         book = Path(self.tmp.name) / "results.xlsx"
         workbook(book, "Test case", ["No", "Test Case ID", "Test Result", "Remark"],

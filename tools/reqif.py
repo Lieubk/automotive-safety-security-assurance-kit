@@ -38,6 +38,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import record  # noqa: E402
+import exchange  # noqa: E402
 from traceability import Project, as_list  # noqa: E402
 
 REQIF_NS = "http://www.omg.org/spec/ReqIF/20110401/reqif.xsd"
@@ -149,6 +150,15 @@ def cmd_import(project, args):
     if unknown or len(mapped) != len(args.attribute or []):
         return record.stop(["--attribute takes <item attribute>=<ReqIF attribute>; %s has no attribute %s"
                             % (args.type, ", ".join(unknown) or "-")])
+    problems = exchange.received_problems(args.received)
+    for obj in objects:                                   # yes/no and other cells into the values the attribute takes
+        for name, reqif_name in mapped:
+            if obj["values"].get(reqif_name) not in (None, ""):
+                obj["values"][reqif_name], problem = exchange.coerce(attributes[name], obj["values"][reqif_name])
+                if problem:
+                    problems.append("%s: %s %s" % (source_id(obj, args), name, problem))
+    if problems:
+        return record.stop(problems)
     received = args.received or datetime.date.today().isoformat()
     number = int(record.next_id(project, args.type).rsplit("-", 1)[1])
     prefix = project.types[args.type]["prefix"]

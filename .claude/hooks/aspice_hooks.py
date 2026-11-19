@@ -21,7 +21,9 @@ Wired up in .claude/settings.json. Test: python -m unittest discover -s tools/te
 import fnmatch
 import io
 import json
+import os
 import re
+import subprocess
 import sys
 from contextlib import redirect_stdout
 from pathlib import Path
@@ -218,6 +220,62 @@ def agent_commands(agent_type):
 PROJECT_OPTION = re.compile(r"""^(python3?\s+\S*tools[\\/]\w+\.py)\s+--project(?:\s+|=)(?:"[^"]*"|'[^']*'|\S+)""")
 
 
+GIT_OPTIONS_WITH_VALUE = {"-C", "-c", "--git-dir", "--work-tree", "--namespace", "--exec-path", "--config-env"}
+CHANGE_DIRECTORY = {"cd", "pushd", "set-location", "sl", "chdir"}
+
+
+def shell_path(base, text):
+    """A path as a shell of this platform writes it: quotes removed, /d/x of Git Bash read as d:/x."""
+    text = text.strip("\"'")
+    drive = re.match(r"^/([a-zA-Z])(/.*)?$", text) if os.name == "nt" else None
+    if drive:
+        text = drive.group(1) + ":" + (drive.group(2) or "/")
+    return Path(base) / text
+
+
+def commit_targets(command, cwd):
+    """Directories in which the command line runs `git commit`, following `cd` and `git -C` within the line.
+    A command that only mentions the words (in a message, an echo, a file name) is not a commit."""
+    here, targets = Path(cwd), []
+    for segment in re.split(r"&&|\|\||[;|\n]", command):
+        words = segment.split()
+        while words and re.match(r"^[A-Za-z_]\w*=", words[0]):      # VAR=value git commit
+            words = words[1:]
+        if not words:
+            continue
+        verb = words[0].strip("\"'").lower()
+        if verb in CHANGE_DIRECTORY:
+            rest = [w for w in words[1:] if not re.match(r"^(/d|-Path|-LiteralPath)$", w, re.I)]
+            if rest:
+                here = shell_path(here, " ".join(rest))
+            continue
+        if Path(verb).name not in ("git", "git.exe"):
+            continue
+        at, i = here, 1
+        while i < len(words) and words[i].startswith("-"):
+            if words[i] == "-C" and i + 1 < len(words):
+                at = shell_path(at, words[i + 1])
+            i += 2 if words[i] in GIT_OPTIONS_WITH_VALUE else 1
+        if i < len(words) and words[i] == "commit":
+            targets.append(at)
+    return targets
+
+
+def commits_into_toolkit(target):
+    """True when `target` lies in the toolkit's own repository; when that cannot be told, assume it does."""
+    if re.search(r"[$%]", str(target)):
+        return True                                   # a variable the hook cannot expand
+    try:
+        top = subprocess.run(["git", "-C", str(target), "rev-parse", "--show-toplevel"], capture_output=True,
+                             text=True, timeout=20)
+        if top.returncode == 0 and top.stdout.strip():
+            return Path(top.stdout.strip()).resolve() == ROOT
+    except (OSError, subprocess.SubprocessError):
+        pass
+    resolved = Path(target).resolve()
+    return resolved == ROOT or ROOT in resolved.parents
+
+
 def pre_shell(payload):
     command = str((payload.get("tool_input") or {}).get("command") or "")
     allowed = agent_commands(payload.get("agent_type"))
@@ -226,8 +284,8 @@ def pre_shell(payload):
         if SHELL_OPERATORS.search(plain) or not any(fnmatch.fnmatchcase(plain, p) for p in allowed):
             return deny("The agent %s may run only these commands, one at a time and without shell operators: "
                         "%s. Ask the caller for anything else." % (payload.get("agent_type"), "; ".join(allowed) or "none"))
-    if not re.search(r"\bgit\b[^|;&]*\bcommit\b", command):
-        return 0
+    if not any(commits_into_toolkit(target) for target in commit_targets(command, payload.get("cwd") or os.getcwd())):
+        return 0                                      # no commit, or a commit into another repository (a project)
     if not (ROOT / ".confidential").is_dir():
         return 0                                      # nothing confidential to protect in this repository
     try:

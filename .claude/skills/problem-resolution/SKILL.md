@@ -17,7 +17,7 @@ records for alerts, and `problem-trend-report` records.
 | SUP.9.BP1 Develop a problem resolution management strategy | writes the strategy with the user: states, severity classes, urgent and alert rules, routes, closure, trend analysis | `plan` with `urgent_severities` and `alerts` |
 | SUP.9.BP2 Identify and record the problem | writes a problem report with what happens, how to reproduce it, where and by whom it was found | `problem-report` in state `open` |
 | SUP.9.BP3 Record the status of problems | moves the report through the states of the schema; reads the history from git | `status`; `history <ID>` |
-| SUP.9.BP4 Diagnose the cause and determine the impact | proposes cause, impact and origin from the items and the evidence; the user confirms the classification | sections `Cause and impact`; `origin`, `severity`; state `analysed` |
+| SUP.9.BP4 (cause, impact) | proposes cause, impact and origin from the items and the evidence; the user confirms the classification | sections `Cause and impact`; `origin`, `severity`; state `analysed` |
 | SUP.9.BP5 Authorize urgent resolution action | asks for the decision on an urgent problem and records who authorised what, and when | `urgent_action` (COV-39) |
 | SUP.9.BP6 Raise alert notifications | names who has to be alerted; records the alert when the user states it was sent | `communication-record` (COV-40) |
 | SUP.9.BP7 Initiate problem resolution | chooses the route with the user: correction by the authoring skill, a change request, a report to a supplier, or rejection | section `Resolution`; `resolves` link of a change request (COV-41) |

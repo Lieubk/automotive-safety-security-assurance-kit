@@ -225,6 +225,21 @@ class OtherEvents(unittest.TestCase):
         code, out, _ = run_hook("pre-shell", {"tool_name": "Bash", "tool_input": {"command": "git status"}})
         self.assertEqual((code, out), (0, ""))
 
+    def test_only_real_commits_into_the_toolkit_are_scanned(self):
+        sys.path.insert(0, str(ROOT / ".claude" / "hooks"))
+        import aspice_hooks
+        here = str(ROOT)
+        self.assertEqual(aspice_hooks.commit_targets("echo 'git commit' && git log --grep commit", here), [])
+        self.assertEqual(aspice_hooks.commit_targets("git -c user.name=a commit -m b", here), [ROOT])
+        with tempfile.TemporaryDirectory() as other:
+            targets = aspice_hooks.commit_targets('cd "%s" && git add . && git commit -m x' % other, here)
+            self.assertEqual([t.resolve() for t in targets], [Path(other).resolve()])
+            self.assertFalse(aspice_hooks.commits_into_toolkit(targets[0]))
+            self.assertFalse(any(aspice_hooks.commits_into_toolkit(t)
+                                 for t in aspice_hooks.commit_targets("git -C %s commit -m x" % other, here)))
+        self.assertTrue(aspice_hooks.commits_into_toolkit(ROOT / "examples"))
+        self.assertTrue(aspice_hooks.commits_into_toolkit(Path("$REPO")))
+
     def test_unknown_event_is_an_error(self):
         code, _, err = run_hook("nonsense", {})
         self.assertEqual(code, 1)

@@ -74,7 +74,9 @@ Everything that is in the build takes part in the architecture, whoever wrote it
 - **Requirements.** A `reused` component fulfils requirements of the project and lists
   them under `fulfils` like a developed one. A `supplied` or `generated` component may
   have none; then `Purpose` says why it is present, which is what `COV-08` accepts.
-- **Budgets.** Either objectives, or `not_relevant` naming who budgets it instead.
+- **Budgets.** Either objectives, or `not_relevant` naming who budgets it instead. A
+  budget nobody has decided yet is neither: the component stays short of approval, and the
+  open budget is a query to whoever sets it (or a risk), not a `not_relevant`.
 - **Interfaces.** Defined to the same depth as all others, with the names of the
   supplied release. This boundary is where integration problems collect.
 
@@ -92,6 +94,7 @@ Everything that is in the build takes part in the architecture, whoever wrote it
 | Driver of a microcontroller peripheral | `basic-software` | `microcontroller-abstraction` |
 | Complex driver | `complex-driver` | `complex-drivers` |
 | Library | `library` | the layer it is delivered with |
+| Supplied platform modelled as one component (the customer's basic software, for example) | `basic-software`, with `origin: supplied` | `several` |
 
 - A complex driver needs its reason in `Purpose`: what the standard path through the
   basic software cannot deliver. WindowPos is one because it needs the time stamp of

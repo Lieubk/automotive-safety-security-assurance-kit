@@ -20,8 +20,10 @@ in `schema/items.yaml`. A kind whose process is not in `scope.processes`, or who
 is not under `scope.cybersecurity` or part not under `scope.safety`, needs no plan.
 
 Recording: the review record needs a result for every check ID of this file. The checks
-of the parts for other kinds are `not-applicable`, with the note "plan of kind <kind>".
-Plans of different kinds are reviewed in separate reviews.
+of the parts for other kinds are `not-applicable`, with the note "plan of kind <kind>";
+`tools/record.py review` fills them in when all subjects are plans of one kind, so only
+"Every plan" and the part of that kind are listed in `--checks`. Plans of different kinds
+are reviewed in separate reviews.
 
 Accountable checks: some answers depend on something that cannot happen in the sitting -
 an agreement of people who are not present, a confirmation from outside the team. Such
