@@ -525,6 +525,19 @@ class SelfAssessments(RecordCase):
         kinds = sorted(f["kind"] for f in record["consistency"])
         self.assertEqual(kinds, ["observation", "recommendation", "recommendation", "rule"])
 
+    def test_at_level_2_every_generic_practice_needs_a_rating(self):
+        code, out = self.assess(self.ratings(), "--level", "2", "--check-only")
+        self.assertEqual(code, 1)
+        self.assertIn("SUP.9 GP 2.1.1 has no rating", out)
+        generic = [{"process": "SUP.9", "practice": "GP 2.%d.%d" % pair, "rating": "P", "note": "rehearsal"}
+                   for pair in [(1, n) for n in range(1, 8)] + [(2, n) for n in range(1, 5)]]
+        practices = json.loads(Path(self.ratings()).read_text(encoding="utf-8"))["practices"]
+        path = self.json_file("level2.json", {"practices": practices, "generic": generic})
+        code, out = self.assess(path, "--level", "2")
+        self.assertEqual(code, 0, out)
+        record = self.front("records/assessments/" + self.records("records/assessments", "SAS-")[-1])
+        self.assertEqual(len(record["generic_observations"]), 11)
+
     def test_a_rating_above_a_practice_it_depends_on_by_rule_needs_its_reason(self):
         # SUP.9.BP3 depends on SUP.9.BP1 by a rule of the catalog
         low = {"rating": "P", "note": "the strategy names no status model"}

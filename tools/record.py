@@ -149,6 +149,10 @@ Commands
         the reason in the note of the rating; a flag from a recommendation is
         recorded. Every base practice of the processes needs a rating. The
         processes are --process, else assessment_scope, else the scope.
+        With --level 2 (default: aspice.target_level) the generic practices of
+        level 2 are rated too, under "generic": [{"process", "practice": "GP 2.1.1",
+        "rating", "note"}], one per process and practice, and checked against
+        `traceability.py generic` and the dependencies of the capability levels.
         --check-only lists the gaps and flags and writes nothing. The toolkit
         rates nothing: the ratings are the assessors'.
 
@@ -1005,11 +1009,54 @@ def assessment_findings(project, processes, data):
     return problems, flags, observations
 
 
+def generic_findings(project, processes, data):
+    """Level 2: every generic practice of every process rated; flags as for base practices."""
+    problems, flags, observations, ratings = [], [], [], {}
+    for entry in data.get("generic", []):
+        key = (str(entry.get("process")), str(entry.get("practice")))
+        if entry.get("rating") not in RATING_ORDER:
+            problems.append("%s %s: rating %r; one of N, P, L, F" % (key[0], key[1], entry.get("rating")))
+        else:
+            ratings[key] = entry
+    catalog = yaml.safe_load((trace.ROOT / "aspice" / "3.1" / "capability-levels.yaml").read_text(encoding="utf-8"))
+    for pid in processes:
+        for row in trace.generic_rows(Project(project.root), pid):
+            observations.append({"process": pid, "practice": row["practice"], "state": row["state"]})
+            entry = ratings.get((pid, row["practice"]))
+            if entry is None:
+                problems.append("%s %s has no rating" % (pid, row["practice"]))
+                continue
+            band = RATING_BANDS.get(row["state"], tuple(RATING_ORDER) if row["state"] == "a person has to judge" else ())
+            if entry["rating"] not in band:
+                flags.append({"practice": "%s %s" % (pid, row["practice"]), "kind": "observation", "needs_note": True,
+                              "text": "rated %s while the toolkit observes '%s'" % (entry["rating"], row["state"]),
+                              "note": entry.get("note")})
+        for relation in catalog.get("dependencies") or []:
+            source = ratings.get((pid, str(relation.get("from"))))
+            for target_id in trace.as_list(relation.get("to")):
+                target = ratings.get((pid, str(target_id)))
+                if source and target and RATING_ORDER[source["rating"]] > RATING_ORDER[target["rating"]]:
+                    flags.append({"practice": "%s %s" % (pid, source["practice"]), "kind": relation.get("kind"),
+                                  "needs_note": relation.get("kind") == "rule", "note": source.get("note"),
+                                  "text": "rated %s, above %s, which it depends on (%s), rated %s"
+                                          % (source["rating"], target_id, relation.get("kind"), target["rating"])})
+    for flag in flags:
+        if flag["needs_note"] and not flag["note"]:
+            problems.append("%s %s: give the reason in its note" % (flag["practice"], flag["text"]))
+    return problems, flags, observations
+
+
 def cmd_self_assessment(project, args):
     data = json.loads(Path(args.ratings).read_text(encoding="utf-8"))
     processes = args.process or list(trace.as_list((project.config.get("scope") or {}).get("assessment_scope"))) \
         or sorted(project.scope or [])
     problems, flags, observations = assessment_findings(project, processes, data)
+    level = args.level or int((project.config.get("aspice") or {}).get("target_level") or 1)
+    generic_flags, generic_observations = [], []
+    if level >= 2:
+        more, generic_flags, generic_observations = generic_findings(project, processes, data)
+        problems += more
+    flags += generic_flags
     for entry in data.get("attributes", []):
         if entry.get("rating") not in RATING_ORDER or not entry.get("process") or not entry.get("attribute"):
             problems.append("attribute rating needs process, attribute and a rating N, P, L or F: %s" % entry)
@@ -1038,6 +1085,10 @@ def cmd_self_assessment(project, args):
         "observations": observations,
         "consistency": [{k: f[k] for k in ("practice", "kind", "text", "note")} for f in flags],
     }
+    if generic_observations:
+        front["generic_ratings"] = sorted(data.get("generic", []), key=lambda e: (str(e.get("process")),
+                                                                                    str(e.get("practice"))))
+        front["generic_observations"] = generic_observations
     if not front["attribute_ratings"]:
         del front["attribute_ratings"]
     path = write_item(project, "self-assessment", front, "\n## Summary\n\n%s\n" % summary)
@@ -1193,6 +1244,7 @@ def main():
     sas.add_argument("--summary", help="text file: strengths, weaknesses, actions")
     sas.add_argument("--as-of")
     sas.add_argument("--check-only", action="store_true", help="report missing ratings and flags, write nothing")
+    sas.add_argument("--level", type=int, help="2: rate the generic practices of level 2 too (default: target_level)")
     trends = sub.add_parser("problem-trends")
     trends.add_argument("--reported-by", required=True)
     trends.add_argument("--assessment", required=True, help="text file with the analyst's reading")

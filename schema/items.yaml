@@ -670,6 +670,8 @@ types:
       target_level: {required: optional}
       ratings: {required: always, note: "list of {practice, rating: N | P | L | F, note}: one entry per base practice of the processes"}
       attribute_ratings: {required: optional, note: "list of {process, attribute, rating, note}, for example PA 1.1"}
+      generic_ratings: {required: optional, note: "level 2: list of {process, practice: GP 2.1.1 ..., rating, note}"}
+      generic_observations: {required: optional, note: "generated: the state of each generic practice in `generic` at the time"}
       observations: {required: always, note: "generated: the state of each base practice in `practices` at the time"}
       consistency: {required: always, may_be_empty: true, note: "generated: ratings that differ from the observation or exceed the rating of a practice they depend on, with the note the assessors gave"}
     sections:

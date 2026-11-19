@@ -5,10 +5,18 @@ exist. Level 2 asks in addition whether the work of that process is managed and 
 its work products are kept under control. That is judged per process, by generic
 practices, and almost all of the evidence lies outside the item files.
 
-When `aspice.target_level` in `project.yaml` is 2 or higher, list every generic practice
-below for each process gated, with the verdict **NOT ASSESSED by the toolkit**. If the
-key is absent or empty, ask the user for the target level; do not assume one. Do not
-shorten the list to a sentence, and do not replace a line by "probably fine".
+When `aspice.target_level` in `project.yaml` is 2 or higher, run
+`python tools/traceability.py generic <PROCESS>` for each process gated and list every
+generic practice with the observation it prints - the state, the evidence IDs and the
+note. If the key is absent or empty, ask the user for the target level; do not assume
+one. Do not shorten the list to a sentence, and do not replace a line by "probably fine".
+
+The observation is not a verdict. Map it as for base practices: `findings open` is FAIL;
+`no evidence yet` and `evidence not settled` are CONCERNS at most; `evidence present` is
+PASS only after a sample of the evidence was read against the row of the practice in
+`aspice/3.1/notes/capability-levels.md`; `a person has to judge` and everything the
+note says is not in the repository are **NOT ASSESSED by the toolkit**, with the
+question a person has to answer.
 
 Say with the list:
 

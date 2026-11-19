@@ -26,6 +26,9 @@ Commands
                        escalations due as of a date (--as-of; default today); --json
     diff ID            what changed in an item since a review saw it, as subject or as
                        reference (--since REV-ID; default: the newest), from git
+    generic [PROC]     per generic practice of level 2 and process in scope: what the
+                       repository holds for it (work packages, status reports,
+                       actions, communication, baselines, reviews); --json
     practices [PROC]   per base practice of the processes in scope (or of one
                        process): the evidence the project holds and the findings
                        still open. The deterministic input of a process gate
@@ -2109,6 +2112,137 @@ def practice_rows(project, process_id=None):
     return rows
 
 
+def generic_rows(project, process_id):
+    """Per generic practice of level 2, what the repository holds for one process. Observations only."""
+    version = str((project.config.get("aspice") or {}).get("version") or project.schema.get("aspice_version"))
+    catalog = yaml.safe_load((ROOT / "aspice" / version / "capability-levels.yaml").read_text(encoding="utf-8"))
+    names = {g["id"]: g["name"] for pa in catalog["process_attributes"] if pa["id"] in ("PA 2.1", "PA 2.2")
+             for g in pa.get("generic_practices", [])}
+    schema = project.schema
+    findings = project.check()
+    bps = [bp["id"] for bp in yaml.safe_load((ROOT / "aspice" / version / "processes" / (process_id + ".yaml"))
+                                             .read_text(encoding="utf-8"))["base_practices"]]
+    kinds = [kind for kind, refs in schema["plan_kinds"].items() if set(refs) & set(bps)]
+    types = [name for name, spec in schema["types"].items() if set(map(str, spec.get("supports") or [])) & set(bps)
+             and name not in ("communication-record", "review-record", "plan")]
+    live = [i for i in project.items.values() if project.live(i) and not i.imported]
+    plans = [i for i in live if i.type == "plan" and i.front.get("kind") in kinds]
+    products = [i for i in live if i.type in types and schema["types"][i.type]["lifecycle"] == "engineering"] + plans
+    product_ids = {i.id for i in products}
+    packages = [i for i in live if i.type == "work-package" and i.front.get("process") == process_id]
+    settled = lambda items: all(i.status in SETTLED.get(project.types[i.type]["lifecycle"], ()) for i in items)  # noqa: E731
+    rows = []
+
+    def row(gp, state, evidence, note):
+        rows.append({"practice": gp, "name": names.get(gp, ""), "state": state, "evidence": sorted(evidence),
+                     "note": note})
+
+    def held(items, note, empty="no evidence yet"):
+        if not items:
+            return empty, [], note
+        return ("evidence present" if settled(items) else "evidence not settled"), [i.id for i in items], note
+
+    state, ids, note = held([w for w in packages if w.front.get("estimate") and w.front.get("planned_finish")],
+                            "work packages with `process: %s`, their estimates and dates; quality objectives are in the "
+                            "strategy of the process" % process_id)
+    row("GP 2.1.1", state, ids, note)
+    with_activities = [w for w in packages if as_list(w.front.get("activities"))]
+    if packages and len(with_activities) < len(packages):
+        row("GP 2.1.2", "evidence not settled", [w.id for w in with_activities],
+            "%d of %d work packages of the process have activities" % (len(with_activities), len(packages)))
+    else:
+        row("GP 2.1.2", *held(with_activities, "activities with owner, estimate and date in the work packages"))
+    reports = [r for r in project.of_type("project-status-report") if r.status == "final"
+               and {str(e.get("item")) for e in as_list(r.front.get("work_packages")) if isinstance(e, dict)}
+               & {w.id for w in packages}]
+    tracked = [w for w in packages if isinstance(w.front.get("progress"), dict)]
+    if reports and tracked:
+        row("GP 2.1.3", "evidence present", [r.id for r in reports] + [w.id for w in tracked],
+            "status reports that list the work packages, and their progress as stated by the owners")
+    else:
+        row("GP 2.1.3", "evidence not settled" if (reports or tracked) else "no evidence yet",
+            [r.id for r in reports] + [w.id for w in tracked], "status reports and stated progress of the work packages")
+    targets = {w.id for w in packages} | product_ids
+    actions = [a for a in project.of_type("corrective-action") if {x for x, _ in a.targets("addresses")} & targets]
+    row("GP 2.1.4", *held(actions, "corrective actions that address the work packages or items of the process; "
+                                   "whether one was needed is for a person to judge", empty="a person has to judge"))
+    with_roles = [pl for pl in plans if pl.has_section("Responsibilities")]
+    owners = [w for w in packages if w.front.get("owner")]
+    row("GP 2.1.5", *held(with_roles + owners, "`Responsibilities` of the strategy, owners of the work packages; "
+                                               "that the people know their roles is for a person to judge"))
+    toolchain = any(v for v in ((project.config.get("toolchain") or {}).values()))
+    resourced = [pl for pl in plans if pl.has_section("Environment and tools")] + \
+        [w for w in packages if any(isinstance(a, dict) and a.get("skill") for a in as_list(w.front.get("activities")))]
+    if resourced and toolchain:
+        row("GP 2.1.6", *held(resourced, "`Environment and tools` of the strategy, `toolchain` of project.yaml, skills "
+                                         "named in activities; training and availability are not in the repository"))
+    else:
+        row("GP 2.1.6", "evidence not settled" if (resourced or toolchain) else "no evidence yet", [i.id for i in resourced],
+            "`toolchain` of project.yaml is %s" % ("set" if toolchain else "empty"))
+    baselines = [b for b in project.of_type("baseline") if b.status == "final"]
+    listed = {str(e.get("item")): b.id for b in baselines for e in as_list(b.front.get("items")) if isinstance(e, dict)}
+    told = [c for c in project.of_type("communication-record") if c.status == "final" and (
+        set(map(str, as_list(c.front.get("practices")))) & set(bps)
+        or {str(s) for s in as_list(c.front.get("subject"))} & (product_ids | {listed.get(i) for i in product_ids}))]
+    asked = [q for q in project.of_type("query") if {x for x, _ in q.targets("about")} & product_ids]
+    row("GP 2.1.7", *held(told + asked, "communication records and queries about the items of the process"))
+    checklists = []
+    for path in sorted((ROOT / ".claude" / "docs" / "checklists").glob("*.md")):
+        head = path.read_text(encoding="utf-8").split("\n\n## ")[0]
+        if any("`%s`" % name in head for name in types + (["plan"] if kinds else [])):
+            checklists.append(path.stem)
+    row("GP 2.2.1", "evidence present" if types or kinds else "no evidence structure", checklists,
+        "the item types of the schema and the review checklists %s; the project's own criteria, where it has any, are "
+        "for a person" % (", ".join(checklists) or "-"))
+    cm = [pl for pl in live if pl.type == "plan" and pl.front.get("kind") == "configuration-management"]
+    row("GP 2.2.2", *held(cm, "the configuration management plan; identification, versions and links come from the "
+                              "item format and the schema"))
+    internal = as_list((project.config.get("trace") or {}).get("internal_baselines"))
+    frozen = {str(e.get("item")) for b in baselines if b.front.get("purpose") not in internal
+              for e in as_list(b.front.get("items")) if isinstance(e, dict)}
+    engineering = [i for i in products if project.types[i.type]["lifecycle"] == "engineering"]
+    inside = [i for i in engineering if i.id in frozen]
+    if engineering and len(inside) == len(engineering):
+        row("GP 2.2.3", "evidence present", [b.id for b in baselines], "every item of the process is in a baseline")
+    else:
+        row("GP 2.2.3", "evidence not settled" if inside or engineering else "no evidence yet", [i.id for i in inside],
+            "%d of %d items of the process are in a baseline that is not internal; all are under version control"
+            % (len(inside), len(engineering)))
+    reviewed = [i for i in engineering if project.approving_review(i)]
+    open_review = [f for f in findings if f["rule"] in ("COV-19", "SUSPECT", "CONSISTENCY") and f["level"] == "error"
+                   and f["item"] in product_ids]
+    checked = [q for q in project.of_type("quality-record") if q.status == "final" and q.front.get("kind") == "work-product"
+               and {str(s) for s in as_list(q.front.get("subject"))} & product_ids]
+    if open_review:
+        row("GP 2.2.4", "findings open", [f["item"] for f in open_review], "items whose approval is stale or suspect")
+    elif engineering and len(reviewed) == len(engineering):
+        row("GP 2.2.4", "evidence present", list({project.approving_review(i).id for i in reviewed}) + [q.id for q in checked],
+            "every item of the process has an approving review of its present content%s; whether the reviews were held "
+            "as planned is for a person" % ("; quality records check a sample" if checked else ""))
+    else:
+        row("GP 2.2.4", "evidence not settled" if engineering else "no evidence yet", [i.id for i in reviewed],
+            "%d of %d items of the process have an approving review" % (len(reviewed), len(engineering)))
+    return rows
+
+
+def cmd_generic(project, args):
+    wanted = [args.process] if args.process else sorted(project.scope or [])
+    out = []
+    for pid in wanted:
+        if not (ROOT / "aspice" / "3.1" / "processes" / (pid + ".yaml")).is_file():
+            print("%s is not a process of the catalog" % pid)
+            return 1
+        out += [dict(r, process=pid) for r in generic_rows(Project(project.root), pid)]
+    if args.json:
+        print(json.dumps(out, indent=2))
+        return 0
+    for r in out:
+        print("%-7s %-9s %-22s %3d  %s" % (r["process"], r["practice"], r["state"], len(r["evidence"]), r["note"]))
+    print("observations of what the repository holds per generic practice of level 2, not ratings; much of level 2 "
+          "lies with people and outside the files")
+    return 0
+
+
 def cmd_practices(project, args):
     if args.process and project.scope is not None and args.process not in project.scope:
         print("%s is not in the scope of this project (%s)" % (args.process, ", ".join(sorted(project.scope))))
@@ -2158,6 +2292,9 @@ def main():
     quality_parser = sub.add_parser("quality")
     quality_parser.add_argument("--as-of", help="the date lateness is measured to (default: today)")
     quality_parser.add_argument("--json", action="store_true")
+    generic = sub.add_parser("generic")
+    generic.add_argument("process", nargs="?")
+    generic.add_argument("--json", action="store_true")
     practices = sub.add_parser("practices")
     practices.add_argument("process", nargs="?")
     practices.add_argument("--json", action="store_true")
@@ -2166,7 +2303,7 @@ def main():
     return {"check": cmd_check, "matrix": cmd_matrix, "show": cmd_show, "impact": cmd_impact,
             "hash": cmd_hash, "status": cmd_status, "list": cmd_list, "audit": cmd_audit, "practices": cmd_practices,
             "diff": cmd_diff, "progress": cmd_progress,
-            "problems": cmd_problems, "history": cmd_history, "quality": cmd_quality}[args.command](project, args)
+            "problems": cmd_problems, "history": cmd_history, "quality": cmd_quality, "generic": cmd_generic}[args.command](project, args)
 
 
 if __name__ == "__main__":

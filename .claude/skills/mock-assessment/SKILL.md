@@ -41,8 +41,10 @@ assessment, and no capability level follows from it.
   `aspice/3.1/notes/<PROCESS>.md` (what must be true, typical evidence), the state and
   the `by` of `practices --json`, the items and records behind it, open findings of
   `check`, and the verdict of the process gate if one exists.
-- With `aspice.target_level` 2 or higher, add the generic practices per process, as the
-  file `level-2.md` among the references of `/process-gate` lists them.
+- With `aspice.target_level` 2 or higher, add the generic practices per process:
+  `python tools/traceability.py generic <PROCESS>` gives what the repository holds for
+  each; the file `level-2.md` among the references of `/process-gate` says what a person
+  looks for beyond it. They are rated too (`--level 2`).
 
 ### 2. Interview questions
 - Per practice, the questions whose answer no file holds: who did it, how they decided,

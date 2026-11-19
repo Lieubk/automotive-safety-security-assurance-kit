@@ -186,6 +186,20 @@ class Case(unittest.TestCase):
         return fixture
 
 
+class GenericPractices(unittest.TestCase):
+    """Observations per generic practice of level 2, read from the worked example."""
+
+    def test_the_example_shows_planning_but_no_baseline(self):
+        from traceability import generic_rows
+        example = Path(__file__).resolve().parents[2] / "examples" / "power-window"
+        rows = {r["practice"]: r for r in generic_rows(Project(example), "SWE.5")}
+        self.assertEqual(len(rows), 11)
+        self.assertEqual(rows["GP 2.1.1"]["state"], "evidence present")
+        self.assertIn("WP-0008", rows["GP 2.1.1"]["evidence"])
+        self.assertEqual(rows["GP 2.2.3"]["state"], "evidence not settled")      # no baseline in the example
+        self.assertEqual(rows["GP 2.2.2"]["evidence"], ["PLN-0002"])
+
+
 class ValidProject(Case):
     def test_clean_project_has_no_findings(self):
         self.assertEqual(self.make().findings(), [])

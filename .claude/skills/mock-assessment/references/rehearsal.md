@@ -77,3 +77,16 @@ above a practice it depends on by recommendation is listed.
 
 Every base practice of each process named needs an entry. `note` holds the reason in
 the assessors' words. `attributes` is optional.
+
+At level 2 (`--level 2`, or `aspice.target_level` 2 or higher) add one entry per process
+and generic practice:
+
+```json
+"generic": [
+  {"process": "SUP.9", "practice": "GP 2.1.1", "rating": "L", "note": "objectives in WP-0007, no quality target"}
+]
+```
+
+They are checked like base practices: against the state `traceability.py generic`
+prints (a state of `a person has to judge` accepts any rating) and against the
+dependencies between generic practices in `aspice/3.1/capability-levels.yaml`.
