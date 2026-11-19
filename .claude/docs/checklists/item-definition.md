@@ -1,6 +1,7 @@
 # Item definition review checklist
 
-Version 1. Applies to: `item-definition`. Supports: 21434:9.3.
+Version 1. Applies to: `item-definition`. Supports: 21434:9.3, 26262-3:5. One item definition
+serves ISO/SAE 21434 and ISO 26262 alike.
 
 Kinds: `script` - a tool answers it; `semantic` - needs reading and judgement, a model
 may propose and a person confirms; `accountable` - only a person can state it.

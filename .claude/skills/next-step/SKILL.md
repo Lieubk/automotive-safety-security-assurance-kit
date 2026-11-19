@@ -65,7 +65,7 @@ that need Grep or `list`, and what to do where no authoring skill exists.
 | Inputs not registered | an entry of `inputs` whose `source` appears in no item | `/import-inputs` |
 | Inputs not accepted | `list --imported --status draft` or `--status in-review` prints items | `/review`; it applies the checklist `input-acceptance` |
 | A question to a source is open | `QUERY` on an approved item; `list --type query --status open` | the user chases the answer; `/import-inputs <QRY-ID>` records it |
-| A plan the scope needs is missing | `COV-27` | the skill of the process: `/project-plan`, `/sw-unit-verify`, `/sw-integration-test`, `/sw-qualification-test`, `/baseline`, `/change-request`, `/problem-resolution`, `/quality-assurance`, `/risk-management`, `/cybersecurity-plan`, `/vulnerability-management`; by hand for the other plan kinds |
+| A plan the scope needs is missing | `COV-27` | the skill of the process: `/project-plan`, `/sw-unit-verify`, `/sw-integration-test`, `/sw-qualification-test`, `/baseline`, `/change-request`, `/problem-resolution`, `/quality-assurance`, `/risk-management`, `/cybersecurity-plan`, `/vulnerability-management`, `/safety-plan`; by hand for the other plan kinds |
 | System requirements not refined | `COV-05` | `/sw-requirements` |
 | Requirements not allocated | `COV-07`; also `COV-08`, `COV-24`, `COV-25` | `/sw-architecture` |
 | Components without design | `COV-09`, `COV-21` | `/sw-detailed-design` |

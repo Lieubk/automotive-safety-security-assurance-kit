@@ -16,6 +16,7 @@ repository - one item per file - and a trace engine checks them.
 | `plans/`, `spec/`, `verification/`, `records/` | the project's items, in the folders `schema/items.yaml` names |
 | `src/`, `tests/` | code and test code |
 | `aspice/3.1/` | process catalog (`processes/`) and notes per process (`notes/`) |
+| `iso-26262/2018/` | catalog of ISO 26262: parts, clauses, requirement numbers, work products, table titles, purposes in our words |
 | `iso-sae-21434/2021/` | catalog of ISO/SAE 21434: clauses, subclauses, requirement and work product identifiers, objectives in our words |
 | `schema/` | item types, links and coverage rules (`items.yaml`), file layout (`item-format.md`), generated documents (`documents.yaml`) |
 | `tools/` | trace engine, record writer, validators |
@@ -57,6 +58,10 @@ repository - one item per file - and a trace engine checks them.
 | `/tara` | ISO/SAE 21434 cl. 9.3, 9.4, 15 | item definition, assets, damage and threat scenarios, attack paths, ratings, risk values, treatment, goals and claims |
 | `/cybersecurity-concept` | ISO/SAE 21434 cl. 9.5, 10, 11 | requirements derived from goals, security relevance down the levels, verification and validation |
 | `/vulnerability-management` | ISO/SAE 21434 cl. 8 | monitoring plan, events, weaknesses, vulnerability analysis and treatment |
+| `/safety-plan` | ISO 26262-2, 8 | safety plan with a decision per clause, methods per table, determinations, confirmation measures, tool evaluation, safety case |
+| `/hara` | ISO 26262-3 | item definition, hazardous events classified, ASIL, safety goals |
+| `/safety-concept` | ISO 26262-3, 4, 6, 9 | functional, technical and software safety requirements, ASIL inheritance, decomposition, validation |
+| `/safety-analysis` | ISO 26262-9, 6, 4 | FMEA, FTA, DFA with findings carried into requirements or design |
 | `/documents` | all | 34 kinds of documents from the items - specifications, SAD, SDD, test specifications and reports, traceability, release, QA, problem, project, risk, TARA and cybersecurity reports - as HTML, Word or Excel, neutral or in the customer's template |
 | `/next-step` | - | where the project stands and what to do next |
 
@@ -70,6 +75,7 @@ python tools/traceability.py check              # findings for the project in th
 python tools/traceability.py --project examples/power-window check
 python tools/traceability.py practices SWE.1    # evidence and open findings per base practice
 python tools/traceability.py clauses           # ISO/SAE 21434: decision, evidence and findings per subclause
+python tools/traceability.py safety            # ISO 26262: decision, evidence and findings per clause
 python tools/document.py build software-architecture-description --format docx   # documents from the items
 python -m unittest discover -s tools/tests      # tests of the engine and the hooks
 python tools/skill_lint.py                      # mechanical checks of skills, agents, checklists
@@ -83,7 +89,7 @@ for the first time in a session.
 - Follow `.claude/docs/skill-authoring.md` for skills, checklists and agents.
 - `schema/items.yaml` is the single definition of items and rules; after a change run
   `python tools/schema_check.py` and the tests.
-- Text of Automotive SPICE and of other standards (ISO/SAE 21434 included, with its
-  annexes and example tables) is not reproduced anywhere in this repository:
+- Text of Automotive SPICE and of other standards (ISO/SAE 21434 and ISO 26262 included,
+  with their annexes, example tables and normative tables) is not reproduced anywhere in this repository:
   identifiers and official names only, descriptions in our own words.
 - Before a commit, `python tools/confidentiality_scan.py` must report no finding.

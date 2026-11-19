@@ -96,7 +96,7 @@ code need SWE.3 in scope.
 
 ## Coverage rules
 
-`COV-01` to `COV-62`; `COV-19` is listed above. A rule is active only when at least one
+`COV-01` to `COV-73`; `COV-19` is listed above. A rule is active only when at least one
 process in the column "Processes" is in `scope.processes`. "Accept" names the waiver the
 schema allows. A waiver is content of an item or of `project.yaml`; it is written by
 the authoring skill and reviewed like everything else. This skill does not apply
@@ -166,6 +166,17 @@ requirement. Nothing is written on the requirement.
 | `COV-60` | requirements, elements, components, units | security-relevant when derived from a goal or a security-relevant item, or fulfilling one | security relevance lost on the way down | 21434:9.5, 21434:10.4.1 | clauses in scope | `/cybersecurity-concept`, the skill of the item's level | No |
 | `COV-61` | weakness from analysed on | a vulnerability to reduce has its change request or problem report; one shared or retained has a claim | a vulnerability decided and left | 21434:8.5, 21434:8.6 | clauses in scope | `/vulnerability-management` | No |
 | `COV-62` | cybersecurity goal | a system qualification test verifies it | a goal never validated on the vehicle | 21434:11 | clauses in scope | `/cybersecurity-concept`, `/sys-qualification-test` | No |
+| `COV-63` | approved safety plan | an entry with a decision for every clause of the parts under `scope.safety`; tailored and not-applicable with a rationale | a clause nobody decided about | 26262-2:6 | parts in scope | `/safety-plan` | No |
+| `COV-64` | approved safety plan | an entry for every table of parts 4, 5, 6, 8 in scope: applied with methods or where they are written, or not-applicable with a rationale | methods per ASIL never chosen | 26262-2:6, 26262-6:5 | parts in scope | `/safety-plan` | No |
+| `COV-65` | hazardous event from in-review on | the ASIL the plan's determination gives for its severity, exposure, controllability | an ASIL chosen by hand; without a determination: not assessed | 26262-3:6 | parts in scope | `/hara`, `/safety-plan` | No |
+| `COV-66` | hazardous event of ASIL A to D; safety goal | a goal addresses it, with an ASIL not lower | an event without protection; a goal below its events | 26262-3:6 | parts in scope | `/hara` | No |
+| `COV-67` | safety goal | a system or software requirement derived from it | a goal nothing implements | 26262-3:7, 26262-4:6, 26262-6:6 | parts in scope | `/safety-concept` | No |
+| `COV-68` | safety analysis from in-review on | findings open or closed; closed with an existing carrier or a rationale; none open at approval | a weakness found and dropped | 26262-9:8, 26262-6:7 | parts in scope | `/safety-analysis` | No |
+| `COV-69` | the project | every software component and system element of ASIL A to D analysed at its level; a DFA where software ASILs coexist | an ASIL element nobody analysed; mixed ASILs without freedom from interference argued | 26262-6:7, 26262-4:6, 26262-9:6, 26262-9:7 | parts in scope | `/safety-analysis` | No |
+| `COV-70` | design decision with a decomposition | the requirements exist, a live DFA argues independence, no part above the original ASIL | an ASIL lowered without argument | 26262-9:5 | parts in scope | `/safety-concept`, `/safety-analysis` | No |
+| `COV-71` | tool evaluation from in-review on | TCL2 and TCL3 qualified with evidence; the confidence level the plan's determination gives | an unqualified tool trusted | 26262-8:11 | parts in scope | `/safety-plan` | No |
+| `COV-72` | the project | every tool named in a final build or analysis record is evaluated | a tool used without evaluation | 26262-8:11 | parts in scope | `/safety-plan` | No |
+| `COV-73` | approved safety plan | every planned confirmation measure has its final record with the planned independence and a passing result | confirmation planned and never done, or by someone not independent enough | 26262-2:6 | parts in scope | `/safety-plan` | No |
 
 ## Link roles and the practices behind `UPSTREAM`, `SUSPECT` and `CONSISTENCY`
 

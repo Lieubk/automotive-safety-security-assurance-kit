@@ -89,6 +89,10 @@ the product is cybersecurity relevant. Say what follows: items carry `asil` and
 `security_relevant`, an item may not fall below what it is derived from (COV-23), and
 unit coverage targets are set per ASIL in the unit verification plan (COV-28). QM is a
 statement, not a default: if nobody has decided yet, leave the value empty.
+When the highest ASIL is above QM, ask which parts of ISO 26262 the team is responsible
+for and which the customer or a supplier performs (show the parts of
+`iso-26262/2018/catalog.yaml` with their level); a software supplier typically has parts
+2 (clause 6), 6, 8 and 9. Write them under `scope.safety`.
 When the product is cybersecurity relevant, ask which clauses of ISO/SAE 21434 the team
 is responsible for and which the customer or a supplier performs (show the clauses of
 `iso-sae-21434/2021/catalog.yaml` with their level: organization, project, lifecycle,

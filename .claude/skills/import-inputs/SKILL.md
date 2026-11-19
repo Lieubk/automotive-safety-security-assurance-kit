@@ -22,6 +22,10 @@ the same way, as imported items of the types `item-definition`, `threat-scenario
 `cybersecurity-goal`, `cybersecurity-claim` or `system-requirement` (with
 `security_relevant`). The rules of ISO/SAE 21434 apply to them only for the clauses under
 `scope.cybersecurity`; `COV-59` still asks for the requirements derived from a goal.
+Safety work products from the customer - item definition, hazardous events, safety goals,
+functional and technical safety requirements with their ASIL - are registered likewise,
+as `item-definition`, `hazardous-event`, `safety-goal` and `system-requirement`; `COV-67`
+asks for the requirements derived from a received goal when part 3, 4 or 6 is in scope.
 
 The practices are those of SYS.1. With SYS.1 in scope the rows are evidence for it;
 without it the same steps are the entry check of the first process in scope, and no

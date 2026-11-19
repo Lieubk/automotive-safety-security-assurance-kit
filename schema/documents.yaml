@@ -481,3 +481,79 @@ documents:
         items: {types: [cybersecurity-assessment]}
       - title: Risk figures of the TARA
         figures: {source: tara, summary: true}
+
+  # ---- functional safety (ISO 26262)
+
+  safety-plan:
+    title: Safety plan
+    supports: ["26262-2:6", "26262-2:6.5.3"]
+    chapters:
+      - title: Plan
+        items: {types: [plan], where: {kind: [safety]}}
+      - title: Tool evaluations
+        table: {types: [tool-evaluation], columns: [id, title, tool, impact, detection, confidence, asil]}
+
+  hara-report:
+    title: Hazard analysis and risk assessment
+    supports: ["26262-3:5", "26262-3:6", "26262-3:6.5.1"]
+    chapters:
+      - title: Item definition
+        items: {types: [item-definition]}
+      - title: Hazardous events
+        table: {types: [hazardous-event], columns: [id, title, hazard, operational_situation, severity, exposure, controllability, asil]}
+      - title: Hazardous event details
+        items: {types: [hazardous-event]}
+      - title: Safety goals
+        items: {types: [safety-goal]}
+      - title: Open findings
+        findings: {processes: ["26262:3"]}
+
+  functional-safety-concept:
+    title: Functional and technical safety concept
+    supports: ["26262-3:7", "26262-3:7.5.1", "26262-4:6", "26262-4:6.5.2"]
+    chapters:
+      - title: Safety goals
+        table: {types: [safety-goal], columns: [id, title, asil, safe_state, ftti_ms]}
+      - title: Requirements derived from the safety goals
+        matrix: {of: safety-goal, role: derived_from, incoming: true}
+      - title: Safety requirements
+        table: {types: [system-requirement, software-requirement], where: {asil: [A, B, C, D]}, columns: [id, title, asil, derived_from]}
+      - title: Allocation
+        matrix: {of: system-requirement, role: fulfils, incoming: true}
+      - title: Decompositions
+        items: {types: [design-decision]}
+      - title: Open findings
+        findings: {processes: ["26262:3", "26262:4", "26262:6", "26262:9"]}
+
+  safety-analysis-report:
+    title: Safety analysis report
+    supports: ["26262-9:8", "26262-9:8.5.1", "26262-9:7.5.1", "26262-6:7.5.2", "26262-6:7.5.3"]
+    chapters:
+      - title: Analyses
+        table: {types: [safety-analysis], columns: [id, title, method, level, analyses]}
+      - title: Analysis details
+        items: {types: [safety-analysis]}
+      - title: Open findings
+        findings: {processes: ["26262:9", "26262:6", "26262:4"]}
+
+  tool-qualification-report:
+    title: Software tool evaluation and qualification
+    supports: ["26262-8:11", "26262-8:11.5.1", "26262-8:11.5.2"]
+    chapters:
+      - title: Tools
+        table: {types: [tool-evaluation], columns: [id, tool, impact, detection, confidence, asil, qualification_method]}
+      - title: Evaluations
+        items: {types: [tool-evaluation]}
+      - title: Open findings
+        findings: {processes: ["26262:8"]}
+
+  safety-case-report:
+    title: Safety case
+    supports: ["26262-2:6.5.4", "26262-2:6.5.5"]
+    chapters:
+      - title: Safety case
+        items: {types: [safety-case], latest: true}
+      - title: Confirmation measures
+        table: {types: [confirmation-measure], columns: [id, kind, subject, performed_by, independence, result, as_of]}
+      - title: Confirmation reports
+        items: {types: [confirmation-measure]}

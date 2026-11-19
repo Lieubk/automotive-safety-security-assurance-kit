@@ -16,12 +16,13 @@ Early. One vertical slice works end to end and is demonstrated by the example:
 | Process catalog | 23 processes of Automotive SPICE 3.1 with base practices, work products and rating dependencies (identifiers and official names; descriptions in our own words) |
 | Item schema | 44 item types, 20 link roles, 62 coverage rules, scope-aware |
 | Documents | 34 kinds - specifications, SAD, SDD, test specifications and reports with verdicts, traceability, review, release note, QA, problem, change, project, risk, supplier, TARA report and worksheet, cybersecurity plan and case - generated from the items as HTML, Word or Excel (`tools/document.py`), in a neutral style or the customer's template, with commit, baseline and the items' hashes; DRAFT when items are not approved |
+| ISO 26262 | parts in scope per project; safety plan with a decision per clause and methods per table, hazardous events and safety goals, ASIL carried through requirements and design, safety analyses (FMEA, FTA, DFA), decomposition, tool evaluation, confirmation measures, safety case; `traceability.py safety`; the standard's tables are stated by the project, not copied |
 | ISO/SAE 21434 | clauses in scope per project; TARA (assets, damage and threat scenarios, attack paths, risk values from the project's matrix, treatment), goals and claims, concept, security relevance down to code and tests, vulnerability management, cybersecurity case and assessment records; `traceability.py tara` and `clauses` |
 | Trace engine | structure, links, coverage, stale approvals, suspect links, impact, traceability matrices, evidence per base practice, changes since a review, progress against the plan, integration steps and the builds and runs on them at software and system level, problems, quality assurance, observations per generic practice of level 2 |
 | Exchange | ReqIF import, comparison of a new version, export (`tools/reqif.py`); AUTOSAR Classic models to architecture items and back to a comparison (`tools/arxml.py`); pipeline templates for GitHub Actions and GitLab CI (`ci/`) |
 | Skills | project scoping and input registration; project management and risk management (MAN.3, MAN.5); SYS.2 to SYS.5 and SWE.1 to SWE.6; reviews and quality assurance; baselines, change requests and problem resolution; supplier monitoring; trace check, process gates and a mock assessment |
 | Hooks | imported inputs, final records and baselined items are protected; every written item is checked |
-| Not yet | exchange with ALM tools beyond ReqIF, ISO 26262, a record for the release for post-development of ISO/SAE 21434, Automotive SPICE 4.0 |
+| Not yet | exchange with ALM tools beyond ReqIF, hardware development (ISO 26262-5) beyond the catalog, a record for the release for post-development of ISO/SAE 21434, Automotive SPICE 4.0 |
 
 ## What it does not do
 

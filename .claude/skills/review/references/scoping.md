@@ -46,10 +46,13 @@ table says what to expect.
 | Item definition (ISO/SAE 21434) | `item-definition` | `item-definition.md` |
 | TARA | `asset`, `damage-scenario`, `threat-scenario` | `tara.md` |
 | Cybersecurity goals and claims | `cybersecurity-goal`, `cybersecurity-claim` | `cybersecurity-goal.md` |
+| Hazard analysis and safety goals | `hazardous-event`, `safety-goal` | `hara.md` |
+| Safety analyses | `safety-analysis` | `safety-analysis.md` |
+| Tool evaluations | `tool-evaluation` | `tool-evaluation.md` |
 | Anything else of the `engineering` lifecycle | for example `system-requirement` written by the project, `software-integration-test` | whichever checklist names the type; if none does, the semantic part is NOT ASSESSED |
 
 Cite a checklist as its file name without `.md`, followed by `v` and the number of its
-version line: `software-requirements v2`, `software-unit-code v2`, `plan v7`. The tool
+version line: `software-requirements v2`, `software-unit-code v2`, `plan v8`. The tool
 looks the file up and refuses a citation it cannot find or whose version is not the one
 in the file. It also accepts the title without the word "checklist"
 (`software requirements review v2`); use the file name, it cannot be mistyped as easily.

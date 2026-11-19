@@ -1,9 +1,10 @@
 # Plan review checklist
 
-Version 7. Applies to: `plan`. Supports: MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6,
+Version 8. Applies to: `plan`. Supports: MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6,
 MAN.3.BP7, SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1,
-SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1, MAN.5.BP1, MAN.5.BP2, and the subclauses of
-ISO/SAE 21434 that the cybersecurity kinds name.
+SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1, MAN.5.BP1, MAN.5.BP2, the subclauses of
+ISO/SAE 21434 that the cybersecurity kinds name, and the clauses of ISO 26262 the kind safety
+names.
 
 Kinds: `script` - a tool answers it; `semantic` - needs reading and judgement, a model
 may propose and a person confirms; `accountable` - only a person can state it.
@@ -16,7 +17,7 @@ decision: the verdict is `rework` until the fact exists.
 A plan says how a process is going to be performed in this project. Apply the part
 "Every plan" to each plan, then the part for its `kind`. The parts follow `plan_kinds`
 in `schema/items.yaml`. A kind whose process is not in `scope.processes`, or whose clause
-is not under `scope.cybersecurity`, needs no plan.
+is not under `scope.cybersecurity` or part not under `scope.safety`, needs no plan.
 
 Recording: the review record needs a result for every check ID of this file. The checks
 of the parts for other kinds are `not-applicable`, with the note "plan of kind <kind>".
@@ -253,3 +254,18 @@ empty, ask the user; do not assume a value.
 | ID | Check | How to check | Kind |
 |---|---|---|---|
 | PLN-162 | The procedure says how and when customers learn that cybersecurity support ends, and what happens to open vulnerabilities | read `Approach` | semantic |
+
+## Kind safety (26262-2:6, 26262-4:5, 26262-5:5, 26262-6:5)
+
+| ID | Check | How to check | Kind |
+|---|---|---|---|
+| PLN-163 | `safety_activities`, `method_selection` and `confirmation_measures` are present | `check`: no `SCHEMA` finding on the item | script |
+| PLN-164 | Every clause of the parts in `scope.safety` has an entry with a decision; tailored and not-applicable entries have a rationale | `check`: no `COV-63` finding; `safety` shows the decision per clause | script |
+| PLN-165 | Every table of parts 4, 5, 6 and 8 in scope has an entry; applied entries say which methods or where they are written; not-applicable entries have a rationale | `check`: no `COV-64` finding | script |
+| PLN-166 | Each tailored or not-applicable clause says how its purpose is still reached or why it does not apply to this item | read `rationale` next to the clause's purpose in `iso-26262/2018/catalog.yaml` | semantic |
+| PLN-167 | `Scope` holds the impact analysis: what is new, changed or reused, and what follows for the activities | read `Scope` | semantic |
+| PLN-168 | The methods named per table agree with the strategies that apply them (unit verification, integration, qualification, coding guideline) | read `method_selection` next to those plans | semantic |
+| PLN-169 | The ASIL and tool confidence determinations are stated, and the safety manager states that they are those of the standard | ask; the note names who and when | accountable |
+| PLN-170 | The confirmation measures cover the work products and the audit and assessment the ASIL calls for, each with the independence the responsible people read from the standard, and name who performs them | read `confirmation_measures` | semantic |
+| PLN-171 | Activities left to the customer or a supplier are those the development interface agreement assigns to them | read next to the agreement | semantic |
+| PLN-172 | The safety manager and the project lead state that the plan is the project's and that its activities are resourced | ask them; the note names who and when | accountable |
