@@ -1,5 +1,6 @@
 {
   "name": "assurance-kit",
+  "description": "The Automotive Safety & Security Assurance Kit for Claude Code: Automotive SPICE, ISO 26262 and ISO/SAE 21434 for automotive ECU software.",
   "owner": {
     "name": "lieund"
   },
