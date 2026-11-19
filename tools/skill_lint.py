@@ -69,7 +69,9 @@ def vocabulary():
         "other": set(schema["plan_kinds"]) | set(schema["structures"]) | set(schema["lifecycles"])
                  | {state for lc in schema["lifecycles"].values() for state in lc["states"]}
                  | {name for spec in schema["types"].values() for name in spec.get("attributes", {}) if name != "use"}
-                 | {name for group in schema["attribute_sets"].values() for name in group},
+                 | {name for group in schema["attribute_sets"].values() for name in group}
+                 | {str(value) for spec in schema["types"].values() for attr in spec.get("attributes", {}).values()
+                    if isinstance(attr, dict) for value in attr.get("values", [])},
     }
 
 

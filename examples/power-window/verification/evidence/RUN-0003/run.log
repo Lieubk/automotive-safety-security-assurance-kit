@@ -1,0 +1,14 @@
+== build
+HallCapture.c
+WindowPos.c
+AntiPinch.c
+WindowCmd.c
+MotorDrive.c
+Platform_double.c
+test_application.c
+Generating Code...
+== run: exit code 0
+SIT-0004 PASS
+SIT-0005 PASS
+SIT-0006 PASS
+SIT-0007 PASS

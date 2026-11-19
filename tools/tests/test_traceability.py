@@ -1018,6 +1018,23 @@ class Integration(Case):
         self.assertIn(("COV-18", "SIT-0002"), rules)            # step 'complete' ran, but not SIT-0002
         self.assertNotIn(("COV-18", "SIT-0001"), rules)         # its own step's run still counts
 
+    def test_a_run_is_evidence_for_the_process_of_its_level_only(self):
+        from traceability import practice_rows
+        rows = {r["practice"]: r for r in practice_rows(Project(self.make().root))}
+        self.assertEqual(rows["SWE.6.BP4"]["evidence"], 1)        # RUN-0003, not the unit or integration runs
+        self.assertEqual(rows["SWE.5.BP4"]["evidence"], 1)        # BLD-0001
+
+    def test_unreviewed_work_package_counts_against_project_management(self):
+        items = integration_items()
+        items["WP-0001"] = ({"type": "work-package", "title": "All", "status": "approved", "owner": "Lead",
+                             "category": "engineering", "estimate": 5, "planned_start": "2026-01-01",
+                             "planned_finish": "2026-02-01"}, {"Description": "All.", "Deliverables": "All.",
+                                                                "Estimate basis": "Guess."})
+        fixture = self.make(items, review=False)
+        fixture.review(without=("WP-0001",))
+        finding = next(f for f in fixture.findings("error") if f["rule"] == "COV-19" and f["item"] == "WP-0001")
+        self.assertEqual(finding["supports"], [])                 # MAN.3 is not in scope; nothing of SWE is blamed
+
     def test_qualification_run_without_a_build(self):
         items = integration_items()
         items["RUN-0003"][0].pop("build")

@@ -11,7 +11,7 @@ aspice:
   target_level: 1
 scope:
   role: software-supplier
-  processes: [SWE.1, SWE.2, SWE.3, SWE.4, SUP.8, MAN.3]   # the software supplier's responsibility; system level is imported
+  processes: [SWE.1, SWE.2, SWE.3, SWE.4, SWE.5, SWE.6, SUP.8, MAN.3]   # the software supplier's responsibility; system level is imported
   assessment_scope: []                              # no assessment planned for the example
 inputs:
   - level: system requirements
@@ -42,6 +42,8 @@ toolchain:
   compiler: "gcc 13 and Microsoft C/C++ 19 (host builds of the unit tests)"
   static_analysis: "static analysis of the Microsoft C/C++ compiler; no coding-guideline analyser"
   unit_test: "plain C test functions, tests/unit/run_tests.py"
+  integration_test: "plain C test programs per integration step, tests/integration/run_tests.py"
+  qualification_test: "plain C test program on the software of the last step, tests/qualification/run_tests.py"
   coverage: "gcov"
   alm: ""
 paths:

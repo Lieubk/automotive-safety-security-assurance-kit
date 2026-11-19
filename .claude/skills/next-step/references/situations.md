@@ -70,9 +70,11 @@ Whether an input was registered and accepted is looked up; the tools report the 
 | `configuration-management` | SUP.8 | `/baseline` |
 | `change-request-management` | SUP.10 | `/change-request` |
 | `project` | MAN.3 | `/project-plan` |
-| `software-integration`, `software-qualification-test`, `system-integration`, `system-qualification-test`, `quality-assurance`, `problem-resolution` | SWE.5, SWE.6, SYS.4, SYS.5, SUP.1, SUP.9 | by hand: a `plan` item with the sections of the schema |
+| `software-integration` | SWE.5 | `/sw-integration-test` |
+| `software-qualification-test` | SWE.6 | `/sw-qualification-test` |
+| `system-integration`, `system-qualification-test`, `quality-assurance`, `problem-resolution` | SYS.4, SYS.5, SUP.1, SUP.9 | by hand: a `plan` item with the sections of the schema |
 
-The three skills draft the plan of their process; their base practice tables say so.
+These skills draft the plan of their process; their base practice tables say so.
 If one of them is not installed, its plan is written by hand like the others. A plan
 in `draft` or `in-review` goes to `/review`. A plan written by hand follows the type
 `plan` in `schema/items.yaml` and the notes of its process under `aspice/3.1/notes/`.
@@ -112,8 +114,10 @@ sections that are missing. Such a draft goes back to its authoring skill, not to
 | SWE.4 | `COV-12`, `COV-28`, `COV-29` | a unit has no unit test, no static analysis entry, coverage below target, or a designed function no test names | `/sw-unit-verify` |
 | SWE.4 | `COV-17`, `COV-18` on unit tests | a test verifies nothing valid; a test has no verdict in the latest run | `/sw-unit-verify` |
 | SWE.4 | `COV-30` | code or test files changed after the latest run, or the run does not record what it ran on | `/sw-unit-verify`, to run again |
-| SWE.5 | `COV-13`; `COV-17`, `COV-18` on its tests | an interface has no integration test | by hand |
-| SWE.6 | `COV-14` | a software requirement has no qualification test or review | by hand |
+| SWE.5 | `COV-13`; `COV-17`, `COV-18` on its tests | an interface has no integration test; a test has no verdict on a build of its step | `/sw-integration-test` |
+| SWE.5 | `COV-35`, `COV-37` | a component is in no step of the strategy, or in two; a step has no test, or a test names an unknown step | `/sw-integration-test` |
+| SWE.5 | `COV-36`, `COV-38` | a step has no current successful build, or its latest run tested an older build | `/sw-integration-test`, to build and run again |
+| SWE.6 | `COV-14`; `COV-17`, `COV-18`, `COV-38` on its tests and runs | a software requirement has no qualification test or review; a test has no verdict; the run tested an older build | `/sw-qualification-test` |
 | SYS.4 | `COV-15` | a system interface has no integration test | by hand |
 | SYS.5 | `COV-16` | a system requirement has no qualification test or review | by hand |
 | any | `COV-23` | an item has a lower ASIL than what it depends on; a test case lower than what it verifies | the authoring skill of the item; a decomposition needs an approved `design-decision` |
@@ -141,7 +145,8 @@ Question 2, by type:
 | `software-component`, `software-interface`, `architecture-view`, `design-decision` | SWE.2 (views and decisions of level `system`: SYS.3; decisions of level `detailed-design`: SWE.3) | `/sw-architecture` | `/review` |
 | `component-design`, `software-unit` | SWE.3 | `/sw-detailed-design`; code: `/sw-unit-implement` | `/review` |
 | `unit-test` | SWE.4 | `/sw-unit-verify` | `/review` |
-| `software-integration-test`, `software-qualification-test` | SWE.5, SWE.6 | none today | `/review` |
+| `software-integration-test` | SWE.5 | `/sw-integration-test` | `/review` |
+| `software-qualification-test` | SWE.6 | `/sw-qualification-test` | `/review` |
 | `system-integration-test`, `system-qualification-test` | SYS.4, SYS.5 | none today | `/review` |
 | `plan` | the process of its `kind` (stop 4) | see stop 4 | `/review` |
 | `change-request` | SUP.10 | `/change-request` | - |

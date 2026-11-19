@@ -65,12 +65,14 @@ that need Grep or `list`, and what to do where no authoring skill exists.
 | Inputs not registered | an entry of `inputs` whose `source` appears in no item | `/import-inputs` |
 | Inputs not accepted | `list --imported --status draft` or `--status in-review` prints items | `/review`; it applies the checklist `input-acceptance` |
 | A question to a source is open | `QUERY` on an approved item; `list --type query --status open` | the user chases the answer; `/import-inputs <QRY-ID>` records it |
-| A plan the scope needs is missing | `COV-27` | the skill of the process: `/sw-unit-verify`, `/baseline`, `/change-request`; by hand for the other plan kinds |
+| A plan the scope needs is missing | `COV-27` | the skill of the process: `/project-plan`, `/sw-unit-verify`, `/sw-integration-test`, `/sw-qualification-test`, `/baseline`, `/change-request`; by hand for the other plan kinds |
 | System requirements not refined | `COV-05` | `/sw-requirements` |
 | Requirements not allocated | `COV-07`; also `COV-08`, `COV-24`, `COV-25` | `/sw-architecture` |
 | Components without design | `COV-09`, `COV-21` | `/sw-detailed-design` |
 | Units without code | `COV-10`, `COV-22` | `/sw-unit-implement` |
 | Units not verified | `COV-12`, `COV-18`, `COV-28`, `COV-29`, `COV-30`; `COV-17` on unit tests | `/sw-unit-verify` |
+| Software not integrated or not tested at integration level | `COV-13`, `COV-35` to `COV-38`; `COV-17`, `COV-18` on integration tests | `/sw-integration-test` |
+| Software not qualified | `COV-14`; `COV-17`, `COV-18`, `COV-38` on qualification tests and runs | `/sw-qualification-test` |
 | Drafts not complete | `still to come before review: ...` in `check --all` | the authoring skill of the item |
 | A review left findings open on a draft | `COV-19` with `left findings open` on an item in `draft` or `in-review` | the authoring skill of the item, then `/review`; for an input: the query its finding cites |
 | Approved above something that is not | `UPSTREAM` | `/review` of the upstream item named in the message; work is approved from the top down |

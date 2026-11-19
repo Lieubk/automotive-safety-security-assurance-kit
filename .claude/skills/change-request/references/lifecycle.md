@@ -116,7 +116,9 @@ design before its changed requirement is approved produces a suspect link at onc
 | `component-design`, `software-unit` | `/sw-detailed-design` | `/review` |
 | code of a unit | `/sw-unit-implement` | `/review` of the code, with the unit as subject and the code revision: only a review recorded with `--item-under-test` counts as a review of the code |
 | `unit-test`, test code, new runs | `/sw-unit-verify` | `/review` for the test cases |
-| `plan` | the skill of its process: `/sw-unit-verify` for the unit verification strategy, `/baseline` for the configuration management plan, this skill for its own plan | `/review` |
+| `software-integration-test`, the integration steps, doubles, new builds and runs | `/sw-integration-test` | `/review` for the test cases and the strategy |
+| `software-qualification-test`, new runs | `/sw-qualification-test` | `/review` for the test cases |
+| `plan` | the skill of its process: `/sw-unit-verify`, `/sw-integration-test` and `/sw-qualification-test` for the test strategies, `/project-plan` for the project plan, `/baseline` for the configuration management plan, this skill for its own plan | `/review` |
 | a type without an authoring skill | the person responsible edits it by the schema; say that no skill exists | `/review` |
 
 After every step run `python tools/traceability.py check`:

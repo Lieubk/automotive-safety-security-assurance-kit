@@ -33,6 +33,8 @@ repository - one item per file - and a trace engine checks them.
 | `/sw-detailed-design` | SWE.3 | component designs and software units |
 | `/sw-unit-implement` | SWE.3 | code for an approved unit design |
 | `/sw-unit-verify` | SWE.4 | strategy, unit test cases, tests, static analysis, coverage, records |
+| `/sw-integration-test` | SWE.5 | integration strategy and steps, integration test cases, builds, runs |
+| `/sw-qualification-test` | SWE.6 | qualification strategy, test cases from requirements, runs, bench reports |
 | `/review` | all | the only way an item becomes approved |
 | `/trace-check` | all | explain what the trace engine reports |
 | `/process-gate` | all | readiness of a process, practice by practice |

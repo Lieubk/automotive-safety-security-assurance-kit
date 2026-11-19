@@ -274,125 +274,113 @@ class Runs(RecordCase):
 
 
 class Integration(RecordCase):
-    """Build records and runs on integrated software, against a plan added to the copy of the example."""
+    """Build records and runs on integrated software, against the integration strategy of the example
+    (PLN-0004: step detection with CMP-0003 and CMP-0004, step application adding CMP-0002 and CMP-0005)."""
 
-    def setUp(self):
-        super().setUp()
-        self.item("plans/PLN-0099.md", {
-            "type": "plan", "title": "Software integration strategy", "status": "approved", "kind": "software-integration",
-            "integration_steps": [{"name": "acquisition", "components": ["CMP-0003"], "doubles": ["CMP-0006"]},
-                                  {"name": "application", "components": ["CMP-0004"], "doubles": ["CMP-0006"]}]})
-        for number, step in ((1, "acquisition"), (2, "application")):
-            self.item("verification/software-integration/SIT-000%d.md" % number, {
-                "type": "software-integration-test", "title": "Case %d" % number, "status": "approved", "asil": "B",
-                "execution": "manual", "environment": "host", "regression": True, "step": step,
-                "links": {"verifies": ["IFC-0002"]}})
-        (self.project / "tests/integration").mkdir(parents=True)
-        (self.project / "tests/integration/double_bsw.c").write_text("/* stands in for the platform */\n", encoding="utf-8")
+    DETECTION = ["SIT-0001", "SIT-0002", "SIT-0003"]
+    DOUBLE = "tests/integration/doubles/Platform_double.c"
 
-    def item(self, relative, front):
-        path = self.project / relative
-        path.parent.mkdir(parents=True, exist_ok=True)
-        front = {"id": path.stem, **front}
-        path.write_text("---\n" + yaml.safe_dump(front, sort_keys=False) + "---\n\n## Scope\n\nx\n", encoding="utf-8")
-
-    def build(self, step="acquisition", **manifest):
+    def build(self, step="detection", **manifest):
+        """Record a build; returns (exit code, output, the ID of the record written or None)."""
         data = {"executed_at": "2026-06-01T09:00:00+00:00", "tool": "gcc 13.2", "result": "succeeded",
-                "files": ["src/windowpos/HallCapture.c", "src/windowpos/WindowPos.c"],
-                "doubles": [{"component": "CMP-0006", "file": "tests/integration/double_bsw.c"}]}
+                "files": ["src/windowpos/HallCapture.c", "src/windowpos/WindowPos.c", "src/antipinch/AntiPinch.c"],
+                "doubles": [{"component": "CMP-0006", "file": self.DOUBLE}]}
         data.update(manifest)
-        return self.record("build", "--step", step, "--manifest", self.json_file("manifest.json", data),
-                           "--item-under-test", "abc123")
+        code, out = self.record("build", "--step", step, "--manifest", self.json_file("manifest.json", data),
+                                "--item-under-test", "abc123")
+        found = re.search(r"verification/builds/(BLD-\d+)\.md", out)
+        return code, out, found.group(1) if found else None
 
-    def run_on(self, build, results, level="software-integration", commit="abc123"):
-        data = {"executed_at": "2026-06-01T10:00:00+00:00", "results": results}
+    def run_on(self, build, tests, level="software-integration", commit="abc123"):
+        data = {"executed_at": "2026-06-01T10:00:00+00:00", "results": [{"test": t, "verdict": "passed"} for t in tests]}
         extra = ["--build", build] if build else []
         return self.record("test-run", "--level", level, "--results", self.json_file("r.json", data),
                            "--item-under-test", commit, "--environment", "host", *extra)
 
     def test_build_groups_the_units_by_component_and_keeps_the_doubles(self):
-        code, out = self.build()
+        code, out, build = self.build()
         self.assertEqual(code, 0, out)
-        record = self.front("verification/builds/BLD-0001.md")
-        self.assertEqual(record["contents"], [{"component": "CMP-0003", "units": ["UNT-0001", "UNT-0002"]}])
-        self.assertEqual(record["doubles"], [{"component": "CMP-0006", "file": "tests/integration/double_bsw.c"}])
-        self.assertIn("tests/integration/double_bsw.c", [s["file"] for s in record["sources"]])
+        record = self.front("verification/builds/%s.md" % build)
+        self.assertEqual(record["contents"], [{"component": "CMP-0003", "units": ["UNT-0001", "UNT-0002"]},
+                                              {"component": "CMP-0004", "units": ["UNT-0003"]}])
+        self.assertEqual(record["doubles"], [{"component": "CMP-0006", "file": self.DOUBLE}])
+        self.assertIn(self.DOUBLE, [s["file"] for s in record["sources"]])
 
     def test_build_of_a_step_the_plan_does_not_have_is_refused(self):
-        code, out = self.build(step="everything")
+        code, out, _ = self.build(step="everything")
         self.assertEqual(code, 1)
         self.assertIn("has no step 'everything'", out)
 
     def test_built_file_that_belongs_to_no_unit_is_refused(self):
-        code, out = self.build(files=["src/windowpos/HallCapture.c", "tests/integration/double_bsw.c"])
+        code, out, _ = self.build(files=["src/windowpos/HallCapture.c", self.DOUBLE])
         self.assertEqual(code, 1)
         self.assertIn("belongs to no software unit", out)
 
     def test_component_integrated_as_received_needs_its_version(self):
-        code, out = self.build(step="application", delivered=[{"component": "CMP-0005"}])
+        code, out, _ = self.build(step="application", delivered=[{"component": "CMP-0005"}])
         self.assertEqual(code, 1)
         self.assertIn("needs the version", out)
 
     def test_build_reports_what_the_step_should_contain_but_does_not(self):
-        code, out = self.build(step="application")
+        code, out, _ = self.build(step="application")
         self.assertEqual(code, 0, out)
-        self.assertIn("not in this build, although the step integrates them: CMP-0004", out)
+        self.assertIn("not in this build, although the step integrates them: CMP-0002, CMP-0005", out)
 
     def test_integration_run_needs_a_build(self):
-        code, out = self.run_on(None, [{"test": "SIT-0001", "verdict": "passed"}])
+        code, out = self.run_on(None, self.DETECTION)
         self.assertEqual(code, 1)
         self.assertIn("needs --build", out)
 
     def test_integration_run_records_the_build_and_the_cases_of_its_step(self):
-        self.build()
-        code, out = self.run_on("BLD-0001", [{"test": "SIT-0001", "verdict": "passed"}])
+        _, _, build = self.build()
+        code, out = self.run_on(build, self.DETECTION)
         self.assertEqual(code, 0, out)
         record = self.front("verification/runs/" + self.records("verification/runs", "RUN-")[-1])
-        self.assertEqual(record["build"], "BLD-0001")
+        self.assertEqual(record["build"], build)
+
+    def test_integration_run_needs_every_case_of_its_step(self):
+        _, _, build = self.build()
+        code, out = self.run_on(build, self.DETECTION[:2])
+        self.assertEqual(code, 1)
+        self.assertIn("approved test case SIT-0003 has no result", out)
 
     def test_case_of_a_later_step_cannot_run_on_an_earlier_build(self):
-        self.build()
-        code, out = self.run_on("BLD-0001", [{"test": "SIT-0001", "verdict": "passed"},
-                                             {"test": "SIT-0002", "verdict": "passed"}])
+        _, _, build = self.build()
+        code, out = self.run_on(build, self.DETECTION + ["SIT-0004"])
         self.assertEqual(code, 1)
-        self.assertIn("SIT-0002 belongs to step 'application'", out)
+        self.assertIn("SIT-0004 belongs to step 'application'", out)
 
     def test_run_on_a_build_of_another_commit_is_refused(self):
-        self.build()
-        code, out = self.run_on("BLD-0001", [{"test": "SIT-0001", "verdict": "passed"}], commit="def456")
+        _, _, build = self.build()
+        code, out = self.run_on(build, self.DETECTION, commit="def456")
         self.assertEqual(code, 1)
         self.assertIn("was built from abc123", out)
 
     def test_junit_report_from_a_test_bench(self):
-        self.item("verification/software-qualification/SQT-0001.md", {
-            "type": "software-qualification-test", "title": "Reversal", "status": "approved", "asil": "B",
-            "execution": "manual", "environment": "hardware-in-the-loop", "regression": True,
-            "links": {"verifies": ["SWR-0004"]}})
-        self.item("verification/software-qualification/SQT-0002.md", {
-            "type": "software-qualification-test", "title": "Manual", "status": "approved", "asil": "QM",
-            "execution": "manual", "environment": "hardware-in-the-loop", "regression": True,
-            "links": {"verifies": ["SWR-0009"]}})
-        self.build()
-        self.build(step="application", executed_at="2026-06-01T09:30:00+00:00")
+        _, _, build = self.build(step="application", executed_at="2026-06-01T09:30:00+00:00")
+        cases = ['<testcase classname="Window" name="SQT-0001 opening"><failure message="late"/></testcase>',
+                 '<testcase classname="Window" name="SQT-0002 reference"><skipped message="switch defect on bench"/>'
+                 '</testcase>']
+        cases += ['<testcase classname="Window" name="SQT-%04d"/>' % n for n in range(3, 10)]
         report = Path(self.tmp.name) / "bench.xml"
-        report.write_text('<testsuites><testsuite name="bench" timestamp="2026-06-02T08:00:00">'
-                          '<testcase classname="Window" name="SQT-0001 reversal at 100 N"><failure message="late"/></testcase>'
-                          '<testcase classname="Window" name="SQT-0002 manual up"><skipped message="switch defect on bench"/>'
-                          '</testcase></testsuite></testsuites>', encoding="utf-8")
+        report.write_text('<testsuites><testsuite name="bench" timestamp="2026-06-02T08:00:00">%s</testsuite>'
+                          '</testsuites>' % "".join(cases), encoding="utf-8")
         code, out = self.record("test-run", "--level", "software-qualification", "--results", report,
-                                "--item-under-test", "abc123", "--environment", "bench 3", "--build", "BLD-0002",
+                                "--item-under-test", "abc123", "--environment", "bench 3", "--build", build,
                                 "--selection", "all")
         self.assertEqual(code, 0, out)
         record = self.front("verification/runs/" + self.records("verification/runs", "RUN-")[-1])
         self.assertEqual(record["executed_at"], "2026-06-02T08:00:00")
-        self.assertEqual([(r["test"], r["verdict"]) for r in record["results"]],
-                         [("SQT-0001", "failed"), ("SQT-0002", "not-run")])
-        self.assertEqual(record["results"][1]["reason"], "switch defect on bench")
-        self.assertTrue(record["results"][0]["evidence"].startswith("verification/evidence/"))
+        verdicts = {r["test"]: r for r in record["results"]}
+        self.assertEqual(verdicts["SQT-0001"]["verdict"], "failed")
+        self.assertEqual((verdicts["SQT-0002"]["verdict"], verdicts["SQT-0002"]["reason"]),
+                         ("not-run", "switch defect on bench"))
+        self.assertEqual(verdicts["SQT-0009"]["verdict"], "passed")
+        self.assertTrue(verdicts["SQT-0001"]["evidence"].startswith("verification/evidence/"))
 
     def test_qualification_on_a_build_of_an_earlier_step_is_refused(self):
-        self.build()
-        code, out = self.run_on("BLD-0001", [], level="software-qualification")
+        _, _, build = self.build()
+        code, out = self.run_on(build, [], level="software-qualification")
         self.assertEqual(code, 1)
         self.assertIn("qualified on a build of the last step", out)
 

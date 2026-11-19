@@ -1,0 +1,8 @@
+HallCapture.c
+WindowPos.c
+AntiPinch.c
+WindowCmd_double.c
+MotorDrive_double.c
+Platform_double.c
+test_detection.c
+Generating Code...

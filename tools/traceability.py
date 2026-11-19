@@ -55,6 +55,7 @@ TEST_TYPES = {  # type -> (process that owns it, level name used by test runs)
     "system-integration-test": ("SYS.4", "system-integration"),
     "system-qualification-test": ("SYS.5", "system-qualification"),
 }
+RUN_LEVELS = {level: process for process, level in TEST_TYPES.values()}   # level of a test run -> its process
 VERDICTS = {"passed", "failed", "blocked", "not-run"}
 FRONT_MATTER = re.compile(r"\A---\n(.*?)\n---[ \t]*(?:\n|\Z)(.*)\Z", re.S)
 HEADING = re.compile(r"^##\s+(.+?)\s*$")
@@ -337,19 +338,24 @@ class Project:
             return "warning"
         return "info"
 
-    def own_supports(self, rule_id, item):
+    def own_supports(self, rule_id, item, fallback="rule"):
         """The practices of a rule that belong to the process owning the item, so that a
-        finding on a requirement is not counted against the unit verification process."""
+        finding on a requirement is not counted against the unit verification process.
+        When none of them does: all practices of the rule, or - for a rule about the item
+        itself (fallback "subject") - the practices the item is evidence for."""
         supports = self.rules[rule_id]["supports"]
         if item.type == "plan":
             refs = self.schema["plan_kinds"].get(item.front.get("kind"), [])
         else:
             refs = self.types.get(item.type, {}).get("supports") or []
         processes = {str(r).split(".BP")[0] for r in refs if ".BP" in str(r)}
-        return [s for s in supports if str(s).split(".BP")[0] in processes] or supports
+        own = [s for s in supports if str(s).split(".BP")[0] in processes]
+        if not own and fallback == "subject":
+            own = [str(r) for r in refs if ".BP" in str(r)]
+        return own or supports
 
-    def gap(self, rule_id, item, message):
-        self.add(self.level_for(item), rule_id, item.id, message, self.own_supports(rule_id, item))
+    def gap(self, rule_id, item, message, fallback="rule"):
+        self.add(self.level_for(item), rule_id, item.id, message, self.own_supports(rule_id, item, fallback))
 
     def reviews_of(self, item, verdict=None):
         """Final review records whose subject names this item at its current content, oldest first."""
@@ -817,7 +823,7 @@ class Project:
                 opened = [str(f.get("id")) for f in as_list(reviews[-1].front.get("findings")) if isinstance(f, dict)
                           and f.get("state") == "open" and f.get("item") in (None, item.id)] if reviews else []
                 if opened:
-                    self.gap(rule, item, "review %s left findings open: %s" % (reviews[-1].id, ", ".join(opened)))
+                    self.gap(rule, item, fallback="subject", message="review %s left findings open: %s" % (reviews[-1].id, ", ".join(opened)))
                 continue
             if item.status != "approved":
                 continue
@@ -825,14 +831,14 @@ class Project:
             if review is None:
                 older = [r.id for r in self.of_type("review-record")
                          if any(isinstance(e, dict) and e.get("item") == item.id for e in as_list(r.front.get("subject")))]
-                self.gap(rule, item, "stale approval: content changed since review %s (current hash %s)"
+                self.gap(rule, item, fallback="subject", message="stale approval: content changed since review %s (current hash %s)"
                          % (", ".join(older), item.hash) if older else
                          "approved, but no final review record covers it (current hash %s)" % item.hash)
                 continue
             opened = [str(f.get("id")) for f in as_list(review.front.get("findings"))
                       if isinstance(f, dict) and f.get("state") == "open" and f.get("item") in (None, item.id)]
             if opened:
-                self.gap(rule, item, "review %s still has open findings: %s" % (review.id, ", ".join(opened)))
+                self.gap(rule, item, fallback="subject", message="review %s still has open findings: %s" % (review.id, ", ".join(opened)))
             closed = {str(f.get("closes")) for rev in self.reviews_of(item) for f in as_list(rev.front.get("findings"))
                       if isinstance(f, dict) and f.get("closes") and f.get("state") == "closed"}
             left = ["%s#%s" % (rev.id, f.get("id")) for rev in self.reviews_of(item) if rev.id != review.id
@@ -840,7 +846,7 @@ class Project:
                     if isinstance(f, dict) and f.get("state") == "open" and f.get("item") in (None, item.id)]
             left = [ref for ref in left if ref not in closed]
             if left:
-                self.gap(rule, item, "approved by %s although findings of an earlier review of the same content are "
+                self.gap(rule, item, fallback="subject", message="approved by %s although findings of an earlier review of the same content are "
                          "open and not closed by a later finding entry: %s" % (review.id, ", ".join(left)))
 
     def cov_20(self, rule):
@@ -1669,6 +1675,7 @@ def practice_rows(project, process_id=None):
             rules = sorted(r["id"] for r in schema["coverage"] if ref in r["supports"])
             held = [i for i in project.items.values() if i.type in types and project.live(i)
                     and (i.type != "plan" or i.front.get("kind") in kinds or not kinds)
+                    and (i.type != "test-run" or RUN_LEVELS.get(i.front.get("level")) == pid)
                     and (i.type != "communication-record" or not i.front.get("practices")
                          or ref in map(str, as_list(i.front.get("practices"))))]
             if not types:                                 # evidenced by links or rules only: count what carries them

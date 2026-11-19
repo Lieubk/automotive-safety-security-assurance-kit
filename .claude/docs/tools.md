@@ -11,7 +11,7 @@ example is `examples/power-window`). They need Python 3 and PyYAML.
 | `check` | find out what is wrong or missing | one line per finding: level, rule, item, message, base practices; a summary line. Exit code 1 when there are errors |
 | `check --all` | also see gaps on items still in draft, and what each draft still needs for its next state | as above, plus `info` lines |
 | `check --json` | process findings in a script | JSON |
-| `status` | see how many items of each type are in which state, and the latest runs | table |
+| `status` | see how many items of each type are in which state, the latest runs, and the latest build of each integration step | table |
 | `list [--type T] [--status S] [--imported]` | get the IDs of items by type and state, or of the imported inputs | `ID state type title` per line |
 | `show <ID>` | read one item's links in both directions | what it links to, what links to it; for a component also the interfaces it provides and uses |
 | `impact <ID>` | see what a change to an item affects | every item that depends on it, by distance |
@@ -37,7 +37,7 @@ ratings:
 
 Finding levels: `error` (approved items, or always-wrong structure), `warning` (items
 in review, or missing consistency evidence), `info` (drafts). Rule names: `FORMAT`,
-`SCHEMA`, `LINK` (structure), `COV-01` to `COV-30` (coverage rules of
+`SCHEMA`, `LINK` (structure), `COV-01` to `COV-38` (coverage rules of
 `schema/items.yaml`), `SUSPECT` (an upstream item, or the code of a unit, changed after
 the review), `CONSISTENCY` (a review did not record what the item was compared with, or
 did not record the code of a unit), `UPSTREAM` (approved above something that is not),
@@ -52,7 +52,8 @@ active. The summary line says how many.
 | Command | Use it to |
 |---|---|
 | `next-id <type>` | get the next free ID before creating an item |
-| `test-run --level L --results FILE --item-under-test REF --environment NAME [--deviation UNIT=TEXT]` | turn a test result file into a final test-run record, with coverage per unit and a hash of every source and test file. `--deviation` records why a person accepted a coverage figure below target |
+| `test-run --level L --results FILE --item-under-test REF --environment NAME [--deviation UNIT=TEXT] [--build BLD-ID] [--selection TEXT] [--executed-at TIME]` | turn a test result file - JSON from a runner, or the JUnit XML report of a test bench - into a final test-run record, with coverage per unit and a hash of every source and test file. `--deviation` records why a person accepted a coverage figure below target. `--build` names the build record of the integrated software tested: needed for level software-integration (then the cases of the build's step must appear, earlier steps' may, later steps' may not) and, once an approved software-integration plan exists, for software-qualification (a build of the last step). `--selection` says how the cases were chosen |
+| `build --step NAME --manifest FILE --item-under-test REF` | turn the manifest a build of one integration step wrote into a final build record: the units built per component, components integrated as received with their version, the doubles, and a hash of every file built. Refused without an approved software-integration plan that has the step, and for a built file that belongs to no unit |
 | `analysis-run --results FILE --item-under-test REF` | turn a static analysis result file into a final record, attributed to units; justified deviations in the file are recorded as such, not as open findings |
 | `review --checklist "NAME vN" --reviewer NAME --verdict approved\|rework [--findings FILE] [--checks FILE] [--item-under-test REF] [--external-criteria] ID ...` | record a review a person has given a verdict on; the checklist is cited as the file name under `.claude/docs/checklists` (or its title) and its version, and must exist unless `--external-criteria` is given; hashes and references are filled in. With `--item-under-test` it is a review of the code as well: the hashes of the units' source files are stored; without it the record covers the design only. `--checks` stores the result per checklist item (`pass`, `finding`, `not-applicable` with a note, `not-assessed`). Verdict approved is refused while a finding is open, while a check of the checklist has no result or is not assessed, while an accountable check is answered with a finding, while an item the subject builds on is not approved, or while an open finding of an earlier review of the same content is not closed by an entry with `closes` |
 | `review --reconfirm --reviewer NAME --verdict approved\|rework [--findings FILE] ID ...` | record that items which did not change were compared with new versions of what they build on. No checklist and no check results; refused for an item whose present content has no approving review. The new versions are recorded as references. The code review of a unit is carried over as it was recorded, so code that changed since stays `SUSPECT`; it cannot be combined with `--item-under-test` |
