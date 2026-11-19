@@ -59,8 +59,10 @@ Read the tool's own message; it names the problem and writes nothing.
 | the case expects something the requirement does not say | correct the item; its approval becomes stale; `/review` |
 | the procedure, the bench or its set-up does not do what the item says | correct it; name every case it affects |
 
-The user confirms. Where SUP.9 is in scope a confirmed defect gets a `problem-report`,
-recorded by `/problem-resolution`.
+The user confirms. A confirmed defect gets a `problem-report`, recorded by `/problem-resolution`, that names
+the run in `found_in` - also where SUP.9 is out of scope, where the report still keeps the
+defect visible (`PROBLEM` on the affected items; `COV-18` reports the failed case as an
+error until a report names it).
 
 ## Summary for the user
 

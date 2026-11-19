@@ -414,6 +414,21 @@ class Coverage(Case):
                               "environment": "host", "executed_at": "2026-02-01T10:00:00", "results": []}, {})
         self.expect("COV-18", "UT-0001", items)
 
+    def test_failed_case_stays_visible_until_a_problem_report_names_it(self):
+        items = base_items()
+        items["RUN-0001"][0]["results"][0].update(verdict="failed", reason="expected 3, got 4")
+        fixture = self.make(items)
+        messages = [f["message"] for f in fixture.findings("error") if f["rule"] == "COV-18"]
+        self.assertTrue(messages and "failed in RUN-0001 (expected 3, got 4)" in messages[0], messages)
+        items["PRB-0001"] = ({"type": "problem-report", "title": "Off by one", "status": "open", "severity": "major",
+                              "found_in": "abc123, RUN-0001", "reported_by": "Tester", "reported_at": "2026-01-03",
+                              "detected_by": "unit-test"}, {"Description": "One count too many."})
+        fixture = self.make(items)
+        self.assertNotIn(("COV-18", "UT-0001"), fixture.rules("error"))
+        self.assertIn(("COV-18", "UT-0001"), fixture.rules("warning"))
+        fixture.edit("PRB-0001", status="resolved")
+        self.assertIn(("COV-18", "UT-0001"), fixture.rules("info"))
+
     def test_approved_item_without_review(self):
         self.assertIn(("COV-19", "SWR-0001"), self.make(review=False).rules())
 

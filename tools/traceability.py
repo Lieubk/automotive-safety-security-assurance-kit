@@ -890,6 +890,25 @@ class Project:
                 self.gap(rule, test, "no verdict in the latest final test run %s" % run.id)
             elif entry["verdict"] in ("not-run", "blocked") and not entry.get("reason"):
                 self.gap(rule, test, "%s in %s without a reason" % (entry["verdict"], run.id))
+            elif entry["verdict"] == "failed":
+                self.failed_case(rule, test, run, entry)
+
+    def failed_case(self, rule, test, run, entry):
+        """A failed verdict in the latest run stays visible until a run passes it: as an error while no
+        problem report names the case, an item it verifies or the run; as a warning while that report is
+        unresolved; as information once it is resolved."""
+        names = {test.id, run.id} | {t for t, _ in test.targets("verifies")}
+        reports = [p for p in self.of_type("problem-report") if p.status != "rejected"
+                   and ({t for t, _ in p.targets("affects")} & names or run.id in str(p.front.get("found_in") or ""))]
+        why = (" (%s)" % " ".join(str(entry.get("reason")).split())[:120]) if entry.get("reason") else ""
+        supports = self.own_supports(rule, test)
+        if not reports:
+            self.add("error", rule, test.id, "failed in %s%s; no problem report names the case, what it verifies or the run"
+                     % (run.id, why), supports)
+            return
+        open_ = [p for p in reports if p.status in UNRESOLVED]
+        self.add("warning" if open_ else "info", rule, test.id, "failed in %s%s; %s" % (run.id, why, ", ".join(
+            "%s %s" % (p.id, p.status) for p in (open_ or reports))), supports)
 
     def cov_19(self, rule):
         for item in self.items.values():

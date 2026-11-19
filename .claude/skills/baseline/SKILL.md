@@ -90,7 +90,9 @@ structure. `python tools/traceability.py practices SUP.8` says so, and
   working tree as it is now?"
 - Run `python tools/record.py baseline --tag <tag> --purpose "<purpose>"` and quote its
   output, including the line that says how many items were left out. If it prints
-  `no record written`, quote the findings it lists and stop.
+  `no record written`, quote the findings it lists and stop. When the refusal lists
+  items that are not approved, ask whether they are approved first or left out; only
+  with the user's reason, run it again with `--leave-out-reason "<their words>"`.
 
 ### 5. Commit and tag
 - Show the exact commands of section "Commit and tag" of the reference, with the real

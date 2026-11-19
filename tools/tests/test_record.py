@@ -372,7 +372,7 @@ class Integration(RecordCase):
         record = self.front("verification/runs/" + self.records("verification/runs", "RUN-")[-1])
         self.assertEqual(record["executed_at"], "2026-06-02T08:00:00")
         verdicts = {r["test"]: r for r in record["results"]}
-        self.assertEqual(verdicts["SQT-0001"]["verdict"], "failed")
+        self.assertEqual((verdicts["SQT-0001"]["verdict"], verdicts["SQT-0001"]["reason"]), ("failed", "late"))
         self.assertEqual((verdicts["SQT-0002"]["verdict"], verdicts["SQT-0002"]["reason"]),
                          ("not-run", "switch defect on bench"))
         self.assertEqual(verdicts["SQT-0009"]["verdict"], "passed")
@@ -659,6 +659,20 @@ class Baselines(RecordCase):
         self.assertIn("needs none", out)
         code, out = self.record("baseline", "--tag", "work-1", "--purpose", "working")
         self.assertEqual(code, 0, out)
+
+    def test_unapproved_items_stay_out_only_with_the_users_reason(self):
+        path = self.project / "verification/software-qualification/SQT-0009.md"
+        path.write_text(path.read_text(encoding="utf-8").replace("status: approved", "status: draft", 1),
+                        encoding="utf-8")
+        code, out = self.record("baseline", "--tag", "design-1", "--purpose", "design freeze")
+        self.assertEqual(code, 1, out)
+        self.assertIn("draft: SQT-0009", out)
+        code, out = self.record("baseline", "--tag", "design-1", "--purpose", "design freeze",
+                                "--leave-out-reason", "SQT-0009 follows with the next release")
+        self.assertEqual(code, 0, out)
+        record = self.front("records/baselines/BL-0001.md")
+        self.assertEqual(record["left_out"], [{"item": "SQT-0009", "status": "draft"}])
+        self.assertEqual(record["left_out_reason"], "SQT-0009 follows with the next release")
 
     def test_a_communication_record_counts_only_for_the_practices_it_names(self):
         self.record("baseline", "--tag", "design-1", "--purpose", "design freeze")

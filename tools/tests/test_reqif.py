@@ -90,6 +90,11 @@ class ReqIF(unittest.TestCase):
         file = Path(self.tmp.name) / "foreign.reqif"
         file.write_text(FOREIGN, encoding="utf-8")
         code, out = self.reqif(self.target, "import", file, "--type", "stakeholder-requirement", "--source", "OEM spec",
+                               "--version", "3", "--id-attribute", "Object Identifier", "--text-attribute", "Object Text",
+                               "--dry-run")
+        self.assertIn("(CUS-12)\nThe window shall close by one touch.", out)       # the user sees what the mapping reads
+        self.assertFalse((self.target / "spec" / "stakeholder" / "STK-0001.md").exists())
+        code, out = self.reqif(self.target, "import", file, "--type", "stakeholder-requirement", "--source", "OEM spec",
                                "--version", "3", "--id-attribute", "Object Identifier", "--text-attribute", "Object Text")
         self.assertEqual(code, 0, out)
         text = (self.target / "spec" / "stakeholder" / "STK-0001.md").read_text(encoding="utf-8")

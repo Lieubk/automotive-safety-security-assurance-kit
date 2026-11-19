@@ -31,6 +31,10 @@ in this step), `environment` and `description`. A step contains everything added
 it. The last step contains the complete software of this project; a component that is
 never integrated here is a double of the last step.
 
+**`components` lists only what the step adds.** Do not repeat the elements of earlier
+steps: a step contains everything added up to it, and an element named in two steps is
+reported by the trace check (`COV-35`, `COV-46`) as integrated twice.
+
 ## Template
 
 The values are those of the power window example (`plans/PLN-0004.md`) and are

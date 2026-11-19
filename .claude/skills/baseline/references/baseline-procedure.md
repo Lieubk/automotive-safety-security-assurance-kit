@@ -94,10 +94,27 @@ On success the tool prints, for example:
 
 ```
 wrote records/baselines/BL-0001.md: 65 items, purpose requirements freeze, tag req-1 (set the tag after committing the record)
-not in the baseline: 1 items that are not approved (python tools/traceability.py list --status draft)
+not in the baseline: 1 items that are not approved, listed under left_out: SWR-0012
 ```
 
-The second line appears only when items were left out. Quote it, and name the items.
+The second line appears only when items were left out; the record lists them under
+`left_out`. Quote it, and name the items.
+
+A baseline that is not internal holds only approved items. When items of processes in
+scope are not approved, the tool refuses and lists them by state:
+
+```
+3 items of processes in scope are not approved; a baseline with purpose 'design freeze' leaves them out
+  draft: SWR-0012
+  in-review: CMP-0004, IF-0007
+approve them first (/review), or state why they stay out with --leave-out-reason TEXT
+no record written
+```
+
+Ask the user which it is. Leaving them out is a decision of the person who asked for the
+baseline: `--leave-out-reason` takes their words, for example "IF-0007 belongs to the
+next release; CMP-0004 and SWR-0012 follow in design freeze 2", and the record keeps it
+as `left_out_reason`. Never write a reason the user did not give.
 The tool assigns the ID, sets `status: final` and `created_at`, and fills `items`.
 
 When the trace check reports errors and the purpose is not internal, it refuses:

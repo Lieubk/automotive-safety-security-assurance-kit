@@ -254,6 +254,8 @@ types:
       use: [common]
       source_document: {required: always, note: "document the stakeholder delivered, with its version"}
       source_id: {required: optional, note: "identifier of the requirement in that document"}
+      asil: {values: [QM, A, B, C, D], required: optional, note: "as the source states it"}
+      security_relevant: {values: [true, false], required: optional, note: "as the source states it"}
       assessment: {values: [accepted, accepted-with-deviation, rejected, needs-clarification], required: before-approval}
       agreement: {required: optional, note: "communication record ID; mandatory unless assessment is accepted"}
     sections:
@@ -803,6 +805,8 @@ types:
       purpose: {required: always, note: "for example requirements freeze, release candidate, delivery"}
       created_at: {required: optional}
       items: {required: always, note: "list of {item: <ID>, hash: <content hash>, status}; generated"}
+      left_out: {required: optional, note: "list of {item: <ID>, status}: live engineering items not in the baseline; generated"}
+      left_out_reason: {required: optional, note: "why items of processes in scope that are not approved stay out, as the user states it"}
 
 # ---------------------------------------------------------------------------
 # Plan kinds and the strategy practices they answer. A process in scope needs an
@@ -978,7 +982,7 @@ coverage:
   - {id: COV-15, subject: system-interface, expect: "at least one system-integration-test verifies it", waiver: "none", supports: [SYS.4.BP7]}
   - {id: COV-16, subject: system-requirement, expect: "verification_method test -> at least one system-qualification-test verifies it; otherwise a final review-record covers it", waiver: "none", supports: [SYS.5.BP5]}
   - {id: COV-17, subject: test-case, expect: "at least one verifies link, to an item that is not rejected or obsolete", waiver: "none", supports: [SWE.4.BP5, SWE.5.BP7, SWE.6.BP5, SYS.4.BP7, SYS.5.BP5]}
-  - {id: COV-18, subject: test-case, expect: "a verdict in the latest final test-run of its level for the baseline under assessment; for an integration test (software or system), in the latest final run on a build of its step", waiver: "recorded as not-run with a reason accepted in the test summary", supports: [SWE.4.BP5, SWE.5.BP7, SWE.6.BP5, SYS.4.BP7, SYS.5.BP5]}
+  - {id: COV-18, subject: test-case, expect: "a verdict in the latest final test-run of its level for the baseline under assessment; for an integration test (software or system), in the latest final run on a build of its step; a failed verdict is named by a problem report (affects the case or what it verifies, or found_in the run) until a later run passes it", waiver: "recorded as not-run with a reason accepted in the test summary; a failed verdict stays reported (warning while its problem report is unresolved, information once resolved)", supports: [SWE.4.BP5, SWE.5.BP7, SWE.6.BP5, SYS.4.BP7, SYS.5.BP5]}
   - {id: COV-19, subject: any-engineering-item, expect: "a final review-record with verdict approved covers the current content hash and all its findings are closed", waiver: "none", supports: [SUP.1.BP2, SYS.2.BP7, SYS.3.BP7, SYS.4.BP8, SYS.5.BP6, SWE.1.BP7, SWE.2.BP8, SWE.3.BP6, SWE.4.BP6, SWE.5.BP8, SWE.6.BP6]}
   - {id: COV-20, subject: change-request, expect: "from state analysed on: at least one affects link", waiver: "none", supports: [SUP.10.BP8]}
   - {id: COV-21, subject: software-interface, expect: "provided by a component with origin developed -> at least one software-unit of that component realizes it", waiver: "none", supports: [SWE.3.BP2, SWE.3.BP5]}

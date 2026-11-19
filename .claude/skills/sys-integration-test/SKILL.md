@@ -137,6 +137,11 @@ Run `python tools/traceability.py check --all`.
 - `COV-47` "the system build is older than the software" and `COV-49` (a newer build of
   the step exists than the one the latest run tested) mean the records describe older
   configurations: integrate, record and run again. Do not explain them away.
+- `COV-47` compares with software builds only where SWE.5 is in scope, because only then
+  does this repository record them. Where the software comes from elsewhere, the system
+  build names the delivered software version in its manifest, and a newer delivery is
+  seen through `/import-inputs` or `/supplier-monitoring`, not by the trace check: say so
+  in the hand-over.
 
 ## Hand-over
 

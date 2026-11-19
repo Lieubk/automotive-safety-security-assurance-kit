@@ -100,9 +100,10 @@ toolkit default applies until someone states otherwise.
 Ask: AUTOSAR Classic or not (if not, what instead); microcontroller; language
 standard; coding guideline set; compiler; static analyser; unit test tool; coverage
 tool; the requirements or ALM tool the items must be exchanged with. Name and version
-for each tool. Say plainly: exchange with ALM tools is not built yet, so
-`/import-inputs` reads documents; a verification tool that is missing later shows up
-as `NOT ASSESSED`, never as a silent skip.
+for each tool. Say plainly: requirements arrive best as ReqIF (`/import-inputs` reads
+it with `tools/reqif.py`) and AUTOSAR models as ARXML (`/sw-architecture` with
+`tools/arxml.py`); other formats are read as documents; a verification tool that is
+missing later shows up as `NOT ASSESSED`, never as a silent skip.
 
 ### 8. Where things live
 Ask for the source roots, and for the patterns of generated and of third-party code.
@@ -118,6 +119,16 @@ approves inputs, requirements, architecture, design and code, and test cases; wh
 decides on change requests; who the contact at the source of each input is. Review
 records need real names and at least one reviewer who did not write the item: say so
 if only one person is named. Record only names the user gives.
+
+Some accountable checks of the review checklists can only be answered by a role: ask
+for the person who holds it, and say which reviews stall without them.
+- `safety.highest_asil` above QM: who is responsible for functional safety (system
+  architecture SYA-84, unit verification PLN-29, safety analyses).
+- System level in scope: who leads hardware, software and mechanics, or who speaks for
+  them (system architecture SYA-83, integration strategy).
+- `security.relevant`: who is responsible for cybersecurity.
+A role that does not exist in the project is recorded as such under `people` with the
+reason; the check then is answered `not-applicable` with that reason, never `pass`.
 
 ### 10. Derive the starting point
 Read `references/starting-point.md`. From the answers derive and explain:

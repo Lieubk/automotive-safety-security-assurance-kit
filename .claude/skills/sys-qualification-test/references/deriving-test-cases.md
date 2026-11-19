@@ -68,9 +68,13 @@ the stimuli and the terms the steps use.
 ```
 
 `execution: automated` needs `script` before approval, in the form
-`<repository path>::<test name>`; a bench that reports its own results names its script
-or procedure there, and the test name in its report carries the case ID. A manual case
-has `Steps` a tester can follow without asking.
+`<repository path>::<test name>`, and the trace check requires the file to exist
+(`LINK`). A bench that keeps its scripts in its own tool: export the script or its
+listing, at the version the bench runs, into the repository (for example
+`tests/system/bench/<name>.<extension>`) and name that file; the name of the test in the
+bench's report carries the case ID. The exported file is then under configuration
+management with the case, and `impact` sees it change. A manual case has `Steps` a
+tester can follow without asking.
 
 ## Procedures
 

@@ -34,3 +34,6 @@ QNT.2 Quantitative Process Improvement
 
 # Trademark notice, to be given in these words
 Automotive SPICE is a registered trademark of the Verband der Automobilindustrie e.V. (VDA)
+
+# Generic technical terms that sources happen to share
+software in the loop hardware in the loop

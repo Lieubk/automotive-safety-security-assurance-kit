@@ -12,8 +12,9 @@ requirement or element, in the words of the source, with the source's identifier
 version and the date received. The result is a set of imported items in state `draft`
 and a set of `query` items, ready for an input acceptance review through `/review`.
 
-Today the skill reads the document and writes the item files itself. Structured
-import and export (ReqIF, spreadsheets, ALM tools) is not built yet.
+A ReqIF delivery is registered with `tools/reqif.py` (see "A delivery as ReqIF" in
+`references/registering-inputs.md`); other documents are read and the item files
+written by the skill.
 
 The practices are those of SYS.1. With SYS.1 in scope the rows are evidence for it;
 without it the same steps are the entry check of the first process in scope, and no

@@ -34,6 +34,10 @@ element ID and say in `description` how it is simulated), `environment` and
 complete system of this project; an element that is never integrated here, an external
 element above all, is a double of the last step.
 
+**`components` lists only what the step adds.** Do not repeat the elements of earlier
+steps: a step contains everything added up to it, and an element named in two steps is
+reported by the trace check (`COV-35`, `COV-46`) as integrated twice.
+
 ## Template
 
 The elements and values are invented for a window lifter control unit. Replace every one

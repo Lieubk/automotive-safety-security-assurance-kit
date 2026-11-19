@@ -163,6 +163,10 @@ def cmd_import(project, args):
         if not args.dry_run:
             record.write_item(project, args.type, front, body)
         number += 1
+    if args.dry_run:
+        for obj in objects[:2]:
+            print("--- %s (%s)\n%s" % (obj["values"].get(args.title_attribute) or "-", source_id(obj, args),
+                                     text_of(obj, args)[:400]))
     print("%s %d %s items from %s, version %s: %s" % ("would write" if args.dry_run else "wrote", len(written),
                                                     args.type, args.source, args.version,
                                                     "%s to %s" % (written[0], written[-1]) if written else "-"))

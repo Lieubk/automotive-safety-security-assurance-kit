@@ -283,6 +283,9 @@ def junit_results(project, path):
             skipped = case.find("skipped")
             if failed is not None:
                 row["verdict"] = "failed"
+                message = (failed.get("message") or failed.text or "").strip()
+                if message:
+                    row["reason"] = message
             elif skipped is not None:
                 row["verdict"] = "not-run"
                 reason = (skipped.get("message") or skipped.text or "").strip()
@@ -1181,7 +1184,16 @@ def cmd_baseline(project, args):
                    if project.types[i.type]["lifecycle"] == "engineering" and project.live(i)]
     # an internal baseline is a snapshot of everything; any other holds what is approved
     members = engineering if args.purpose in internal else [i for i in engineering if i.status == "approved"]
-    left_out = len(engineering) - len(members)
+    left_out = sorted((i for i in engineering if i not in members), key=lambda i: i.id)
+    owned = [i for i in left_out if project.in_scope(project.types[i.type].get("supports") or [])]
+    if owned and not args.leave_out_reason:
+        by_status = defaultdict(list)
+        for item in owned:
+            by_status[item.status].append(item.id)
+        return stop(["%d items of processes in scope are not approved; a baseline with purpose '%s' leaves them out"
+                     % (len(owned), args.purpose)]
+                    + ["  %s: %s" % (status, ", ".join(ids)) for status, ids in sorted(by_status.items())]
+                    + ["approve them first (/review), or state why they stay out with --leave-out-reason TEXT"])
     front = {
         "id": next_id(project, "baseline"),
         "type": "baseline",
@@ -1191,11 +1203,16 @@ def cmd_baseline(project, args):
         "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
         "items": [{"item": i.id, "hash": i.hash, "status": i.status} for i in sorted(members, key=lambda i: i.id)],
     }
+    if left_out:
+        front["left_out"] = [{"item": i.id, "status": i.status} for i in left_out]
+        if args.leave_out_reason:
+            front["left_out_reason"] = args.leave_out_reason
     path = write_item(project, "baseline", front)
     print("wrote %s: %d items, purpose %s, tag %s (set the tag after committing the record)"
           % (path, len(members), args.purpose, args.tag))
     if left_out:
-        print("not in the baseline: %d items that are not approved (python tools/traceability.py list --status draft)" % left_out)
+        print("not in the baseline: %d items that are not approved, listed under left_out: %s"
+              % (len(left_out), ", ".join(i.id for i in left_out[:12]) + (" ..." if len(left_out) > 12 else "")))
     return 0
 
 
@@ -1304,6 +1321,8 @@ def main():
     baseline = sub.add_parser("baseline")
     baseline.add_argument("--tag", required=True)
     baseline.add_argument("--purpose", required=True)
+    baseline.add_argument("--leave-out-reason", help="why items of processes in scope that are not approved stay out "
+                          "of a baseline that is not internal")
     told = sub.add_parser("communication")
     told.add_argument("--subject", required=True, action="append")
     told.add_argument("--audience", required=True, action="append")

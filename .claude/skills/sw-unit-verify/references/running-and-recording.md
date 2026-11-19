@@ -218,9 +218,10 @@ the test case item, and the design statement it names; then the code.
 Propose the classification with the texts it rests on; the user confirms. Until then the
 case stays failed. Not allowed, whatever the pressure: deleting the case, removing or
 loosening a check, setting `regression: false`, recording `not-run` for a case that
-failed. Where SUP.9 is in the project's scope, a confirmed defect also needs a
-`problem-report` that names the run in `found_in`: `/problem-resolution` records it;
-say so in the hand-over.
+failed. A confirmed defect gets a `problem-report`, recorded by `/problem-resolution`, that names
+the run in `found_in` - also where SUP.9 is out of scope, where the report still keeps the
+defect visible (`PROBLEM` on the affected items; `COV-18` reports the failed case as an
+error until a report names it). Say so in the hand-over.
 
 ## A unit without code
 

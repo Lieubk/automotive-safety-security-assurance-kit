@@ -1,6 +1,6 @@
 # System architecture review checklist
 
-Version 1. Applies to: `system-element`, `system-interface`, `architecture-view` of
+Version 2. Applies to: `system-element`, `system-interface`, `architecture-view` of
 level `system`, and `design-decision` of level `system`. Supports: SYS.3.BP1, SYS.3.BP2,
 SYS.3.BP3, SYS.3.BP4, SYS.3.BP5, SYS.3.BP6, SYS.3.BP7.
 
@@ -109,6 +109,6 @@ requirements an element or interface fulfils. `check` means
 | SYA-80 | One term, one name and one value for one thing in all elements, interfaces and views | read the items side by side | semantic |
 | SYA-81 | Every choice that shaped the system has a decision item, including the adoption of a given platform or architecture | ask which alternatives were discussed; compare with the decisions | semantic |
 | SYA-82 | The elements allocated software can be handed to software development: each requirement allocated to a `software` element is one that software requirements can be derived from | read the allocation; later `COV-05` shows the derivation | semantic |
-| SYA-83 | The architecture can be built with the available disciplines, suppliers, cost and time | ask the system lead and the leads of hardware, software and mechanics; the note names who states it | accountable |
-| SYA-84 | Where safety requirements are allocated: the safety analyses that are due at system architecture level by now exist, and their results are reflected in requirements and elements | ask the person responsible for functional safety which analyses are due at this point and whether they exist. `not-applicable` only when no subject carries an ASIL. Where nobody holds that role, the check cannot be answered: `not-assessed` | accountable |
+| SYA-83 | The architecture can be built with the available disciplines, suppliers, cost and time | ask the system lead and the leads of hardware, software and mechanics (`people` in `project.yaml`); the note names who states it. Where a discipline has no lead in the project, the person who speaks for it is named; `not-assessed` only while nobody can be named | accountable |
+| SYA-84 | Where safety requirements are allocated: the safety analyses that are due at system architecture level by now exist, and their results are reflected in requirements and elements | ask the person responsible for functional safety which analyses are due at this point and whether they exist. `not-applicable` only when no subject carries an ASIL. Where nobody holds that role, the check cannot be answered: `not-assessed`. Without an allocated safety requirement (no ASIL above QM in the architecture) the check is `not-applicable` with that reason; with one and no person responsible for functional safety named in `project.yaml`, the finding is that the role is missing | accountable |
 | SYA-85 | Open questions to the source of an input are `query` items, and no open one invalidates an item under review | `python tools/traceability.py list --type query --status open`; go through each with the author | accountable |
