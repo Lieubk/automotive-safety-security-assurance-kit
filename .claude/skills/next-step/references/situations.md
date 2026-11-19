@@ -158,6 +158,7 @@ Question 2, by type:
 | `work-package` | MAN.3 | `/work-breakdown` | `/review` |
 | `corrective-action` | MAN.3 | `/project-status` | - |
 | `problem-report` | SUP.9 | `/problem-resolution` | - |
+| `supplier-agreement` | ACQ.4 | `/supplier-monitoring` | `/review` |
 
 To name the IDs behind a count, run
 `python tools/traceability.py list --type <type> --status <state>`.

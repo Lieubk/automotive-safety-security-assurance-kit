@@ -156,6 +156,13 @@ Commands
         --check-only lists the gaps and flags and writes nothing. The toolkit
         rates nothing: the ratings are the assessors'.
 
+    supplier-review --agreement SAG-ID --kind technical|progress --held-at DATE
+                    --participant NAME [--participant NAME ...] --minutes FILE [--open-items FILE]
+        final record of a review with a supplier under its agreement: the minutes
+        as the participants agree them, and the open items as JSON
+        [{"id", "text", "owner", "due", "state": "open"|"closed", "closes": "<SRV-ID>#<id>"}];
+        an entry with closes settles an open item of an earlier review.
+
     problem-trends --reported-by NAME --assessment FILE [--as-of DATE] [--period TEXT]
         final problem trend report: every problem report known on the date with
         its state, severity, origin, detection and age, and the counts by state,
@@ -1096,6 +1103,39 @@ def cmd_self_assessment(project, args):
     return 0
 
 
+def cmd_supplier_review(project, args):
+    agreement = project.items.get(args.agreement)
+    problems = [] if agreement is not None and agreement.type == "supplier-agreement" and project.live(agreement) \
+        else ["%s is no live supplier agreement" % args.agreement]
+    if trace.as_date(args.held_at) is None:
+        problems.append("--held-at must be a date YYYY-MM-DD")
+    minutes = read_text_file(args.minutes, "minutes")
+    if not minutes:
+        problems.append("--minutes names no file with text: what was reviewed and decided, as the participants agree")
+    items = json.loads(Path(args.open_items).read_text(encoding="utf-8")) if args.open_items else []
+    for item in items:
+        missing = [k for k in ("id", "text", "owner", "state") if not item.get(k)]
+        if missing or item.get("state") not in ("open", "closed"):
+            problems.append("open item %s needs id, text, owner and state open or closed" % item.get("id"))
+    if problems:
+        return stop(problems)
+    front = {
+        "id": next_id(project, "supplier-review"),
+        "type": "supplier-review",
+        "status": "final",
+        "title": "%s review with %s on %s" % (args.kind.capitalize(), agreement.front.get("supplier"), args.held_at),
+        "agreement": agreement.id,
+        "kind": args.kind,
+        "held_at": args.held_at,
+        "participants": args.participant,
+        "open_items": items,
+    }
+    path = write_item(project, "supplier-review", front, "\n## Minutes\n\n%s\n" % minutes)
+    still = sum(1 for i in items if i.get("state") == "open")
+    print("wrote %s: %s review under %s, %d open items" % (path, args.kind, agreement.id, still))
+    return 0
+
+
 def cmd_problem_trends(project, args):
     as_of = trace.as_date(args.as_of) if args.as_of else datetime.date.today()
     problems = [] if as_of else ["--as-of must be a date YYYY-MM-DD"]
@@ -1245,6 +1285,13 @@ def main():
     sas.add_argument("--as-of")
     sas.add_argument("--check-only", action="store_true", help="report missing ratings and flags, write nothing")
     sas.add_argument("--level", type=int, help="2: rate the generic practices of level 2 too (default: target_level)")
+    srv = sub.add_parser("supplier-review")
+    srv.add_argument("--agreement", required=True)
+    srv.add_argument("--kind", required=True, choices=["technical", "progress"])
+    srv.add_argument("--held-at", required=True)
+    srv.add_argument("--participant", required=True, action="append")
+    srv.add_argument("--minutes", required=True, help="text file: what was reviewed and decided")
+    srv.add_argument("--open-items", help="JSON: [{id, text, owner, due, state, closes}]")
     trends = sub.add_parser("problem-trends")
     trends.add_argument("--reported-by", required=True)
     trends.add_argument("--assessment", required=True, help="text file with the analyst's reading")
@@ -1266,7 +1313,8 @@ def main():
                 "review": cmd_review, "baseline": cmd_baseline, "communication": cmd_communication,
                 "status-report": cmd_status_report, "build": cmd_build,
                 "problem-trends": cmd_problem_trends, "quality-check": cmd_quality_check,
-                "quality-report": cmd_quality_report, "self-assessment": cmd_self_assessment}
+                "quality-report": cmd_quality_report, "self-assessment": cmd_self_assessment,
+                "supplier-review": cmd_supplier_review}
     return commands[args.command](project, args)
 
 

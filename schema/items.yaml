@@ -146,6 +146,19 @@ structures:
     keys: [note]
     dates: [accepted_at]
     note: "the formal acceptance of the closure: who accepted it, when, and the test run or review record that shows the resolution works"
+  exchanges:                       # supplier-agreement.exchanges
+    mandatory: [name, direction, content]
+    keys: [due, format]
+    note: "direction is to-supplier or from-supplier; due is a date or a rhythm such as 'weekly' or 'with each delivery'"
+  meetings:                        # supplier-agreement.meetings
+    mandatory: [name, kind, cadence]
+    keys: [participants]
+    note: "kind is technical or progress; cadence in days between two meetings, or a text"
+  open-items:                      # supplier-review.open_items
+    mandatory: [id, text, owner, state]
+    keys: [due, closes]
+    dates: [due]
+    note: "state open or closed; closes names <SRV-ID>#<id> of an earlier review of the same agreement that this entry settles"
   quality-checks:                  # plan.quality_checks when kind is quality-assurance
     mandatory: [name, kind, scope]
     keys: [before, when, criteria]
@@ -538,7 +551,7 @@ types:
     prefix: CMR
     folder: records/communication
     lifecycle: record
-    supports: [SYS.2.BP8, SYS.3.BP8, SYS.4.BP9, SYS.5.BP7, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7, SWE.4.BP7, SWE.5.BP9, SWE.6.BP7, SUP.1.BP4, SUP.1.BP6, SUP.9.BP6, "13-04"]
+    supports: [SYS.2.BP8, SYS.3.BP8, SYS.4.BP9, SYS.5.BP7, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7, SWE.4.BP7, SWE.5.BP9, SWE.6.BP7, SUP.1.BP4, SUP.1.BP6, SUP.9.BP6, ACQ.4.BP2, "13-04"]
     attributes:
       id: {required: always}
       type: {required: always}
@@ -601,7 +614,7 @@ types:
     prefix: CA
     folder: records/actions
     lifecycle: action
-    supports: [MAN.3.BP10, SUP.1.BP5, "14-02"]
+    supports: [MAN.3.BP10, SUP.1.BP5, ACQ.4.BP5, "14-02"]
     attributes:
       use: [common]
       owner: {required: always}
@@ -631,6 +644,40 @@ types:
       check: {required: optional, note: "summary of the trace check at the time of the report; generated"}
     sections:
       Assessment: always           # the reporter's reading of the figures, risks and what is decided
+
+  supplier-agreement:              # what the project and one supplier agreed on: joint processes, interfaces, exchanges, meetings
+    prefix: SAG
+    folder: plans/suppliers
+    lifecycle: engineering
+    supports: [ACQ.4.BP1, "02-01"]
+    attributes:
+      use: [common]
+      supplier: {required: always, note: "the supplier, by name or role, and the contract or order the agreement belongs to"}
+      components: {required: before-review, note: "IDs of the software components or system elements the supplier delivers"}
+      exchanges: {structure: exchanges, required: before-review}
+      meetings: {structure: meetings, required: before-review}
+    sections:
+      Joint processes: before-review           # which processes each side performs, and how they meet (reviews, change requests, problems)
+      Interfaces and responsibilities: before-review
+      Deviations and escalation: before-approval   # how missed objectives are handled, who escalates to whom
+
+  supplier-review:                 # a technical or progress review with a supplier: minutes and open items
+    prefix: SRV
+    folder: records/suppliers
+    lifecycle: record
+    supports: [ACQ.4.BP3, ACQ.4.BP4, "13-09", "13-14"]
+    attributes:
+      id: {required: always}
+      type: {required: always}
+      status: {required: always}
+      title: {required: optional}
+      agreement: {required: always, note: "the supplier agreement the review is held under"}
+      kind: {values: [technical, progress], required: always}
+      held_at: {format: date, required: always}
+      participants: {required: always, note: "who took part, on both sides, by name or role"}
+      open_items: {structure: open-items, required: always, may_be_empty: true}
+    sections:
+      Minutes: always              # what was reviewed - for progress: schedule, quality, cost against the agreement; for technical: the matters, problems and risks - and what was decided
 
   quality-record:                  # a check by quality assurance, with the facts the tools showed and the person's verdict
     prefix: QAR

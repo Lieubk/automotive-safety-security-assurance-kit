@@ -1,0 +1,52 @@
+# Template for a project built with this toolkit: copy it to .github/workflows/aspice.yml.
+#
+# It reports facts, it decides nothing: the job fails when the trace check reports an
+# error, and it keeps the evidence per base practice and per generic practice as an
+# artifact for the people who read it. Records are not written here - a test run or a
+# review on a CI machine is recorded only when a person decides it is evidence, with
+# `tools/record.py` on a clean, committed tree.
+name: aspice
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0              # reviews are compared with the history (`diff`, `history`)
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install pyyaml
+      - name: Trace check (fails on errors)
+        run: python tools/traceability.py check
+      - name: Evidence per practice
+        if: always()
+        run: |
+          mkdir -p ci-out
+          python tools/traceability.py check --json > ci-out/check.json || true
+          python tools/traceability.py practices --json > ci-out/practices.json
+          python tools/traceability.py generic --json > ci-out/generic.json
+          python tools/traceability.py status > ci-out/status.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aspice-evidence
+          path: ci-out/
+
+  # Uncomment and adapt to the project's own runners. A run here shows the state of a
+  # commit; it becomes a record only through tools/record.py, as /sw-unit-verify says.
+  # tests:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-python@v5
+  #       with:
+  #         python-version: "3.12"
+  #     - run: python -m pip install pyyaml
+  #     - run: python tests/unit/run_tests.py --coverage
+  #     - run: python tests/integration/run_tests.py

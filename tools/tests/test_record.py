@@ -485,6 +485,49 @@ class SystemBuilds(RecordCase):
         self.assertIn("a run of level software-integration needs a software build", out)
 
 
+class SupplierReviews(RecordCase):
+    def setUp(self):
+        super().setUp()
+        front = {"id": "SAG-0001", "type": "supplier-agreement", "title": "Platform team", "status": "approved",
+                 "supplier": "window lifter platform team, order 17", "components": ["CMP-0002"],
+                 "exchanges": [{"name": "release", "direction": "from-supplier", "content": "WindowCmd source"}],
+                 "meetings": [{"name": "progress call", "kind": "progress", "cadence": 7}]}
+        path = self.project / "plans" / "suppliers" / "SAG-0001.md"
+        path.parent.mkdir(parents=True)
+        path.write_text("---\n" + yaml.safe_dump(front, sort_keys=False) + "---\n\n## Joint processes\n\nx\n",
+                        encoding="utf-8")
+
+    def review(self, held_at, items, agreement="SAG-0001"):
+        minutes = Path(self.tmp.name) / "minutes.txt"
+        minutes.write_text("Schedule on track; release 3.2.1 due.", encoding="utf-8")
+        return self.record("supplier-review", "--agreement", agreement, "--kind", "progress", "--held-at", held_at,
+                           "--participant", "Project lead", "--participant", "Platform lead", "--minutes", minutes,
+                           "--open-items", self.json_file("items.json", items))
+
+    def overview(self, as_of):
+        sys.path.insert(0, str(ROOT / "tools"))
+        from traceability import Project, suppliers, as_date
+        return suppliers(Project(self.project), as_date(as_of))["agreements"][0]
+
+    def test_an_open_item_stays_open_until_a_later_review_closes_it(self):
+        code, out = self.review("2026-06-01", [{"id": "A1", "text": "date of 3.2.1", "owner": "Platform lead",
+                                                "due": "2026-06-05", "state": "open"}])
+        self.assertEqual(code, 0, out)
+        first = self.records("records/suppliers", "SRV-")[-1][:-3]
+        status = self.overview("2026-06-10")
+        self.assertEqual([i["item"] for i in status["open_items"]], ["%s#A1" % first])
+        self.assertEqual(status["open_items"][0]["overdue_days"], 5)
+        self.assertEqual(status["meetings"][0]["overdue_days"], 2)
+        self.review("2026-06-08", [{"id": "A1", "text": "3.2.1 on 2026-06-15", "owner": "Platform lead",
+                                    "state": "closed", "closes": "%s#A1" % first}])
+        self.assertEqual(self.overview("2026-06-10")["open_items"], [])
+
+    def test_a_review_needs_a_supplier_agreement(self):
+        code, out = self.review("2026-06-01", [], agreement="PLN-0001")
+        self.assertEqual(code, 1)
+        self.assertIn("no live supplier agreement", out)
+
+
 class SelfAssessments(RecordCase):
     """Ratings of SUP.9 in the example, where every practice shows evidence present."""
 

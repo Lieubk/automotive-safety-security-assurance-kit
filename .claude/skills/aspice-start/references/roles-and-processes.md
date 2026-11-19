@@ -48,7 +48,7 @@ type and no rule for the process, so its evidence lives outside the toolkit.
 | Supporting | SUP.10 | Change Request Management | vda | authoring for change requests: `/change-request` |
 | Management | MAN.3 | Project Management | vda | authoring: `/project-plan`, `/work-breakdown`, `/project-status` |
 | Management | MAN.5 | Risk Management | extended | catalog |
-| Acquisition | ACQ.4 | Supplier Monitoring | vda | catalog |
+| Acquisition | ACQ.4 | Supplier Monitoring | vda | authoring: `/supplier-monitoring` |
 | Supply | SPL.2 | Product Release | extended | catalog |
 | Reuse | REU.2 | Reuse Program Management | other | catalog |
 

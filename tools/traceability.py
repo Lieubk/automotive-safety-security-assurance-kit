@@ -21,6 +21,9 @@ Commands
     problems           problem reports with state, severity, origin, detection and age
                        as of a date (--as-of; default today), and the figures; --json
     history ID         the states an item had in the commits that changed it, from git
+    suppliers          per supplier agreement: meetings held against the agreed rhythm,
+                       exchanges recorded, open items and corrective actions
+                       (--as-of; default today); --json
     quality            the checks of the quality assurance plan and their records, the
                        findings with the state of their actions, lateness and the
                        escalations due as of a date (--as-of; default today); --json
@@ -635,6 +638,24 @@ class Project:
                     self.add("error", "LINK", run.id, "result names %s, which is not a test case" % entry.get("test"))
             if run.front.get("build") and getattr(self.items.get(str(run.front["build"])), "type", None) != "build-record":
                 self.add("error", "LINK", run.id, "build names %s, which is not a build record" % run.front["build"])
+        for agreement in self.of_type("supplier-agreement"):
+            for ref in as_list(agreement.front.get("components")):
+                if getattr(self.items.get(str(ref)), "type", None) not in ("software-component", "system-element"):
+                    self.add("error", "LINK", agreement.id, "components names %s, which is no software component or "
+                             "system element" % ref)
+        earlier = {}
+        for review in sorted(self.of_type("supplier-review"), key=lambda r: (str(r.front.get("held_at")), record_number(r.id))):
+            if getattr(self.items.get(str(review.front.get("agreement"))), "type", None) != "supplier-agreement":
+                self.add("error", "LINK", review.id, "agreement names %s, which is no supplier agreement"
+                         % review.front.get("agreement"))
+            for item in as_list(review.front.get("open_items")):
+                ref = item.get("closes") if isinstance(item, dict) else None
+                if ref and earlier.get(str(ref)) != review.front.get("agreement"):
+                    self.add("error", "LINK", review.id, "open item %s closes %s, which is no open item of an earlier "
+                             "review of the same agreement" % (item.get("id"), ref))
+            for item in as_list(review.front.get("open_items")):
+                if isinstance(item, dict) and item.get("state") == "open":
+                    earlier["%s#%s" % (review.id, item.get("id"))] = review.front.get("agreement")
         for record in self.of_type("quality-record"):
             if record.front.get("kind") in ("work-product", "summary"):
                 for ref in as_list(record.front.get("subject")):
@@ -1845,6 +1866,77 @@ def quality(project, as_of):
             "summaries": summaries, "figures": figures}
 
 
+def suppliers(project, as_of):
+    """Per supplier agreement: meetings held against the agreed rhythm, exchanges recorded, open items."""
+    out = []
+    reviews = sorted([r for r in project.of_type("supplier-review") if r.status == "final"],
+                     key=lambda r: (str(r.front.get("held_at")), record_number(r.id)))
+    for agreement in sorted(project.of_type("supplier-agreement"), key=lambda a: record_number(a.id)):
+        if not project.live(agreement):
+            continue
+        mine = [r for r in reviews if r.front.get("agreement") == agreement.id]
+        meetings = []
+        for meeting in as_list(agreement.front.get("meetings")):
+            if not isinstance(meeting, dict):
+                continue
+            held = [r for r in mine if r.front.get("kind") == meeting.get("kind")]
+            last = as_date(held[-1].front.get("held_at")) if held else None
+            cadence = meeting.get("cadence")
+            due = (last + datetime.timedelta(days=int(cadence))) if last and isinstance(cadence, int) else None
+            meetings.append({"name": meeting.get("name"), "kind": meeting.get("kind"), "cadence": cadence,
+                             "held": len(held), "last": str(last) if last else None,
+                             "overdue_days": (as_of - due).days if due and due < as_of else 0})
+        closed = {str(i.get("closes")) for r in mine for i in as_list(r.front.get("open_items"))
+                  if isinstance(i, dict) and i.get("closes")}
+        items = []
+        for review in mine:
+            for item in as_list(review.front.get("open_items")):
+                if not isinstance(item, dict) or item.get("state") != "open":
+                    continue
+                key = "%s#%s" % (review.id, item.get("id"))
+                if key in closed:
+                    continue
+                due = as_date(item.get("due"))
+                items.append({"item": key, "text": item.get("text"), "owner": item.get("owner"),
+                              "due": str(due) if due else None,
+                              "overdue_days": (as_of - due).days if due and due < as_of else 0})
+        exchanged = [c for c in project.of_type("communication-record") if c.status == "final"
+                     and agreement.id in map(str, as_list(c.front.get("subject")))]
+        actions = [a for a in project.of_type("corrective-action") if agreement.id in {t for t, _ in a.targets("addresses")}]
+        out.append({"agreement": agreement.id, "supplier": agreement.front.get("supplier"), "status": agreement.status,
+                    "components": as_list(agreement.front.get("components")), "meetings": meetings,
+                    "exchanges_agreed": len(as_list(agreement.front.get("exchanges"))),
+                    "exchanges_recorded": [c.id for c in exchanged], "open_items": items,
+                    "corrective_actions": [{"item": a.id, "state": a.status} for a in actions]})
+    return {"as_of": str(as_of), "agreements": out}
+
+
+def cmd_suppliers(project, args):
+    as_of = as_date(args.as_of) if args.as_of else datetime.date.today()
+    if as_of is None:
+        print("--as-of must be a date YYYY-MM-DD")
+        return 2
+    data = suppliers(project, as_of)
+    if args.json:
+        print(json.dumps(data, indent=2))
+        return 0
+    print("Suppliers as of %s" % as_of)
+    for a in data["agreements"]:
+        print("%s %s (%s), components %s" % (a["agreement"], a["supplier"], a["status"], ", ".join(map(str, a["components"])) or "-"))
+        for m in a["meetings"]:
+            print("  meeting %-24s %-9s every %s, held %d times, last %s%s" % (
+                m["name"], m["kind"], m["cadence"], m["held"], m["last"] or "-",
+                ", overdue %d days" % m["overdue_days"] if m["overdue_days"] else ""))
+        print("  exchanges: %d agreed, %d communication records" % (a["exchanges_agreed"], len(a["exchanges_recorded"])))
+        for i in a["open_items"]:
+            print("  open item %s (%s, due %s)%s: %s" % (i["item"], i["owner"], i["due"] or "-",
+                  ", overdue %d days" % i["overdue_days"] if i["overdue_days"] else "", i["text"]))
+        for c in a["corrective_actions"]:
+            print("  corrective action %s %s" % (c["item"], c["state"]))
+    print("%d supplier agreements" % len(data["agreements"]))
+    return 0
+
+
 def cmd_quality(project, args):
     as_of = as_date(args.as_of) if args.as_of else datetime.date.today()
     if as_of is None:
@@ -2289,6 +2381,9 @@ def main():
     problems_parser.add_argument("--as-of", help="the date ages are measured to (default: today)")
     problems_parser.add_argument("--json", action="store_true")
     sub.add_parser("history").add_argument("id")
+    suppliers_parser = sub.add_parser("suppliers")
+    suppliers_parser.add_argument("--as-of", help="the date lateness is measured to (default: today)")
+    suppliers_parser.add_argument("--json", action="store_true")
     quality_parser = sub.add_parser("quality")
     quality_parser.add_argument("--as-of", help="the date lateness is measured to (default: today)")
     quality_parser.add_argument("--json", action="store_true")
@@ -2303,7 +2398,8 @@ def main():
     return {"check": cmd_check, "matrix": cmd_matrix, "show": cmd_show, "impact": cmd_impact,
             "hash": cmd_hash, "status": cmd_status, "list": cmd_list, "audit": cmd_audit, "practices": cmd_practices,
             "diff": cmd_diff, "progress": cmd_progress,
-            "problems": cmd_problems, "history": cmd_history, "quality": cmd_quality, "generic": cmd_generic}[args.command](project, args)
+            "problems": cmd_problems, "history": cmd_history, "quality": cmd_quality, "generic": cmd_generic,
+            "suppliers": cmd_suppliers}[args.command](project, args)
 
 
 if __name__ == "__main__":

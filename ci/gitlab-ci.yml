@@ -1,0 +1,21 @@
+# Template for a project built with this toolkit: copy it to .gitlab-ci.yml.
+# Same intent as ci/github-actions.yml: the trace check fails the pipeline on errors,
+# the evidence per practice is kept as an artifact, and nothing is recorded here.
+stages: [trace]
+
+trace:
+  stage: trace
+  image: python:3.12
+  variables:
+    GIT_DEPTH: 0                      # reviews are compared with the history
+  before_script:
+    - python -m pip install pyyaml
+  script:
+    - mkdir -p ci-out
+    - python tools/traceability.py check --json > ci-out/check.json || true
+    - python tools/traceability.py practices --json > ci-out/practices.json
+    - python tools/traceability.py generic --json > ci-out/generic.json
+    - python tools/traceability.py check
+  artifacts:
+    when: always
+    paths: [ci-out/]

@@ -18,6 +18,7 @@ example is `examples/power-window`). They need Python 3 and PyYAML.
 | `audit <BL-ID>` | compare a baseline record with the items as they are now | one line per difference; exit code 1 when there are any |
 | `progress [--as-of DATE] [--json]` | compare the plan with what the items show: per work package its state read from the items it delivers, lateness, effort against estimate; milestones against baselines; open corrective actions | a tree of work packages, milestones, corrective actions, a summary line |
 | `problems [--as-of DATE] [--json]` | see every problem report with state, severity, origin, detection, age and the change requests that resolve it, and counts by severity, origin, detection and age | a list and a summary line |
+| `suppliers [--as-of DATE] [--json]` | see per supplier agreement the meetings held against the agreed rhythm, the communication records about it, the open items no later review closed, and the corrective actions | one block per agreement |
 | `quality [--as-of DATE] [--json]` | see the checks of the quality assurance plan with their last record, every finding with the state of its action, how far it is overdue and the escalation due by the plan, and whether the reports were communicated | lists and a summary line |
 | `history <ID>` | see the states an item had, from the commits that changed its file | date, commit, state per change; NOT ASSESSED with exit code 2 when git cannot be read |
 | `diff <ID> [--since REV-ID]` | see what changed in an item since a review saw it, as subject or as reference (an upstream item since the review of what builds on it); the reviewed text is taken from the git history by its content hash | a unified diff; "unchanged"; or NOT ASSESSED with exit code 2 when the reviewed text is in no commit |
@@ -66,6 +67,7 @@ active. The summary line says how many.
 | `quality-check --kind work-product\|process [--check NAME] --subject ID ... --criteria TEXT --checked-by NAME --result R --summary FILE [--findings FILE] [--checked-at DATE]` | record a check by quality assurance: the facts at the time (per item state, hash, approving review; per process the evidence per base practice) and the checker's result, summary and findings. Refused without an approved quality-assurance plan, for a finding whose action does not exist, and for a result that does not agree with the findings |
 | `quality-report --checked-by NAME --result R --summary FILE [--as-of DATE] [--period TEXT]` | record the periodic report of quality assurance: the quality records since the last report, the figures and findings of `quality`, and the reading of the person in the role. It raises no findings of its own |
 | `self-assessment --ratings FILE --assessor NAME [--process ID ...] --summary FILE [--as-of DATE] [--level 2] [--check-only]` | record the ratings N, P, L, F that named people gave per base practice in a mock assessment, with the observations of `practices` at the time and the consistency flags: a rating outside the band of the observation, a rating above that of a practice it depends on in the catalog. A flag from an observation or a rule needs the reason in the rating's note. `--check-only` lists gaps and flags and writes nothing. The toolkit rates nothing |
+| `supplier-review --agreement SAG-ID --kind technical\|progress --held-at DATE --participant NAME ... --minutes FILE [--open-items FILE]` | record a technical or progress review with a supplier: the minutes as the participants agree them and the open items; an item with `closes` settles an open item of an earlier review |
 | `problem-trends --reported-by NAME --assessment FILE [--as-of DATE] [--period TEXT]` | write a problem trend report: the list and figures of `problems` for the date, and the analyst's assessment from the file, in their words. Refused without an assessment |
 | `communication --subject ID --audience WHO --channel TEXT [--agreement TEXT] [--sent-at DATE] [--practice BP]` | record what was made known to whom, and what was agreed; `--subject`, `--audience` and `--practice` may repeat. `--practice` names the communicate practices the record serves; `practices` counts it for those only |
 
@@ -133,6 +135,15 @@ module text). Records are final when written and are never edited afterwards.
 - `audit <BL-ID>` reports items whose content or status differs from the baseline record,
   items the record lists that no longer exist, and approved items the record does not
   list.
+
+## Continuous integration
+
+`ci/github-actions.yml` and `ci/gitlab-ci.yml` are templates for a project: the pipeline
+fails when `check` reports an error and keeps `check --json`, `practices --json`,
+`generic --json` and `status` as artifacts. A pipeline reports; it records nothing.
+A run on a CI machine becomes evidence only when a person decides so and it is recorded
+with `tools/record.py` from a clean, committed tree. The toolkit's own checks run in
+`.github/workflows/toolkit.yml`.
 
 ## Catalog and schema
 

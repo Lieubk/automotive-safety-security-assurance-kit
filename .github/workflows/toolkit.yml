@@ -1,0 +1,37 @@
+# Checks of the toolkit itself, on every push and pull request.
+# The confidential data the leak scan uses lives only on the maintainer's machine;
+# here the scan runs its built-in pattern checks.
+name: toolkit
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0              # `traceability.py diff` and `history` read the git history
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install pyyaml
+      - name: Process catalog
+        run: python tools/catalog.py validate
+      - name: Item schema
+        run: python tools/schema_check.py
+      - name: Skills, agents, checklists
+        run: python tools/skill_lint.py
+      - name: Regression tests of the engine, the record tool and the hooks
+        run: python -m unittest discover -s tools/tests
+      - name: Trace check of the worked example
+        run: python tools/traceability.py --project examples/power-window check
+      - name: Unit, integration and qualification tests of the worked example
+        run: |
+          python examples/power-window/tests/unit/run_tests.py --coverage
+          python examples/power-window/tests/integration/run_tests.py
+          python examples/power-window/tests/qualification/run_tests.py
+      - name: Leak scan (patterns only on this machine)
+        run: python tools/confidentiality_scan.py
