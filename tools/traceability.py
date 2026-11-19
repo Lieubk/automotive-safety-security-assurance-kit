@@ -21,6 +21,9 @@ Commands
     problems           problem reports with state, severity, origin, detection and age
                        as of a date (--as-of; default today), and the figures; --json
     history ID         the states an item had in the commits that changed it, from git
+    quality            the checks of the quality assurance plan and their records, the
+                       findings with the state of their actions, lateness and the
+                       escalations due as of a date (--as-of; default today); --json
     diff ID            what changed in an item since a review saw it, as subject or as
                        reference (--since REV-ID; default: the newest), from git
     practices [PROC]   per base practice of the processes in scope (or of one
@@ -425,6 +428,11 @@ class Project:
         return next((p for p in sorted(self.of_type("plan"), key=lambda p: record_number(p.id))
                      if p.status == "approved" and p.front.get("kind") == "problem-resolution"), None)
 
+    def quality_plan(self):
+        """The approved plan of kind quality-assurance, or None."""
+        return next((p for p in sorted(self.of_type("plan"), key=lambda p: record_number(p.id))
+                     if p.status == "approved" and p.front.get("kind") == "quality-assurance"), None)
+
     def problem_gap(self, rule_id, problem, message):
         """Urgency and alerts matter from the first day: a warning while the problem is open, an error after."""
         self.add("warning" if problem.status == "open" else "error", rule_id, problem.id, message,
@@ -605,6 +613,11 @@ class Project:
                     self.add("error", "LINK", run.id, "result names %s, which is not a test case" % entry.get("test"))
             if run.front.get("build") and getattr(self.items.get(str(run.front["build"])), "type", None) != "build-record":
                 self.add("error", "LINK", run.id, "build names %s, which is not a build record" % run.front["build"])
+        for record in self.of_type("quality-record"):
+            if record.front.get("kind") in ("work-product", "summary"):
+                for ref in as_list(record.front.get("subject")):
+                    if str(ref) not in self.items:
+                        self.add("error", "LINK", record.id, "subject names %s, which does not exist" % ref)
         for build in self.of_type("build-record"):
             for entry in as_list(build.front.get("contents")):
                 if not isinstance(entry, dict) or getattr(self.items.get(str(entry.get("component"))), "type", None) \
@@ -1239,6 +1252,44 @@ class Project:
                 if change.status != "closed":
                     self.gap(rule, problem, "closed, but %s, which resolves it, is %s" % (change.id, change.status))
 
+    def cov_43(self, rule):
+        plan = self.quality_plan()
+        checks = [c for c in as_list(plan.front.get("quality_checks")) if isinstance(c, dict)] if plan else []
+        records = [r for r in self.of_type("quality-record") if r.status == "final"]
+        for base in self.of_type("baseline"):
+            if base.status != "final":
+                continue
+            created = as_date(str(base.front.get("created_at") or "")[:10])
+            for check in checks:
+                if base.front.get("purpose") not in map(str, as_list(check.get("before"))):
+                    continue
+                done = [r for r in records if r.front.get("check") == check.get("name")
+                        and as_date(r.front.get("checked_at")) and (created is None or as_date(r.front.get("checked_at")) <= created)]
+                if not done:
+                    self.add("error", rule, base.id, "no final quality record of check '%s' was made before this %s "
+                             "baseline, as %s asks" % (check.get("name"), base.front.get("purpose"), plan.id),
+                             self.rules[rule]["supports"])
+
+    def cov_44(self, rule):
+        for record in self.of_type("quality-record"):
+            if record.status != "final":
+                continue
+            for finding in as_list(record.front.get("findings")):
+                action = self.items.get(str(finding.get("action"))) if isinstance(finding, dict) else None
+                if action is None or action.type not in ("corrective-action", "problem-report"):
+                    self.add("error", rule, record.id, "finding %s names %s as its action, which is no corrective action "
+                             "or problem report" % (finding.get("id") if isinstance(finding, dict) else finding,
+                                                   finding.get("action") if isinstance(finding, dict) else None),
+                             self.rules[rule]["supports"])
+
+    def cov_45(self, rule):
+        told = {str(s) for c in self.of_type("communication-record") if c.status == "final"
+                for s in as_list(c.front.get("subject"))}
+        for record in self.of_type("quality-record"):
+            if record.status == "final" and record.front.get("kind") == "summary" and record.id not in told:
+                self.add("error", rule, record.id, "no final communication record names this quality report",
+                         self.rules[rule]["supports"])
+
     def cov_26(self, rule):
         internal = as_list((self.config.get("trace") or {}).get("internal_baselines"))
         told = set()
@@ -1648,6 +1699,100 @@ def problems(project, as_of):
     return {"as_of": str(as_of), "problems": entries, "figures": figures}
 
 
+def quality(project, as_of):
+    """What quality assurance planned and did, and the state of its non-conformances, on a date."""
+    plan = project.quality_plan()
+    records = sorted([r for r in project.of_type("quality-record") if r.status == "final"
+                      and (as_date(r.front.get("checked_at")) or as_of) <= as_of],
+                     key=lambda r: (str(r.front.get("checked_at")), record_number(r.id)))
+    checks = []
+    for check in (as_list(plan.front.get("quality_checks")) if plan else []):
+        if not isinstance(check, dict):
+            continue
+        done = [r for r in records if r.front.get("check") == check.get("name")]
+        checks.append({"name": check.get("name"), "kind": check.get("kind"), "scope": as_list(check.get("scope")),
+                       "before": as_list(check.get("before")), "when": check.get("when"), "performed": len(done),
+                       "last": done[-1].id if done else None,
+                       "last_at": str(done[-1].front.get("checked_at")) if done else None,
+                       "last_result": done[-1].front.get("result") if done else None})
+    told = defaultdict(list)
+    for record in project.of_type("communication-record"):
+        if record.status == "final":
+            for subject in as_list(record.front.get("subject")):
+                told[str(subject)].append(record)
+    rules = [e for e in (as_list(plan.front.get("escalation")) if plan else []) if isinstance(e, dict)]
+    findings = []
+    for record in records:
+        if record.front.get("kind") == "summary":
+            continue                                      # a report restates; the checks raise the findings
+        for finding in as_list(record.front.get("findings")):
+            if not isinstance(finding, dict):
+                continue
+            action = project.items.get(str(finding.get("action")))
+            state = action.status if action else "missing"
+            done = state in ("closed", "cancelled", "rejected", "done", "resolved")
+            due = as_date(action.front.get("due")) if action is not None and action.type == "corrective-action" else None
+            overdue = (as_of - due).days if due and not done and due < as_of else 0
+            escalations = [c for c in told.get(str(finding.get("action")), [])
+                           if not c.front.get("practices") or "SUP.1.BP6" in map(str, as_list(c.front.get("practices")))]
+            reached = {str(a).strip().lower() for c in escalations for a in as_list(c.front.get("audience"))}
+            needed = sorted({str(to) for rule in rules if overdue > int(rule.get("after_days") or 0)
+                             for to in as_list(rule.get("to"))})
+            findings.append({"record": record.id, "finding": finding.get("id"), "text": finding.get("text"),
+                             "action": finding.get("action"), "state": state, "due": str(due) if due else None,
+                             "overdue_days": overdue,
+                             "escalation_due": [n for n in needed if n.strip().lower() not in reached],
+                             "escalated_to": sorted({str(a) for c in escalations for a in as_list(c.front.get("audience"))}),
+                             "responses": [c.front.get("agreement") for c in escalations if c.front.get("agreement")]})
+    summaries = [{"record": r.id, "checked_at": str(r.front.get("checked_at")), "result": r.front.get("result"),
+                  "communicated": bool(told.get(r.id))} for r in records if r.front.get("kind") == "summary"]
+    summarised = {str(s) for r in records if r.front.get("kind") == "summary" for s in as_list(r.front.get("subject"))}
+    open_findings = [f for f in findings if f["state"] not in ("closed", "cancelled", "rejected")]
+    figures = {"checks_planned": len(checks), "checks_never_performed": sum(1 for c in checks if not c["performed"]),
+               "records": sum(1 for r in records if r.front.get("kind") != "summary"),
+               "conforming": sum(1 for r in records if r.front.get("kind") != "summary"
+                                 and r.front.get("result") == "conforms"),
+               "findings": len(findings), "findings_open": len(open_findings),
+               "findings_overdue": sum(1 for f in open_findings if f["overdue_days"]),
+               "escalations_due": sum(1 for f in findings if f["escalation_due"]),
+               "not_summarised": [r.id for r in records if r.front.get("kind") != "summary" and r.id not in summarised]}
+    return {"as_of": str(as_of), "plan": plan.id if plan else None, "checks": checks, "findings": findings,
+            "summaries": summaries, "figures": figures}
+
+
+def cmd_quality(project, args):
+    as_of = as_date(args.as_of) if args.as_of else datetime.date.today()
+    if as_of is None:
+        print("--as-of must be a date YYYY-MM-DD")
+        return 2
+    data = quality(project, as_of)
+    if args.json:
+        print(json.dumps(data, indent=2))
+        return 0
+    print("Quality assurance as of %s (plan %s)" % (as_of, data["plan"] or "none approved"))
+    for c in data["checks"]:
+        print("check %-28s %-12s performed %d times, last %s %s %s" % (c["name"], c["kind"], c["performed"],
+              c["last"] or "-", c["last_at"] or "", c["last_result"] or ""))
+    for f in data["findings"]:
+        line = "finding %s#%s  action %s %s" % (f["record"], f["finding"], f["action"], f["state"])
+        if f["overdue_days"]:
+            line += ", overdue %d days" % f["overdue_days"]
+        if f["escalation_due"]:
+            line += ", escalation due to %s" % ", ".join(f["escalation_due"])
+        if f["escalated_to"]:
+            line += ", escalated to %s" % ", ".join(f["escalated_to"])
+        print(line)
+    for s in data["summaries"]:
+        print("report %s %s %s, %s" % (s["record"], s["checked_at"], s["result"],
+                                       "communicated" if s["communicated"] else "not communicated"))
+    fig = data["figures"]
+    print("%d checks planned (%d never performed); %d quality records, %d conforming; %d findings, %d open, %d overdue, "
+          "%d escalations due; not yet in a report: %s"
+          % (fig["checks_planned"], fig["checks_never_performed"], fig["records"], fig["conforming"], fig["findings"],
+             fig["findings_open"], fig["findings_overdue"], fig["escalations_due"], ", ".join(fig["not_summarised"]) or "-"))
+    return 0
+
+
 def cmd_problems(project, args):
     as_of = as_date(args.as_of) if args.as_of else datetime.date.today()
     if as_of is None:
@@ -1928,6 +2073,9 @@ def main():
     problems_parser.add_argument("--as-of", help="the date ages are measured to (default: today)")
     problems_parser.add_argument("--json", action="store_true")
     sub.add_parser("history").add_argument("id")
+    quality_parser = sub.add_parser("quality")
+    quality_parser.add_argument("--as-of", help="the date lateness is measured to (default: today)")
+    quality_parser.add_argument("--json", action="store_true")
     practices = sub.add_parser("practices")
     practices.add_argument("process", nargs="?")
     practices.add_argument("--json", action="store_true")
@@ -1936,7 +2084,7 @@ def main():
     return {"check": cmd_check, "matrix": cmd_matrix, "show": cmd_show, "impact": cmd_impact,
             "hash": cmd_hash, "status": cmd_status, "list": cmd_list, "audit": cmd_audit, "practices": cmd_practices,
             "diff": cmd_diff, "progress": cmd_progress,
-            "problems": cmd_problems, "history": cmd_history}[args.command](project, args)
+            "problems": cmd_problems, "history": cmd_history, "quality": cmd_quality}[args.command](project, args)
 
 
 if __name__ == "__main__":

@@ -978,6 +978,76 @@ class ProblemResolution(Case):
         self.assertEqual(states, ["open", "closed"], done.stdout + done.stderr)
 
 
+QA_SCOPE = SCOPE + ["SUP.1"]
+
+
+def quality_items():
+    """The base thread with a quality assurance plan, one process check with a finding, and a report."""
+    items = base_items()
+    items["PLN-0003"] = ({"type": "plan", "title": "Quality assurance plan", "status": "approved",
+                          "kind": "quality-assurance",
+                          "quality_checks": [{"name": "release audit", "kind": "process", "scope": ["SWE.4"],
+                                              "before": ["release candidate"]}],
+                          "escalation": [{"after_days": 7, "to": ["Project lead"]}]},
+                         {"Scope": "SWE.4.", "Approach": "Audits.", "Criteria": "Plan.", "Environment and tools": "Items.",
+                          "Responsibilities": "Quality engineer."})
+    items["QAR-0001"] = ({"type": "quality-record", "status": "final", "kind": "process", "check": "release audit",
+                          "subject": ["SWE.4"], "criteria": "PLN-0001", "checked_by": "Q. Engineer",
+                          "checked_at": "2026-01-05", "result": "conforms-with-findings",
+                          "findings": [{"id": "F1", "text": "No regression rule.", "action": "CA-0001"}],
+                          "facts": [{"process": "SWE.4", "practices": []}]},
+                         {"Summary": "One finding."})
+    items["CA-0001"] = ({"type": "corrective-action", "title": "Write the regression rule", "status": "open",
+                         "owner": "Developer", "due": "2026-01-10", "raised_in": "QAR-0001"},
+                        {"Deviation": "No rule.", "Action": "Write it."})
+    items["QAR-0002"] = ({"type": "quality-record", "status": "final", "kind": "summary", "subject": ["QAR-0001"],
+                          "criteria": "PLN-0003", "checked_by": "Q. Engineer", "checked_at": "2026-01-06",
+                          "result": "conforms-with-findings", "findings": [{"id": "F1", "text": "Open.", "action": "CA-0001"}],
+                          "facts": {}}, {"Summary": "Report."})
+    items["BL-0001"] = ({"type": "baseline", "status": "final", "tag": "rc1", "purpose": "release candidate",
+                         "created_at": "2026-01-06T10:00:00+00:00",
+                         "items": [{"item": "SWR-0001", "hash": "x", "status": "approved"}]}, {})
+    items["CMR-0001"] = ({"type": "communication-record", "status": "final", "subject": ["QAR-0002", "BL-0001"],
+                          "audience": ["Project lead"], "channel": "mail", "sent_at": "2026-01-06"}, {})
+    return items
+
+
+class QualityAssurance(Case):
+    def make(self, items=None, **kwargs):
+        kwargs.setdefault("scope", QA_SCOPE)
+        return super().make(quality_items() if items is None else items, **kwargs)
+
+    def test_checked_reported_and_communicated_has_no_findings(self):
+        self.assertEqual(self.make().findings(), [])
+
+    def test_baseline_before_the_check_the_plan_asks_for(self):
+        items = changed(quality_items(), "QAR-0001", checked_at="2026-01-07")
+        self.assertIn(("COV-43", "BL-0001"), self.make(items).rules())
+
+    def test_finding_without_an_existing_action(self):
+        items = changed(quality_items(), "QAR-0001",
+                        findings=[{"id": "F1", "text": "No regression rule.", "action": "CA-0099"}])
+        self.assertIn(("COV-44", "QAR-0001"), self.make(items).rules())
+
+    def test_report_not_communicated(self):
+        items = changed(quality_items(), "CMR-0001", subject=["BL-0001"])
+        self.assertIn(("COV-45", "QAR-0002"), self.make(items).rules())
+
+    def test_overdue_non_conformance_is_due_for_escalation_until_escalated(self):
+        from traceability import quality
+        fixture = self.make()
+        data = quality(Project(fixture.root), as_of(2026, 1, 20))
+        finding = data["findings"][0]
+        self.assertEqual((finding["overdue_days"], finding["escalation_due"]), (10, ["Project lead"]))
+        self.assertEqual(data["checks"][0]["last"], "QAR-0001")
+        fixture.write("CMR-0002", {"type": "communication-record", "status": "final", "subject": "CA-0001",
+                                   "audience": ["Project lead"], "channel": "meeting", "sent_at": "2026-01-19",
+                                   "practices": ["SUP.1.BP6"], "agreement": "a second developer from 2026-01-20"}, {})
+        finding = quality(Project(fixture.root), as_of(2026, 1, 20))["findings"][0]
+        self.assertEqual(finding["escalation_due"], [])
+        self.assertEqual(finding["responses"], ["a second developer from 2026-01-20"])
+
+
 def as_of(year, month, day):
     import datetime
     return datetime.date(year, month, day)

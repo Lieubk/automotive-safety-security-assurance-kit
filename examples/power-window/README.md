@@ -26,9 +26,10 @@ and is responsible for:
 | SWE.4 Software Unit Verification | a unit verification strategy with coverage targets per ASIL, 20 unit test cases with executable tests, a test run with measured coverage, a static analysis run |
 | SWE.5 Software Integration and Integration Test | an integration strategy in two steps, 7 integration test cases with executable tests and doubles, a build record and a test run per step |
 | SWE.6 Software Qualification Test | a qualification test strategy, 9 test cases - one per software requirement, every verification criterion a step - and a test run on the build of the last integration step |
+| SUP.1 Quality Assurance | a quality assurance plan with two checks before the release candidate; a work product sample and a process audit with their findings and corrective actions, a quality report, an escalation |
 | SUP.8 Configuration Management | a configuration management plan; everything is text under version control |
 | SUP.9 Problem Resolution Management | a problem resolution strategy with urgent and alert rules; one problem report from recording to closure - a defect the qualification test found in a component taken over - with its alert and a trend report |
-| MAN.3 Project Management | a project plan with four milestones, nine work packages that deliver every item the project wrote, and one status report |
+| MAN.3 Project Management | a project plan with four milestones, ten work packages that deliver every item the project wrote, and one status report |
 
 Two of the four application components (window position acquisition and anti-pinch
 detection) are developed in the project, down to code and unit tests. The other two
@@ -53,6 +54,7 @@ under `verification/evidence/`.
 | `RUN-0004` | the qualification tests ran on the software of the last step, on the host with the platform double, and passed | the software on the control unit; the qualification on the customer's bench |
 | `PRB-0001` | while the qualification tests were written, the case of SWR-0008 failed on the command logic taken over: it ended the automatic closing 20 ms early. The code was corrected and the run recorded afterwards (`RUN-0004`) | the people, dates, the platform team and its release 3.2.1 are invented around that fact; the failing run was not recorded |
 | `CMR-0001`, `PTR-0001` | written by `record.py communication` and `record.py problem-trends` | an alert anybody sent, an analysis anybody made: their texts say so |
+| `QAR-0001` to `QAR-0003`, `CA-0001`, `CA-0002`, `CMR-0002`, `CMR-0003` | written by `record.py quality-check`, `quality-report` and `communication`; the facts in the quality records are what the tools showed at the time. The findings are true of the example: its reviews are fixtures (CA-0001), and no integration or qualification result was communicated (CA-0002) | a check by a quality engineer, an answer of a project lead: the texts say they are demonstration data |
 | `PSR-0001` | written by `record.py status-report` from `progress` and `check` as of 2026-06-05; the planned and actual dates and efforts in the work packages are invented | an assessment by a person: its text says it is demonstration data |
 | `REV-0001` to `REV-0007` | nothing: they are fixtures that bind each item to a content hash, and the units to the hashes of their code, so that the trace check can be demonstrated. They are recorded as "external criteria: demonstration fixture" | a review. No person reviewed these items, no checklist was applied, and the records say so |
 
@@ -83,12 +85,14 @@ whether that is enough is for a person to judge.
 | Unit test case | UT | `verification/unit` | 20 |
 | Software integration test case | SIT | `verification/software-integration` | 7 |
 | Software qualification test case | SQT | `verification/software-qualification` | 9 |
-| Plan | PLN | `plans` | 6 |
-| Work package | WP | `plans/work-packages` | 9 |
+| Plan | PLN | `plans` | 7 |
+| Work package | WP | `plans/work-packages` | 10 |
 | Project status report | PSR | `records/status` | 1 |
 | Problem report | PRB | `records/problems` | 1 |
 | Problem trend report | PTR | `records/problem-trends` | 1 |
-| Communication record | CMR | `records/communication` | 1 |
+| Communication record | CMR | `records/communication` | 3 |
+| Quality record | QAR | `records/quality` | 3 |
+| Corrective action | CA | `records/actions` | 2 |
 | Build record | BLD | `verification/builds` | 2 |
 | Test run, static analysis run | RUN, SAR | `verification/runs` | 4, 1 |
 | Review record | REV | `records/reviews` | 7 |

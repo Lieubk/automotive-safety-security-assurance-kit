@@ -19,7 +19,7 @@ rating and no capability level.
 | Every base practice of the process asked for | maps the engine's observation to a verdict and reads a sample of the evidence | none: the items and records are the evidence; the report, saved on request under `reports/`, is a plain file |
 | Practices the schema has no evidence structure for | NOT ASSESSED by the toolkit; asks what evidence exists outside the repository | the answer, reported as the user's statement |
 | GP 2.1.1 to GP 2.1.7 and GP 2.2.1 to GP 2.2.4, when the target level is 2 or higher | lists them as NOT ASSESSED by the toolkit, with what a person would look for | - |
-| SUP.1.BP3 | not done here: a gate the team runs on its own work is not an independent check of process activities; whoever the quality assurance plan names may use the report as input | - |
+| SUP.1.BP3 | not done here: a gate the team runs on its own work is not an independent check of process activities; `/quality-assurance` uses the report as input for the check of the person the quality assurance plan names | - |
 
 ## Before you start
 

@@ -39,7 +39,7 @@ type and no rule for the process, so its evidence lives outside the toolkit.
 | Software | SWE.4 | Software Unit Verification | vda | authoring: `/sw-unit-verify` |
 | Software | SWE.5 | Software Integration and Integration Test | vda | authoring: `/sw-integration-test` |
 | Software | SWE.6 | Software Qualification Test | vda | authoring: `/sw-qualification-test` |
-| Supporting | SUP.1 | Quality Assurance | vda | checked; reviews through `/review`, gates through `/process-gate` |
+| Supporting | SUP.1 | Quality Assurance | vda | authoring: `/quality-assurance`; it builds on `/review` and `/process-gate` |
 | Supporting | SUP.2 | Verification | extended | catalog |
 | Supporting | SUP.4 | Joint Review | extended | catalog |
 | Supporting | SUP.7 | Documentation | extended | catalog |

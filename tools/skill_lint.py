@@ -32,9 +32,9 @@ EFFORTS = {"low", "medium", "high", "xhigh", "max"}
 BUILT_IN_AGENTS = {"general-purpose", "Explore", "Plan"}
 MAX_LINES = 200
 TRACE_COMMANDS = {"check", "matrix", "show", "impact", "hash", "status", "list", "audit", "practices", "diff",
-                  "progress", "problems", "history"}
+                  "progress", "problems", "history", "quality"}
 RECORD_COMMANDS = {"next-id", "test-run", "analysis-run", "review", "baseline", "communication", "status-report", "build",
-                   "problem-trends"}
+                   "problem-trends", "quality-check", "quality-report"}
 
 
 def front_matter(path, errors):

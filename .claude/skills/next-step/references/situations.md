@@ -73,7 +73,8 @@ Whether an input was registered and accepted is looked up; the tools report the 
 | `software-integration` | SWE.5 | `/sw-integration-test` |
 | `software-qualification-test` | SWE.6 | `/sw-qualification-test` |
 | `problem-resolution` | SUP.9 | `/problem-resolution` |
-| `system-integration`, `system-qualification-test`, `quality-assurance` | SYS.4, SYS.5, SUP.1 | by hand: a `plan` item with the sections of the schema |
+| `quality-assurance` | SUP.1 | `/quality-assurance` |
+| `system-integration`, `system-qualification-test` | SYS.4, SYS.5 | by hand: a `plan` item with the sections of the schema |
 
 These skills draft the plan of their process; their base practice tables say so.
 If one of them is not installed, its plan is written by hand like the others. A plan
@@ -192,6 +193,8 @@ and the notes of the process under `aspice/3.1/notes/`, and then goes to `/revie
 | `change-request` items in a state other than `closed` or `rejected` in `status` | changes under way | `/change-request` |
 | `problem-report` items not `closed` or `rejected` | problems open; `python tools/traceability.py problems` lists them with their age | `/problem-resolution` |
 | `COV-39`, `COV-40` | an urgent problem without an authorised action; a problem not alerted to the parties the strategy names | `/problem-resolution <PRB-ID>`: the decision and the alert come from people |
+| `COV-43` | a baseline was made without the quality check the quality assurance plan asks for before it | `/quality-assurance`; the next quality report names it |
+| `COV-44`, `COV-45` | a finding of quality assurance without an existing action; a quality report not communicated | `/quality-assurance` |
 | `COV-41`, `COV-42` | a problem in a baselined item without a change request; a closed problem without accepted closure, evidence, or with a change request still open | `/problem-resolution <PRB-ID>`; `/change-request` |
 
 ## Stop 7: nothing open

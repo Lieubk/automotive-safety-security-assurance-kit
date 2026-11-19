@@ -41,6 +41,7 @@ repository - one item per file - and a trace engine checks them.
 | `/baseline` | SUP.8 | baselines and their communication |
 | `/change-request` | SUP.10 | changes to baselined items |
 | `/problem-resolution` | SUP.9 | problems from recording to closure, urgent actions, alerts, trends |
+| `/quality-assurance` | SUP.1 | quality assurance plan, checks of work products and processes, non-conformances, escalation, quality reports |
 | `/project-plan` | MAN.3 | scope, life cycle and milestones, feasibility, resources, skills, interfaces, reporting |
 | `/work-breakdown` | MAN.3 | work packages, activities, estimates, schedule, dependencies |
 | `/project-status` | MAN.3 | progress against the plan, status reports, corrective actions |

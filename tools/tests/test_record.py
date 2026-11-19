@@ -385,6 +385,65 @@ class Integration(RecordCase):
         self.assertIn("qualified on a build of the last step", out)
 
 
+class QualityChecks(RecordCase):
+    """Checks against the quality assurance plan of the example (PLN-0007)."""
+
+    def check(self, *extra, result="conforms", findings=None, subject=("SWR-0001",), kind="work-product"):
+        summary = Path(self.tmp.name) / "summary.txt"
+        summary.write_text("Looked at the requirement and its review.", encoding="utf-8")
+        arguments = ["quality-check", "--kind", kind, "--criteria", "software-requirements v2", "--checked-by",
+                     "Q. Engineer", "--result", result, "--summary", summary, "--checked-at", "2026-06-01"]
+        for s in subject:
+            arguments += ["--subject", s]
+        if findings is not None:
+            arguments += ["--findings", self.json_file("findings.json", findings)]
+        return self.record(*arguments, *extra)
+
+    def test_a_check_needs_an_approved_quality_assurance_plan(self):
+        plan = self.project / "plans" / "PLN-0007.md"
+        plan.write_text(plan.read_text(encoding="utf-8").replace("status: approved", "status: draft", 1), encoding="utf-8")
+        code, out = self.check()
+        self.assertEqual(code, 1)
+        self.assertIn("no approved quality-assurance plan", out)
+
+    def test_a_work_product_check_records_the_approving_review(self):
+        code, out = self.check("--check", "work product sample")
+        self.assertEqual(code, 0, out)
+        record = self.front("records/quality/" + self.records("records/quality", "QAR-")[-1])
+        self.assertEqual(record["facts"][0]["item"], "SWR-0001")
+        self.assertTrue(record["facts"][0]["approved_by"].startswith("REV-"))
+
+    def test_a_finding_needs_an_action_that_exists(self):
+        code, out = self.check(result="conforms-with-findings",
+                               findings=[{"id": "F1", "text": "Unclear.", "action": "CA-0099"}])
+        self.assertEqual(code, 1)
+        self.assertIn("write the action first", out)
+
+    def test_the_result_has_to_agree_with_the_findings(self):
+        code, out = self.check(result="does-not-conform")
+        self.assertEqual(code, 1)
+        self.assertIn("needs at least one finding", out)
+
+    def test_a_process_check_records_the_evidence_per_practice(self):
+        code, out = self.check(kind="process", subject=("SWE.1",))
+        self.assertEqual(code, 0, out)
+        record = self.front("records/quality/" + self.records("records/quality", "QAR-")[-1])
+        self.assertEqual(record["facts"][0]["process"], "SWE.1")
+        self.assertEqual(record["facts"][0]["practices"][0]["practice"], "SWE.1.BP1")
+
+    def test_a_report_covers_the_checks_since_the_last_one(self):
+        self.check()
+        summary = Path(self.tmp.name) / "report.txt"
+        summary.write_text("One check, conforming.", encoding="utf-8")
+        code, out = self.record("quality-report", "--checked-by", "Q. Engineer", "--result", "conforms",
+                                "--summary", summary, "--as-of", "2026-06-30")
+        self.assertEqual(code, 0, out)
+        names = self.records("records/quality", "QAR-")
+        report = self.front("records/quality/" + names[-1])
+        self.assertEqual(report["kind"], "summary")
+        self.assertEqual(report["subject"], [names[-2][:-3]])
+
+
 class ProblemTrends(RecordCase):
     def add_problem(self):
         front = {"id": "PRB-0099", "type": "problem-report", "title": "Late stop", "status": "open", "severity": "major",

@@ -111,6 +111,25 @@ Commands
         The reviewer names are the people accountable for the verdict: pass what
         the user states, never an invented name.
 
+    quality-check --kind work-product|process [--check NAME] --subject ID [--subject ID ...]
+                  --criteria TEXT --checked-by NAME --result conforms|conforms-with-findings|does-not-conform
+                  --summary FILE [--findings FILE] [--checked-at DATE]
+        final quality record of a check by quality assurance. The tool adds the
+        facts at the time: per item its state, hash and approving review with its
+        reviewers and checklist; per process the evidence per base practice of
+        `practices`. The verdict and the summary are the checker's. Findings FILE
+        is JSON: [{"id", "text", "action": "<CA-ID or PRB-ID>", "severity"}]; the
+        action has to exist. Refused without an approved quality-assurance plan,
+        for a --check the plan does not have, for result conforms with findings,
+        and for any other result without one.
+
+    quality-report --checked-by NAME --result R --summary FILE [--as-of DATE] [--period TEXT]
+        final quality record of kind summary: the quality records since the last
+        report as subject, the figures of `traceability.py quality` as facts - the
+        findings of the checks with the state of their actions among them - and the
+        reading of quality assurance from the file. It raises no findings of its own. It is communicated with
+        `communication --subject <QAR-ID> --practice SUP.1.BP4` (COV-45).
+
     problem-trends --reported-by NAME --assessment FILE [--as-of DATE] [--period TEXT]
         final problem trend report: every problem report known on the date with
         its state, severity, origin, detection and age, and the counts by state,
@@ -731,6 +750,125 @@ def cmd_status_report(project, args):
     return 0
 
 
+def read_text_file(path, what):
+    """The text of a file a person wrote, or None."""
+    return Path(path).read_text(encoding="utf-8").strip() if path and Path(path).is_file() else None
+
+
+def quality_findings(project, path, problems):
+    """Findings of a quality check from a JSON file; each must name an existing action."""
+    if not path:
+        return []
+    findings = json.loads(Path(path).read_text(encoding="utf-8"))
+    for finding in findings:
+        action = project.items.get(str(finding.get("action")))
+        if not finding.get("id") or not finding.get("text"):
+            problems.append("a finding needs id and text: %s" % finding)
+        if action is None or action.type not in ("corrective-action", "problem-report"):
+            problems.append("finding %s: action %s is no corrective action or problem report; write the action first"
+                            % (finding.get("id"), finding.get("action")))
+    return findings
+
+
+def consistent_result(result, findings, problems):
+    if result == "conforms" and findings:
+        problems.append("result conforms, but the file lists findings")
+    if result != "conforms" and not findings:
+        problems.append("result %s needs at least one finding" % result)
+
+
+def cmd_quality_check(project, args):
+    plan = project.quality_plan()
+    problems = [] if plan else ["no approved quality-assurance plan: the checks are performed as it defines them"]
+    names = [str(c.get("name")) for c in trace.as_list(plan.front.get("quality_checks")) if isinstance(c, dict)] if plan else []
+    if plan and args.check and args.check not in names:
+        problems.append("%s has no quality check '%s'; its checks: %s" % (plan.id, args.check, ", ".join(names)))
+    checked_at = args.checked_at or datetime.date.today().isoformat()
+    if trace.as_date(checked_at) is None:
+        problems.append("--checked-at must be a date YYYY-MM-DD")
+    summary = read_text_file(args.summary, "summary")
+    if not summary:
+        problems.append("--summary names no file with text: the record carries the checker's verdict in their words")
+    facts = []
+    if args.kind == "work-product":
+        for ref in args.subject:
+            item = project.items.get(ref)
+            if item is None:
+                problems.append("no such item: %s" % ref)
+                continue
+            review = project.approving_review(item)
+            facts.append({"item": item.id, "type": item.type, "status": item.status, "hash": item.hash,
+                          "approved_by": review.id if review else None,
+                          "reviewers": trace.as_list(review.front.get("reviewers")) if review else [],
+                          "checklist": review.front.get("checklist") if review else None})
+    else:
+        scope = project.scope or set()
+        for ref in args.subject:
+            if project.scope is not None and ref not in scope:
+                problems.append("%s is not a process in the scope of this project" % ref)
+                continue
+            facts.append({"process": ref, "practices": [{k: row[k] for k in ("practice", "state", "errors", "warnings")}
+                                                        for row in trace.practice_rows(Project(project.root), ref)]})
+    findings = quality_findings(project, args.findings, problems)
+    consistent_result(args.result, findings, problems)
+    if problems:
+        return stop(problems)
+    front = {
+        "id": next_id(project, "quality-record"),
+        "type": "quality-record",
+        "status": "final",
+        "kind": args.kind,
+        "check": args.check,
+        "subject": args.subject,
+        "criteria": args.criteria,
+        "checked_by": args.checked_by,
+        "checked_at": checked_at,
+        "result": args.result,
+        "findings": findings,
+        "facts": facts,
+    }
+    if not args.check:
+        del front["check"]
+    path = write_item(project, "quality-record", front, "\n## Summary\n\n%s\n" % summary)
+    print("wrote %s: %s check of %s, %s, %d findings" % (path, args.kind, ", ".join(args.subject), args.result, len(findings)))
+    return 0
+
+
+def cmd_quality_report(project, args):
+    as_of = trace.as_date(args.as_of) if args.as_of else datetime.date.today()
+    problems = [] if as_of else ["--as-of must be a date YYYY-MM-DD"]
+    summary = read_text_file(args.summary, "summary")
+    if not summary:
+        problems.append("--summary names no file with text: the report carries the reading of quality assurance, "
+                        "in the words of the person in that role")
+    if project.quality_plan() is None:
+        problems.append("no approved quality-assurance plan: reporting is done as it defines it")
+    if problems:
+        return stop(problems)
+    data = trace.quality(project, as_of)
+    front = {
+        "id": next_id(project, "quality-record"),
+        "type": "quality-record",
+        "status": "final",
+        "title": "Quality assurance report as of %s" % as_of,
+        "kind": "summary",
+        "subject": data["figures"]["not_summarised"],
+        "criteria": "%s, %s" % (data["plan"], args.period or "since the last report"),
+        "checked_by": args.checked_by,
+        "checked_at": str(as_of),
+        "result": args.result,
+        "findings": [],
+        "facts": {"checks": [{k: c[k] for k in ("name", "performed", "last", "last_result")} for c in data["checks"]],
+                  "findings": [{k: f[k] for k in ("record", "finding", "action", "state", "overdue_days", "escalation_due")}
+                               for f in data["findings"]],
+                  "figures": {k: v for k, v in data["figures"].items() if k != "not_summarised"}},
+    }
+    path = write_item(project, "quality-record", front, "\n## Summary\n\n%s\n" % summary)
+    print("wrote %s: report over %d quality records, %d findings open" % (path, len(front["subject"]),
+                                                                          data["figures"]["findings_open"]))
+    return 0
+
+
 def cmd_problem_trends(project, args):
     as_of = trace.as_date(args.as_of) if args.as_of else datetime.date.today()
     problems = [] if as_of else ["--as-of must be a date YYYY-MM-DD"]
@@ -855,6 +993,22 @@ def main():
     status.add_argument("--assessment", required=True, help="text file with the reporter's assessment")
     status.add_argument("--as-of", help="date the figures are measured against (default: today)")
     status.add_argument("--period")
+    qa_check = sub.add_parser("quality-check")
+    qa_check.add_argument("--kind", required=True, choices=["work-product", "process"])
+    qa_check.add_argument("--check", help="name of the quality check of the quality-assurance plan")
+    qa_check.add_argument("--subject", required=True, action="append", help="item ID, or process ID for kind process")
+    qa_check.add_argument("--criteria", required=True)
+    qa_check.add_argument("--checked-by", required=True)
+    qa_check.add_argument("--result", required=True, choices=["conforms", "conforms-with-findings", "does-not-conform"])
+    qa_check.add_argument("--summary", required=True, help="text file with the checker's verdict in their words")
+    qa_check.add_argument("--findings", help="JSON file: [{id, text, action, severity}]")
+    qa_check.add_argument("--checked-at", help="date of the check (default: today)")
+    qa_report = sub.add_parser("quality-report")
+    qa_report.add_argument("--checked-by", required=True)
+    qa_report.add_argument("--result", required=True, choices=["conforms", "conforms-with-findings", "does-not-conform"])
+    qa_report.add_argument("--summary", required=True)
+    qa_report.add_argument("--as-of")
+    qa_report.add_argument("--period")
     trends = sub.add_parser("problem-trends")
     trends.add_argument("--reported-by", required=True)
     trends.add_argument("--assessment", required=True, help="text file with the analyst's reading")
@@ -875,7 +1029,8 @@ def main():
     commands = {"next-id": cmd_next_id, "test-run": cmd_test_run, "analysis-run": cmd_analysis_run,
                 "review": cmd_review, "baseline": cmd_baseline, "communication": cmd_communication,
                 "status-report": cmd_status_report, "build": cmd_build,
-                "problem-trends": cmd_problem_trends}
+                "problem-trends": cmd_problem_trends, "quality-check": cmd_quality_check,
+                "quality-report": cmd_quality_report}
     return commands[args.command](project, args)
 
 

@@ -146,6 +146,18 @@ structures:
     keys: [note]
     dates: [accepted_at]
     note: "the formal acceptance of the closure: who accepted it, when, and the test run or review record that shows the resolution works"
+  quality-checks:                  # plan.quality_checks when kind is quality-assurance
+    mandatory: [name, kind, scope]
+    keys: [before, when, criteria]
+    note: "the checks quality assurance performs: kind work-product or process; scope names item types or process IDs; before lists baseline purposes the check has to precede (COV-43); when says how often otherwise; criteria names the checklist or what is compared"
+  escalation-rules:                # plan.escalation when kind is quality-assurance
+    mandatory: [after_days, to]
+    keys: [channel]
+    note: "a non-conformance whose action is overdue by more than after_days is escalated to every party under to (a list); `traceability.py quality` shows which are due"
+  quality-findings:                # quality-record.findings
+    mandatory: [id, text, action]
+    keys: [severity]
+    note: "action names the corrective action or problem report that deals with the finding"
   alert-rules:                     # plan.alerts when kind is problem-resolution
     mandatory: [severity, audience]
     keys: [within_days, channel]
@@ -368,6 +380,8 @@ types:
       integration_steps: {structure: integration-steps, required: optional, note: "software-integration plans: the integration steps in order (conditions)"}
       urgent_severities: {required: optional, note: "problem-resolution plans: the severities for which an urgent action has to be authorised and recorded (conditions)"}
       alerts: {structure: alert-rules, required: optional, note: "problem-resolution plans: who is alerted to problems of which severity (conditions)"}
+      quality_checks: {structure: quality-checks, required: optional, note: "quality-assurance plans: the checks of work products and process activities (conditions)"}
+      escalation: {structure: escalation-rules, required: optional, note: "quality-assurance plans: when an overdue non-conformance goes to which level (conditions)"}
     sections:
       Scope: before-review         # what the plan covers and what it leaves to others
       Approach: before-review      # methods, their order, and how they depend on ASIL
@@ -521,7 +535,7 @@ types:
     prefix: CMR
     folder: records/communication
     lifecycle: record
-    supports: [SYS.2.BP8, SYS.3.BP8, SYS.4.BP9, SYS.5.BP7, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7, SWE.4.BP7, SWE.5.BP9, SWE.6.BP7, SUP.9.BP6, "13-04"]
+    supports: [SYS.2.BP8, SYS.3.BP8, SYS.4.BP9, SYS.5.BP7, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7, SWE.4.BP7, SWE.5.BP9, SWE.6.BP7, SUP.1.BP4, SUP.1.BP6, SUP.9.BP6, "13-04"]
     attributes:
       id: {required: always}
       type: {required: always}
@@ -584,7 +598,7 @@ types:
     prefix: CA
     folder: records/actions
     lifecycle: action
-    supports: [MAN.3.BP10, "14-02"]
+    supports: [MAN.3.BP10, SUP.1.BP5, "14-02"]
     attributes:
       use: [common]
       owner: {required: always}
@@ -614,6 +628,28 @@ types:
       check: {required: optional, note: "summary of the trace check at the time of the report; generated"}
     sections:
       Assessment: always           # the reporter's reading of the figures, risks and what is decided
+
+  quality-record:                  # a check by quality assurance, with the facts the tools showed and the person's verdict
+    prefix: QAR
+    folder: records/quality
+    lifecycle: record
+    supports: [SUP.1.BP2, SUP.1.BP3, SUP.1.BP4, "13-18"]
+    attributes:
+      id: {required: always}
+      type: {required: always}
+      status: {required: always}
+      title: {required: optional}
+      kind: {values: [work-product, process, summary], required: always, note: "summary: the periodic report of quality assurance over the checks since the last one"}
+      check: {required: optional, note: "name of the quality check of the quality-assurance plan this record carries out"}
+      subject: {required: always, note: "the items checked (work-product), the processes (process), or the quality records summarised (summary)"}
+      criteria: {required: always, note: "what was checked against: checklist and version, plan, strategy section"}
+      checked_by: {required: always, note: "the person in the quality assurance role who stands behind the verdict"}
+      checked_at: {format: date, required: always}
+      result: {values: [conforms, conforms-with-findings, does-not-conform], required: always}
+      findings: {structure: quality-findings, required: always, may_be_empty: true}
+      facts: {required: always, note: "generated: what the tools showed at the time - per item its state, hash and approving review; per process the evidence per base practice; for a summary the figures of `traceability.py quality`"}
+    sections:
+      Summary: always              # the verdict in the checker's words: what was looked at, what was found, what follows
 
   problem-trend-report:            # problem status and trends as of a date, with the analyst's reading
     prefix: PTR
@@ -686,6 +722,8 @@ conditions:
   - {types: [plan], when: {kind: [problem-resolution]}, attributes: [urgent_severities], stage: before-review}
   - {types: [plan], when: {kind: [problem-resolution]}, attributes: [alerts], structure: alert-rules, stage: before-review}
   - {types: [problem-report], when: {status: [closed]}, attributes: [closure], structure: closure, stage: always}
+  - {types: [plan], when: {kind: [quality-assurance]}, attributes: [quality_checks], structure: quality-checks, stage: before-review}
+  - {types: [plan], when: {kind: [quality-assurance]}, attributes: [escalation], structure: escalation-rules, stage: before-review}
   - {types: any, when: {status: [rejected]}, attributes: [rejection_reason], stage: always}
   - {types: [change-request], when: {status: [approved, rejected, implemented, verified, closed]}, attributes: [decision], stage: always}
 
@@ -837,6 +875,9 @@ coverage:
   - {id: COV-40, subject: problem-report, expect: "a live problem report of a severity that the approved problem-resolution plan names under alerts is the subject of a final communication record whose audience names every party the alert rule lists", waiver: "none", supports: [SUP.9.BP6]}
   - {id: COV-41, subject: problem-report, expect: "from state in-resolution on: if it affects an item listed by a final baseline whose purpose is not internal, a change request resolves it", waiver: "none", supports: [SUP.9.BP7, SUP.10.BP2]}
   - {id: COV-42, subject: problem-report, expect: "in state closed: the closure names who accepted it, when, and evidence that is a final test run or review record; every change request that resolves it is closed", waiver: "none", supports: [SUP.9.BP8]}
+  - {id: COV-43, subject: baseline, expect: "for every final baseline whose purpose a quality check of the approved quality-assurance plan names under before, a final quality record of that check was made on or before the day the baseline was created", waiver: "none", supports: [SUP.1.BP2, SUP.1.BP3]}
+  - {id: COV-44, subject: quality-record, expect: "every finding of a final quality record names, under action, an existing corrective action or problem report", waiver: "none", supports: [SUP.1.BP5]}
+  - {id: COV-45, subject: quality-record, expect: "a final quality record of kind summary is the subject of a final communication record", waiver: "none", supports: [SUP.1.BP4]}
   - {id: COV-26, subject: baseline, expect: "at least one final communication-record names the baseline as subject", waiver: "baseline purpose marked internal in the project configuration", supports: [SYS.2.BP8, SYS.3.BP8, SYS.4.BP9, SYS.5.BP7, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7, SWE.4.BP7, SWE.5.BP9, SWE.6.BP7]}
 
 # ---------------------------------------------------------------------------

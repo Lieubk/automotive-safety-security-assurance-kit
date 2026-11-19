@@ -1,6 +1,6 @@
 # Plan review checklist
 
-Version 4. Applies to: `plan`. Supports: MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6,
+Version 5. Applies to: `plan`. Supports: MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6,
 MAN.3.BP7, SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1,
 SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1.
 
@@ -147,7 +147,8 @@ empty, ask the user; do not assume a value.
 
 | ID | Check | How to check | Kind |
 |---|---|---|---|
-| PLN-80 | It is stated which work products and which process activities are checked, by which method, and at which events or how often | read `Scope`, `Approach` | semantic |
+| PLN-88 | `quality_checks` and `escalation` are present; every check names its kind and scope, and the baseline purposes under `before` are purposes of the configuration management plan | `check`: no `SCHEMA` finding on the item; compare `before` with the purposes the configuration management plan defines | script |
+| PLN-80 | It is stated which work products and which process activities are checked, by which method, and at which events or how often: one entry of `quality_checks` per check | read `quality_checks`, `Scope`, `Approach` | semantic |
 | PLN-81 | It is stated who performs the checks and what makes that person independent of the people whose work is checked; conflicts of interest are addressed | read `Approach`, `Responsibilities` | semantic |
 | PLN-82 | The criteria are named: which checklist in which version applies to which work product type, and what a process check compares against | compare with `.claude/docs/checklists/` | semantic |
 | PLN-83 | The part played by tools and by reviews prepared by a model is stated: their output is input for a person, not an independent check in itself | read `Approach` | semantic |
