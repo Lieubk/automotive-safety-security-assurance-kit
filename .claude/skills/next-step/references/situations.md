@@ -74,6 +74,7 @@ Whether an input was registered and accepted is looked up; the tools report the 
 | `software-qualification-test` | SWE.6 | `/sw-qualification-test` |
 | `problem-resolution` | SUP.9 | `/problem-resolution` |
 | `quality-assurance` | SUP.1 | `/quality-assurance` |
+| `risk-management` | MAN.5 | `/risk-management` |
 | `system-integration` | SYS.4 | `/sys-integration-test` |
 | `system-qualification-test` | SYS.5 | `/sys-qualification-test` |
 
@@ -159,6 +160,7 @@ Question 2, by type:
 | `corrective-action` | MAN.3 | `/project-status` | - |
 | `problem-report` | SUP.9 | `/problem-resolution` | - |
 | `supplier-agreement` | ACQ.4 | `/supplier-monitoring` | `/review` |
+| `risk` | MAN.5 | `/risk-management` | - |
 
 To name the IDs behind a count, run
 `python tools/traceability.py list --type <type> --status <state>`.
@@ -197,6 +199,7 @@ and the notes of the process under `aspice/3.1/notes/`, and then goes to `/revie
 | `change-request` items in a state other than `closed` or `rejected` in `status` | changes under way | `/change-request` |
 | `problem-report` items not `closed` or `rejected` | problems open; `python tools/traceability.py problems` lists them with their age | `/problem-resolution` |
 | `COV-39`, `COV-40` | an urgent problem without an authorised action; a problem not alerted to the parties the strategy names | `/problem-resolution <PRB-ID>`: the decision and the alert come from people |
+| `COV-50`, `COV-51`, `COV-52` | a risk rated outside the scales or with an unknown category; a risk above the threshold neither treated nor accepted by a named person; a risk in treatment without an indicator | `/risk-management <RSK-ID>` |
 | `COV-43` | a baseline was made without the quality check the quality assurance plan asks for before it | `/quality-assurance`; the next quality report names it |
 | `COV-44`, `COV-45` | a finding of quality assurance without an existing action; a quality report not communicated | `/quality-assurance` |
 | `COV-41`, `COV-42` | a problem in a baselined item without a change request; a closed problem without accepted closure, evidence, or with a change request still open | `/problem-resolution <PRB-ID>`; `/change-request` |

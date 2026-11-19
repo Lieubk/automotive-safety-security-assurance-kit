@@ -50,6 +50,7 @@ repository - one item per file - and a trace engine checks them.
 | `/quality-assurance` | SUP.1 | quality assurance plan, checks of work products and processes, non-conformances, escalation, quality reports |
 | `/project-plan` | MAN.3 | scope, life cycle and milestones, feasibility, resources, skills, interfaces, reporting |
 | `/work-breakdown` | MAN.3 | work packages, activities, estimates, schedule, dependencies |
+| `/risk-management` | MAN.5 | risk management plan, risks rated, treated, monitored, accepted, corrective actions |
 | `/project-status` | MAN.3 | progress against the plan, status reports, corrective actions |
 | `/next-step` | - | where the project stands and what to do next |
 

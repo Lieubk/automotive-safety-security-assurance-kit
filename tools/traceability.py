@@ -21,6 +21,8 @@ Commands
     problems           problem reports with state, severity, origin, detection and age
                        as of a date (--as-of; default today), and the figures; --json
     history ID         the states an item had in the commits that changed it, from git
+    risks              the risks by exposure, with treatment actions overdue and indicators
+                       at their threshold (--as-of; default today); --json
     suppliers          per supplier agreement: meetings held against the agreed rhythm,
                        exchanges recorded, open items and corrective actions
                        (--as-of; default today); --json
@@ -448,6 +450,11 @@ class Project:
         """The approved plan of kind problem-resolution, or None."""
         return next((p for p in sorted(self.of_type("plan"), key=lambda p: record_number(p.id))
                      if p.status == "approved" and p.front.get("kind") == "problem-resolution"), None)
+
+    def risk_plan(self):
+        """The approved plan of kind risk-management, or None."""
+        return next((p for p in sorted(self.of_type("plan"), key=lambda p: record_number(p.id))
+                     if p.status == "approved" and p.front.get("kind") == "risk-management"), None)
 
     def quality_plan(self):
         """The approved plan of kind quality-assurance, or None."""
@@ -1396,6 +1403,54 @@ class Project:
                 self.add("error", rule, record.id, "no final communication record names this quality report",
                          self.rules[rule]["supports"])
 
+    def risk_numbers(self, risk):
+        try:
+            return int(risk.front.get("probability")), int(risk.front.get("impact"))
+        except (TypeError, ValueError):
+            return None, None
+
+    def cov_50(self, rule):
+        plan = self.risk_plan()
+        if plan is None:
+            return
+        scale = plan.front.get("risk_scale") if isinstance(plan.front.get("risk_scale"), dict) else {}
+        categories = [str(c) for c in as_list(plan.front.get("risk_categories"))]
+        for risk in self.of_type("risk"):
+            if risk.status in ("identified", "rejected"):
+                continue
+            probability, impact = self.risk_numbers(risk)
+            if probability is None or not 1 <= probability <= int(scale.get("probability_levels") or 0):
+                self.gap(rule, risk, "probability %r is outside 1 to %s of %s"
+                         % (risk.front.get("probability"), scale.get("probability_levels"), plan.id))
+            if impact is None or not 1 <= impact <= int(scale.get("impact_levels") or 0):
+                self.gap(rule, risk, "impact %r is outside 1 to %s of %s" % (risk.front.get("impact"),
+                                                                           scale.get("impact_levels"), plan.id))
+            if str(risk.front.get("category")) not in categories:
+                self.gap(rule, risk, "category %s is not one of %s: %s" % (risk.front.get("category"), plan.id,
+                                                                          ", ".join(categories)))
+
+    def cov_51(self, rule):
+        plan = self.risk_plan()
+        scale = plan.front.get("risk_scale") if plan and isinstance(plan.front.get("risk_scale"), dict) else {}
+        if not scale.get("acceptable_up_to"):
+            return
+        for risk in self.of_type("risk"):
+            if risk.status in ("identified", "rejected", "closed", "in-treatment"):
+                continue
+            probability, impact = self.risk_numbers(risk)
+            if probability is None or impact is None or probability * impact <= int(scale["acceptable_up_to"]):
+                continue
+            if risk.status == "accepted" and risk.front.get("decision"):
+                continue
+            self.gap(rule, risk, "exposure %d is above %s of %s: the risk needs treatment, or a decision that names "
+                     "who accepted it" % (probability * impact, scale["acceptable_up_to"], plan.id))
+
+    def cov_52(self, rule):
+        for risk in self.of_type("risk"):
+            if risk.status == "in-treatment" and not [i for i in as_list(risk.front.get("indicators"))
+                                                      if isinstance(i, dict) and i.get("threshold") not in (None, "")]:
+                self.gap(rule, risk, "in treatment, but no indicator with a threshold shows whether the treatment works")
+
     def cov_26(self, rule):
         internal = as_list((self.config.get("trace") or {}).get("internal_baselines"))
         told = set()
@@ -1937,6 +1992,71 @@ def cmd_suppliers(project, args):
     return 0
 
 
+def risks(project, as_of):
+    """The risks with their exposure, treatment and indicators, as of a date."""
+    plan = project.risk_plan()
+    scale = plan.front.get("risk_scale") if plan and isinstance(plan.front.get("risk_scale"), dict) else {}
+    limit = scale.get("acceptable_up_to")
+    entries = []
+    for risk in project.of_type("risk"):
+        probability, impact = project.risk_numbers(risk)
+        exposure = probability * impact if probability and impact else None
+        actions = [a for a in as_list(risk.front.get("treatment")) if isinstance(a, dict)]
+        overdue = [a.get("action") for a in actions if a.get("state") != "done" and as_date(a.get("due"))
+                   and as_date(a.get("due")) < as_of]
+        alarms = [i.get("name") for i in as_list(risk.front.get("indicators")) if isinstance(i, dict)
+                  and i.get("value") is not None and i.get("threshold") is not None
+                  and _number(i.get("value")) is not None and _number(i.get("threshold")) is not None
+                  and _number(i.get("value")) >= _number(i.get("threshold"))]
+        corrective = [{"item": a.id, "state": a.status} for a in project.of_type("corrective-action")
+                      if risk.id in {t for t, _ in a.targets("addresses")}]
+        entries.append({"item": risk.id, "title": risk.title, "state": risk.status, "category": risk.front.get("category"),
+                        "owner": risk.front.get("owner"), "probability": probability, "impact": impact,
+                        "exposure": exposure, "above_threshold": bool(limit and exposure and exposure > int(limit)),
+                        "actions_open": sum(1 for a in actions if a.get("state") != "done"), "actions_overdue": overdue,
+                        "indicators_at_threshold": alarms, "corrective_actions": corrective})
+    entries.sort(key=lambda e: (-(e["exposure"] or 0), e["item"]))
+    live = [e for e in entries if e["state"] not in ("closed", "rejected")]
+    figures = {"live": len(live), "above_threshold": sum(1 for e in live if e["above_threshold"]),
+               "in_treatment": sum(1 for e in live if e["state"] == "in-treatment"),
+               "actions_overdue": sum(len(e["actions_overdue"]) for e in live),
+               "indicators_at_threshold": sum(len(e["indicators_at_threshold"]) for e in live)}
+    return {"as_of": str(as_of), "plan": plan.id if plan else None, "acceptable_up_to": limit, "risks": entries,
+            "figures": figures}
+
+
+def _number(value):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def cmd_risks(project, args):
+    as_of = as_date(args.as_of) if args.as_of else datetime.date.today()
+    if as_of is None:
+        print("--as-of must be a date YYYY-MM-DD")
+        return 2
+    data = risks(project, as_of)
+    if args.json:
+        print(json.dumps(data, indent=2))
+        return 0
+    print("Risks as of %s (plan %s, acceptable up to %s)" % (as_of, data["plan"] or "none approved", data["acceptable_up_to"]))
+    for e in data["risks"]:
+        notes = []
+        if e["actions_overdue"]:
+            notes.append("overdue: %s" % "; ".join(map(str, e["actions_overdue"])))
+        if e["indicators_at_threshold"]:
+            notes.append("at threshold: %s" % ", ".join(map(str, e["indicators_at_threshold"])))
+        print("%-9s %-12s %-10s exposure %-4s %s%s  %s" % (e["item"], e["state"], e["category"], e["exposure"],
+              "above threshold " if e["above_threshold"] else "", " | ".join(notes), e["title"]))
+    f = data["figures"]
+    print("%d live risks, %d above the threshold, %d in treatment, %d treatment actions overdue, %d indicators at "
+          "their threshold" % (f["live"], f["above_threshold"], f["in_treatment"], f["actions_overdue"],
+                               f["indicators_at_threshold"]))
+    return 0
+
+
 def cmd_quality(project, args):
     as_of = as_date(args.as_of) if args.as_of else datetime.date.today()
     if as_of is None:
@@ -2381,6 +2501,9 @@ def main():
     problems_parser.add_argument("--as-of", help="the date ages are measured to (default: today)")
     problems_parser.add_argument("--json", action="store_true")
     sub.add_parser("history").add_argument("id")
+    risks_parser = sub.add_parser("risks")
+    risks_parser.add_argument("--as-of", help="the date lateness is measured to (default: today)")
+    risks_parser.add_argument("--json", action="store_true")
     suppliers_parser = sub.add_parser("suppliers")
     suppliers_parser.add_argument("--as-of", help="the date lateness is measured to (default: today)")
     suppliers_parser.add_argument("--json", action="store_true")
@@ -2399,7 +2522,7 @@ def main():
             "hash": cmd_hash, "status": cmd_status, "list": cmd_list, "audit": cmd_audit, "practices": cmd_practices,
             "diff": cmd_diff, "progress": cmd_progress,
             "problems": cmd_problems, "history": cmd_history, "quality": cmd_quality, "generic": cmd_generic,
-            "suppliers": cmd_suppliers}[args.command](project, args)
+            "suppliers": cmd_suppliers, "risks": cmd_risks}[args.command](project, args)
 
 
 if __name__ == "__main__":

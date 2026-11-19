@@ -837,6 +837,10 @@ def cmd_status_report(project, args):
     }
     if not args.period:
         del front["period"]
+    if project.of_type("risk"):
+        risk_data = trace.risks(project, as_of)
+        front["risks"] = {"items": [{k: e[k] for k in ("item", "state", "exposure", "above_threshold", "actions_overdue")}
+                                    for e in risk_data["risks"]], "figures": risk_data["figures"]}
     path = write_item(project, "project-status-report", front, "\n## Assessment\n\n%s\n" % text)
     print("wrote %s: %d work packages, %d late; %d milestones; %d corrective actions open"
           % (path, len(data["work_packages"]), sum(1 for p in data["work_packages"] if p["late"]),

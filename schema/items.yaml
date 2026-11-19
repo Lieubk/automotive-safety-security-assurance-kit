@@ -78,6 +78,15 @@ lifecycles:
       - {from: done, to: closed, when: "its effect on the deviation it addresses is shown, in a later status report or review"}
       - {from: done, to: open, when: "the effect did not come about"}
       - {from: [open, done], to: cancelled, when: "the reason is recorded"}
+  risk:                            # risks of the project
+    states: [identified, analysed, in-treatment, closed, accepted, rejected]
+    stages: {before-review: [analysed, in-treatment, closed, accepted], before-approval: [in-treatment, closed]}
+    transitions:
+      - {from: identified, to: analysed, when: "probability, impact and the analysis are recorded"}
+      - {from: analysed, to: in-treatment, when: "treatment actions with owners and dates and the indicators that show progress are recorded"}
+      - {from: analysed, to: accepted, when: "the exposure is acceptable by the plan, or a named person accepted it; the decision is recorded"}
+      - {from: in-treatment, to: closed, when: "the risk can no longer occur, or it occurred and was handled"}
+      - {from: [identified, analysed], to: rejected, when: "it is not a risk of the project; the reason is recorded"}
   record:                          # review records, test runs, baselines, communication records
     states: [open, final]
     stages: {before-review: [final], before-approval: [final]}
@@ -146,6 +155,21 @@ structures:
     keys: [note]
     dates: [accepted_at]
     note: "the formal acceptance of the closure: who accepted it, when, and the test run or review record that shows the resolution works"
+  risk-scale:                      # plan.risk_scale when kind is risk-management
+    shape: mapping
+    mandatory: [probability_levels, impact_levels, acceptable_up_to]
+    keys: [probability_meaning, impact_meaning]
+    note: "probability and impact are rated 1 to their number of levels; exposure is their product; a risk whose exposure is at most acceptable_up_to needs no treatment"
+  treatment-actions:               # risk.treatment
+    mandatory: [action, owner, state]
+    keys: [due, done_on]
+    dates: [due, done_on]
+    note: "state open or done"
+  risk-indicators:                 # risk.indicators
+    mandatory: [name, threshold]
+    keys: [value, as_of]
+    dates: [as_of]
+    note: "what shows that the risk grows or that its treatment works, the value at which to act, and the last value seen"
   exchanges:                       # supplier-agreement.exchanges
     mandatory: [name, direction, content]
     keys: [due, format]
@@ -387,13 +411,15 @@ types:
     supports: [MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6, MAN.3.BP7, SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1, SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1, "08-12", "08-52", "08-04", "08-13", "08-27", "08-28"]
     attributes:
       use: [common]
-      kind: {values: [project, unit-verification, software-integration, software-qualification-test, system-integration, system-qualification-test, configuration-management, quality-assurance, problem-resolution, change-request-management], required: always}
+      kind: {values: [project, unit-verification, software-integration, software-qualification-test, system-integration, system-qualification-test, configuration-management, quality-assurance, problem-resolution, change-request-management, risk-management], required: always}
       milestones: {structure: milestones, required: optional, note: "project plans: the milestones of the life cycle, each with its date and the baseline purpose that marks it"}
       coverage_targets: {required: optional, note: "unit-verification plans: structural coverage a unit must reach, per ASIL, as {<ASIL>: {statement_percent, branch_percent, mcdc_percent}} with any subset of the metrics; an ASIL without an entry has no target"}
       integration_steps: {structure: integration-steps, required: optional, note: "software-integration and system-integration plans: the integration steps in order (conditions)"}
       urgent_severities: {required: optional, note: "problem-resolution plans: the severities for which an urgent action has to be authorised and recorded (conditions)"}
       alerts: {structure: alert-rules, required: optional, note: "problem-resolution plans: who is alerted to problems of which severity (conditions)"}
       quality_checks: {structure: quality-checks, required: optional, note: "quality-assurance plans: the checks of work products and process activities (conditions)"}
+      risk_categories: {required: optional, note: "risk-management plans: the kinds of risk the project manages, for example technical, schedule, cost, supplier, safety (conditions)"}
+      risk_scale: {structure: risk-scale, required: optional, note: "risk-management plans: the rating scales and the acceptance threshold (conditions)"}
       escalation: {structure: escalation-rules, required: optional, note: "quality-assurance plans: when an overdue non-conformance goes to which level (conditions)"}
     sections:
       Scope: before-review         # what the plan covers and what it leaves to others
@@ -590,6 +616,27 @@ types:
       Description: always
       Impact analysis: before-review     # affected items, effort, schedule, risk, regression scope
 
+  risk:
+    prefix: RSK
+    folder: records/risks
+    lifecycle: risk
+    supports: [MAN.5.BP3, MAN.5.BP4, MAN.5.BP5, MAN.5.BP6, "15-08", "08-20"]
+    attributes:
+      use: [common]
+      category: {required: always, note: "one of the risk_categories of the risk-management plan"}
+      owner: {required: always}
+      identified_at: {format: date, required: always}
+      identified_in: {required: always, note: "the plan, decision, change request, problem or meeting that brought the risk up"}
+      probability: {required: before-review, note: "1 to probability_levels of the plan"}
+      impact: {required: before-review, note: "1 to impact_levels of the plan"}
+      treatment: {structure: treatment-actions, required: optional, note: "mandatory in state in-treatment"}
+      indicators: {structure: risk-indicators, required: optional, note: "mandatory in state in-treatment (COV-52)"}
+      decision: {required: optional, note: "who accepted the risk, when and why; mandatory in state accepted when the exposure is above the threshold"}
+    sections:
+      Description: always          # cause, event and consequence
+      Analysis: before-review      # why this probability and this impact
+      Treatment and monitoring: before-approval   # what is done, how its effect shows, when to act further
+
   problem-report:
     prefix: PRB
     folder: records/problems
@@ -614,7 +661,7 @@ types:
     prefix: CA
     folder: records/actions
     lifecycle: action
-    supports: [MAN.3.BP10, SUP.1.BP5, ACQ.4.BP5, "14-02"]
+    supports: [MAN.3.BP10, SUP.1.BP5, ACQ.4.BP5, MAN.5.BP7, "14-02"]
     attributes:
       use: [common]
       owner: {required: always}
@@ -629,7 +676,7 @@ types:
     prefix: PSR
     folder: records/status
     lifecycle: record
-    supports: [MAN.3.BP10, "15-06"]
+    supports: [MAN.3.BP10, MAN.5.BP6, "15-06", "15-09"]
     attributes:
       id: {required: always}
       type: {required: always}
@@ -642,6 +689,7 @@ types:
       milestones: {required: optional, note: "generated"}
       corrective_actions: {required: optional, note: "generated"}
       check: {required: optional, note: "summary of the trace check at the time of the report; generated"}
+      risks: {required: optional, note: "generated from `traceability.py risks` when risks exist: per risk its state and exposure, and the figures"}
     sections:
       Assessment: always           # the reporter's reading of the figures, risks and what is decided
 
@@ -770,6 +818,7 @@ plan_kinds:
   configuration-management: [SUP.8.BP1]
   quality-assurance: [SUP.1.BP1]
   problem-resolution: [SUP.9.BP1]
+  risk-management: [MAN.5.BP1, MAN.5.BP2]
   change-request-management: [SUP.10.BP1]
 
 # ---------------------------------------------------------------------------
@@ -795,6 +844,10 @@ conditions:
   - {types: [plan], when: {kind: [problem-resolution]}, attributes: [urgent_severities], stage: before-review}
   - {types: [plan], when: {kind: [problem-resolution]}, attributes: [alerts], structure: alert-rules, stage: before-review}
   - {types: [problem-report], when: {status: [closed]}, attributes: [closure], structure: closure, stage: always}
+  - {types: [plan], when: {kind: [risk-management]}, attributes: [risk_categories], stage: before-review}
+  - {types: [plan], when: {kind: [risk-management]}, attributes: [risk_scale], structure: risk-scale, stage: before-review}
+  - {types: [risk], when: {status: [in-treatment]}, attributes: [treatment], structure: treatment-actions, stage: always}
+  - {types: [risk], when: {status: [in-treatment]}, attributes: [indicators], structure: risk-indicators, stage: always}
   - {types: [plan], when: {kind: [quality-assurance]}, attributes: [quality_checks], structure: quality-checks, stage: before-review}
   - {types: [plan], when: {kind: [quality-assurance]}, attributes: [escalation], structure: escalation-rules, stage: before-review}
   - {types: any, when: {status: [rejected]}, attributes: [rejection_reason], stage: always}
@@ -956,6 +1009,9 @@ coverage:
   - {id: COV-47, subject: project, expect: "for every step of the approved system-integration plan, the latest final build record of level system of that step succeeded and contains every element integrated up to that step; a software build it names is final, succeeded and the latest of the last software integration step", waiver: "none", supports: [SYS.4.BP4]}
   - {id: COV-48, subject: system-integration-test, expect: "names a step of the approved system-integration plan; every step of that plan has at least one live system-integration-test", waiver: "none", supports: [SYS.4.BP3, SYS.4.BP5]}
   - {id: COV-49, subject: test-run, expect: "the latest final run of level system-integration of each step, and the latest final run of level system-qualification, name the latest final successful system build of that step (for qualification: of the last step), made from the item under test of the run", waiver: "system-qualification: no approved system-integration plan exists, because the integrated system comes from outside the scope", supports: [SYS.4.BP6, SYS.5.BP4]}
+  - {id: COV-50, subject: risk, expect: "from state analysed on: probability and impact lie within the scales of the approved risk-management plan, and the category is one the plan names", waiver: "none", supports: [MAN.5.BP4, MAN.5.BP1]}
+  - {id: COV-51, subject: risk, expect: "a live risk whose exposure (probability times impact) is above acceptable_up_to of the plan is in treatment, closed, or accepted with a decision that names who accepted it", waiver: "none", supports: [MAN.5.BP5]}
+  - {id: COV-52, subject: risk, expect: "a risk in treatment has at least one indicator with a threshold", waiver: "none", supports: [MAN.5.BP6]}
   - {id: COV-26, subject: baseline, expect: "at least one final communication-record names the baseline as subject", waiver: "baseline purpose marked internal in the project configuration", supports: [SYS.2.BP8, SYS.3.BP8, SYS.4.BP9, SYS.5.BP7, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7, SWE.4.BP7, SWE.5.BP9, SWE.6.BP7]}
 
 # ---------------------------------------------------------------------------

@@ -1074,6 +1074,65 @@ class SystemIntegration(Case):
         self.assertEqual(self.make(items).findings(), [])        # same step name at both levels
 
 
+RISK_SCOPE = SCOPE + ["MAN.5"]
+
+
+def risk_items(**risk):
+    """The base thread with a risk-management plan and one risk in treatment."""
+    items = base_items()
+    items["PLN-0003"] = ({"type": "plan", "title": "Risk management plan", "status": "approved", "kind": "risk-management",
+                          "risk_categories": ["technical", "supplier"],
+                          "risk_scale": {"probability_levels": 5, "impact_levels": 5, "acceptable_up_to": 6}},
+                         {"Scope": "Project risks.", "Approach": "Monthly.", "Criteria": "Exposure.",
+                          "Environment and tools": "Items.", "Responsibilities": "Project lead."})
+    front = {"type": "risk", "title": "Hall sensor samples late", "status": "in-treatment", "category": "supplier",
+             "owner": "Project lead", "identified_at": "2026-01-02", "identified_in": "PLN-0003", "probability": 3,
+             "impact": 4, "treatment": [{"action": "second source", "owner": "Purchasing", "state": "open",
+                                         "due": "2026-01-20"}],
+             "indicators": [{"name": "weeks of delay", "threshold": 2, "value": 1}]}
+    front.update(risk)
+    items["RSK-0001"] = (front, {"Description": "Late samples.", "Analysis": "One supplier.",
+                                 "Treatment and monitoring": "Second source."})
+    return items
+
+
+class RiskManagement(Case):
+    def make(self, items=None, **kwargs):
+        kwargs.setdefault("scope", RISK_SCOPE)
+        return super().make(risk_items() if items is None else items, **kwargs)
+
+    def test_a_risk_in_treatment_with_indicators_has_no_findings(self):
+        self.assertEqual(self.make().findings(), [])
+
+    def test_ratings_outside_the_scale_and_an_unknown_category(self):
+        items = risk_items(probability=6, category="weather")
+        messages = [f["message"] for f in self.make(items).findings("error") if f["rule"] == "COV-50"]
+        self.assertEqual(len(messages), 2, messages)
+
+    def test_exposure_above_the_threshold_needs_treatment_or_an_accepted_decision(self):
+        items = risk_items(status="analysed")
+        for key in ("treatment", "indicators"):
+            items["RSK-0001"][0].pop(key)
+        fixture = self.make(items)
+        self.assertIn(("COV-51", "RSK-0001"), fixture.rules("warning"))
+        fixture.edit("RSK-0001", status="accepted", decision="P. Lead, 2026-01-05: second source too expensive")
+        self.assertNotIn("COV-51", {r for r, _ in fixture.rules("warning") + fixture.rules("error")})
+
+    def test_a_risk_in_treatment_needs_indicators(self):
+        items = risk_items()
+        items["RSK-0001"][0].pop("indicators")
+        rules = self.make(items).rules()
+        self.assertIn(("SCHEMA", "RSK-0001"), rules)
+        self.assertIn(("COV-52", "RSK-0001"), rules)
+
+    def test_risks_lists_overdue_treatment_by_exposure(self):
+        from traceability import risks
+        data = risks(Project(self.make().root), as_of(2026, 1, 25))
+        entry = data["risks"][0]
+        self.assertEqual((entry["exposure"], entry["above_threshold"], entry["actions_overdue"]),
+                         (12, True, ["second source"]))
+
+
 QA_SCOPE = SCOPE + ["SUP.1"]
 
 

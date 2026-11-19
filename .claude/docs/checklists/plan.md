@@ -1,8 +1,8 @@
 # Plan review checklist
 
-Version 5. Applies to: `plan`. Supports: MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6,
+Version 6. Applies to: `plan`. Supports: MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6,
 MAN.3.BP7, SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1,
-SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1.
+SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1, MAN.5.BP1, MAN.5.BP2.
 
 Kinds: `script` - a tool answers it; `semantic` - needs reading and judgement, a model
 may propose and a person confirms; `accountable` - only a person can state it.
@@ -183,3 +183,18 @@ empty, ask the user; do not assume a value.
 | PLN-104 | It is defined from when a change needs a change request - from the first baseline that is not internal on - in agreement with the configuration management plan | compare the two plans | semantic |
 | PLN-105 | The interfaces are named: who may request a change and who is informed about decision and closure | read `Scope`, `Responsibilities` | semantic |
 | PLN-106 | The deciding body exists and its members know their role | ask who the members are | accountable |
+
+## Kind risk-management (MAN.5.BP1, MAN.5.BP2)
+
+| ID | Check | How to check | Kind |
+|---|---|---|---|
+| PLN-130 | `risk_categories` and `risk_scale` are present, and the scale has `probability_levels`, `impact_levels` and `acceptable_up_to` | `check`: no `SCHEMA` finding on the item | script |
+| PLN-131 | The scope names the kinds of risk the project manages and what it leaves to others, and states the organizational risk policy followed, or that none applies | read `Scope`, `risk_categories` | semantic |
+| PLN-132 | The ways of finding risks are defined: where they are looked for (plan, design decisions, change requests, problem reports, supplier reviews, status meetings), when, and with which techniques | read `Approach` | semantic |
+| PLN-133 | Every level of both scales has a meaning that two people would apply alike (a range, a duration, a consequence), and the number of levels agrees with `risk_scale` | read `Criteria`, `probability_meaning`, `impact_meaning` | semantic |
+| PLN-134 | `acceptable_up_to` lies within the range of exposure (probability times impact) the scales allow, and `Criteria` says why that level is acceptable for the project and the organization | compare `risk_scale` with `Criteria` | semantic |
+| PLN-135 | The activities from identification to closure are described, and the states agree with the `risk` lifecycle in `schema/items.yaml` | compare `Approach` with the schema | semantic |
+| PLN-136 | The treatment options are defined, and it is said when a recovery plan is written and who accepts a risk above the acceptable level | read `Approach`, `Criteria`, `Responsibilities` | semantic |
+| PLN-137 | Monitoring is defined: the review rhythm, what an indicator must show, who supplies values, and when an overdue action or an indicator at its threshold counts as treatment not progressing | read `Approach`, `Responsibilities` | semantic |
+| PLN-138 | Reporting and escalation are defined: the risk figures in the project status report, which risks go to higher management, to whom and how fast; it agrees with the project plan and the quality assurance escalation path | read `Approach`; compare with the project plan and the quality assurance plan | semantic |
+| PLN-139 | The people named as risk owners, acceptors and escalation recipients know the arrangement and have agreed to take the roles | ask who was informed, and when | accountable |
