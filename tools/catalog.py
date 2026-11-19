@@ -160,7 +160,7 @@ def main():
     if not errors:
         wanted = yaml.safe_dump(build_index(args.version, procs), sort_keys=False, allow_unicode=True)
         if args.command == "index":
-            index_path.write_text(wanted, encoding="utf-8")
+            index_path.write_text(wanted, encoding="utf-8", newline="\n")
             print("wrote %s" % index_path.relative_to(ROOT))
         elif not index_path.exists() or index_path.read_text(encoding="utf-8") != wanted:
             errors.append("index.yaml is missing or stale: run 'python tools/catalog.py index'")
