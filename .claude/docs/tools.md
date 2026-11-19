@@ -156,6 +156,16 @@ module text). Records are final when written and are never edited afterwards.
 | `import FILE [--dry-run]` | start the architecture items from an AUTOSAR Classic model: a draft component per SW component type, a draft interface per port interface, providers and users from the ports, data elements and operations, `part_of` from compositions, `model` set to the file. Refused when items of these names exist |
 | `compare FILE` | see where the items and the model differ: components and interfaces on one side only, providers, users, data elements and operations. Exit code 1 when there are differences |
 
+## Documents - `python tools/document.py [--project DIR] <command>`
+
+Generates documents from the items; the kinds and their chapters are in
+`schema/documents.yaml`. The items stay the source.
+
+| Command | Use it to | Result |
+|---|---|---|
+| `list` | see the document kinds and how many items of their types the project has | one line per kind |
+| `build KIND [--format html\|docx] [--out FILE] [--template FILE] [--baseline BL-ID] [--include-drafts] [--no-script] [--json]` | write a document: HTML (one file; Mermaid diagrams drawn when online) or Word, neutral or in a `.docx`/`.dotx` template (default `documents.template` of `project.yaml`); with `--baseline` only the baseline's items, refused when one changed since; without `--include-drafts` only approved items | the file under `build/documents/` unless `--out`; marked DRAFT when it shows items not approved or comes from uncommitted changes. DOCX needs python-docx: without it the tool says NOT ASSESSED |
+
 ## Continuous integration
 
 `ci/github-actions.yml` and `ci/gitlab-ci.yml` are templates for a project: the pipeline

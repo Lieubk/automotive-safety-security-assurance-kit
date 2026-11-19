@@ -1,0 +1,100 @@
+"""Tests for the document generator (tools/document.py), on a copy of the worked example.
+
+Run:  python -m unittest discover -s tools/tests -v
+"""
+import shutil
+import subprocess
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+EXAMPLE = ROOT / "examples" / "power-window"
+
+try:
+    import docx
+except ImportError:                                   # DOCX is optional; the HTML tests still run
+    docx = None
+
+
+class Documents(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(prefix="doctest-", ignore_cleanup_errors=True)
+        self.addCleanup(self.tmp.cleanup)
+        self.project = Path(self.tmp.name) / "p"
+        shutil.copytree(str(EXAMPLE), str(self.project), ignore=shutil.ignore_patterns("build"))
+
+    def tool(self, script, *arguments):
+        done = subprocess.run([sys.executable, str(ROOT / "tools" / script), "--project", str(self.project)]
+                              + [str(a) for a in arguments], capture_output=True, text=True)
+        return done.returncode, done.stdout
+
+    def html(self, kind, *extra):
+        out = Path(self.tmp.name) / ("%s.html" % kind)
+        code, text = self.tool("document.py", "build", kind, "--out", out, *extra)
+        self.assertEqual(code, 0, text)
+        return out.read_text(encoding="utf-8")
+
+    def test_every_kind_is_generated_from_the_items(self):
+        code, out = self.tool("document.py", "list")
+        self.assertEqual(code, 0, out)
+        for kind in ("software-requirements-specification", "software-architecture-description",
+                     "software-detailed-design", "tara-report"):
+            self.assertIn(kind, out)
+        page = self.html("software-architecture-description")
+        self.assertIn('id="CMP-0004"', page)
+        self.assertIn('<pre class="mermaid">', page)
+        self.assertIn("Items in this document", page)
+        self.assertNotIn('class="banner"', page)                  # everything shown is approved
+
+    def test_the_tara_report_shows_the_method_and_the_risks(self):
+        page = self.html("tara-report")
+        self.assertIn("risk matrix", page)
+        self.assertIn('id="THR-0001"', page)
+        self.assertIn("CSG-0001", page)
+
+    def test_items_not_approved_stay_out_unless_asked_and_then_mark_the_document(self):
+        path = self.project / "spec" / "cybersecurity" / "tara" / "THR-0002.md"
+        path.write_text(path.read_text(encoding="utf-8").replace("status: approved", "status: draft", 1), encoding="utf-8")
+        self.assertNotIn('id="THR-0002"', self.html("tara-report"))
+        page = self.html("tara-report", "--include-drafts")
+        self.assertIn('id="THR-0002"', page)
+        self.assertIn('class="banner">DRAFT', page)
+
+    def test_a_document_of_a_baseline_is_refused_when_its_items_changed(self):
+        code, out = self.tool("record.py", "baseline", "--tag", "design-1", "--purpose", "design freeze")
+        self.assertEqual(code, 0, out)
+        self.html("software-requirements-specification", "--baseline", "BL-0001")
+        path = self.project / "spec" / "software" / "requirements" / "SWR-0001.md"
+        path.write_text(path.read_text(encoding="utf-8") + "\nOne more sentence.\n", encoding="utf-8")
+        code, out = self.tool("document.py", "build", "software-requirements-specification", "--baseline", "BL-0001",
+                              "--out", Path(self.tmp.name) / "x.html")
+        self.assertEqual(code, 1)
+        self.assertIn("differ from baseline BL-0001", out)
+
+    @unittest.skipIf(docx is None, "python-docx is not installed")
+    def test_docx_in_neutral_style_and_in_the_customer_template(self):
+        out = Path(self.tmp.name) / "sdd.docx"
+        code, text = self.tool("document.py", "build", "software-detailed-design", "--out", out)
+        self.assertEqual(code, 0, text)
+        headings = [p.text for p in docx.Document(str(out)).paragraphs if p.style.name.startswith("Heading")]
+        self.assertIn("Component designs", headings)
+        template = docx.Document()
+        template.add_paragraph("Customer cover: {{title}} for {{project}}")
+        template.add_paragraph("{{content}}")
+        template.add_paragraph("Customer closing page")
+        template_path = Path(self.tmp.name) / "customer.docx"
+        template.save(str(template_path))
+        out = Path(self.tmp.name) / "sdd-customer.docx"
+        code, text = self.tool("document.py", "build", "software-detailed-design", "--format", "docx",
+                               "--template", template_path, "--out", out)
+        self.assertEqual(code, 0, text)
+        paragraphs = [p.text for p in docx.Document(str(out)).paragraphs]
+        self.assertEqual(paragraphs[0], "Customer cover: Software detailed design for Power window control")
+        self.assertEqual(paragraphs[-1], "Customer closing page")                  # content went where {{content}} was
+        self.assertNotIn("{{content}}", paragraphs)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -17,7 +17,7 @@ repository - one item per file - and a trace engine checks them.
 | `src/`, `tests/` | code and test code |
 | `aspice/3.1/` | process catalog (`processes/`) and notes per process (`notes/`) |
 | `iso-sae-21434/2021/` | catalog of ISO/SAE 21434: clauses, subclauses, requirement and work product identifiers, objectives in our words |
-| `schema/` | item types, links and coverage rules (`items.yaml`), file layout (`item-format.md`) |
+| `schema/` | item types, links and coverage rules (`items.yaml`), file layout (`item-format.md`), generated documents (`documents.yaml`) |
 | `tools/` | trace engine, record writer, validators |
 | `.claude/skills/`, `.claude/agents/`, `.claude/hooks/` | the toolkit itself |
 | `.claude/docs/` | working agreement, command reference (`tools.md`), review checklists, authoring conventions |
@@ -57,6 +57,7 @@ repository - one item per file - and a trace engine checks them.
 | `/tara` | ISO/SAE 21434 cl. 9.3, 9.4, 15 | item definition, assets, damage and threat scenarios, attack paths, ratings, risk values, treatment, goals and claims |
 | `/cybersecurity-concept` | ISO/SAE 21434 cl. 9.5, 10, 11 | requirements derived from goals, security relevance down the levels, verification and validation |
 | `/vulnerability-management` | ISO/SAE 21434 cl. 8 | monitoring plan, events, weaknesses, vulnerability analysis and treatment |
+| `/documents` | all | SRS, SAD, SDD, TARA report as HTML or Word, neutral or in the customer's template, for the working state or a baseline |
 | `/next-step` | - | where the project stands and what to do next |
 
 Processes without a skill of their own are still in the catalog and covered by the
@@ -69,6 +70,7 @@ python tools/traceability.py check              # findings for the project in th
 python tools/traceability.py --project examples/power-window check
 python tools/traceability.py practices SWE.1    # evidence and open findings per base practice
 python tools/traceability.py clauses           # ISO/SAE 21434: decision, evidence and findings per subclause
+python tools/document.py build software-architecture-description --format docx   # documents from the items
 python -m unittest discover -s tools/tests      # tests of the engine and the hooks
 python tools/skill_lint.py                      # mechanical checks of skills, agents, checklists
 ```

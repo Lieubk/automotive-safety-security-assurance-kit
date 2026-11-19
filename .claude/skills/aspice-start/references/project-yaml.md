@@ -45,6 +45,9 @@ safety:
                            # product; empty while nobody has decided
 security:
   relevant: false          # true when the product is cybersecurity relevant
+documents:
+  template: ""             # the customer's Word template (.docx or .dotx) in the project,
+                           # for example templates/customer.dotx; empty: neutral style
 conventions:               # the project's rules that reviews check against. Each value
                            # says what the rule is and where it is written; empty means
                            # that the toolkit default named here applies
@@ -97,6 +100,7 @@ people:                    # who is accountable; review records need these names
 | `aspice.target_level` | people | A target, never a result. See "Target level" in `roles-and-processes.md`. |
 | `inputs` | `/import-inputs`, `/next-step` | The record of what was received and when. An entry whose `source` appears in no item has not been registered yet. |
 | `safety`, `security` | skills and people | The highest `asil` an item of this product can carry; whether `security_relevant` has to be considered at all. |
+| `documents.template` | `tools/document.py`, `/documents` | The Word template every generated document uses. Kept in the project because it belongs to the customer who gave it. |
 | `conventions` | review checklists, design and implementation skills | The one place a check looks for a rule of the project: SDD-05 (naming), SDD-09 and SUC-34 (limits), SDD-41 (notation), SUC-45 and UT-31 (independence). A value names the rule and where it is written; a rule that no document holds is written out in the value with who stated it and when. Empty means the toolkit default in the comment applies; a review then checks against that default and says so. The value is stated by the person accountable for the rule, never filled in by a skill. |
 | `platform`, `toolchain` | skills and people | The platform vocabulary and the tools that design, implementation and verification work with. A tool that is named here but not available is reported as `NOT ASSESSED`, never skipped. |
 | `paths.items` | trace engine | Folders scanned for item files. The folder of each type is fixed by `schema/items.yaml` and is not configurable. |

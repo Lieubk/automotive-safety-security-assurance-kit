@@ -1,0 +1,87 @@
+# Documents generated from items (tools/document.py).
+#
+# A document is a view over the items of a project, never a second source: what it
+# shows is changed in the items and the document is generated again. Each kind lists
+# its chapters in order. A chapter is one of:
+#   items:   the items of the given types (and attribute values under `where`), each
+#            with its attributes, sections, structured attributes and links
+#   table:   one row per item of the given types, with the columns named
+#   matrix:  for each item of `of`, the items linked to it by `role` (incoming when
+#            `incoming: true`), as a two-column table
+#   tara:    the threat scenarios with what their risk rests on (traceability.py tara)
+#   method:  the TARA method of the approved cybersecurity plan
+# `text` is a lead paragraph in our own words. Names of chapters and documents are
+# generic: a customer template brings its own cover page, styles and headers.
+
+documents:
+  software-requirements-specification:
+    title: Software requirements specification
+    supports: [SWE.1.BP1, SWE.1.BP6, "17-11"]
+    chapters:
+      - title: Software requirements
+        text: "The requirements of the software, each with its attributes, statement, verification criteria and the items it is derived from."
+        items: {types: [software-requirement]}
+      - title: Traceability to the system level
+        matrix: {of: software-requirement, role: derived_from}
+      - title: Allocation to the architecture
+        matrix: {of: software-requirement, role: fulfils, incoming: true}
+
+  software-architecture-description:
+    title: Software architecture description
+    supports: [SWE.2.BP1, SWE.2.BP3, SWE.2.BP4, SWE.2.BP5, SWE.2.BP6, SWE.2.BP7, "04-04"]
+    chapters:
+      - title: Context and structure
+        text: "How the software is placed in its surroundings and how it is decomposed."
+        items: {types: [architecture-view], where: {level: [software], kind: [context, structure]}}
+      - title: Software components
+        table: {types: [software-component], columns: [id, title, kind, layer, origin, asil, security_relevant, part_of]}
+      - title: Component descriptions
+        items: {types: [software-component]}
+      - title: Software interfaces
+        items: {types: [software-interface]}
+      - title: Dynamic behavior
+        text: "States, sequences and the reaction to faults."
+        items: {types: [architecture-view], where: {level: [software], kind: [state-machine, sequence, fault-reaction, communication]}}
+      - title: Execution model and resources
+        items: {types: [architecture-view], where: {level: [software], kind: [execution-model, memory-layout, resource-summary, other]}}
+      - title: Design decisions
+        items: {types: [design-decision], where: {level: [software]}}
+      - title: Allocation of the software requirements
+        matrix: {of: software-requirement, role: fulfils, incoming: true}
+
+  software-detailed-design:
+    title: Software detailed design
+    supports: [SWE.3.BP1, SWE.3.BP2, SWE.3.BP3, SWE.3.BP4, SWE.3.BP5, "04-05"]
+    chapters:
+      - title: Component designs
+        items: {types: [component-design]}
+      - title: Software units
+        table: {types: [software-unit], columns: [id, title, origin, asil, part_of, source_files]}
+      - title: Unit descriptions
+        text: "Each unit with its functions and their contracts, its data and the files that implement it."
+        items: {types: [software-unit]}
+      - title: Design decisions
+        items: {types: [design-decision], where: {level: [detailed-design]}}
+
+  tara-report:
+    title: Threat analysis and risk assessment
+    supports: ["21434:15.3", "21434:15.4", "21434:15.5", "21434:15.6", "21434:15.7", "21434:15.8", "21434:15.9", "21434:9.4", "21434:WP-09-02"]
+    chapters:
+      - title: Item definition
+        items: {types: [item-definition]}
+      - title: Method
+        text: "The rating method of the approved cybersecurity plan: impact categories, feasibility approach and the risk matrix that gives the risk value."
+        method: {}
+      - title: Assets
+        table: {types: [asset], columns: [id, title, properties, located_in]}
+      - title: Damage scenarios
+        table: {types: [damage-scenario], columns: [id, title, impact]}
+      - title: Risk overview
+        text: "The threat scenarios by risk value, with the impact and feasibility the value rests on and what answers the risk."
+        tara: {}
+      - title: Threat scenarios
+        items: {types: [threat-scenario]}
+      - title: Cybersecurity goals
+        items: {types: [cybersecurity-goal]}
+      - title: Cybersecurity claims
+        items: {types: [cybersecurity-claim]}

@@ -96,6 +96,8 @@ def cs_catalog():
         _CS_CATALOG = yaml.safe_load(path.read_text(encoding="utf-8")) if path.exists() \
             else {"clauses": [], "work_products": []}
     return _CS_CATALOG
+
+
 VERDICTS = {"passed", "failed", "blocked", "not-run"}
 FRONT_MATTER = re.compile(r"\A---\n(.*?)\n---[ \t]*(?:\n|\Z)(.*)\Z", re.S)
 HEADING = re.compile(r"^##\s+(.+?)\s*$")
