@@ -219,7 +219,7 @@ class OtherEvents(unittest.TestCase):
     def test_session_start_reports_the_state(self):
         code, out, _ = run_hook("session-start", {})
         self.assertEqual(code, 0)
-        self.assertIn("Automotive SPICE toolkit", out)
+        self.assertIn("Automotive Safety & Security Assurance Kit", out)
 
     def test_pre_shell_ignores_commands_that_do_not_commit(self):
         code, out, _ = run_hook("pre-shell", {"tool_name": "Bash", "tool_input": {"command": "git status"}})

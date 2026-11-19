@@ -231,8 +231,8 @@ def cmd_export(project, args):
     root = ElementTree.Element(q("REQ-IF"))
     header = ElementTree.SubElement(ElementTree.SubElement(root, q("THE-HEADER")), q("REQ-IF-HEADER"),
                                     {"IDENTIFIER": "header"})
-    for name, value in (("CREATION-TIME", now), ("REQ-IF-TOOL-ID", "aspice toolkit reqif.py"),
-                        ("REQ-IF-VERSION", "1.0"), ("SOURCE-TOOL-ID", "aspice toolkit"),
+    for name, value in (("CREATION-TIME", now), ("REQ-IF-TOOL-ID", "automotive-safety-security-assurance-kit reqif.py"),
+                        ("REQ-IF-VERSION", "1.0"), ("SOURCE-TOOL-ID", "automotive-safety-security-assurance-kit"),
                         ("TITLE", args.title or "Export of %s" % ", ".join(args.type))):
         ElementTree.SubElement(header, q(name)).text = value
     content = ElementTree.SubElement(ElementTree.SubElement(root, q("CORE-CONTENT")), q("REQ-IF-CONTENT"))

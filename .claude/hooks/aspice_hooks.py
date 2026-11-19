@@ -312,7 +312,8 @@ def session_start(payload):
         print(not_assessed("session-start"))
         return 0
     if not (ROOT / "project.yaml").is_file():
-        print("Automotive SPICE toolkit: this repository has no project.yaml yet. /aspice-start sets up the scope "
+        print("Automotive Safety & Security Assurance Kit: this repository has no project.yaml yet. "
+              "/aspice-start sets up the scope "
               "(role, inputs received, processes the team is responsible for). A worked example is in "
               "examples/power-window: python tools/traceability.py --project examples/power-window check")
         return 0
@@ -322,8 +323,8 @@ def session_start(payload):
     warnings = [f for f in findings if f["level"] == "warning"]
     scope = ", ".join(sorted(project.scope)) if project.scope else "all processes (no scope set)"
     active = sum(1 for rule in project.rules if project.active(rule))
-    print("Automotive SPICE toolkit. Scope: %s. %d items, %d of %d coverage rules active, %d errors, %d warnings."
-          % (scope, len(project.items), active, len(project.rules), len(errors), len(warnings)))
+    print("Automotive Safety & Security Assurance Kit. Scope: %s. %d items, %d of %d coverage rules active, "
+          "%d errors, %d warnings." % (scope, len(project.items), active, len(project.rules), len(errors), len(warnings)))
     for finding in errors[:8]:
         print("  %s %s: %s" % (finding["rule"], finding["item"], finding["message"]))
     if len(errors) > 8:

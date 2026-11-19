@@ -1,4 +1,6 @@
-# Automotive SPICE toolkit for ECU software
+# Automotive Safety & Security Assurance Kit
+
+**Process, safety and security assurance for automotive ECU software.**
 
 A set of [Claude Code](https://claude.com/claude-code) skills, agents and hooks, plus
 deterministic tools, for developing automotive ECU software in line with Automotive

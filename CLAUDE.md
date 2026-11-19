@@ -1,8 +1,9 @@
-# Automotive SPICE toolkit for ECU software
+# Automotive Safety & Security Assurance Kit
 
 Skills, agents, hooks and deterministic tools for developing automotive ECU software in
-line with Automotive SPICE 3.1. Engineering artifacts are text files in this
-repository - one item per file - and a trace engine checks them.
+line with Automotive SPICE 3.1 (4.0 from its draft), ISO 26262 and ISO/SAE 21434.
+Engineering artifacts are text files in this repository - one item per file - and a
+trace engine checks them.
 
 ## How work is done here
 
