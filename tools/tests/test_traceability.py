@@ -1645,6 +1645,29 @@ class FunctionalSafety(Case):
                 entry.update(decision="not-applicable", rationale="developed under ISO 26262 by the customer, see the DIA")
         self.assertNotIn(("COV-75", "CMP-0002"), self.make(items).rules())
 
+    def test_a_proven_in_use_argument_qualifies_an_element_and_is_planned(self):
+        items = fs_items()
+        items["CMP-0002"][0]["origin"] = "reused"
+        items["CMP-0002"][0]["supplier"] = "the earlier door module"
+        items["PIU-0001"] = ({"type": "proven-in-use-argument", "title": "Detection carried over", "status": "approved",
+                              "candidate_version": "Detection 2.1", "credit": ["6:8", "6:9", "6:99"], "target_asil": "B",
+                              "incident_rate_limit": "as the safety plan states", "evaluation_hours": "2e8",
+                              "observed_incidents": 0, "result": "obtained", "evidence": "change history; field data",
+                              "links": {"qualifies": ["CMP-0002"]}},
+                             {"Candidate": "x", "Modifications": "x", "Field data": "x", "Conclusion": "x"})
+        fixture = self.make(items)
+        self.assertNotIn(("COV-75", "CMP-0002"), fixture.rules())             # proven in use instead of qualification
+        self.assertIn(("COV-77", "PIU-0001"), fixture.rules())                  # 6:99 is no clause
+        self.assertTrue(any("6:99" in f["message"] for f in fixture.findings() if f["rule"] == "COV-77"))
+        items["PIU-0001"][0]["credit"] = ["6:8", "26262-6:9"]
+        self.assertNotIn(("COV-77", "PIU-0001"), self.make(items).rules())
+        for entry in items["PLN-0009"][0]["safety_activities"]:
+            if entry["clause"] == "8:14":
+                entry.update(decision="not-applicable", rationale="no proven in use argument is made")
+        fixture = self.make(items)
+        self.assertTrue(any("clause 8:14 is not-applicable" in f["message"] for f in fixture.findings()
+                            if f["rule"] == "COV-77"))
+
     def test_safety_rows_show_decision_and_evidence_per_clause(self):
         from traceability import safety_rows
         rows = {r["clause"]: r for r in safety_rows(Project(self.make().root))}

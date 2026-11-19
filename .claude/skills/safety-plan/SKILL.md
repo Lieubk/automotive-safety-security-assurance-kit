@@ -56,6 +56,11 @@ items, `confirmation-measure` records and a `safety-case`.
   kind `development-interface-agreement` with `shared_activities`, in the same form as the
   cybersecurity interface agreement of `/cybersecurity-plan`.
   Record the agreement only when the user states that both parties agreed.
+- Trucks, buses, trailers and semi-trailers only: the agreement also carries the
+  guideline to an integrator working under another standard (8:15) and, for a system
+  developed under another standard, the criteria and agreed verification measures
+  (8:16); the rationale for 8:16 goes into the safety case. Otherwise decide both
+  clauses not-applicable with the reason.
 
 ### 2. Methods per table
 - For every table of parts 4, 5, 6 and 8 in scope, ask which methods the project applies
@@ -63,6 +68,9 @@ items, `confirmation-measure` records and a `safety-case`.
   written (the unit verification, integration and qualification strategies, the coding
   guideline). Write one `method_selection` entry per table. The toolkit lists the
   tables by number and title only.
+- When clause 8:14 is performed (a proven in use credit), the entries of the proven in
+  use tables state the incident rate limits and the confidence the project applies; the
+  argument itself is written with `/component-qualification`.
 
 ### 3. Determinations
 - Ask the safety manager to state the ASIL determination and the tool confidence

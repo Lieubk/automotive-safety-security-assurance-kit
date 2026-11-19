@@ -542,12 +542,16 @@ documents:
 
   tool-qualification-report:
     title: Software tool evaluation and component qualification
-    supports: ["26262-8:11", "26262-8:11.5.1", "26262-8:11.5.2", "26262-8:12", "26262-8:12.5.2"]
+    supports: ["26262-8:11", "26262-8:11.5.1", "26262-8:11.5.2", "26262-8:12", "26262-8:12.5.2", "26262-8:14", "26262-8:14.5.2"]
     chapters:
       - title: Software components qualified
         table: {types: [component-qualification], columns: [id, title, version, result, qualifies]}
       - title: Component qualifications
         items: {types: [component-qualification]}
+      - title: Elements proven in use
+        table: {types: [proven-in-use-argument], columns: [id, title, candidate_version, target_asil, result, credit, qualifies]}
+      - title: Proven in use arguments
+        items: {types: [proven-in-use-argument]}
       - title: Tools
         table: {types: [tool-evaluation], columns: [id, tool, impact, detection, confidence, asil, qualification_method]}
       - title: Evaluations

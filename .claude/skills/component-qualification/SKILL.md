@@ -1,7 +1,7 @@
 ---
 name: component-qualification
-description: "Qualify a software component that was not developed for this project under ISO 26262 (part 8 clause 12): a supplied library, an operating system, a component reused from elsewhere, when it carries requirements of ASIL A to D. Its specification at the version used, the qualification method and evidence, the result and its restrictions. Use when the trace check reports COV-75, when a supplied or reused component of ASIL A to D enters the architecture, or when its version changes."
-argument-hint: "[a CMP ID, a CQL ID, or nothing for the components that need a qualification]"
+description: "Qualify a software component that was not developed for this project under ISO 26262 (part 8 clause 12): a supplied library, an operating system, a component reused from elsewhere, when it carries requirements of ASIL A to D - its specification at the version used, the qualification method and evidence, the result and its restrictions; or argue an element proven in use from its field history (part 8 clause 14). Use when the trace check reports COV-75 or COV-77, when a supplied or reused component of ASIL A to D enters the architecture, when an element in series production is carried over, or when a version changes."
+argument-hint: "[a CMP ID, a CQL or PIU ID, or nothing for the components that need a qualification]"
 allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Bash(python tools/traceability.py *), Bash(python tools/record.py next-id *)
 ---
 
@@ -16,6 +16,7 @@ safety plan says so for clause 8:12 instead, and no qualification is written.
 | Clause | What this skill does | Evidence it leaves |
 |---|---|---|
 | 26262-8:12 Qualification of software components | lists the supplied and reused components of ASIL A to D; with the user, writes the specification of the component, the method and evidence of its qualification, the result and restrictions | `component-qualification` (26262-8:12.5.1 to 12.5.3); COV-75; its review through `/review` |
+| 26262-8:14 Proven in use argument | when the user wants field history to replace parts of the lifecycle: the candidate, its modifications, the field data against the limit the safety plan states, the credit | `proven-in-use-argument` (26262-8:14.5.1, 14.5.2); COV-77; its review with `proven-in-use.md` |
 
 ## Before you start
 
@@ -46,9 +47,17 @@ safety plan says so for clause 8:12 instead, and no qualification is written.
 - The result and any restrictions are the safety manager's statement. Restrictions are
   carried into the architecture or the requirements of the components that use it.
 
-### 4. Review
+### 4. Proven in use instead (clause 8:14)
+- Only when the user chooses it and field data exists. Read
+  `references/proven-in-use-template.md`. The safety plan must decide clause 8:14
+  performed or tailored and state the incident rate limits in its `method_selection`
+  for the proven in use tables; a missing plan entry is `/safety-plan` work first.
+- The evaluation period, the incidents counted and the result are the safety manager's
+  statements from field data that exists; nothing is estimated here.
+
+### 5. Review
 - Status `in-review` when complete; `/review` with
-  `.claude/docs/checklists/component-qualification.md`.
+  `.claude/docs/checklists/component-qualification.md`, or `proven-in-use.md`.
 
 ## Writing
 
@@ -63,6 +72,7 @@ safety plan says so for clause 8:12 instead, and no qualification is written.
 Run `python tools/traceability.py check`.
 - `FORMAT`, `SCHEMA`, `LINK` on items written in this session: fix them.
 - `COV-75`: report each component that is still without an approved qualification.
+- `COV-77`: report each argument whose element, credit or plan entry is missing.
 
 ## Hand-over
 

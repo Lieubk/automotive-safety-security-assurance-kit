@@ -625,6 +625,27 @@ types:
       Qualification: before-review           # what was verified, how, with which results
       Restrictions: optional
 
+  proven-in-use-argument:          # field experience of an element used instead of parts of the safety lifecycle (26262-8:14)
+    prefix: PIU
+    folder: spec/safety/proven-in-use
+    lifecycle: engineering
+    supports: ["26262-8:14", "26262-8:14.5.1", "26262-8:14.5.2"]
+    attributes:
+      use: [common]
+      candidate_version: {required: always, note: "the candidate whose field history is used: its identification and version"}
+      credit: {required: before-review, note: "list of the clauses of ISO 26262 whose sub-phases and activities the argument replaces, as <part>:<clause> (\"6:9\"); nothing else is credited"}
+      target_asil: {values: [A, B, C, D], required: before-review, note: "the highest ASIL of the safety goals or requirements the candidate can violate in its future use; D while none is assigned"}
+      incident_rate_limit: {required: before-review, note: "the limit of the observable incident rate the project applies for that ASIL, as the method_selection of the safety plan states it for the proven in use tables; the values of the standard are not copied here"}
+      evaluation_hours: {required: before-review, note: "the evaluation period: the added observation hours of the specimens counted, each beyond the average yearly operating time of a vehicle, and the rationale of the calculation in Field data"}
+      observed_incidents: {required: before-review, note: "the number of observable incidents in the field data; 0 when none"}
+      result: {values: [obtained, provisional, not-obtained], required: before-review, note: "provisional: the credit is anticipated under the interim limits; an incident in the field ends it unless its root cause is found and removed"}
+      evidence: {required: before-review, note: "the configuration and change records, the sources of field data and the problem reports the argument rests on"}
+    sections:
+      Candidate: before-review         # identification and parts, fit, form and function, the safety requirements and ASILs of its previous use
+      Modifications: before-review     # changes to the candidate and its environment since the evaluation period, and their analysis
+      Field data: before-review        # configuration management, the evaluation period and its rationale, incidents, non-constant failure rates
+      Conclusion: before-approval      # the status reached and the credit it gives
+
   # ---- ISO 26262 (functional safety); active only for the parts under scope.safety
 
   hazardous-event:                 # a hazard in an operational situation, classified, with its ASIL
@@ -718,7 +739,7 @@ types:
     prefix: SFC
     folder: records/safety
     lifecycle: record
-    supports: ["26262-2:6", "26262-2:6.5.4"]
+    supports: ["26262-2:6", "26262-2:6.5.4", "26262-8:16", "26262-8:16.5.1"]
     attributes:
       id: {required: always}
       type: {required: always}
@@ -1201,7 +1222,7 @@ plan_kinds:
   production-control: ["21434:12", "21434:WP-12-01", "21434:WP-10-02", "26262-7:5", "26262-7:6", "26262-7:6.5.1", "26262-7:6.5.2"]
   end-of-cybersecurity-support: ["21434:14.3", "21434:WP-14-01", "21434:14.4"]
   safety: ["26262-2:6", "26262-2:6.5.3", "26262-4:5", "26262-5:5", "26262-6:5", "26262-2:6.5.1", "26262-2:6.5.2", "26262-6:5.5.1"]
-  development-interface-agreement: ["26262-8:5", "26262-8:5.5.2"]
+  development-interface-agreement: ["26262-8:5", "26262-8:5.5.2", "26262-8:15", "26262-8:15.5.1", "26262-8:16"]
   release: [SPL.2.BP1, SPL.2.BP2, SPL.2.BP3, SPL.2.BP4, SPL.2.BP6, SPL.2.BP7, SPL.2.BP8]
   operation-and-service: ["26262-7:5", "26262-7:7", "26262-7:7.5.1"]
 
@@ -1359,6 +1380,7 @@ links:
     meaning: "the qualification shows the component fit for its use here; a change of the component makes it suspect"
     pairs:
       - {from: component-qualification, to: [software-component], supports: ["26262-8:12"]}
+      - {from: proven-in-use-argument, to: [software-component, system-element], supports: ["26262-8:14"]}
   located_in:
     meaning: "the asset is held, processed or carried by the target; a change of the target makes the asset suspect"
     pairs:
@@ -1467,7 +1489,8 @@ coverage:
   - {id: COV-72, subject: project, expect: "every tool named in a final build-record or static-analysis-run is covered by a live tool-evaluation", waiver: "none", supports: ["26262-8:11"]}
   - {id: COV-73, subject: project, expect: "for every entry of confirmation_measures of the approved safety plan, a final confirmation-measure record of that kind and subject exists with at least the independence planned and a result other than failed or rejected", waiver: "none", supports: ["26262-2:6"]}
   - {id: COV-74, subject: release, expect: "its baseline is final and not internal; a final communication-record names the release as delivered, with the receipt stated under agreement", waiver: "none", supports: [SPL.2.BP13, SPL.2.BP11, "21434:6.4.9", "26262-2:6"]}
-  - {id: COV-75, subject: software-component, expect: "origin supplied or reused, ASIL A to D -> an approved component-qualification of result qualified or qualified-with-restrictions qualifies it", waiver: "the safety plan decides clause 8:12 not-applicable or by-customer, with the rationale (for example developed under ISO 26262 by the party of the interface agreement)", supports: ["26262-8:12"]}
+  - {id: COV-75, subject: software-component, expect: "origin supplied or reused, ASIL A to D -> an approved component-qualification of result qualified or qualified-with-restrictions, or an approved proven-in-use-argument of result obtained or provisional, qualifies it", waiver: "the safety plan decides clause 8:12 not-applicable or by-customer, with the rationale (for example developed under ISO 26262 by the party of the interface agreement)", supports: ["26262-8:12"]}
+  - {id: COV-77, subject: proven-in-use-argument, expect: "qualifies an element; credit names clauses of ISO 26262 as <part>:<clause>; the safety plan decides clause 8:14 performed or tailored, because the credit is planned there", waiver: "none", supports: ["26262-8:14"]}
   - {id: COV-76, subject: supplier-agreement, expect: "an approved supplier-evaluation with result selected or selected-with-conditions names the same supplier", waiver: "none", supports: ["21434:7.4.1", "26262-8:5"]}
   - {id: COV-26, subject: baseline, expect: "at least one final communication-record names the baseline as subject", waiver: "baseline purpose marked internal in the project configuration", supports: [SYS.2.BP8, SYS.3.BP8, SYS.4.BP9, SYS.5.BP7, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7, SWE.4.BP7, SWE.5.BP9, SWE.6.BP7]}
 

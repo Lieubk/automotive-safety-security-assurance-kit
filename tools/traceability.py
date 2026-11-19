@@ -1724,9 +1724,27 @@ class Project:
                 continue
             good = [q for q in self.sources(component.id, "qualifies", ["component-qualification"])
                     if q.status == "approved" and q.front.get("result") in ("qualified", "qualified-with-restrictions")]
+            good += [a for a in self.sources(component.id, "qualifies", ["proven-in-use-argument"])
+                     if a.status == "approved" and a.front.get("result") in ("obtained", "provisional")]
             if not good:
                 self.gap(rule, component, "origin %s, ASIL %s, but no approved qualification qualifies it"
                          % (component.front.get("origin"), component.front.get("asil")))
+
+    def cov_77(self, rule):
+        plan = self.plan_in_work("safety")
+        entry = self.safety_entries(plan, "safety_activities", "clause").get("8:14") if plan else None
+        clauses = {"%s:%s" % (p["id"], c["id"]) for p in fs_catalog()["parts"] for c in p["clauses"]}
+        for argument in self.of_type("proven-in-use-argument"):
+            if not self.live(argument):
+                continue
+            if not argument.targets("qualifies"):
+                self.gap(rule, argument, "qualifies no element: name the component or system element it argues for")
+            bad = [str(c) for c in as_list(argument.front.get("credit")) if str(c).replace("26262-", "", 1) not in clauses]
+            if bad:
+                self.gap(rule, argument, "credit names %s, which are not clauses of ISO 26262 (<part>:<clause>)" % ", ".join(bad))
+            if not entry or entry.get("decision") not in ("performed", "tailored"):
+                self.gap(rule, argument, "the safety plan does not plan the proven in use credit: clause 8:14 is %s"
+                         % (entry.get("decision") if entry else "not decided"))
 
     def cov_76(self, rule):
         selected = {str(e.front.get("supplier")).strip().lower() for e in self.of_type("supplier-evaluation")
