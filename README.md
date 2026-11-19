@@ -9,14 +9,37 @@ files in the repository - one item per file - and a trace engine checks them.
 
 The toolkit drafts and checks. People decide, review and are accountable.
 
+## At a glance
+
+| Scale | What it covers |
+|---|---|
+| **38** skills | one per process or task, from project scope to release: system and software engineering (SYS.2 to SYS.5, SWE.1 to SWE.6), project management, quality assurance, configuration, problem and change management, supplier monitoring, release, functional safety and cybersecurity |
+| **12** role agents | system engineer, software requirements engineer, software architect, software developer, unit verification engineer, software and system test engineers, safety engineer, cybersecurity engineer, project manager, configuration manager, and an independent reviewer |
+| **28** review checklists | the checks a review applies - by script, by an independent reviewer agent, or by a named person |
+| **55** item types, **23** link roles, **78** coverage rules | from stakeholder requirement to code, test, review, baseline and release, checked by a deterministic trace engine |
+| **32** processes, **265** base practices | Automotive SPICE 3.1, with evidence and open findings per base practice; Automotive SPICE 4.0 from its draft 3.991, **197** base practices mapped onto 3.1 |
+| **12** parts, **48** clauses, **669** requirement numbers | ISO 26262:2018 - a decision and its evidence per clause |
+| **41** subclauses, **118** requirement identifiers, **42** work products | ISO/SAE 21434:2021 - a decision and its evidence per subclause |
+| **40** document kinds, **4** formats | specifications, architecture and design descriptions, test specifications and reports, TARA, safety and cybersecurity plans and cases, project and quality reports - as HTML, PDF, Word or Excel, neutral or in the customer's template |
+| **6** exchange routes | ReqIF, AUTOSAR ARXML, Excel, and REST connectors to Polarion, codebeamer and Jama Connect |
+| **14** tools, over **9,000** lines of Python | trace engine, record writer, document generator, validators, exchange adapters |
+| **325** regression tests | trace engine, records, documents, exchange adapters and hooks |
+| **155** items, **31** documents, **345** pages | the worked example: a power window with anti-pinch protection at ASIL B |
+
+**See what it produces:** [31 documents, 345 pages, generated from the worked example](examples/power-window/documents/) -
+requirements, architecture and design, test specifications and reports, traceability, TARA,
+safety and cybersecurity cases - as PDF, HTML, Word and Excel.
+
 ## Status
 
-Early. One vertical slice works end to end and is demonstrated by the example:
+Every process of the VDA scope of Automotive SPICE 3.1 has a skill - SYS.2 to SYS.5,
+SWE.1 to SWE.6, MAN.3, SUP.1, SUP.8 to SUP.10 and ACQ.4. The worked example runs the
+software processes end to end, with ISO 26262 and ISO/SAE 21434 in scope:
 
 | Area | State |
 |---|---|
 | Process catalog | 32 processes of Automotive SPICE 3.1 with base practices, work products and rating dependencies, 26 of them covered by evidence structures and rules (23 with skills) and the others in the catalog only; 32 processes of Automotive SPICE 4.0 built from the draft 3.991 (which its publisher marks as not for assessments), each base and generic practice mapped to the 3.1 practices whose evidence it reads. Identifiers and official names; descriptions in our own words |
-| Item schema | 54 item types, 23 link roles, 77 coverage rules, scope-aware |
+| Item schema | 55 item types, 23 link roles, 78 coverage rules, scope-aware |
 | Documents | 40 kinds - specifications, SAD, SDD, test specifications and reports with verdicts, traceability, review, release note, QA, problem, change, project, risk, supplier, TARA report and worksheet, cybersecurity plan and case - generated from the items as HTML, PDF, Word or Excel (`tools/document.py`), in a neutral style or the customer's Word template or Excel workbook, with commit, baseline and the items' hashes; DRAFT when items are not approved |
 | ISO 26262 | parts in scope per project; safety plan with a decision per clause and methods per table, hazardous events and safety goals, ASIL carried through requirements and design, safety analyses (FMEA, FTA, DFA), decomposition, tool evaluation, confirmation measures, safety case; `traceability.py safety`; the standard's tables are stated by the project, not copied |
 | ISO/SAE 21434 | clauses in scope per project; TARA (assets, damage and threat scenarios, attack paths, risk values from the project's matrix, treatment), goals and claims, concept, security relevance down to code and tests, vulnerability management, cybersecurity case and assessment records; `traceability.py tara` and `clauses` |

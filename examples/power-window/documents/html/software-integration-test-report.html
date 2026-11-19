@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Software integration test report</title><style>
+:root { --ink: #1d2430; --muted: #5b6575; --line: #d6dbe3; --soft: #f4f6f9; --accent: #2d5b8a; --warn: #a33a1f; }
+body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: #fff;
+       max-width: 60rem; margin: 2rem auto; padding: 0 1rem; }
+h1 { font-size: 1.6rem; border-bottom: 2px solid var(--accent); padding-bottom: .3rem; margin-top: 2.5rem; }
+h2 { font-size: 1.25rem; margin-top: 2rem; } h3 { font-size: 1.05rem; } h4 { font-size: .95rem; }
+table { border-collapse: collapse; width: 100%; margin: .6rem 0 1rem; font-size: .9rem; }
+th, td { border: 1px solid var(--line); padding: .3rem .5rem; text-align: left; vertical-align: top; }
+th { background: var(--soft); } code, pre { font-family: Consolas, "Courier New", monospace; font-size: .88rem; }
+pre { background: var(--soft); padding: .6rem; overflow-x: auto; } .caption { color: var(--muted); font-size: .85rem; margin: .8rem 0 .1rem; }
+.note { border-left: 4px solid var(--warn); padding: .2rem .6rem; color: var(--warn); }
+.banner { background: var(--warn); color: #fff; padding: .4rem .8rem; font-weight: 600; }
+.meta td:first-child { width: 14rem; color: var(--muted); } nav ul { columns: 2; } a { color: var(--accent); }
+@page { size: A4; margin: 16mm 14mm 18mm; @bottom-right { content: counter(page) " / " counter(pages); font-size: 9pt; color: #5b6575; } }
+@media print { body { max-width: none; margin: 0; padding: 0; font-size: 10.5pt; } nav { display: none; }
+  h1 { page-break-before: always; } h1.title { page-break-before: avoid; } h1, h2, h3, h4 { break-after: avoid; }
+  thead { display: table-header-group; } tr, pre, .note { break-inside: avoid; } a { color: inherit; text-decoration: none; }
+  .banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style></head><body>
+<h1 class="title">Software integration test report</h1>
+<table class="meta"><tr><td>Project</td><td>Power window control</td></tr><tr><td>Generated</td><td>2026-11-19T14:14:55+00:00</td></tr><tr><td>Commit</td><td>68d1561</td></tr><tr><td>Uncommitted changes</td><td>no</td></tr><tr><td>Baseline</td><td>none</td></tr><tr><td>Items shown</td><td>11</td></tr></table>
+<h2>Revision history</h2><table><tr><th>date</th><th>record</th><th>what</th><th>by</th></tr><tr><td>2026-11-19</td><td>REV-0007</td><td>review approved of 7 items shown here</td><td>Demonstration data - no review by a person took place</td></tr></table>
+<nav><ul><li>Test cases and results</li><li>Builds of the integration steps</li><li>Test runs</li><li>Open findings</li></ul></nav>
+<h1>Test cases and results</h1>
+<p class="caption">result summary</p>
+<table><tr><th>passed</th><td>7</td></tr><tr><th>total</th><td>7</td></tr></table>
+<table><thead><tr><th>test case</th><th>title</th><th>verifies</th><th>step</th><th>execution</th><th>preconditions</th><th>steps</th><th>expected result</th><th>verdict</th><th>run</th><th>executed</th><th>environment</th><th>reason or evidence</th></tr></thead><tr><td><a href="#SIT-0001">SIT-0001</a></td><td>Hall edges and the capture time become window position and speed</td><td>IFC-0001, IFC-0007</td><td>detection</td><td>automated</td><td>Test program of step detection (<code>tests/integration/test_detection.c</code>), built by
+<code>tests/integration/run_tests.py</code> from the units of WindowPos (CMP-0003) and AntiPinch
+(CMP-0004), with the doubles of WindowCmd, MotorDrive and the platform. The MotorDrive
+double publishes the motor state the test sets and records the reversal request and the
+speed the 5 ms task hands to it. A cycle is one run of <code>OsTask_Control_5ms</code> by the
+platform double, 5 ms after the previous one, with the capture time set to the time of
+the cycle; the edges of a cycle reach the capture interrupt before the task runs.
+&quot;Referenced&quot; means: start, motor state opening, 40 cycles without edges. Positions in
+counts of 0.5 mm.</td><td>1. Referenced.
+2. Motor state closing; edges every 3000 us for 60 cycles (100 edges, the last one at the time of the last cycle).
+3. An edge 399 us after the last accepted edge and another one 400 us after it; one cycle.</td><td>1. <code>WindowPos_GetPosition</code> returns E_OK and 960 (480.0 mm).
+2. Position 860 (430.0 mm); speed 166 mm/s (0.5 mm in 3000 us, rounded down).
+3. Position 859: the edge 399 us after the accepted one was rejected, the one 400 us after it was counted.</td><td>passed</td><td><a href="#RUN-0002">RUN-0002</a></td><td>2026-11-19</td><td>host (Microsoft C/C++ 19.51.36248 x64 (cl /std:c11 /W4 /WX))</td><td>verification/evidence/<a href="#RUN-0002">RUN-0002</a>/run.log</td></tr><tr><td><a href="#SIT-0002">SIT-0002</a></td><td>The motor state decides the counting direction and the supervision</td><td>IFC-0005</td><td>detection</td><td>automated</td><td>Test program of step detection (<code>tests/integration/test_detection.c</code>), built by
+<code>tests/integration/run_tests.py</code> from the units of WindowPos (CMP-0003) and AntiPinch
+(CMP-0004), with the doubles of WindowCmd, MotorDrive and the platform. The MotorDrive
+double publishes the motor state the test sets and records the reversal request and the
+speed the 5 ms task hands to it. A cycle is one run of <code>OsTask_Control_5ms</code> by the
+platform double, 5 ms after the previous one, with the capture time set to the time of
+the cycle; the edges of a cycle reach the capture interrupt before the task runs.
+&quot;Referenced&quot; means: start, motor state opening, 40 cycles without edges. Positions in
+counts of 0.5 mm.</td><td>1. Referenced.
+2. Motor state closing; edges every 3000 us for 12 cycles (20 edges).
+3. Motor state stopped; edges every 3000 us for 2 cycles (3 edges).
+4. Motor state opening; edges every 3000 us for 6 cycles (10 edges).
+5. Motor state closing; 1 cycle.
+6. Motor state 3; no edges; 1 cycle.</td><td>1. Position 960.
+2. Position 940.
+3. Position 937: the run-out edges count in the direction driven last.
+4. Position 947; AntiPinch state IDLE: no supervision while opening.
+5. AntiPinch state SETTLING: the supervision of the closing movement begins.
+6. AntiPinch reversal request TRUE, and the reversal request handed to MotorDrive in the same cycle TRUE.</td><td>passed</td><td><a href="#RUN-0002">RUN-0002</a></td><td>2026-11-19</td><td>host (Microsoft C/C++ 19.51.36248 x64 (cl /std:c11 /W4 /WX))</td><td>verification/evidence/<a href="#RUN-0002">RUN-0002</a>/run.log</td></tr><tr><td><a href="#SIT-0003">SIT-0003</a></td><td>An obstacle reaches the motor actuation in the cycle it is detected</td><td>IFC-0002, IFC-0003, VIEW-0004</td><td>detection</td><td>automated</td><td>Test program of step detection (<code>tests/integration/test_detection.c</code>), built by
+<code>tests/integration/run_tests.py</code> from the units of WindowPos (CMP-0003) and AntiPinch
+(CMP-0004), with the doubles of WindowCmd, MotorDrive and the platform. The MotorDrive
+double publishes the motor state the test sets and records the reversal request and the
+speed the 5 ms task hands to it. A cycle is one run of <code>OsTask_Control_5ms</code> by the
+platform double, 5 ms after the previous one, with the capture time set to the time of
+the cycle; the edges of a cycle reach the capture interrupt before the task runs.
+&quot;Referenced&quot; means: start, motor state opening, 40 cycles without edges. Positions in
+counts of 0.5 mm.</td><td>1. Referenced; motor state closing; edges every 3333 us (150 mm/s) for 200 cycles.
+2. Edges every 3870 us (129 mm/s); 1 cycle.
+3. 1 more cycle.</td><td>1. AntiPinch state MONITORING; speed handed to MotorDrive 150; reversal request handed to MotorDrive FALSE.
+2. Speed handed to MotorDrive 129; reversal request FALSE in AntiPinch and at MotorDrive: first cycle of the drop.
+3. AntiPinch state REVERSING, request TRUE; the request handed to MotorDrive in this same cycle TRUE.</td><td>passed</td><td><a href="#RUN-0002">RUN-0002</a></td><td>2026-11-19</td><td>host (Microsoft C/C++ 19.51.36248 x64 (cl /std:c11 /W4 /WX))</td><td>verification/evidence/<a href="#RUN-0002">RUN-0002</a>/run.log</td></tr><tr><td><a href="#SIT-0004">SIT-0004</a></td><td>The switch request reaches the bridge through command logic and motor actuation</td><td>IFC-0006, IFC-0004, IFC-0008</td><td>application</td><td>automated</td><td>Test program of step application (<code>tests/integration/test_application.c</code>), built by
+<code>tests/integration/run_tests.py</code> from the units of WindowPos and AntiPinch and the
+received sources of WindowCmd (CMP-0002) and MotorDrive (CMP-0005), with the platform
+double. A cycle is one run of <code>OsTask_Control_5ms</code>; after every fourth cycle
+<code>OsTask_Command_20ms</code> runs, as in VIEW-0004. The bridge command is what the platform
+double received in the last call of <code>BridgeOutput_Set</code>: direction 0 off, 1 opening,
+2 closing, and the duty cycle.
+Edges every 3333 us throughout, so that no movement is ended as stalled.</td><td>1. Switch request CLOSE; 8 cycles.
+2. NONE; 8 cycles.
+3. OPEN; 8 cycles.
+4. 7, the value the stack delivers after a reception time-out; 8 cycles.
+5. OPEN; 8 cycles; then 5, a reserved value; 8 cycles.</td><td>1. Bridge command closing at 40 % (soft start: 30 % plus 70 % x 3/20 in the fourth cycle of the movement); motor state closing.
+2. Bridge off.
+3. Bridge opening.
+4. Bridge off.
+5. Bridge opening, then off.</td><td>passed</td><td><a href="#RUN-0003">RUN-0003</a></td><td>2026-11-19</td><td>host (Microsoft C/C++ 19.51.36248 x64 (cl /std:c11 /W4 /WX))</td><td>verification/evidence/<a href="#RUN-0003">RUN-0003</a>/run.log</td></tr><tr><td><a href="#SIT-0005">SIT-0005</a></td><td>The movement command operation, every return value</td><td>IFC-0004</td><td>application</td><td>automated</td><td>Test program of step application (<code>tests/integration/test_application.c</code>), built by
+<code>tests/integration/run_tests.py</code> from the units of WindowPos and AntiPinch and the
+received sources of WindowCmd (CMP-0002) and MotorDrive (CMP-0005), with the platform
+double. A cycle is one run of <code>OsTask_Control_5ms</code>; after every fourth cycle
+<code>OsTask_Command_20ms</code> runs, as in VIEW-0004. The bridge command is what the platform
+double received in the last call of <code>BridgeOutput_Set</code>: direction 0 off, 1 opening,
+2 closing, and the duty cycle.
+Only the 5 ms task runs, so that WindowCmd does not overwrite the command; edges
+every 3333 us.</td><td>1. <code>MotorDrive_RequestMovement(2, 100)</code>; 1 cycle.
+2. <code>(3, 100)</code>; 1 cycle.
+3. <code>(1, 29)</code>; 1 cycle; then <code>(1, 30)</code>; 1 cycle.
+4. <code>(1, 101)</code>; 1 cycle.
+5. <code>(0, 0)</code>; 1 cycle.</td><td>1. E_OK; bridge closing at 30 %.
+2. E_NOT_OK; bridge off.
+3. E_NOT_OK; bridge off; then E_OK; bridge opening at 30 %.
+4. E_NOT_OK; bridge off.
+5. E_OK; bridge off.</td><td>passed</td><td><a href="#RUN-0003">RUN-0003</a></td><td>2026-11-19</td><td>host (Microsoft C/C++ 19.51.36248 x64 (cl /std:c11 /W4 /WX))</td><td>verification/evidence/<a href="#RUN-0003">RUN-0003</a>/run.log</td></tr><tr><td><a href="#SIT-0006">SIT-0006</a></td><td>An obstacle reverses the bridge in the cycle it is detected and ends the automatic closing</td><td>IFC-0003, IFC-0005, VIEW-0003</td><td>application</td><td>automated</td><td>Test program of step application (<code>tests/integration/test_application.c</code>), built by
+<code>tests/integration/run_tests.py</code> from the units of WindowPos and AntiPinch and the
+received sources of WindowCmd (CMP-0002) and MotorDrive (CMP-0005), with the platform
+double. A cycle is one run of <code>OsTask_Control_5ms</code>; after every fourth cycle
+<code>OsTask_Command_20ms</code> runs, as in VIEW-0004. The bridge command is what the platform
+double received in the last call of <code>BridgeOutput_Set</code>: direction 0 off, 1 opening,
+2 closing, and the duty cycle.</td><td>1. Switch request OPEN for 60 cycles, no edges (window at the open end stop).
+2. NONE for 8 cycles; AUTO_CLOSE for 12 cycles, edges every 3333 us from then on; NONE for 188 cycles.
+3. Edges every 3870 us; cycle by cycle, at most 2 cycles, until the reversal request is set.
+4. Edges every 3333 us for 200 cycles; then no edges for 20 cycles.</td><td>1. Position 960: referenced while the motor state was opening at 0 mm/s; bridge off: MotorDrive ended the movement after 250 ms at 0 mm/s.
+2. Bridge closing at 100 %; AntiPinch state MONITORING.
+3. The request is set within 2 cycles, and in that same cycle the bridge command is opening at 100 %.
+4. Request clear (ended after 120 mm); bridge off and motor state stopped: the automatic closing was given up and does not resume.</td><td>passed</td><td><a href="#RUN-0003">RUN-0003</a></td><td>2026-11-19</td><td>host (Microsoft C/C++ 19.51.36248 x64 (cl /std:c11 /W4 /WX))</td><td>verification/evidence/<a href="#RUN-0003">RUN-0003</a>/run.log</td></tr><tr><td><a href="#SIT-0007">SIT-0007</a></td><td>A fault of the bridge driver is published as standstill and the command is repeated</td><td>IFC-0008, IFC-0005</td><td>application</td><td>automated</td><td>Test program of step application (<code>tests/integration/test_application.c</code>), built by
+<code>tests/integration/run_tests.py</code> from the units of WindowPos and AntiPinch and the
+received sources of WindowCmd (CMP-0002) and MotorDrive (CMP-0005), with the platform
+double. A cycle is one run of <code>OsTask_Control_5ms</code>; after every fourth cycle
+<code>OsTask_Command_20ms</code> runs, as in VIEW-0004. The bridge command is what the platform
+double received in the last call of <code>BridgeOutput_Set</code>: direction 0 off, 1 opening,
+2 closing, and the duty cycle.
+Edges every 3333 us throughout. In steps 2 to 4 only the 5 ms task runs.</td><td>1. Switch request CLOSE; 8 cycles.
+2. The platform double answers E_NOT_OK; 1 cycle.
+3. 1 more cycle with the fault.
+4. The platform double answers E_OK; 1 cycle.</td><td>1. Motor state closing.
+2. One more bridge call; motor state stopped.
+3. One more bridge call, again closing; motor state stopped.
+4. Motor state closing.</td><td>passed</td><td><a href="#RUN-0003">RUN-0003</a></td><td>2026-11-19</td><td>host (Microsoft C/C++ 19.51.36248 x64 (cl /std:c11 /W4 /WX))</td><td>verification/evidence/<a href="#RUN-0003">RUN-0003</a>/run.log</td></tr></table>
+<h1>Builds of the integration steps</h1>
+<h2 id="BLD-0001">BLD-0001 </h2>
+<table><tr><th>status</th><td>final</td></tr><tr><th>step</th><td>detection</td></tr><tr><th>item_under_test</th><td>fb933f1</td></tr><tr><th>tool</th><td>Microsoft C/C++ 19.51.36248 x64 (cl /std:c11 /W4 /WX)</td></tr><tr><th>executed_at</th><td>2026-11-19T00:55:54+00:00</td></tr><tr><th>result</th><td>succeeded</td></tr><tr><th>evidence</th><td>verification/evidence/<a href="#BLD-0001">BLD-0001</a>/build.log</td></tr></table>
+<p class="caption">contents</p>
+<table><thead><tr><th>component</th><th>units</th></tr></thead><tr><td>CMP-0003</td><td>UNT-0001, UNT-0002</td></tr><tr><td>CMP-0004</td><td>UNT-0003</td></tr></table>
+<p class="caption">doubles</p>
+<table><thead><tr><th>component</th><th>file</th></tr></thead><tr><td>CMP-0002</td><td>tests/integration/doubles/WindowCmd_double.c</td></tr><tr><td>CMP-0005</td><td>tests/integration/doubles/MotorDrive_double.c</td></tr><tr><td>CMP-0006</td><td>tests/integration/doubles/Platform_double.c</td></tr></table>
+<p class="caption">sources</p>
+<table><thead><tr><th>file</th><th>hash</th></tr></thead><tr><td>src/antipinch/AntiPinch.c</td><td>6f89e47360a3</td></tr><tr><td>src/windowpos/HallCapture.c</td><td>6ff986fc1967</td></tr><tr><td>src/windowpos/WindowPos.c</td><td>c8724dd66d39</td></tr><tr><td>tests/integration/doubles/MotorDrive_double.c</td><td>6d6a4d999b50</td></tr><tr><td>tests/integration/doubles/Platform_double.c</td><td>872d70474575</td></tr><tr><td>tests/integration/doubles/WindowCmd_double.c</td><td>08859213b8dc</td></tr></table>
+<h2 id="BLD-0002">BLD-0002 </h2>
+<table><tr><th>status</th><td>final</td></tr><tr><th>step</th><td>application</td></tr><tr><th>item_under_test</th><td>fb933f1</td></tr><tr><th>tool</th><td>Microsoft C/C++ 19.51.36248 x64 (cl /std:c11 /W4 /WX)</td></tr><tr><th>executed_at</th><td>2026-11-19T00:55:57+00:00</td></tr><tr><th>result</th><td>succeeded</td></tr><tr><th>evidence</th><td>verification/evidence/<a href="#BLD-0002">BLD-0002</a>/build.log</td></tr></table>
+<p class="caption">contents</p>
+<table><thead><tr><th>component</th><th>delivered</th><th>units</th></tr></thead><tr><td>CMP-0002</td><td>window lifter platform 3.2.1, WindowCmd</td><td></td></tr><tr><td>CMP-0003</td><td></td><td>UNT-0001, UNT-0002</td></tr><tr><td>CMP-0004</td><td></td><td>UNT-0003</td></tr><tr><td>CMP-0005</td><td>window lifter platform 3.2.0, MotorDrive</td><td></td></tr></table>
+<p class="caption">doubles</p>
+<table><thead><tr><th>component</th><th>file</th></tr></thead><tr><td>CMP-0006</td><td>tests/integration/doubles/Platform_double.c</td></tr></table>
+<p class="caption">sources</p>
+<table><thead><tr><th>file</th><th>hash</th></tr></thead><tr><td>reused/motordrive/MotorDrive.c</td><td>77a412366f7b</td></tr><tr><td>reused/windowcmd/WindowCmd.c</td><td>4811286c1e8f</td></tr><tr><td>src/antipinch/AntiPinch.c</td><td>6f89e47360a3</td></tr><tr><td>src/windowpos/HallCapture.c</td><td>6ff986fc1967</td></tr><tr><td>src/windowpos/WindowPos.c</td><td>c8724dd66d39</td></tr><tr><td>tests/integration/doubles/Platform_double.c</td><td>872d70474575</td></tr></table>
+<h1>Test runs</h1>
+<h2 id="RUN-0002">RUN-0002 </h2>
+<table><tr><th>status</th><td>final</td></tr><tr><th>level</th><td>software-integration</td></tr><tr><th>item_under_test</th><td>fb933f1</td></tr><tr><th>environment</th><td>host (Microsoft C/C++ 19.51.36248 x64 (cl /std:c11 /W4 /WX))</td></tr><tr><th>executed_at</th><td>2026-11-19T00:55:54+00:00</td></tr><tr><th>build</th><td><a href="#BLD-0001">BLD-0001</a></td></tr><tr><th>selection</th><td>all test cases of the step</td></tr></table>
+<p class="caption">results</p>
+<table><thead><tr><th>test</th><th>verdict</th><th>evidence</th></tr></thead><tr><td><a href="#SIT-0001">SIT-0001</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0002">RUN-0002</a>/run.log</td></tr><tr><td><a href="#SIT-0002">SIT-0002</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0002">RUN-0002</a>/run.log</td></tr><tr><td><a href="#SIT-0003">SIT-0003</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0002">RUN-0002</a>/run.log</td></tr></table>
+<p class="caption">sources</p>
+<table><thead><tr><th>file</th><th>hash</th></tr></thead><tr><td>src/antipinch/AntiPinch.c</td><td>6f89e47360a3</td></tr><tr><td>src/antipinch/AntiPinch.h</td><td>345ab5ac10d9</td></tr><tr><td>src/windowpos/HallCapture.c</td><td>6ff986fc1967</td></tr><tr><td>src/windowpos/HallCapture.h</td><td>dad803ad6278</td></tr><tr><td>src/windowpos/WindowPos.c</td><td>c8724dd66d39</td></tr><tr><td>src/windowpos/WindowPos.h</td><td>b3aba40f4110</td></tr><tr><td>tests/integration/test_detection.c</td><td>a010d20c3560</td></tr></table>
+<h2 id="RUN-0003">RUN-0003 </h2>
+<table><tr><th>status</th><td>final</td></tr><tr><th>level</th><td>software-integration</td></tr><tr><th>item_under_test</th><td>fb933f1</td></tr><tr><th>environment</th><td>host (Microsoft C/C++ 19.51.36248 x64 (cl /std:c11 /W4 /WX))</td></tr><tr><th>executed_at</th><td>2026-11-19T00:55:57+00:00</td></tr><tr><th>build</th><td><a href="#BLD-0002">BLD-0002</a></td></tr><tr><th>selection</th><td>all test cases of the step</td></tr></table>
+<p class="caption">results</p>
+<table><thead><tr><th>test</th><th>verdict</th><th>evidence</th></tr></thead><tr><td><a href="#SIT-0004">SIT-0004</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0003">RUN-0003</a>/run.log</td></tr><tr><td><a href="#SIT-0005">SIT-0005</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0003">RUN-0003</a>/run.log</td></tr><tr><td><a href="#SIT-0006">SIT-0006</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0003">RUN-0003</a>/run.log</td></tr><tr><td><a href="#SIT-0007">SIT-0007</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0003">RUN-0003</a>/run.log</td></tr></table>
+<p class="caption">sources</p>
+<table><thead><tr><th>file</th><th>hash</th></tr></thead><tr><td>src/antipinch/AntiPinch.c</td><td>6f89e47360a3</td></tr><tr><td>src/antipinch/AntiPinch.h</td><td>345ab5ac10d9</td></tr><tr><td>src/windowpos/HallCapture.c</td><td>6ff986fc1967</td></tr><tr><td>src/windowpos/HallCapture.h</td><td>dad803ad6278</td></tr><tr><td>src/windowpos/WindowPos.c</td><td>c8724dd66d39</td></tr><tr><td>src/windowpos/WindowPos.h</td><td>b3aba40f4110</td></tr><tr><td>tests/integration/test_application.c</td><td>345a5cdd6fff</td></tr></table>
+<h1>Open findings</h1>
+<p>The trace check reports no error and no warning here.</p>
+<h1>Items in this document</h1><table><thead><tr><th>item</th><th>title</th><th>state</th><th>content hash</th></tr></thead><tr><td><a href="#BLD-0001">BLD-0001</a></td><td></td><td>final</td><td><code>b3853d4374fa</code></td></tr><tr><td><a href="#BLD-0002">BLD-0002</a></td><td></td><td>final</td><td><code>109055a7e8c2</code></td></tr><tr><td><a href="#RUN-0002">RUN-0002</a></td><td></td><td>final</td><td><code>79ccf98a91e6</code></td></tr><tr><td><a href="#RUN-0003">RUN-0003</a></td><td></td><td>final</td><td><code>84d72e6b67c8</code></td></tr><tr><td><a href="#SIT-0001">SIT-0001</a></td><td>Hall edges and the capture time become window position and speed</td><td>approved</td><td><code>cad840285a72</code></td></tr><tr><td><a href="#SIT-0002">SIT-0002</a></td><td>The motor state decides the counting direction and the supervision</td><td>approved</td><td><code>239280992d98</code></td></tr><tr><td><a href="#SIT-0003">SIT-0003</a></td><td>An obstacle reaches the motor actuation in the cycle it is detected</td><td>approved</td><td><code>c287491dfa93</code></td></tr><tr><td><a href="#SIT-0004">SIT-0004</a></td><td>The switch request reaches the bridge through command logic and motor actuation</td><td>approved</td><td><code>b5c8d6ac3626</code></td></tr><tr><td><a href="#SIT-0005">SIT-0005</a></td><td>The movement command operation, every return value</td><td>approved</td><td><code>cac86c0036e7</code></td></tr><tr><td><a href="#SIT-0006">SIT-0006</a></td><td>An obstacle reverses the bridge in the cycle it is detected and ends the automatic closing</td><td>approved</td><td><code>5c919770bafe</code></td></tr><tr><td><a href="#SIT-0007">SIT-0007</a></td><td>A fault of the bridge driver is published as standstill and the command is repeated</td><td>approved</td><td><code>693353c73231</code></td></tr></table>
+<p class="caption">Generated by tools/document.py from the items of the project. The items are the source: change them, not this document.</p>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script><script>if (window.mermaid) { mermaid.initialize({startOnLoad: true}); }</script>
+</body></html>

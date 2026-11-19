@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Software requirements specification</title><style>
+:root { --ink: #1d2430; --muted: #5b6575; --line: #d6dbe3; --soft: #f4f6f9; --accent: #2d5b8a; --warn: #a33a1f; }
+body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: #fff;
+       max-width: 60rem; margin: 2rem auto; padding: 0 1rem; }
+h1 { font-size: 1.6rem; border-bottom: 2px solid var(--accent); padding-bottom: .3rem; margin-top: 2.5rem; }
+h2 { font-size: 1.25rem; margin-top: 2rem; } h3 { font-size: 1.05rem; } h4 { font-size: .95rem; }
+table { border-collapse: collapse; width: 100%; margin: .6rem 0 1rem; font-size: .9rem; }
+th, td { border: 1px solid var(--line); padding: .3rem .5rem; text-align: left; vertical-align: top; }
+th { background: var(--soft); } code, pre { font-family: Consolas, "Courier New", monospace; font-size: .88rem; }
+pre { background: var(--soft); padding: .6rem; overflow-x: auto; } .caption { color: var(--muted); font-size: .85rem; margin: .8rem 0 .1rem; }
+.note { border-left: 4px solid var(--warn); padding: .2rem .6rem; color: var(--warn); }
+.banner { background: var(--warn); color: #fff; padding: .4rem .8rem; font-weight: 600; }
+.meta td:first-child { width: 14rem; color: var(--muted); } nav ul { columns: 2; } a { color: var(--accent); }
+@page { size: A4; margin: 16mm 14mm 18mm; @bottom-right { content: counter(page) " / " counter(pages); font-size: 9pt; color: #5b6575; } }
+@media print { body { max-width: none; margin: 0; padding: 0; font-size: 10.5pt; } nav { display: none; }
+  h1 { page-break-before: always; } h1.title { page-break-before: avoid; } h1, h2, h3, h4 { break-after: avoid; }
+  thead { display: table-header-group; } tr, pre, .note { break-inside: avoid; } a { color: inherit; text-decoration: none; }
+  .banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style></head><body>
+<h1 class="title">Software requirements specification</h1>
+<table class="meta"><tr><td>Project</td><td>Power window control</td></tr><tr><td>Generated</td><td>2026-11-19T14:14:32+00:00</td></tr><tr><td>Commit</td><td>68d1561</td></tr><tr><td>Uncommitted changes</td><td>no</td></tr><tr><td>Baseline</td><td>none</td></tr><tr><td>Items shown</td><td>9</td></tr></table>
+<h2>Revision history</h2><table><tr><th>date</th><th>record</th><th>what</th><th>by</th></tr><tr><td>2026-11-19</td><td>REV-0003</td><td>review approved of 9 items shown here</td><td>Demonstration data - no review by a person took place</td></tr></table>
+<nav><ul><li>Software requirements</li><li>Traceability to the system level</li><li>Allocation to the architecture</li></ul></nav>
+<h1>Software requirements</h1>
+<p>The requirements of the software, each with its attributes, statement, verification criteria and the items it is derived from.</p>
+<h2 id="SWR-0001">SWR-0001 Window opening from Hall pulses</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>asil</th><td>B</td></tr><tr><th>security_relevant</th><td>no</td></tr><tr><th>kind</th><td>functional</td></tr><tr><th>priority</th><td>must</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>verification_method</th><td>test</td></tr><tr><th>origin</th><td>derived</td></tr></table>
+<h3>Statement</h3>
+<p>The software shall change the window opening by 0.5 mm, within the range 0 mm to 480 mm, for every Hall sensor pulse that follows the previously counted pulse by at least 400 us, in the direction in which the drive is driven or was driven last.</p>
+<h3>Verification criteria</h3>
+<p>Starting from a referenced window opening of 480.0 mm, with pulses 3 ms apart:</p>
+<ol><li>100 pulses while the drive closes: 430.0 mm.</li><li>20 further pulses while the drive opens: 440.0 mm.</li><li>3 further pulses after the drive has stopped: 441.5 mm.</li><li>A pulse 399 us after a counted pulse: opening unchanged. The same pulse 400 us after it: opening changed by 0.5 mm.</li><li>More pulses than travel remains, in either direction: the opening stays at 0.0 mm or at 480.0 mm.</li></ol>
+<h3>Analysis</h3>
+<p>One Hall sensor gives no direction. Pulses of the run-out after a change of direction (at most 3, SYE-0002) are counted in the new direction; the error of at most 1.5 mm per change is removed whenever the opening is referenced again (<a href="#SWR-0002">SWR-0002</a>). Effect on the environment: one capture interrupt per pulse, at most 400 per second in steady movement.</p>
+<p class="caption">links</p>
+<table><tr><th>derived_from</th><td>SYI-0001 Hall sensor pulse signal, SYE-0001 Window control software</td></tr><tr><th>delivers (from)</th><td>WP-0002 Software requirements</td></tr><tr><th>fulfils (from)</th><td>CMP-0003 WindowPos - window position and speed acquisition</td></tr><tr><th>implements (from)</th><td>UNT-0001 HallCapture - capture of the Hall sensor edges, UNT-0002 WindowPos - window position and speed</td></tr><tr><th>verifies (from)</th><td>SQT-0001 Window opening from Hall pulses</td></tr></table>
+<h2 id="SWR-0002">SWR-0002 Reference of the window opening at the open end stop</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>asil</th><td>B</td></tr><tr><th>security_relevant</th><td>no</td></tr><tr><th>kind</th><td>functional</td></tr><tr><th>priority</th><td>must</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>verification_method</th><td>test</td></tr><tr><th>origin</th><td>derived</td></tr></table>
+<h3>Statement</h3>
+<p>The software shall report the window opening as not available from reset until the drive has been driven in the opening direction at a window speed of 0 mm/s for 200 ms without interruption, and set it to 480 mm at that moment.</p>
+<h3>Verification criteria</h3>
+<ol><li>After reset, with any sequence of closing and stopped drive: opening not available.</li><li>Drive opening at 0 mm/s for 195 ms: not available. After 200 ms: 480.0 mm.</li><li>Drive opening at 0 mm/s for 195 ms, stopped for 5 ms, opening for 195 ms: not available.</li><li>Opening available at 430.0 mm, drive opening at 0 mm/s for 200 ms: 480.0 mm.</li></ol>
+<h3>Analysis</h3>
+<p>The reference is taken at the open end stop only, where a wrong reference cannot shrink the protected zone: if the window is blocked before the end stop, the reported opening is larger than the real one, and the zone of <a href="#SWR-0004">SWR-0004</a> ends earlier, never later. The closed end stop cannot be told from an obstacle without a valid opening. No non-volatile memory is needed in release R1.0.</p>
+<p class="caption">links</p>
+<table><tr><th>derived_from</th><td>SYE-0001 Window control software</td></tr><tr><th>delivers (from)</th><td>WP-0002 Software requirements</td></tr><tr><th>fulfils (from)</th><td>CMP-0003 WindowPos - window position and speed acquisition</td></tr><tr><th>implements (from)</th><td>UNT-0002 WindowPos - window position and speed</td></tr><tr><th>verifies (from)</th><td>SQT-0002 Reference of the window opening at the open end stop</td></tr></table>
+<h2 id="SWR-0003">SWR-0003 Window speed</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>asil</th><td>B</td></tr><tr><th>security_relevant</th><td>no</td></tr><tr><th>kind</th><td>functional</td></tr><tr><th>priority</th><td>must</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>verification_method</th><td>test</td></tr><tr><th>origin</th><td>derived</td></tr></table>
+<h3>Statement</h3>
+<p>Every 5 ms the software shall determine the window speed, over the range 10 mm/s to 500 mm/s with a deviation of at most 1 mm/s, as 0.5 mm divided by the longer of the last pulse period and the time since the last pulse.</p>
+<h3>Verification criteria</h3>
+<ol><li>Pulse period 3333 us, last pulse 0.5 ms ago: 149 mm/s to 151 mm/s.</li><li>No further pulse: at most 100 mm/s when 5 ms have passed since the last pulse, at most 50 mm/s after 10 ms.</li><li>Pulse period or time since the last pulse of 50 ms or more: 0 mm/s, and 0 mm/s remains until two further pulses have arrived.</li><li>Pulse period of 1 ms or less: 500 mm/s.</li></ol>
+<h3>Analysis</h3>
+<p>The time since the last pulse lets a blocked window show as a falling speed after 5 ms, without waiting for a pulse that may never come; <a href="#SWR-0004">SWR-0004</a> depends on this. Effect on the environment: the capture time stamps and the 5 ms task need a common time base with a resolution of 1 us (SYI-0001). One 32 bit division per cycle; no floating point.</p>
+<p class="caption">links</p>
+<table><tr><th>derived_from</th><td>SYR-0001 Limitation of the closing force, SYI-0001 Hall sensor pulse signal</td></tr><tr><th>delivers (from)</th><td>WP-0002 Software requirements</td></tr><tr><th>fulfils (from)</th><td>CMP-0003 WindowPos - window position and speed acquisition</td></tr><tr><th>implements (from)</th><td>UNT-0002 WindowPos - window position and speed</td></tr><tr><th>verifies (from)</th><td>SQT-0003 Window speed</td></tr></table>
+<h2 id="SWR-0004">SWR-0004 Obstacle detection during closing</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>asil</th><td>B</td></tr><tr><th>security_relevant</th><td>no</td></tr><tr><th>kind</th><td>functional</td></tr><tr><th>priority</th><td>must</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>verification_method</th><td>test</td></tr><tr><th>origin</th><td>derived</td></tr></table>
+<h3>Statement</h3>
+<p>While the drive has been closing for at least 100 ms and the window opening is more than 5 mm or not available, the software shall set the reversal request no later than 10 ms after the window speed has fallen more than 20 mm/s below the reference speed.</p>
+<p>The reference speed is the window speed passed through a first-order low-pass with a time constant of 80 ms +/- 5 ms, held while the window speed is more than 20 mm/s below it, and never lower than 50 mm/s.</p>
+<h3>Verification criteria</h3>
+<p>Drive closing for 1 s at 150 mm/s and a window opening of 300 mm, then:</p>
+<ol><li>Speed 129 mm/s: reversal request set within 10 ms.</li><li>Speed 130 mm/s for 1 s: request stays clear.</li><li>Speed falling by 100 mm/s per second down to 100 mm/s: request stays clear.</li></ol>
+<p>Further cases:</p>
+<ol><li>As case 1 at a window opening of 5.0 mm: request stays clear. At 5.5 mm and with the opening not available: set within 10 ms.</li><li>Drive closing from standstill, speed never above 29 mm/s: request set no later than 110 ms after the start of closing. Speed 30 mm/s: request stays clear.</li></ol>
+<h3>Analysis</h3>
+<p>Budget: the system architecture allows 20 ms from the speed drop to the reversed motor command (SYE-0001). 10 ms are spent here (two 5 ms cycles, so that one disturbed speed value does not reverse the window), 5 ms in <a href="#SWR-0007">SWR-0007</a>, 5 ms remain. Below 5 mm the glass enters the seal and slows down by design; the limit is the one of SYR-0001.</p>
+<p class="caption">links</p>
+<table><tr><th>derived_from</th><td>SYR-0001 Limitation of the closing force, SYE-0001 Window control software</td></tr><tr><th>addresses (from)</th><td>CA-0001 Reviews by named people against the checklists, in place of the demonstration fixtures</td></tr><tr><th>delivers (from)</th><td>WP-0002 Software requirements</td></tr><tr><th>fulfils (from)</th><td>CMP-0004 AntiPinch - anti-pinch detection</td></tr><tr><th>implements (from)</th><td>UNT-0003 AntiPinch - obstacle detection state machine</td></tr><tr><th>verifies (from)</th><td>SQT-0004 Obstacle detection during closing</td></tr></table>
+<h2 id="SWR-0005">SWR-0005 End of the reversal</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>asil</th><td>B</td></tr><tr><th>security_relevant</th><td>no</td></tr><tr><th>kind</th><td>functional</td></tr><tr><th>priority</th><td>must</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>verification_method</th><td>test</td></tr><tr><th>origin</th><td>derived</td></tr></table>
+<h3>Statement</h3>
+<p>The software shall clear the reversal request when the window opening has grown by 120 mm since the request was set, when the window opening has reached 480 mm, or when 2 s have passed since the request was set, whichever comes first.</p>
+<h3>Verification criteria</h3>
+<ol><li>Request set at 300.0 mm: still set at 419.5 mm, clear at 420.0 mm.</li><li>Request set at 400.0 mm: still set at 479.5 mm, clear at 480.0 mm.</li><li>Request set with the window opening not available: still set after 1.995 s, clear after 2.000 s.</li><li>Request set at 300.0 mm, window opening at 40 mm/s: still set after 1.995 s, clear after 2.000 s (at about 380 mm).</li></ol>
+<h3>Analysis</h3>
+<p>The time limit ends a reversal that does not reach its position, for example when the window opening is not available or the glass moves slowly against ice, so that the motor is not driven without end. At the slowest steady speed of 80 mm/s (SYE-0002) 120 mm take 1.5 s; 2 s leave a margin of 0.5 s. A window that is blocked completely while opening is referenced as fully open after 200 ms (<a href="#SWR-0002">SWR-0002</a>), which ends the reversal through the second condition.</p>
+<p class="caption">links</p>
+<table><tr><th>derived_from</th><td>SYR-0002 Reversal after an obstacle</td></tr><tr><th>delivers (from)</th><td>WP-0002 Software requirements</td></tr><tr><th>fulfils (from)</th><td>CMP-0004 AntiPinch - anti-pinch detection</td></tr><tr><th>implements (from)</th><td>UNT-0003 AntiPinch - obstacle detection state machine</td></tr><tr><th>verifies (from)</th><td>SQT-0005 End of the reversal</td></tr></table>
+<h2 id="SWR-0006">SWR-0006 Reversal when a closing movement cannot be supervised</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>asil</th><td>B</td></tr><tr><th>security_relevant</th><td>no</td></tr><tr><th>kind</th><td>functional</td></tr><tr><th>priority</th><td>must</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>verification_method</th><td>test</td></tr><tr><th>origin</th><td>internal</td></tr></table>
+<h3>Statement</h3>
+<p>If the window opening, the window speed or the drive direction delivered to the obstacle detection is outside its specified range during a closing movement, the software shall set the reversal request within 5 ms.</p>
+<p>A closing movement lasts from the first 5 ms cycle in which the drive direction is &quot;closing&quot; until the first cycle in which it is &quot;stopped&quot; or &quot;opening&quot;.</p>
+<h3>Rationale</h3>
+<p>No system requirement and no element of the system architecture asks for this reaction; it is a defensive measure of the software. The obstacle detection compares numbers. A value outside its range - from corrupted memory, a fault in the delivering component or a wrong integration - would be evaluated like a measurement and could hide an obstacle. With the window driven open no closing force acts on anything, so opening is the reaction that needs no further information.</p>
+<h3>Verification criteria</h3>
+<p>During a closing movement, in its first cycle, within the first 100 ms and later:</p>
+<ol><li>Window opening value 961 (480.5 mm): reversal request set in the same 5 ms cycle.</li><li>Window speed 501 mm/s: as case 1.</li><li>Drive direction value 3 after at least one cycle with &quot;closing&quot;: as case 1.</li><li>In each case the request is cleared 2.000 s later (time limit of <a href="#SWR-0005">SWR-0005</a>).</li></ol>
+<p>The same values outside a closing movement: request stays clear.</p>
+<h3>Analysis</h3>
+<p>The ranges are those of interfaces IFC-0002 and IFC-0005. The value for &quot;opening not available&quot; is inside the specified range and does not trigger this reaction (<a href="#SWR-0004">SWR-0004</a> treats it as inside the protected zone).</p>
+<p class="caption">links</p>
+<table><tr><th>delivers (from)</th><td>WP-0002 Software requirements</td></tr><tr><th>fulfils (from)</th><td>CMP-0004 AntiPinch - anti-pinch detection</td></tr><tr><th>implements (from)</th><td>UNT-0003 AntiPinch - obstacle detection state machine</td></tr><tr><th>verifies (from)</th><td>SQT-0006 Reversal when a closing movement cannot be supervised</td></tr></table>
+<h2 id="SWR-0007">SWR-0007 Priority of the reversal request</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>asil</th><td>B</td></tr><tr><th>security_relevant</th><td>no</td></tr><tr><th>kind</th><td>functional</td></tr><tr><th>priority</th><td>must</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>verification_method</th><td>test</td></tr><tr><th>origin</th><td>derived</td></tr></table>
+<h3>Statement</h3>
+<p>While the reversal request is set, the software shall command the bridge driver in the opening direction at a duty cycle of 100 %, whatever movement command is present, starting no later than 5 ms after the request was set.</p>
+<h3>Verification criteria</h3>
+<ol><li>Movement command &quot;closing, 100 %&quot;, reversal request set: the direction signal of SYI-0002 shows &quot;opening&quot; and the duty cycle 100 % within 5 ms.</li><li>While the request stays set, the movement command is changed through stopped, opening and closing: direction signal and duty cycle do not change.</li><li>Request cleared: the bridge command follows the movement command again within 5 ms.</li></ol>
+<h3>Analysis</h3>
+<p>The reaction is taken where the bridge is commanded, so that the command logic (QM) is not part of the path from detection to motor. Fulfilled by the reused motor actuation without change; its reversal input was confirmed against this requirement in the reuse analysis for release R1.0.</p>
+<p class="caption">links</p>
+<table><tr><th>derived_from</th><td>SYR-0002 Reversal after an obstacle, SYI-0002 Motor command to the bridge driver</td></tr><tr><th>delivers (from)</th><td>WP-0002 Software requirements</td></tr><tr><th>fulfils (from)</th><td>CMP-0005 MotorDrive - motor actuation</td></tr><tr><th>verifies (from)</th><td>SQT-0007 Priority of the reversal request</td></tr></table>
+<h2 id="SWR-0008">SWR-0008 Automatic closing</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>asil</th><td>QM</td></tr><tr><th>security_relevant</th><td>no</td></tr><tr><th>kind</th><td>functional</td></tr><tr><th>priority</th><td>must</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>verification_method</th><td>test</td></tr><tr><th>origin</th><td>derived</td></tr></table>
+<h3>Statement</h3>
+<p>When the switch request changes to AUTO_CLOSE while the window opening is available, the software shall issue the movement command &quot;closing&quot; until the window stands at an opening of 5 mm or less, a switch request other than NONE follows, or the reversal request is set.</p>
+<h3>Verification criteria</h3>
+<ol><li>AUTO_CLOSE for 60 ms, then NONE, at a window opening of 300 mm: the movement command is &quot;closing&quot; within 40 ms and stays so until the window speed has been 0 mm/s for 200 ms at an opening of 5 mm or less; then it is &quot;stopped&quot;.</li><li>OPEN while closing automatically: &quot;closing&quot; is withdrawn within 40 ms.</li><li>Reversal request set while closing automatically: the movement command is &quot;stopped&quot; within 40 ms and stays so after the request is cleared.</li><li>AUTO_CLOSE while the window opening is not available: no movement command.</li></ol>
+<h3>Analysis</h3>
+<p>Without a valid opening the window would close to the seal and be reversed there by the obstacle detection (<a href="#SWR-0004">SWR-0004</a>), hence the condition. 40 ms are two cycles of the 20 ms task and lie within the 100 ms of SYR-0003.</p>
+<p class="caption">links</p>
+<table><tr><th>derived_from</th><td>SYR-0003 Automatic closing by one touch, SYI-0003 Switch request on the body network</td></tr><tr><th>delivers (from)</th><td>WP-0002 Software requirements</td></tr><tr><th>fulfils (from)</th><td>CMP-0002 WindowCmd - window command logic</td></tr><tr><th>verifies (from)</th><td>SQT-0008 Automatic closing</td></tr></table>
+<h2 id="SWR-0009">SWR-0009 Manual movement</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>asil</th><td>QM</td></tr><tr><th>security_relevant</th><td>no</td></tr><tr><th>kind</th><td>functional</td></tr><tr><th>priority</th><td>must</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>verification_method</th><td>test</td></tr><tr><th>origin</th><td>derived</td></tr></table>
+<h3>Statement</h3>
+<p>While the switch request is OPEN or CLOSE, the software shall issue the movement command for the requested direction, with at most 40 ms between a change of the switch request and the change of the movement command.</p>
+<h3>Verification criteria</h3>
+<ol><li>CLOSE for 500 ms: movement command &quot;closing&quot; from at most 40 ms after the start of the request until at most 40 ms after its end, &quot;stopped&quot; afterwards.</li><li>OPEN for 500 ms: the same with &quot;opening&quot;.</li><li>Switch request values 4 to 7, or no value received for 100 ms: movement command &quot;stopped&quot; within 40 ms.</li></ol>
+<h3>Analysis</h3>
+<p>40 ms are two cycles of the 20 ms task and lie within the 100 ms of SYR-0004. A manual closing movement is supervised by the obstacle detection like an automatic one.</p>
+<p class="caption">links</p>
+<table><tr><th>derived_from</th><td>SYR-0004 Manual movement while the switch is held, SYI-0003 Switch request on the body network</td></tr><tr><th>delivers (from)</th><td>WP-0002 Software requirements</td></tr><tr><th>fulfils (from)</th><td>CMP-0002 WindowCmd - window command logic</td></tr><tr><th>verifies (from)</th><td>SQT-0009 Manual movement</td></tr></table>
+<h1>Traceability to the system level</h1>
+<table><thead><tr><th>software-requirement</th><th>derived_from</th></tr></thead><tr><td><a href="#SWR-0001">SWR-0001</a> Window opening from Hall pulses</td><td>SYI-0001 Hall sensor pulse signal, SYE-0001 Window control software</td></tr><tr><td><a href="#SWR-0002">SWR-0002</a> Reference of the window opening at the open end stop</td><td>SYE-0001 Window control software</td></tr><tr><td><a href="#SWR-0003">SWR-0003</a> Window speed</td><td>SYR-0001 Limitation of the closing force, SYI-0001 Hall sensor pulse signal</td></tr><tr><td><a href="#SWR-0004">SWR-0004</a> Obstacle detection during closing</td><td>SYR-0001 Limitation of the closing force, SYE-0001 Window control software</td></tr><tr><td><a href="#SWR-0005">SWR-0005</a> End of the reversal</td><td>SYR-0002 Reversal after an obstacle</td></tr><tr><td><a href="#SWR-0006">SWR-0006</a> Reversal when a closing movement cannot be supervised</td><td>-</td></tr><tr><td><a href="#SWR-0007">SWR-0007</a> Priority of the reversal request</td><td>SYR-0002 Reversal after an obstacle, SYI-0002 Motor command to the bridge driver</td></tr><tr><td><a href="#SWR-0008">SWR-0008</a> Automatic closing</td><td>SYR-0003 Automatic closing by one touch, SYI-0003 Switch request on the body network</td></tr><tr><td><a href="#SWR-0009">SWR-0009</a> Manual movement</td><td>SYR-0004 Manual movement while the switch is held, SYI-0003 Switch request on the body network</td></tr></table>
+<h1>Allocation to the architecture</h1>
+<table><thead><tr><th>software-requirement</th><th>fulfils (from)</th></tr></thead><tr><td><a href="#SWR-0001">SWR-0001</a> Window opening from Hall pulses</td><td>CMP-0003 WindowPos - window position and speed acquisition</td></tr><tr><td><a href="#SWR-0002">SWR-0002</a> Reference of the window opening at the open end stop</td><td>CMP-0003 WindowPos - window position and speed acquisition</td></tr><tr><td><a href="#SWR-0003">SWR-0003</a> Window speed</td><td>CMP-0003 WindowPos - window position and speed acquisition</td></tr><tr><td><a href="#SWR-0004">SWR-0004</a> Obstacle detection during closing</td><td>CMP-0004 AntiPinch - anti-pinch detection</td></tr><tr><td><a href="#SWR-0005">SWR-0005</a> End of the reversal</td><td>CMP-0004 AntiPinch - anti-pinch detection</td></tr><tr><td><a href="#SWR-0006">SWR-0006</a> Reversal when a closing movement cannot be supervised</td><td>CMP-0004 AntiPinch - anti-pinch detection</td></tr><tr><td><a href="#SWR-0007">SWR-0007</a> Priority of the reversal request</td><td>CMP-0005 MotorDrive - motor actuation</td></tr><tr><td><a href="#SWR-0008">SWR-0008</a> Automatic closing</td><td>CMP-0002 WindowCmd - window command logic</td></tr><tr><td><a href="#SWR-0009">SWR-0009</a> Manual movement</td><td>CMP-0002 WindowCmd - window command logic</td></tr></table>
+<h1>Items in this document</h1><table><thead><tr><th>item</th><th>title</th><th>state</th><th>content hash</th></tr></thead><tr><td><a href="#SWR-0001">SWR-0001</a></td><td>Window opening from Hall pulses</td><td>approved</td><td><code>2ffb19461a48</code></td></tr><tr><td><a href="#SWR-0002">SWR-0002</a></td><td>Reference of the window opening at the open end stop</td><td>approved</td><td><code>f20e16a3c053</code></td></tr><tr><td><a href="#SWR-0003">SWR-0003</a></td><td>Window speed</td><td>approved</td><td><code>8d80d6da2d66</code></td></tr><tr><td><a href="#SWR-0004">SWR-0004</a></td><td>Obstacle detection during closing</td><td>approved</td><td><code>ac44902f7e17</code></td></tr><tr><td><a href="#SWR-0005">SWR-0005</a></td><td>End of the reversal</td><td>approved</td><td><code>e9c3f089f4bb</code></td></tr><tr><td><a href="#SWR-0006">SWR-0006</a></td><td>Reversal when a closing movement cannot be supervised</td><td>approved</td><td><code>18b5f58368a4</code></td></tr><tr><td><a href="#SWR-0007">SWR-0007</a></td><td>Priority of the reversal request</td><td>approved</td><td><code>a67ed859d848</code></td></tr><tr><td><a href="#SWR-0008">SWR-0008</a></td><td>Automatic closing</td><td>approved</td><td><code>dcd2e1c561ac</code></td></tr><tr><td><a href="#SWR-0009">SWR-0009</a></td><td>Manual movement</td><td>approved</td><td><code>f345c9d605f5</code></td></tr></table>
+<p class="caption">Generated by tools/document.py from the items of the project. The items are the source: change them, not this document.</p>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script><script>if (window.mermaid) { mermaid.initialize({startOnLoad: true}); }</script>
+</body></html>

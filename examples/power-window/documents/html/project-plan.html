@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project plan</title><style>
+:root { --ink: #1d2430; --muted: #5b6575; --line: #d6dbe3; --soft: #f4f6f9; --accent: #2d5b8a; --warn: #a33a1f; }
+body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: #fff;
+       max-width: 60rem; margin: 2rem auto; padding: 0 1rem; }
+h1 { font-size: 1.6rem; border-bottom: 2px solid var(--accent); padding-bottom: .3rem; margin-top: 2.5rem; }
+h2 { font-size: 1.25rem; margin-top: 2rem; } h3 { font-size: 1.05rem; } h4 { font-size: .95rem; }
+table { border-collapse: collapse; width: 100%; margin: .6rem 0 1rem; font-size: .9rem; }
+th, td { border: 1px solid var(--line); padding: .3rem .5rem; text-align: left; vertical-align: top; }
+th { background: var(--soft); } code, pre { font-family: Consolas, "Courier New", monospace; font-size: .88rem; }
+pre { background: var(--soft); padding: .6rem; overflow-x: auto; } .caption { color: var(--muted); font-size: .85rem; margin: .8rem 0 .1rem; }
+.note { border-left: 4px solid var(--warn); padding: .2rem .6rem; color: var(--warn); }
+.banner { background: var(--warn); color: #fff; padding: .4rem .8rem; font-weight: 600; }
+.meta td:first-child { width: 14rem; color: var(--muted); } nav ul { columns: 2; } a { color: var(--accent); }
+@page { size: A4; margin: 16mm 14mm 18mm; @bottom-right { content: counter(page) " / " counter(pages); font-size: 9pt; color: #5b6575; } }
+@media print { body { max-width: none; margin: 0; padding: 0; font-size: 10.5pt; } nav { display: none; }
+  h1 { page-break-before: always; } h1.title { page-break-before: avoid; } h1, h2, h3, h4 { break-after: avoid; }
+  thead { display: table-header-group; } tr, pre, .note { break-inside: avoid; } a { color: inherit; text-decoration: none; }
+  .banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style></head><body>
+<h1 class="title">Project plan</h1>
+<table class="meta"><tr><td>Project</td><td>Power window control</td></tr><tr><td>Generated</td><td>2026-11-19T14:15:12+00:00</td></tr><tr><td>Commit</td><td>68d1561</td></tr><tr><td>Uncommitted changes</td><td>no</td></tr><tr><td>Baseline</td><td>none</td></tr><tr><td>Items shown</td><td>13</td></tr></table>
+<h2>Revision history</h2><table><tr><th>date</th><th>record</th><th>what</th><th>by</th></tr><tr><td>2026-11-19</td><td>REV-0002</td><td>review approved of 11 items shown here</td><td>Demonstration data - no review by a person took place</td></tr><tr><td>2026-11-19</td><td>REV-0009</td><td>review approved of 1 items shown here</td><td>Demonstration data - no review by a person took place</td></tr><tr><td>2026-11-19</td><td>REV-0012</td><td>review approved of 1 items shown here</td><td>Demonstration data - no review by a person took place</td></tr></table>
+<nav><ul><li>Plan</li><li>Work breakdown and schedule</li><li>Work packages</li></ul></nav>
+<h1>Plan</h1>
+<h2 id="PLN-0003">PLN-0003 Project plan - power window software R1.0</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>kind</th><td>project</td></tr></table>
+<p class="caption">milestones</p>
+<table><thead><tr><th>name</th><th>date</th><th>baseline_purpose</th><th>release</th></tr></thead><tr><td>Requirements agreed</td><td>2026-03-20</td><td>requirements freeze</td><td>R1.0</td></tr><tr><td>Design frozen</td><td>2026-04-17</td><td>design freeze</td><td>R1.0</td></tr><tr><td>Release candidate</td><td>2026-06-12</td><td>release candidate</td><td>R1.0</td></tr><tr><td>Delivery to the customer</td><td>2026-06-26</td><td>delivery</td><td>R1.0</td></tr></table>
+<h3>Scope</h3>
+<p>Goal: the software of the power window control with anti-pinch protection for one door, as the customer&#x27;s system requirements 2.1 and system architecture 1.4 ask (see <code>inputs</code> in <code>project.yaml</code>). The reason: the customer replaces the window lifter of an existing door module and needs anti-pinch protection at ASIL B.</p>
+<p>Delivered: the C sources of the developed units, the component and interface descriptions, the unit verification evidence, the integration of the developed components with WindowCmd and MotorDrive (taken over unchanged from the platform release) and its integration and qualification test evidence from the host, the baselines named in <code>milestones</code> and their notices. Not part of it: integration into the door module software, tests on the target, the hardware, calibration on the vehicle - all with the customer.</p>
+<h3>Approach</h3>
+<p>Life cycle: one release, R1.0, in four phases - requirements, design, implementation with unit verification and integration, qualification and release. Each phase ends with the baseline its milestone names; from the requirements freeze on, a change goes through a change request.</p>
+<p>Estimation: the owner of a work package estimates its effort in person-days with the software lead, from the number and size of the deliverables, and from the actual effort of finished packages of the same kind.</p>
+<h3>Criteria</h3>
+<p>A milestone is reached when its baseline is recorded and communicated. The plan is revised when a milestone is at risk by more than one reporting period, when the scope changes, or when a resource is lost.</p>
+<h3>Environment and tools</h3>
+<p>The Git repository of the project; the trace engine and record tool of the toolkit; gcc with gcov and the static analysis of the Microsoft C compiler on the host. No target hardware is needed: there is no test on the target in this scope.</p>
+<h3>Responsibilities</h3>
+<table><thead><tr><th>Role</th><th>Work</th><th>Skills needed</th><th>Gap and how it is closed</th></tr></thead><tr><td>Project lead</td><td>this plan, status reports, corrective actions</td><td>project management</td><td>none</td></tr><tr><td>Software lead</td><td>architecture, reviews, technical risks and decisions</td><td>AUTOSAR Classic; functional safety at ASIL B</td><td>none</td></tr><tr><td>Software developer</td><td>requirements, detailed design, code, unit tests</td><td>C99 for embedded targets; the unit test approach of PLN-0001</td><td>none</td></tr><tr><td>Configuration manager</td><td>baselines, change requests</td><td>the configuration management plan PLN-0002</td><td>none</td></tr><tr><td>Quality engineer</td><td>quality assurance of the project (PLN-0007), from the quality department, outside the project team</td><td>the checklists of the toolkit; audits</td><td>none</td></tr><tr><td>Software tester</td><td>integration and qualification tests</td><td>the strategies PLN-0004 and PLN-0005; independent of the development of the units and components</td><td>none</td></tr></table>
+<h3>Feasibility</h3>
+<p>Facts: four milestones over 17 weeks; one software developer and the software lead at half time, a software tester for the last five weeks; the work packages add up to 81 person-days, quality assurance included. Assumptions: the customer answers queries within one week; system requirements 2.1 stay stable until the design freeze. Risk: anti-pinch thresholds may need tuning on the vehicle, which is outside this scope. Decision: feasible, on condition that the customer confirms the system requirements by 2026-03-20 - decided by the project lead on 2026-03-04. The example names roles, not people.</p>
+<h3>Interfaces and commitments</h3>
+<table><thead><tr><th>Party</th><th>Exchanged</th><th>Contact role</th><th>Commitment</th><th>Date</th><th>State</th></tr></thead><tr><td>Customer system engineering</td><td>system requirements and architecture to the project; queries, baselines and notices from the project</td><td>system engineer</td><td>answers to queries within one week</td><td>from 2026-03-02</td><td>agreed</td></tr><tr><td>Customer system engineering</td><td>confirmation of the system requirements</td><td>system engineer</td><td>confirmation of version 2.1</td><td>2026-03-20</td><td>agreed</td></tr><tr><td>Customer integration</td><td>the software and its interface descriptions from the project</td><td>integrator</td><td>delivery of R1.0</td><td>2026-06-26</td><td>agreed</td></tr></table>
+<h3>Reporting</h3>
+<p>Every two weeks, and at each milestone, a status report to the software lead and the customer&#x27;s project lead, written with <code>/project-status</code>. A corrective action is decided when a work package is late by more than two weeks, when actual effort exceeds the estimate by more than 25 %, or when a milestone is at risk.</p>
+<p class="caption">links</p>
+<table><tr><th>delivers (from)</th><td><a href="#WP-0006">WP-0006</a> Project management</td></tr></table>
+<h1>Work breakdown and schedule</h1>
+<table><thead><tr><th>id</th><th>title</th><th>owner</th><th>category</th><th>estimate</th><th>planned_start</th><th>planned_finish</th><th>part_of</th><th>depends_on</th></tr></thead><tr><td><a href="#WP-0001">WP-0001</a></td><td>Power window software R1.0</td><td>Project lead</td><td>engineering</td><td>81</td><td>2026-03-03</td><td>2026-06-26</td><td></td><td></td></tr><tr><td><a href="#WP-0002">WP-0002</a></td><td>Software requirements</td><td>Software developer</td><td>engineering</td><td>8</td><td>2026-03-03</td><td>2026-03-20</td><td><a href="#WP-0001">WP-0001</a></td><td></td></tr><tr><td><a href="#WP-0003">WP-0003</a></td><td>Software architecture</td><td>Software lead</td><td>engineering</td><td>12</td><td>2026-03-23</td><td>2026-04-17</td><td><a href="#WP-0001">WP-0001</a></td><td><a href="#WP-0002">WP-0002</a></td></tr><tr><td><a href="#WP-0004">WP-0004</a></td><td>Detailed design and code</td><td>Software developer</td><td>engineering</td><td>18</td><td>2026-04-20</td><td>2026-05-15</td><td><a href="#WP-0001">WP-0001</a></td><td><a href="#WP-0003">WP-0003</a></td></tr><tr><td><a href="#WP-0005">WP-0005</a></td><td>Unit verification</td><td>Software developer</td><td>engineering</td><td>12</td><td>2026-05-18</td><td>2026-06-05</td><td><a href="#WP-0001">WP-0001</a></td><td><a href="#WP-0004">WP-0004</a></td></tr><tr><td><a href="#WP-0006">WP-0006</a></td><td>Project management</td><td>Project lead</td><td>management</td><td>6</td><td>2026-03-02</td><td>2026-06-26</td><td></td><td></td></tr><tr><td><a href="#WP-0007">WP-0007</a></td><td>Configuration management and problem resolution</td><td>Configuration manager</td><td>support</td><td>8</td><td>2026-03-02</td><td>2026-06-26</td><td></td><td></td></tr><tr><td><a href="#WP-0008">WP-0008</a></td><td>Software integration and integration test</td><td>Software tester</td><td>engineering</td><td>6</td><td>2026-06-08</td><td>2026-06-12</td><td><a href="#WP-0001">WP-0001</a></td><td><a href="#WP-0005">WP-0005</a></td></tr><tr><td><a href="#WP-0009">WP-0009</a></td><td>Software qualification test</td><td>Software tester</td><td>engineering</td><td>7</td><td>2026-06-15</td><td>2026-06-24</td><td><a href="#WP-0001">WP-0001</a></td><td><a href="#WP-0008">WP-0008</a></td></tr><tr><td><a href="#WP-0010">WP-0010</a></td><td>Quality assurance</td><td>Quality engineer</td><td>support</td><td>4</td><td>2026-05-04</td><td>2026-06-26</td><td></td><td></td></tr><tr><td><a href="#WP-0011">WP-0011</a></td><td>Threat analysis and risk assessment</td><td>Cybersecurity engineer</td><td>engineering</td><td>6</td><td>2026-03-23</td><td>2026-04-17</td><td></td><td></td></tr><tr><td><a href="#WP-0012">WP-0012</a></td><td>Functional safety</td><td>Safety manager</td><td>engineering</td><td>8</td><td>2026-03-23</td><td>2026-06-05</td><td></td><td></td></tr></table>
+<h1>Work packages</h1>
+<h2 id="WP-0001">WP-0001 Power window software R1.0</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>owner</th><td>Project lead</td></tr><tr><th>category</th><td>engineering</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>estimate</th><td>81</td></tr><tr><th>planned_start</th><td>2026-03-03</td></tr><tr><th>planned_finish</th><td>2026-06-26</td></tr></table>
+<h3>Description</h3>
+<p>Everything the project develops for release R1.0, broken down by process below. It delivers nothing of its own.</p>
+<h3>Deliverables</h3>
+<p>The software of R1.0 and its evidence, through the work packages that are part of it.</p>
+<h3>Estimate basis</h3>
+<p>Sum of all work packages of the project, the management and support packages included; compared with the 17 weeks and the people of <a href="#PLN-0003">PLN-0003</a>.</p>
+<p class="caption">links</p>
+<table><tr><th>part_of (from)</th><td><a href="#WP-0002">WP-0002</a> Software requirements, <a href="#WP-0003">WP-0003</a> Software architecture, <a href="#WP-0004">WP-0004</a> Detailed design and code, <a href="#WP-0005">WP-0005</a> Unit verification, <a href="#WP-0008">WP-0008</a> Software integration and integration test, <a href="#WP-0009">WP-0009</a> Software qualification test</td></tr></table>
+<h2 id="WP-0002">WP-0002 Software requirements</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>owner</th><td>Software developer</td></tr><tr><th>category</th><td>engineering</td></tr><tr><th>process</th><td>SWE.1</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>estimate</th><td>8</td></tr><tr><th>planned_start</th><td>2026-03-03</td></tr><tr><th>planned_finish</th><td>2026-03-20</td></tr></table>
+<p class="caption">progress</p>
+<table><thead><tr><th>actual_start</th><th>actual_effort</th><th>completed_on</th><th>as_of</th></tr></thead><tr><td>2026-03-03</td><td>9</td><td>2026-03-19</td><td>2026-03-19</td></tr></table>
+<h3>Description</h3>
+<p>Software requirements derived from the customer&#x27;s system requirements 2.1 and system architecture 1.4, with analysis and verification criteria, and their review.</p>
+<h3>Deliverables</h3>
+<p>SWR-0001 to SWR-0009 and their review record.</p>
+<h3>Estimate basis</h3>
+<p>About half a day per requirement including analysis, plus one day of review: 9 requirements, 8 days.</p>
+<p class="caption">links</p>
+<table><tr><th>part_of</th><td><a href="#WP-0001">WP-0001</a> Power window software R1.0</td></tr><tr><th>delivers</th><td>SWR-0001 Window opening from Hall pulses, SWR-0002 Reference of the window opening at the open end stop, SWR-0003 Window speed, SWR-0004 Obstacle detection during closing, SWR-0005 End of the reversal, SWR-0006 Reversal when a closing movement cannot be supervised, SWR-0007 Priority of the reversal request, SWR-0008 Automatic closing, SWR-0009 Manual movement</td></tr><tr><th>depends_on (from)</th><td><a href="#WP-0003">WP-0003</a> Software architecture</td></tr></table>
+<h2 id="WP-0003">WP-0003 Software architecture</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>owner</th><td>Software lead</td></tr><tr><th>category</th><td>engineering</td></tr><tr><th>process</th><td>SWE.2</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>estimate</th><td>12</td></tr><tr><th>planned_start</th><td>2026-03-23</td></tr><tr><th>planned_finish</th><td>2026-04-17</td></tr></table>
+<p class="caption">progress</p>
+<table><thead><tr><th>actual_start</th><th>actual_effort</th><th>completed_on</th><th>as_of</th></tr></thead><tr><td>2026-03-23</td><td>11</td><td>2026-04-16</td><td>2026-04-16</td></tr></table>
+<h3>Description</h3>
+<p>Components, interfaces, views and the design decision of the software architecture, the allocation of the requirements, and their review.</p>
+<h3>Deliverables</h3>
+<p>6 components, 8 interfaces, 5 views, 1 design decision, and their review record.</p>
+<h3>Estimate basis</h3>
+<p>One day per developed component and its interfaces, half a day per reused one and per view, two days for the decision and the budgets, two days of review.</p>
+<p class="caption">links</p>
+<table><tr><th>part_of</th><td><a href="#WP-0001">WP-0001</a> Power window software R1.0</td></tr><tr><th>depends_on</th><td><a href="#WP-0002">WP-0002</a> Software requirements</td></tr><tr><th>delivers</th><td>CMP-0001 PowerWindowApp - power window application, CMP-0002 WindowCmd - window command logic, CMP-0003 WindowPos - window position and speed acquisition, CMP-0004 AntiPinch - anti-pinch detection, CMP-0005 MotorDrive - motor actuation, CMP-0006 BswPlatform - basic software of the door module, IFC-0001 Hall edge notification, IFC-0002 Window motion, IFC-0003 Detection status, IFC-0004 Movement command, IFC-0005 Motor state, IFC-0006 Switch request, IFC-0007 Capture time base, IFC-0008 Bridge output, VIEW-0001 Static structure of the power window software, VIEW-0002 States of the window movement, VIEW-0003 Sequence of an obstacle reversal, VIEW-0004 Execution model, VIEW-0005 Resource summary of the application, ADR-0001 Measuring the window speed by pulse period or by pulse count</td></tr><tr><th>depends_on (from)</th><td><a href="#WP-0004">WP-0004</a> Detailed design and code</td></tr></table>
+<h2 id="WP-0004">WP-0004 Detailed design and code</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>owner</th><td>Software developer</td></tr><tr><th>category</th><td>engineering</td></tr><tr><th>process</th><td>SWE.3</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>estimate</th><td>18</td></tr><tr><th>planned_start</th><td>2026-04-20</td></tr><tr><th>planned_finish</th><td>2026-05-15</td></tr></table>
+<p class="caption">progress</p>
+<table><thead><tr><th>actual_start</th><th>actual_effort</th><th>completed_on</th><th>as_of</th></tr></thead><tr><td>2026-04-20</td><td>21</td><td>2026-05-14</td><td>2026-05-14</td></tr></table>
+<h3>Description</h3>
+<p>Component designs of WindowPos and AntiPinch, the designs of their three units, the C code of the units, and the reviews of design and code.</p>
+<h3>Deliverables</h3>
+<p>CDS-0001, CDS-0002, UNT-0001 to UNT-0003 with their source files, and the review records.</p>
+<h3>Estimate basis</h3>
+<p>Two days per unit design, two and a half days per unit of code, one day per component design, three days of reviews.</p>
+<p class="caption">links</p>
+<table><tr><th>part_of</th><td><a href="#WP-0001">WP-0001</a> Power window software R1.0</td></tr><tr><th>depends_on</th><td><a href="#WP-0003">WP-0003</a> Software architecture</td></tr><tr><th>delivers</th><td>CDS-0001 Detailed design of WindowPos, CDS-0002 Detailed design of AntiPinch, UNT-0001 HallCapture - capture of the Hall sensor edges, UNT-0002 WindowPos - window position and speed, UNT-0003 AntiPinch - obstacle detection state machine</td></tr><tr><th>depends_on (from)</th><td><a href="#WP-0005">WP-0005</a> Unit verification</td></tr></table>
+<h2 id="WP-0005">WP-0005 Unit verification</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>owner</th><td>Software developer</td></tr><tr><th>category</th><td>engineering</td></tr><tr><th>process</th><td>SWE.4</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>estimate</th><td>12</td></tr><tr><th>planned_start</th><td>2026-05-18</td></tr><tr><th>planned_finish</th><td>2026-06-05</td></tr></table>
+<p class="caption">progress</p>
+<table><thead><tr><th>actual_start</th><th>actual_effort</th><th>completed_on</th><th>as_of</th></tr></thead><tr><td>2026-05-18</td><td>12</td><td>2026-06-04</td><td>2026-06-04</td></tr></table>
+<h3>Description</h3>
+<p>The unit verification strategy, the unit test cases and their test code, the runs with coverage and the static analysis, and their review.</p>
+<h3>Deliverables</h3>
+<p>PLN-0001, UT-0001 to UT-0020 with test code, the test run and analysis run records, the review records.</p>
+<h3>Estimate basis</h3>
+<p>Half a day per test case including test code, two days for runs, analysis and records.</p>
+<p class="caption">links</p>
+<table><tr><th>part_of</th><td><a href="#WP-0001">WP-0001</a> Power window software R1.0</td></tr><tr><th>depends_on</th><td><a href="#WP-0004">WP-0004</a> Detailed design and code</td></tr><tr><th>delivers</th><td>PLN-0001 Unit verification strategy, UT-0001 HallCapture - first edge after initialisation, UT-0002 HallCapture - pulse period, also across a wrap of the capture timer, UT-0003 HallCapture - shortest accepted pulse interval, UT-0004 HallCapture - limits of the pulse counter and of the rejected edge counter, UT-0005 HallCapture - snapshot inside the exclusive area, and null pointer, UT-0006 WindowPos - state after initialisation, UT-0007 WindowPos - referencing at the fully open end stop, UT-0008 WindowPos - position counting, run-out and travel limits, UT-0009 WindowPos - speed from the pulse period and the time since the last pulse, UT-0010 WindowPos - speed limits: standstill and maximum, UT-0011 WindowPos - refused step: invalid direction and failure of the capture service, UT-0012 WindowPos - null pointers at the read functions, UT-0013 AntiPinch - settling time and start of monitoring, UT-0014 AntiPinch - obstacle detected by a speed drop, UT-0015 AntiPinch - limits of the speed drop and of its confirmation, UT-0016 AntiPinch - edge of the protected zone and position not referenced, UT-0017 AntiPinch - reference speed: lower limit and tracking, UT-0018 AntiPinch - end of the reversal by travel, UT-0019 AntiPinch - end of the reversal by time, UT-0020 AntiPinch - arguments out of range, and null pointer</td></tr><tr><th>depends_on (from)</th><td><a href="#WP-0008">WP-0008</a> Software integration and integration test</td></tr></table>
+<h2 id="WP-0006">WP-0006 Project management</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>owner</th><td>Project lead</td></tr><tr><th>category</th><td>management</td></tr><tr><th>process</th><td>MAN.3</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>estimate</th><td>6</td></tr><tr><th>planned_start</th><td>2026-03-02</td></tr><tr><th>planned_finish</th><td>2026-06-26</td></tr></table>
+<h3>Description</h3>
+<p>The project plan, the work breakdown, the status reports every two weeks and the corrective actions.</p>
+<h3>Deliverables</h3>
+<p><a href="#PLN-0003">PLN-0003</a>, the work packages, the status reports.</p>
+<h3>Estimate basis</h3>
+<p>Two days for the plan, half a day per status report over 17 weeks.</p>
+<p class="caption">links</p>
+<table><tr><th>delivers</th><td><a href="#PLN-0003">PLN-0003</a> Project plan - power window software R1.0</td></tr></table>
+<h2 id="WP-0007">WP-0007 Configuration management and problem resolution</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>owner</th><td>Configuration manager</td></tr><tr><th>category</th><td>support</td></tr><tr><th>process</th><td>SUP.8</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>estimate</th><td>8</td></tr><tr><th>planned_start</th><td>2026-03-02</td></tr><tr><th>planned_finish</th><td>2026-06-26</td></tr></table>
+<h3>Description</h3>
+<p>The configuration management plan, the four baselines of <a href="#PLN-0003">PLN-0003</a> with their notices, and the change requests after the requirements freeze; the problem resolution strategy, the recording of problems, their alerts and closure, and the trend reports.</p>
+<h3>Deliverables</h3>
+<p>PLN-0002, PLN-0006, the baseline records and their communication records, the problem reports and trend reports.</p>
+<h3>Estimate basis</h3>
+<p>Two days for each plan, one day per baseline with its notice.</p>
+<p class="caption">links</p>
+<table><tr><th>delivers</th><td>PLN-0002 Configuration management plan, PLN-0006 Problem resolution strategy</td></tr></table>
+<h2 id="WP-0008">WP-0008 Software integration and integration test</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>owner</th><td>Software tester</td></tr><tr><th>category</th><td>engineering</td></tr><tr><th>process</th><td>SWE.5</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>estimate</th><td>6</td></tr><tr><th>planned_start</th><td>2026-06-08</td></tr><tr><th>planned_finish</th><td>2026-06-12</td></tr></table>
+<h3>Description</h3>
+<p>The integration strategy, the integration of WindowPos and AntiPinch with the components taken over from the platform release in two steps, the integration test cases with their test code and doubles, the build and run records, and their review.</p>
+<h3>Deliverables</h3>
+<p>PLN-0004, SIT-0001 to SIT-0007 with test code and doubles, a build record and a run record per step, the review records.</p>
+<h3>Estimate basis</h3>
+<p>Half a day per test case including test code, one day for the doubles and the runner, one day for builds, runs and records.</p>
+<p class="caption">links</p>
+<table><tr><th>part_of</th><td><a href="#WP-0001">WP-0001</a> Power window software R1.0</td></tr><tr><th>depends_on</th><td><a href="#WP-0005">WP-0005</a> Unit verification</td></tr><tr><th>delivers</th><td>PLN-0004 Software integration and integration test strategy, SIT-0001 Hall edges and the capture time become window position and speed, SIT-0002 The motor state decides the counting direction and the supervision, SIT-0003 An obstacle reaches the motor actuation in the cycle it is detected, SIT-0004 The switch request reaches the bridge through command logic and motor actuation, SIT-0005 The movement command operation, every return value, SIT-0006 An obstacle reverses the bridge in the cycle it is detected and ends the automatic closing, SIT-0007 A fault of the bridge driver is published as standstill and the command is repeated</td></tr><tr><th>depends_on (from)</th><td><a href="#WP-0009">WP-0009</a> Software qualification test</td></tr></table>
+<h2 id="WP-0009">WP-0009 Software qualification test</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>owner</th><td>Software tester</td></tr><tr><th>category</th><td>engineering</td></tr><tr><th>process</th><td>SWE.6</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>estimate</th><td>7</td></tr><tr><th>planned_start</th><td>2026-06-15</td></tr><tr><th>planned_finish</th><td>2026-06-24</td></tr></table>
+<h3>Description</h3>
+<p>The qualification test strategy, one or more test cases per software requirement with their test code, the run on the build of the last integration step, and their review.</p>
+<h3>Deliverables</h3>
+<p>PLN-0005, SQT-0001 to SQT-0009 with test code, the run record, the review records.</p>
+<h3>Estimate basis</h3>
+<p>Half a day per test case including test code, two days for the strategy, the runs and the records.</p>
+<p class="caption">links</p>
+<table><tr><th>part_of</th><td><a href="#WP-0001">WP-0001</a> Power window software R1.0</td></tr><tr><th>depends_on</th><td><a href="#WP-0008">WP-0008</a> Software integration and integration test</td></tr><tr><th>delivers</th><td>PLN-0005 Software qualification test strategy, SQT-0001 Window opening from Hall pulses, SQT-0002 Reference of the window opening at the open end stop, SQT-0003 Window speed, SQT-0004 Obstacle detection during closing, SQT-0005 End of the reversal, SQT-0006 Reversal when a closing movement cannot be supervised, SQT-0007 Priority of the reversal request, SQT-0008 Automatic closing, SQT-0009 Manual movement</td></tr></table>
+<h2 id="WP-0010">WP-0010 Quality assurance</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>owner</th><td>Quality engineer</td></tr><tr><th>category</th><td>support</td></tr><tr><th>process</th><td>SUP.1</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>estimate</th><td>4</td></tr><tr><th>planned_start</th><td>2026-05-04</td></tr><tr><th>planned_finish</th><td>2026-06-26</td></tr></table>
+<h3>Description</h3>
+<p>The quality assurance plan, the checks before the release candidate, the follow-up of the findings and the quality reports. Carried out by the quality department, outside the project team.</p>
+<h3>Deliverables</h3>
+<p>PLN-0007, the quality records and reports, the corrective actions raised from findings.</p>
+<h3>Estimate basis</h3>
+<p>One day for the plan, one day per check round, one day for follow-up and reports.</p>
+<p class="caption">links</p>
+<table><tr><th>delivers</th><td>PLN-0007 Quality assurance plan</td></tr></table>
+<h2 id="WP-0011">WP-0011 Threat analysis and risk assessment</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>owner</th><td>Cybersecurity engineer</td></tr><tr><th>category</th><td>engineering</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>estimate</th><td>6</td></tr><tr><th>planned_start</th><td>2026-03-23</td></tr><tr><th>planned_finish</th><td>2026-04-17</td></tr></table>
+<h3>Description</h3>
+<p>The cybersecurity plan of the project and the threat analysis and risk assessment of the window control on the customer&#x27;s item definition (ITM-0001), up to the goals and claims handed to the customer before the design freeze.</p>
+<h3>Deliverables</h3>
+<p>PLN-0008; the assets, damage and threat scenarios; CSG-0001, CLM-0001, CLM-0002; the cybersecurity case.</p>
+<h3>Estimate basis</h3>
+<p>One day for the plan, three days for the analysis, one day for the treatment decisions and their review, one day for the hand-over and the case.</p>
+<p class="caption">links</p>
+<table><tr><th>delivers</th><td>PLN-0008 Cybersecurity plan of the window control software, AST-0001 Switch request received over the body network, AST-0002 Software image of the window control, DMG-0001 An occupant is trapped by a closing window, DMG-0002 The window opens while the vehicle is parked and locked, DMG-0003 The window cannot be moved from the switch panel, THR-0001 Forged open request while the vehicle is parked, THR-0002 Flooding the body network so that switch requests are lost, THR-0003 Manipulated software image without anti-pinch reversal, CSG-0001 Only authentic and fresh switch requests move the window, CLM-0001 Loss of window movement during a bus flooding attack is acceptable, CLM-0002 The customer&#x27;s bootloader keeps manipulated software images out</td></tr></table>
+<h2 id="WP-0012">WP-0012 Functional safety</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>owner</th><td>Safety manager</td></tr><tr><th>category</th><td>engineering</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>estimate</th><td>8</td></tr><tr><th>planned_start</th><td>2026-03-23</td></tr><tr><th>planned_finish</th><td>2026-06-05</td></tr></table>
+<h3>Description</h3>
+<p>The safety plan, the change management plan, the safety analyses of the software architecture, the tool evaluations, the confirmation reviews and the safety case.</p>
+<h3>Deliverables</h3>
+<p>PLN-0010, PLN-0011, SAN-0001, SAN-0002, TEV-0001, TEV-0002, the confirmation measures and the safety case.</p>
+<h3>Estimate basis</h3>
+<p>Two days for the plans, four for the analyses, one for the tool evaluations, one for the confirmation reviews and the case.</p>
+<p class="caption">links</p>
+<table><tr><th>delivers</th><td>PLN-0010 Safety plan of the window control software, PLN-0011 Change management plan, PLN-0012 Development interface agreement with the customer, SAN-0001 Software FMEA of the ASIL B components, SAN-0002 Dependent failures between WindowCmd and the ASIL B components, TEV-0001 Microsoft C/C++ compiler and its static analysis, TEV-0002 gcc and gcov for unit tests and structural coverage</td></tr></table>
+<h1>Items in this document</h1><table><thead><tr><th>item</th><th>title</th><th>state</th><th>content hash</th></tr></thead><tr><td><a href="#PLN-0003">PLN-0003</a></td><td>Project plan - power window software R1.0</td><td>approved</td><td><code>7df1c668a2d0</code></td></tr><tr><td><a href="#WP-0001">WP-0001</a></td><td>Power window software R1.0</td><td>approved</td><td><code>3f1ad3597781</code></td></tr><tr><td><a href="#WP-0002">WP-0002</a></td><td>Software requirements</td><td>approved</td><td><code>6f2d601fb3d3</code></td></tr><tr><td><a href="#WP-0003">WP-0003</a></td><td>Software architecture</td><td>approved</td><td><code>3db342f2f863</code></td></tr><tr><td><a href="#WP-0004">WP-0004</a></td><td>Detailed design and code</td><td>approved</td><td><code>fdb8774ca538</code></td></tr><tr><td><a href="#WP-0005">WP-0005</a></td><td>Unit verification</td><td>approved</td><td><code>2a75b542b1be</code></td></tr><tr><td><a href="#WP-0006">WP-0006</a></td><td>Project management</td><td>approved</td><td><code>0894d880a1b8</code></td></tr><tr><td><a href="#WP-0007">WP-0007</a></td><td>Configuration management and problem resolution</td><td>approved</td><td><code>b3e37ce5f052</code></td></tr><tr><td><a href="#WP-0008">WP-0008</a></td><td>Software integration and integration test</td><td>approved</td><td><code>fbf089b64f72</code></td></tr><tr><td><a href="#WP-0009">WP-0009</a></td><td>Software qualification test</td><td>approved</td><td><code>fbde8af6d40e</code></td></tr><tr><td><a href="#WP-0010">WP-0010</a></td><td>Quality assurance</td><td>approved</td><td><code>93002e737ea7</code></td></tr><tr><td><a href="#WP-0011">WP-0011</a></td><td>Threat analysis and risk assessment</td><td>approved</td><td><code>22b6ce9f772e</code></td></tr><tr><td><a href="#WP-0012">WP-0012</a></td><td>Functional safety</td><td>approved</td><td><code>9af468e915b1</code></td></tr></table>
+<p class="caption">Generated by tools/document.py from the items of the project. The items are the source: change them, not this document.</p>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script><script>if (window.mermaid) { mermaid.initialize({startOnLoad: true}); }</script>
+</body></html>

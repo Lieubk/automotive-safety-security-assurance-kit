@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Software qualification test report</title><style>
+:root { --ink: #1d2430; --muted: #5b6575; --line: #d6dbe3; --soft: #f4f6f9; --accent: #2d5b8a; --warn: #a33a1f; }
+body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: #fff;
+       max-width: 60rem; margin: 2rem auto; padding: 0 1rem; }
+h1 { font-size: 1.6rem; border-bottom: 2px solid var(--accent); padding-bottom: .3rem; margin-top: 2.5rem; }
+h2 { font-size: 1.25rem; margin-top: 2rem; } h3 { font-size: 1.05rem; } h4 { font-size: .95rem; }
+table { border-collapse: collapse; width: 100%; margin: .6rem 0 1rem; font-size: .9rem; }
+th, td { border: 1px solid var(--line); padding: .3rem .5rem; text-align: left; vertical-align: top; }
+th { background: var(--soft); } code, pre { font-family: Consolas, "Courier New", monospace; font-size: .88rem; }
+pre { background: var(--soft); padding: .6rem; overflow-x: auto; } .caption { color: var(--muted); font-size: .85rem; margin: .8rem 0 .1rem; }
+.note { border-left: 4px solid var(--warn); padding: .2rem .6rem; color: var(--warn); }
+.banner { background: var(--warn); color: #fff; padding: .4rem .8rem; font-weight: 600; }
+.meta td:first-child { width: 14rem; color: var(--muted); } nav ul { columns: 2; } a { color: var(--accent); }
+@page { size: A4; margin: 16mm 14mm 18mm; @bottom-right { content: counter(page) " / " counter(pages); font-size: 9pt; color: #5b6575; } }
+@media print { body { max-width: none; margin: 0; padding: 0; font-size: 10.5pt; } nav { display: none; }
+  h1 { page-break-before: always; } h1.title { page-break-before: avoid; } h1, h2, h3, h4 { break-after: avoid; }
+  thead { display: table-header-group; } tr, pre, .note { break-inside: avoid; } a { color: inherit; text-decoration: none; }
+  .banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style></head><body>
+<h1 class="title">Software qualification test report</h1>
+<table class="meta"><tr><td>Project</td><td>Power window control</td></tr><tr><td>Generated</td><td>2026-11-19T14:14:58+00:00</td></tr><tr><td>Commit</td><td>68d1561</td></tr><tr><td>Uncommitted changes</td><td>no</td></tr><tr><td>Baseline</td><td>none</td></tr><tr><td>Items shown</td><td>10</td></tr></table>
+<h2>Revision history</h2><table><tr><th>date</th><th>record</th><th>what</th><th>by</th></tr><tr><td>2026-11-19</td><td>REV-0007</td><td>review approved of 9 items shown here</td><td>Demonstration data - no review by a person took place</td></tr></table>
+<nav><ul><li>Test cases and results</li><li>Latest test run</li><li>Coverage of the software requirements</li><li>Open findings</li></ul></nav>
+<h1>Test cases and results</h1>
+<p class="caption">result summary</p>
+<table><tr><th>passed</th><td>9</td></tr><tr><th>total</th><td>9</td></tr></table>
+<table><thead><tr><th>test case</th><th>title</th><th>verifies</th><th>step</th><th>execution</th><th>preconditions</th><th>steps</th><th>expected result</th><th>verdict</th><th>run</th><th>executed</th><th>environment</th><th>reason or evidence</th></tr></thead><tr><td><a href="#SQT-0001">SQT-0001</a></td><td>Window opening from Hall pulses</td><td>SWR-0001</td><td>-</td><td>automated</td><td>Test program <code>tests/qualification/test_qualification.c</code>, built by
+<code>tests/qualification/run_tests.py</code> from the software of the last integration step
+(PLN-0004, step application) and the platform double; stimuli and measurement points as
+PLN-0005 names them. A cycle is 5 ms; every fourth cycle the 20 ms task follows.
+&quot;Referenced&quot;: start, switch request OPEN for 300 ms with the window at the open end
+stop (no pulses), then NONE for 40 ms. &quot;A movement by n pulses&quot;: the switch starts the
+drive, n pulses follow 3 ms apart from 3 ms after the drive started, and the switch is
+released so that the drive stops in the cycle of the last pulse. &quot;Pulses at v mm/s&quot;:
+a pulse train with the period that 0.5 mm takes at v mm/s. Positions in counts of 0.5 mm.</td><td>1. Referenced.
+2. A closing movement by 100 pulses.
+3. An opening movement by 20 pulses.
+4. With the drive stopped, 3 pulses 3 ms apart.
+5. With the drive stopped, a pulse and a second one 399 us after it; then a pulse and a second one 400 us after it.
+6. OPEN with 120 pulses 3 ms apart; NONE; CLOSE with 1000 pulses 3 ms apart.</td><td>1. Position 960 (480.0 mm).
+2. Bridge off; position 860 (430.0 mm).
+3. Position 880 (440.0 mm).
+4. Position 883 (441.5 mm).
+5. The first pair changes the position by 1 count, the second pair by 2 counts.
+6. Position 960 after the opening, 0 after the closing; no reversal request.</td><td>passed</td><td><a href="#RUN-0004">RUN-0004</a></td><td>2026-11-19</td><td>software-in-the-loop (Microsoft C/C++ 19.51.36248 x64 (cl /std:c11 /W4 /WX))</td><td>verification/evidence/<a href="#RUN-0004">RUN-0004</a>/run.log</td></tr><tr><td><a href="#SQT-0002">SQT-0002</a></td><td>Reference of the window opening at the open end stop</td><td>SWR-0002</td><td>-</td><td>automated</td><td>Test program <code>tests/qualification/test_qualification.c</code>, built by
+<code>tests/qualification/run_tests.py</code> from the software of the last integration step
+(PLN-0004, step application) and the platform double; stimuli and measurement points as
+PLN-0005 names them. A cycle is 5 ms; every fourth cycle the 20 ms task follows.
+&quot;Referenced&quot;: start, switch request OPEN for 300 ms with the window at the open end
+stop (no pulses), then NONE for 40 ms. &quot;A movement by n pulses&quot;: the switch starts the
+drive, n pulses follow 3 ms apart from 3 ms after the drive started, and the switch is
+released so that the drive stops in the cycle of the last pulse. &quot;Pulses at v mm/s&quot;:
+a pulse train with the period that 0.5 mm takes at v mm/s. Positions in counts of 0.5 mm.</td><td>1. Start; CLOSE with pulses at 150 mm/s for 175 ms; NONE for 40 ms; no pulses for 300 ms.
+2. OPEN with the window at the open end stop; 195 ms after the drive started opening, and 200 ms after.
+3. Start; OPEN at the open end stop; after 195 ms of opening, a bridge fault for one cycle (5 ms); then 10 ms and 200 ms after the stop.
+4. Referenced; a closing movement by 100 pulses; 60 ms without pulses; OPEN without pulses; 195 ms and 200 ms after the drive started opening.</td><td>1. <code>WindowPos_GetPosition</code> returns E_NOT_OK and 65535: not available.
+2. Not available at 195 ms; 960 (480.0 mm) at 200 ms.
+3. Not available at both times.
+4. Position 860 (430.0 mm), speed 0 before opening; 860 at 195 ms; 960 at 200 ms.</td><td>passed</td><td><a href="#RUN-0004">RUN-0004</a></td><td>2026-11-19</td><td>software-in-the-loop (Microsoft C/C++ 19.51.36248 x64 (cl /std:c11 /W4 /WX))</td><td>verification/evidence/<a href="#RUN-0004">RUN-0004</a>/run.log</td></tr><tr><td><a href="#SQT-0003">SQT-0003</a></td><td>Window speed</td><td>SWR-0003</td><td>-</td><td>automated</td><td>Test program <code>tests/qualification/test_qualification.c</code>, built by
+<code>tests/qualification/run_tests.py</code> from the software of the last integration step
+(PLN-0004, step application) and the platform double; stimuli and measurement points as
+PLN-0005 names them. A cycle is 5 ms; every fourth cycle the 20 ms task follows.
+&quot;Referenced&quot;: start, switch request OPEN for 300 ms with the window at the open end
+stop (no pulses), then NONE for 40 ms. &quot;A movement by n pulses&quot;: the switch starts the
+drive, n pulses follow 3 ms apart from 3 ms after the drive started, and the switch is
+released so that the drive stops in the cycle of the last pulse. &quot;Pulses at v mm/s&quot;:
+a pulse train with the period that 0.5 mm takes at v mm/s. Positions in counts of 0.5 mm.</td><td>1. 10 pulses 3333 us apart, the last one 0.5 ms before a cycle.
+2. 10 pulses 3333 us apart, the last one at a cycle; then no pulse for 5 ms and for 10 ms.
+3. No pulse until 50 ms after the last one; then one pulse; then a second pulse.
+4. Pulses 1000 us apart for 20 ms; then 900 us apart for 20 ms.</td><td>1. Speed 149 mm/s to 151 mm/s.
+2. At most 100 mm/s after 5 ms; at most 50 mm/s after 10 ms.
+3. 0 mm/s at 50 ms and after the one pulse; more than 0 mm/s after the second pulse.
+4. 500 mm/s in both cases.</td><td>passed</td><td><a href="#RUN-0004">RUN-0004</a></td><td>2026-11-19</td><td>software-in-the-loop (Microsoft C/C++ 19.51.36248 x64 (cl /std:c11 /W4 /WX))</td><td>verification/evidence/<a href="#RUN-0004">RUN-0004</a>/run.log</td></tr><tr><td><a href="#SQT-0004">SQT-0004</a></td><td>Obstacle detection during closing</td><td>SWR-0004</td><td>-</td><td>automated</td><td>Test program <code>tests/qualification/test_qualification.c</code>, built by
+<code>tests/qualification/run_tests.py</code> from the software of the last integration step
+(PLN-0004, step application) and the platform double; stimuli and measurement points as
+PLN-0005 names them. A cycle is 5 ms; every fourth cycle the 20 ms task follows.
+&quot;Referenced&quot;: start, switch request OPEN for 300 ms with the window at the open end
+stop (no pulses), then NONE for 40 ms. &quot;A movement by n pulses&quot;: the switch starts the
+drive, n pulses follow 3 ms apart from 3 ms after the drive started, and the switch is
+released so that the drive stops in the cycle of the last pulse. &quot;Pulses at v mm/s&quot;:
+a pulse train with the period that 0.5 mm takes at v mm/s. Positions in counts of 0.5 mm.</td><td>1. Referenced; CLOSE with pulses at 150 mm/s until the position is 600 (300.0 mm) or less; then pulses at 129 mm/s.
+2. As step 1, but 130 mm/s for 1 s.
+3. As step 1, but the speed falls by 0.5 mm/s every cycle (100 mm/s per second) to 100 mm/s, held for 0.5 s.
+4. As step 1 at a position of 10 (5.0 mm) or less; again at 16 (8.0 mm) or less; and after a start without reference.
+5. Referenced; CLOSE; pulses at 29 mm/s from the start of the drive; then again with 30 mm/s for 1 s.</td><td>1. Reversal request set within 2 cycles (10 ms).
+2. Request clear throughout.
+3. Request clear throughout.
+4. No request within 10 cycles at 5.0 mm; request within 2 cycles at 8.0 mm and without reference.
+5. Request set no later than 22 cycles (110 ms) after the drive started closing; at 30 mm/s clear throughout.</td><td>passed</td><td><a href="#RUN-0004">RUN-0004</a></td><td>2026-11-19</td><td>software-in-the-loop (Microsoft C/C++ 19.51.36248 x64 (cl /std:c11 /W4 /WX))</td><td>verification/evidence/<a href="#RUN-0004">RUN-0004</a>/run.log</td></tr><tr><td><a href="#SQT-0005">SQT-0005</a></td><td>End of the reversal</td><td>SWR-0005</td><td>-</td><td>automated</td><td>Test program <code>tests/qualification/test_qualification.c</code>, built by
+<code>tests/qualification/run_tests.py</code> from the software of the last integration step
+(PLN-0004, step application) and the platform double; stimuli and measurement points as
+PLN-0005 names them. A cycle is 5 ms; every fourth cycle the 20 ms task follows.
+&quot;Referenced&quot;: start, switch request OPEN for 300 ms with the window at the open end
+stop (no pulses), then NONE for 40 ms. &quot;A movement by n pulses&quot;: the switch starts the
+drive, n pulses follow 3 ms apart from 3 ms after the drive started, and the switch is
+released so that the drive stops in the cycle of the last pulse. &quot;Pulses at v mm/s&quot;:
+a pulse train with the period that 0.5 mm takes at v mm/s. Positions in counts of 0.5 mm.</td><td>1. Referenced; closing to 300.0 mm, drop to 129 mm/s until the request is set; then pulses at 150 mm/s, cycle by cycle.
+2. As step 1, the drop at 400.0 mm or less.
+3. Start without reference; closing, drop until the request is set; pulses at 150 mm/s; 1.995 s and 2.000 s after the request was set.
+4. As step 1, then pulses at 40 mm/s; 1.995 s and 2.000 s after the request was set.</td><td>1. Set while the position is less than 240 counts (120 mm) above the position at which it was set; clear in the cycle the position reaches it.
+2. Set while the position is below 960; clear in the cycle it reaches 960 (480.0 mm).
+3. Set at 1.995 s, clear at 2.000 s.
+4. Set at 1.995 s, clear at 2.000 s; the position then 150 to 170 counts above the start of the reversal (about 380 mm).</td><td>passed</td><td><a href="#RUN-0004">RUN-0004</a></td><td>2026-11-19</td><td>software-in-the-loop (Microsoft C/C++ 19.51.36248 x64 (cl /std:c11 /W4 /WX))</td><td>verification/evidence/<a href="#RUN-0004">RUN-0004</a>/run.log</td></tr><tr><td><a href="#SQT-0006">SQT-0006</a></td><td>Reversal when a closing movement cannot be supervised</td><td>SWR-0006</td><td>-</td><td>automated</td><td>Test program <code>tests/qualification/test_qualification.c</code>, built by
+<code>tests/qualification/run_tests.py</code> from the software of the last integration step
+(PLN-0004, step application) and the platform double; stimuli and measurement points as
+PLN-0005 names them. A cycle is 5 ms; every fourth cycle the 20 ms task follows.
+&quot;Referenced&quot;: start, switch request OPEN for 300 ms with the window at the open end
+stop (no pulses), then NONE for 40 ms. &quot;A movement by n pulses&quot;: the switch starts the
+drive, n pulses follow 3 ms apart from 3 ms after the drive started, and the switch is
+released so that the drive stops in the cycle of the last pulse. &quot;Pulses at v mm/s&quot;:
+a pulse train with the period that 0.5 mm takes at v mm/s. Positions in counts of 0.5 mm.</td><td>1. Start; CLOSE; pulses at 150 mm/s; the window opening value 961 handed to the detection for one cycle: in the first cycle of the closing movement, after 50 ms, after 200 ms (each time after a new start).
+2. As step 1 with the window speed 501 mm/s.
+3. As step 1 with the drive direction value 3, in the second cycle instead of the first.
+4. For each of the three values: after 50 ms of closing, 1.995 s and 2.000 s after the request was set.
+5. Each value for one cycle with the drive stopped, and again while it opens.</td><td>1. Request set in the cycle of the wrong value, each time.
+2. As 1.
+3. As 1.
+4. Set at 1.995 s, clear at 2.000 s (time limit of SWR-0005; the opening is not available, so no travel ends it).
+5. Request clear.</td><td>passed</td><td><a href="#RUN-0004">RUN-0004</a></td><td>2026-11-19</td><td>software-in-the-loop (Microsoft C/C++ 19.51.36248 x64 (cl /std:c11 /W4 /WX))</td><td>verification/evidence/<a href="#RUN-0004">RUN-0004</a>/run.log</td></tr><tr><td><a href="#SQT-0007">SQT-0007</a></td><td>Priority of the reversal request</td><td>SWR-0007</td><td>-</td><td>automated</td><td>Test program <code>tests/qualification/test_qualification.c</code>, built by
+<code>tests/qualification/run_tests.py</code> from the software of the last integration step
+(PLN-0004, step application) and the platform double; stimuli and measurement points as
+PLN-0005 names them. A cycle is 5 ms; every fourth cycle the 20 ms task follows.
+&quot;Referenced&quot;: start, switch request OPEN for 300 ms with the window at the open end
+stop (no pulses), then NONE for 40 ms. &quot;A movement by n pulses&quot;: the switch starts the
+drive, n pulses follow 3 ms apart from 3 ms after the drive started, and the switch is
+released so that the drive stops in the cycle of the last pulse. &quot;Pulses at v mm/s&quot;:
+a pulse train with the period that 0.5 mm takes at v mm/s. Positions in counts of 0.5 mm.</td><td>1. Start; CLOSE (command closing at 100 %); pulses at 150 mm/s for 1 s; then a drop to 129 mm/s until the request is set.
+2. Pulses at 150 mm/s; switch request NONE, OPEN, CLOSE for 100 ms each.
+3. Cycle by cycle until the request is cleared.</td><td>1. Before the drop, command and bridge closing; in the cycle the request is set, bridge opening at 100 %.
+2. In every cycle request set and bridge opening at 100 %; the movement command is stopped, opening and closing at the end of the three periods.
+3. In the cycle the request is cleared, the bridge command is closing again, as the movement command.</td><td>passed</td><td><a href="#RUN-0004">RUN-0004</a></td><td>2026-11-19</td><td>software-in-the-loop (Microsoft C/C++ 19.51.36248 x64 (cl /std:c11 /W4 /WX))</td><td>verification/evidence/<a href="#RUN-0004">RUN-0004</a>/run.log</td></tr><tr><td><a href="#SQT-0008">SQT-0008</a></td><td>Automatic closing</td><td>SWR-0008</td><td>-</td><td>automated</td><td>Test program <code>tests/qualification/test_qualification.c</code>, built by
+<code>tests/qualification/run_tests.py</code> from the software of the last integration step
+(PLN-0004, step application) and the platform double; stimuli and measurement points as
+PLN-0005 names them. A cycle is 5 ms; every fourth cycle the 20 ms task follows.
+&quot;Referenced&quot;: start, switch request OPEN for 300 ms with the window at the open end
+stop (no pulses), then NONE for 40 ms. &quot;A movement by n pulses&quot;: the switch starts the
+drive, n pulses follow 3 ms apart from 3 ms after the drive started, and the switch is
+released so that the drive stops in the cycle of the last pulse. &quot;Pulses at v mm/s&quot;:
+a pulse train with the period that 0.5 mm takes at v mm/s. Positions in counts of 0.5 mm.</td><td>1. Referenced; a closing movement by 360 pulses; AUTO_CLOSE for 60 ms, then NONE; pulses at 150 mm/s until the position is 0, then none.
+2. Referenced; AUTO_CLOSE for 60 ms, then NONE, pulses at 150 mm/s; after 0.5 s OPEN.
+3. Referenced; AUTO_CLOSE for 60 ms, then NONE, pulses at 150 mm/s for 1 s; a drop until the request is set; then pulses at 150 mm/s until the request is cleared and 200 ms more.
+4. Start without reference; AUTO_CLOSE for 60 ms, then NONE; 200 ms.</td><td>1. Position 600 (300.0 mm) before; command closing within 40 ms of AUTO_CLOSE and in every cycle until 195 ms after the speed became 0; stopped 220 ms after.
+2. Within 40 ms of OPEN the command is no longer closing.
+3. Command stopped 40 ms after the request was set, and in every cycle after that.
+4. Command and bridge stopped in every cycle.</td><td>passed</td><td><a href="#RUN-0004">RUN-0004</a></td><td>2026-11-19</td><td>software-in-the-loop (Microsoft C/C++ 19.51.36248 x64 (cl /std:c11 /W4 /WX))</td><td>verification/evidence/<a href="#RUN-0004">RUN-0004</a>/run.log</td></tr><tr><td><a href="#SQT-0009">SQT-0009</a></td><td>Manual movement</td><td>SWR-0009</td><td>-</td><td>automated</td><td>Test program <code>tests/qualification/test_qualification.c</code>, built by
+<code>tests/qualification/run_tests.py</code> from the software of the last integration step
+(PLN-0004, step application) and the platform double; stimuli and measurement points as
+PLN-0005 names them. A cycle is 5 ms; every fourth cycle the 20 ms task follows.
+&quot;Referenced&quot;: start, switch request OPEN for 300 ms with the window at the open end
+stop (no pulses), then NONE for 40 ms. &quot;A movement by n pulses&quot;: the switch starts the
+drive, n pulses follow 3 ms apart from 3 ms after the drive started, and the switch is
+released so that the drive stops in the cycle of the last pulse. &quot;Pulses at v mm/s&quot;:
+a pulse train with the period that 0.5 mm takes at v mm/s. Positions in counts of 0.5 mm.
+Pulses at 150 mm/s throughout.</td><td>1. Referenced; CLOSE for 500 ms, then NONE for 200 ms.
+2. OPEN for 500 ms, then NONE for 200 ms.
+3. For each of the values 4, 5, 6 and 7: OPEN for 100 ms, then the value.
+4. OPEN for 200 ms; then the frames stop: the stack keeps OPEN for 100 ms and then delivers 7.</td><td>1. Command closing from at most 40 ms after the start of the request in every cycle until its end; stopped at most 40 ms after its end and in every cycle after that.
+2. As 1, with opening.
+3. Command opening, then stopped within 40 ms of the value.
+4. Command opening; stopped within 40 ms of the 7, at most 140 ms after the last frame.</td><td>passed</td><td><a href="#RUN-0004">RUN-0004</a></td><td>2026-11-19</td><td>software-in-the-loop (Microsoft C/C++ 19.51.36248 x64 (cl /std:c11 /W4 /WX))</td><td>verification/evidence/<a href="#RUN-0004">RUN-0004</a>/run.log</td></tr></table>
+<h1>Latest test run</h1>
+<h2 id="RUN-0004">RUN-0004 </h2>
+<table><tr><th>status</th><td>final</td></tr><tr><th>level</th><td>software-qualification</td></tr><tr><th>item_under_test</th><td>fb933f1</td></tr><tr><th>environment</th><td>software-in-the-loop (Microsoft C/C++ 19.51.36248 x64 (cl /std:c11 /W4 /WX))</td></tr><tr><th>executed_at</th><td>2026-11-19T00:56:05+00:00</td></tr><tr><th>build</th><td>BLD-0002</td></tr><tr><th>selection</th><td>all test cases</td></tr></table>
+<p class="caption">results</p>
+<table><thead><tr><th>test</th><th>verdict</th><th>evidence</th></tr></thead><tr><td><a href="#SQT-0001">SQT-0001</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0004">RUN-0004</a>/run.log</td></tr><tr><td><a href="#SQT-0002">SQT-0002</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0004">RUN-0004</a>/run.log</td></tr><tr><td><a href="#SQT-0003">SQT-0003</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0004">RUN-0004</a>/run.log</td></tr><tr><td><a href="#SQT-0004">SQT-0004</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0004">RUN-0004</a>/run.log</td></tr><tr><td><a href="#SQT-0005">SQT-0005</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0004">RUN-0004</a>/run.log</td></tr><tr><td><a href="#SQT-0006">SQT-0006</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0004">RUN-0004</a>/run.log</td></tr><tr><td><a href="#SQT-0007">SQT-0007</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0004">RUN-0004</a>/run.log</td></tr><tr><td><a href="#SQT-0008">SQT-0008</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0004">RUN-0004</a>/run.log</td></tr><tr><td><a href="#SQT-0009">SQT-0009</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0004">RUN-0004</a>/run.log</td></tr></table>
+<p class="caption">sources</p>
+<table><thead><tr><th>file</th><th>hash</th></tr></thead><tr><td>src/antipinch/AntiPinch.c</td><td>6f89e47360a3</td></tr><tr><td>src/antipinch/AntiPinch.h</td><td>345ab5ac10d9</td></tr><tr><td>src/windowpos/HallCapture.c</td><td>6ff986fc1967</td></tr><tr><td>src/windowpos/HallCapture.h</td><td>dad803ad6278</td></tr><tr><td>src/windowpos/WindowPos.c</td><td>c8724dd66d39</td></tr><tr><td>src/windowpos/WindowPos.h</td><td>b3aba40f4110</td></tr><tr><td>tests/qualification/test_qualification.c</td><td>3dab43cbb20c</td></tr></table>
+<h1>Coverage of the software requirements</h1>
+<table><thead><tr><th>software-requirement</th><th>verifies (from)</th></tr></thead><tr><td>SWR-0001 Window opening from Hall pulses</td><td><a href="#SQT-0001">SQT-0001</a> Window opening from Hall pulses</td></tr><tr><td>SWR-0002 Reference of the window opening at the open end stop</td><td><a href="#SQT-0002">SQT-0002</a> Reference of the window opening at the open end stop</td></tr><tr><td>SWR-0003 Window speed</td><td><a href="#SQT-0003">SQT-0003</a> Window speed</td></tr><tr><td>SWR-0004 Obstacle detection during closing</td><td><a href="#SQT-0004">SQT-0004</a> Obstacle detection during closing</td></tr><tr><td>SWR-0005 End of the reversal</td><td><a href="#SQT-0005">SQT-0005</a> End of the reversal</td></tr><tr><td>SWR-0006 Reversal when a closing movement cannot be supervised</td><td><a href="#SQT-0006">SQT-0006</a> Reversal when a closing movement cannot be supervised</td></tr><tr><td>SWR-0007 Priority of the reversal request</td><td><a href="#SQT-0007">SQT-0007</a> Priority of the reversal request</td></tr><tr><td>SWR-0008 Automatic closing</td><td><a href="#SQT-0008">SQT-0008</a> Automatic closing</td></tr><tr><td>SWR-0009 Manual movement</td><td><a href="#SQT-0009">SQT-0009</a> Manual movement</td></tr></table>
+<h1>Open findings</h1>
+<p>The trace check reports no error and no warning here.</p>
+<h1>Items in this document</h1><table><thead><tr><th>item</th><th>title</th><th>state</th><th>content hash</th></tr></thead><tr><td><a href="#RUN-0004">RUN-0004</a></td><td></td><td>final</td><td><code>c1b16690a206</code></td></tr><tr><td><a href="#SQT-0001">SQT-0001</a></td><td>Window opening from Hall pulses</td><td>approved</td><td><code>ed2d865a0983</code></td></tr><tr><td><a href="#SQT-0002">SQT-0002</a></td><td>Reference of the window opening at the open end stop</td><td>approved</td><td><code>fd439eab11e1</code></td></tr><tr><td><a href="#SQT-0003">SQT-0003</a></td><td>Window speed</td><td>approved</td><td><code>d16952dbd09f</code></td></tr><tr><td><a href="#SQT-0004">SQT-0004</a></td><td>Obstacle detection during closing</td><td>approved</td><td><code>a2fbd4c688ff</code></td></tr><tr><td><a href="#SQT-0005">SQT-0005</a></td><td>End of the reversal</td><td>approved</td><td><code>900b35b978d1</code></td></tr><tr><td><a href="#SQT-0006">SQT-0006</a></td><td>Reversal when a closing movement cannot be supervised</td><td>approved</td><td><code>3da013f6379a</code></td></tr><tr><td><a href="#SQT-0007">SQT-0007</a></td><td>Priority of the reversal request</td><td>approved</td><td><code>950f105f988e</code></td></tr><tr><td><a href="#SQT-0008">SQT-0008</a></td><td>Automatic closing</td><td>approved</td><td><code>afcb120f7ec0</code></td></tr><tr><td><a href="#SQT-0009">SQT-0009</a></td><td>Manual movement</td><td>approved</td><td><code>48ad0291841f</code></td></tr></table>
+<p class="caption">Generated by tools/document.py from the items of the project. The items are the source: change them, not this document.</p>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script><script>if (window.mermaid) { mermaid.initialize({startOnLoad: true}); }</script>
+</body></html>

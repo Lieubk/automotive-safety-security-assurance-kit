@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Threat analysis and risk assessment</title><style>
+:root { --ink: #1d2430; --muted: #5b6575; --line: #d6dbe3; --soft: #f4f6f9; --accent: #2d5b8a; --warn: #a33a1f; }
+body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: #fff;
+       max-width: 60rem; margin: 2rem auto; padding: 0 1rem; }
+h1 { font-size: 1.6rem; border-bottom: 2px solid var(--accent); padding-bottom: .3rem; margin-top: 2.5rem; }
+h2 { font-size: 1.25rem; margin-top: 2rem; } h3 { font-size: 1.05rem; } h4 { font-size: .95rem; }
+table { border-collapse: collapse; width: 100%; margin: .6rem 0 1rem; font-size: .9rem; }
+th, td { border: 1px solid var(--line); padding: .3rem .5rem; text-align: left; vertical-align: top; }
+th { background: var(--soft); } code, pre { font-family: Consolas, "Courier New", monospace; font-size: .88rem; }
+pre { background: var(--soft); padding: .6rem; overflow-x: auto; } .caption { color: var(--muted); font-size: .85rem; margin: .8rem 0 .1rem; }
+.note { border-left: 4px solid var(--warn); padding: .2rem .6rem; color: var(--warn); }
+.banner { background: var(--warn); color: #fff; padding: .4rem .8rem; font-weight: 600; }
+.meta td:first-child { width: 14rem; color: var(--muted); } nav ul { columns: 2; } a { color: var(--accent); }
+@page { size: A4; margin: 16mm 14mm 18mm; @bottom-right { content: counter(page) " / " counter(pages); font-size: 9pt; color: #5b6575; } }
+@media print { body { max-width: none; margin: 0; padding: 0; font-size: 10.5pt; } nav { display: none; }
+  h1 { page-break-before: always; } h1.title { page-break-before: avoid; } h1, h2, h3, h4 { break-after: avoid; }
+  thead { display: table-header-group; } tr, pre, .note { break-inside: avoid; } a { color: inherit; text-decoration: none; }
+  .banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style></head><body>
+<h1 class="title">Threat analysis and risk assessment</h1>
+<table class="meta"><tr><td>Project</td><td>Power window control</td></tr><tr><td>Generated</td><td>2026-11-19T14:14:35+00:00</td></tr><tr><td>Commit</td><td>68d1561</td></tr><tr><td>Uncommitted changes</td><td>no</td></tr><tr><td>Baseline</td><td>none</td></tr><tr><td>Items shown</td><td>13</td></tr></table>
+<h2>Revision history</h2><table><tr><th>date</th><th>record</th><th>what</th><th>by</th></tr><tr><td>2026-11-19</td><td>REV-0008</td><td>review approved of 1 items shown here</td><td>Demonstration data - no review by a person took place</td></tr><tr><td>2026-11-19</td><td>REV-0009</td><td>review approved of 1 items shown here</td><td>Demonstration data - no review by a person took place</td></tr><tr><td>2026-11-19</td><td>REV-0010</td><td>review approved of 8 items shown here</td><td>Demonstration data - no review by a person took place</td></tr><tr><td>2026-11-19</td><td>REV-0011</td><td>review approved of 3 items shown here</td><td>Demonstration data - no review by a person took place</td></tr></table>
+<nav><ul><li>Item definition</li><li>Method</li><li>Assets</li><li>Damage scenarios</li><li>Risk overview</li><li>Threat scenarios</li><li>Cybersecurity goals</li><li>Cybersecurity claims</li></ul></nav>
+<h1>Item definition</h1>
+<h2 id="ITM-0001">ITM-0001 Window control of the front door module</h2>
+<p class="note">Received from Front Door Module - Item Definition for Cybersecurity, version 1.0, identifier ID-FDM-WIN.</p>
+<table><tr><th>status</th><td>approved</td></tr></table>
+<h3>Boundary and functions</h3>
+<p>The item is the window control of the front door module: the window control software (SYE-0001) and the window drive hardware (SYE-0002) with its motor and Hall sensor. Outside the item: the driver&#x27;s switch panel and the other door modules, the body network, the central gateway, the diagnostic tester, the basic software of the door module. Functions: opening and closing on a switch request, automatic closing by one touch, reversal after an obstacle.</p>
+<h3>Preliminary architecture</h3>
+<p>Window control software (SYE-0001) and window drive hardware (SYE-0002), connected by the Hall sensor pulse signal (SYI-0001) and the motor command to the bridge driver (SYI-0002). Switch requests reach the software over the body network (SYI-0003) through the communication stack of the basic software.</p>
+<h3>Operational environment</h3>
+<p>The body network links the door modules, the switch panel and the central gateway. The gateway connects it to the diagnostic port inside the cabin and to the telematics unit. Bus wiring runs through the door hinge and to the mirror connector. Workshops reprogram the door module through the diagnostic port; the bootloader is part of the basic software. Vehicles are parked unattended.</p>
+<h3>Assumptions</h3>
+<p>The communication stack of the basic software can protect the authenticity and freshness of signals on the body network. The bootloader accepts only signed software images.</p>
+<h1>Method</h1>
+<p>The rating method of the approved cybersecurity plan: impact categories, feasibility approach and the risk matrix that gives the risk value.</p>
+<table><tr><th>plan</th><td><a href="#PLN-0008">PLN-0008</a> Cybersecurity plan of the window control software</td></tr><tr><th>impact categories</th><td>safety, financial, operational, privacy</td></tr><tr><th>impact levels</th><td>severe: a road user can be killed or badly injured, or a loss that threatens the customer&#x27;s business; major: a road user can be injured, or a vehicle function is lost for many vehicles; moderate: a nuisance for the user of one vehicle, a loss the owner notices, a function lost until the next workshop visit; negligible: nothing a road user notices. The safety rating is the one the functional safety lead derives from the severity of the matching hazard of the customer&#x27;s hazard analysis.</td></tr><tr><th>feasibility approach</th><td>attack-vector</td></tr><tr><th>feasibility levels</th><td>high: from outside the vehicle without touching it, over a remote interface; medium: with a device on the body network, plugged in at the diagnostic port or at bus wiring that can be reached without opening a locked vehicle; low: with a session on the diagnostic port that needs credentials or a security access of the customer&#x27;s basic software; very-low: with the door module opened and its hardware changed.</td></tr><tr><th>retained without a decision up to</th><td>2</td></tr></table>
+<p class="caption">risk matrix</p>
+<table><thead><tr><th>impact \ feasibility</th><th>very-low</th><th>low</th><th>medium</th><th>high</th></tr></thead><tr><td>severe</td><td>3</td><td>4</td><td>5</td><td>5</td></tr><tr><td>major</td><td>2</td><td>3</td><td>4</td><td>5</td></tr><tr><td>moderate</td><td>1</td><td>2</td><td>3</td><td>4</td></tr><tr><td>negligible</td><td>1</td><td>1</td><td>2</td><td>2</td></tr></table>
+<h1>Assets</h1>
+<table><thead><tr><th>id</th><th>title</th><th>properties</th><th>located_in</th></tr></thead><tr><td><a href="#AST-0001">AST-0001</a></td><td>Switch request received over the body network</td><td>integrity, authenticity, availability</td><td>SYI-0003, IFC-0006</td></tr><tr><td><a href="#AST-0002">AST-0002</a></td><td>Software image of the window control</td><td>integrity, authenticity</td><td>CMP-0001</td></tr></table>
+<h1>Damage scenarios</h1>
+<table><thead><tr><th>id</th><th>title</th><th>impact</th></tr></thead><tr><td><a href="#DMG-0001">DMG-0001</a></td><td>An occupant is trapped by a closing window</td><td>safety: severe; financial: negligible; operational: negligible; privacy: negligible</td></tr><tr><td><a href="#DMG-0002">DMG-0002</a></td><td>The window opens while the vehicle is parked and locked</td><td>safety: negligible; financial: moderate; operational: negligible; privacy: negligible</td></tr><tr><td><a href="#DMG-0003">DMG-0003</a></td><td>The window cannot be moved from the switch panel</td><td>safety: negligible; financial: negligible; operational: moderate; privacy: negligible</td></tr></table>
+<h1>Risk overview</h1>
+<p>The threat scenarios by risk value, with the impact and feasibility the value rests on and what answers the risk.</p>
+<table><thead><tr><th>threat scenario</th><th>title</th><th>assets</th><th>damage</th><th>impact</th><th>feasibility</th><th>risk</th><th>treatment</th><th>answered by</th></tr></thead><tr><td><a href="#THR-0001">THR-0001</a></td><td>Forged open request while the vehicle is parked</td><td><a href="#AST-0001">AST-0001</a></td><td><a href="#DMG-0002">DMG-0002</a></td><td>moderate</td><td>high</td><td>4</td><td>reduce</td><td><a href="#CSG-0001">CSG-0001</a></td></tr><tr><td><a href="#THR-0003">THR-0003</a></td><td>Manipulated software image without anti-pinch reversal</td><td><a href="#AST-0002">AST-0002</a></td><td><a href="#DMG-0001">DMG-0001</a></td><td>severe</td><td>low</td><td>4</td><td>share</td><td><a href="#CLM-0002">CLM-0002</a></td></tr><tr><td><a href="#THR-0002">THR-0002</a></td><td>Flooding the body network so that switch requests are lost</td><td><a href="#AST-0001">AST-0001</a></td><td><a href="#DMG-0003">DMG-0003</a></td><td>moderate</td><td>medium</td><td>3</td><td>retain</td><td><a href="#CLM-0001">CLM-0001</a></td></tr></table>
+<h1>Threat scenarios</h1>
+<h2 id="THR-0001">THR-0001 Forged open request while the vehicle is parked</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>property</th><td>authenticity</td></tr><tr><th>feasibility</th><td>high</td></tr><tr><th>risk_value</th><td>4</td></tr><tr><th>treatment</th><td>reduce</td></tr></table>
+<p class="caption">attack_paths</p>
+<table><thead><tr><th>path</th><th>feasibility</th><th>factors</th></tr></thead><tr><td>telematics unit compromised over its cellular interface -&gt; the central gateway forwards a frame to the body network -&gt; forged switch request &#x27;open&#x27; with the identifier of the driver&#x27;s switch panel -&gt; WindowCmd opens the window</td><td>high</td><td>vector: network; note: the item definition names no filter in the gateway for frames from the telematics unit</td></tr><tr><td>device clipped to the bus wiring at the mirror connector from outside the locked vehicle -&gt; forged switch request &#x27;open&#x27; -&gt; WindowCmd opens the window</td><td>medium</td><td>vector: adjacent; note: the mirror connector is reached without opening the vehicle</td></tr></table>
+<h3>Description</h3>
+<p>A thief wants the window of a parked, locked vehicle open. A switch request that does not come from the driver&#x27;s switch panel, or that was recorded earlier and replayed, is taken by the window control as a request to open (STRIDE: spoofing).</p>
+<h3>Treatment rationale</h3>
+<p>Risk value 4 is above what the plan allows to retain. Reduce: only authentic and fresh switch requests may move the window (<a href="#CSG-0001">CSG-0001</a>). The control belongs to the communication stack of the customer&#x27;s basic software, so the goal goes to the customer&#x27;s cybersecurity concept.</p>
+<p class="caption">links</p>
+<table><tr><th>threatens</th><td><a href="#AST-0001">AST-0001</a> Switch request received over the body network</td></tr><tr><th>leads_to</th><td><a href="#DMG-0002">DMG-0002</a> The window opens while the vehicle is parked and locked</td></tr><tr><th>addresses (from)</th><td><a href="#CSG-0001">CSG-0001</a> Only authentic and fresh switch requests move the window</td></tr><tr><th>delivers (from)</th><td>WP-0011 Threat analysis and risk assessment</td></tr></table>
+<h2 id="THR-0002">THR-0002 Flooding the body network so that switch requests are lost</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>property</th><td>availability</td></tr><tr><th>feasibility</th><td>medium</td></tr><tr><th>risk_value</th><td>3</td></tr><tr><th>treatment</th><td>retain</td></tr><tr><th>decision</th><td>Retained by the cybersecurity lead on 2026-04-16 (demonstration data): the window stays where it is, nobody is put at risk, and the attack ends when the device is removed.</td></tr></table>
+<p class="caption">attack_paths</p>
+<table><thead><tr><th>path</th><th>feasibility</th><th>factors</th></tr></thead><tr><td>device at the diagnostic port inside the cabin -&gt; the gateway passes its frames to the body network -&gt; high-priority frames fill the bus -&gt; switch requests do not arrive</td><td>medium</td><td>vector: adjacent</td></tr><tr><td>device clipped to the bus wiring at the mirror connector -&gt; high-priority frames fill the bus -&gt; switch requests do not arrive</td><td>medium</td><td>vector: adjacent</td></tr></table>
+<h3>Description</h3>
+<p>Someone with a device on the body network keeps the bus busy, so that the switch requests of the driver&#x27;s switch panel no longer reach the window control (STRIDE: denial of service).</p>
+<h3>Treatment rationale</h3>
+<p>Risk value 3 is above <code>retain_up_to</code> (2), so the retention is decided by the cybersecurity lead, as <code>decision</code> records. Reasons in <a href="#CLM-0001">CLM-0001</a>. Protecting the bus as a whole is the customer&#x27;s.</p>
+<p class="caption">links</p>
+<table><tr><th>threatens</th><td><a href="#AST-0001">AST-0001</a> Switch request received over the body network</td></tr><tr><th>leads_to</th><td><a href="#DMG-0003">DMG-0003</a> The window cannot be moved from the switch panel</td></tr><tr><th>addresses (from)</th><td><a href="#CLM-0001">CLM-0001</a> Loss of window movement during a bus flooding attack is acceptable</td></tr><tr><th>delivers (from)</th><td>WP-0011 Threat analysis and risk assessment</td></tr></table>
+<h2 id="THR-0003">THR-0003 Manipulated software image without anti-pinch reversal</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>property</th><td>integrity</td></tr><tr><th>feasibility</th><td>low</td></tr><tr><th>risk_value</th><td>4</td></tr><tr><th>treatment</th><td>share</td></tr></table>
+<p class="caption">attack_paths</p>
+<table><thead><tr><th>path</th><th>feasibility</th><th>factors</th></tr></thead><tr><td>tester at the diagnostic port -&gt; reprogramming session of the bootloader of the basic software -&gt; image with the anti-pinch reversal removed is written -&gt; the window closes against an obstacle</td><td>low</td><td>vector: local; note: the session needs the security access of the customer&#x27;s bootloader</td></tr></table>
+<h3>Description</h3>
+<p>Someone - a tuner, a careless workshop, an attacker - writes a changed program into the door module in which the anti-pinch detection does not reverse the window (STRIDE: tampering).</p>
+<h3>Treatment rationale</h3>
+<p>Risk value 4. Shared with the customer: reprogramming, its security access and the check of the image signature belong to the bootloader of the customer&#x27;s basic software (CMP-0006). <a href="#CLM-0002">CLM-0002</a> records the claim; the customer confirmed it at the TARA hand-over.</p>
+<p class="caption">links</p>
+<table><tr><th>threatens</th><td><a href="#AST-0002">AST-0002</a> Software image of the window control</td></tr><tr><th>leads_to</th><td><a href="#DMG-0001">DMG-0001</a> An occupant is trapped by a closing window</td></tr><tr><th>addresses (from)</th><td><a href="#CLM-0002">CLM-0002</a> The customer&#x27;s bootloader keeps manipulated software images out</td></tr><tr><th>delivers (from)</th><td>WP-0011 Threat analysis and risk assessment</td></tr></table>
+<h1>Cybersecurity goals</h1>
+<h2 id="CSG-0001">CSG-0001 Only authentic and fresh switch requests move the window</h2>
+<table><tr><th>status</th><td>approved</td></tr></table>
+<h3>Statement</h3>
+<p>The window shall move on a request received over the body network only if the request comes from the driver&#x27;s switch panel, has not been changed on its way and has not been received before.</p>
+<h3>Rationale</h3>
+<p><a href="#THR-0001">THR-0001</a>, risk value 4, treatment reduce. Handed to the customer for the cybersecurity concept of the door module (clause 9 is the customer&#x27;s); the expected control is the secured communication of the customer&#x27;s communication stack for the switch request (IFC-0006).</p>
+<p class="caption">links</p>
+<table><tr><th>addresses</th><td><a href="#THR-0001">THR-0001</a> Forged open request while the vehicle is parked</td></tr><tr><th>delivers (from)</th><td>WP-0011 Threat analysis and risk assessment</td></tr></table>
+<h1>Cybersecurity claims</h1>
+<h2 id="CLM-0001">CLM-0001 Loss of window movement during a bus flooding attack is acceptable</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>monitored_by</th><td>reported to the customer with the TARA (CMR-0004); bus attacks are watched by the customer&#x27;s vehicle security monitoring</td></tr></table>
+<h3>Claim</h3>
+<p>The risk of <a href="#THR-0002">THR-0002</a> can be retained: while the body network is flooded the window does not move, and that harms nobody.</p>
+<h3>Rationale</h3>
+<p>A window that stays where it is traps nobody (<a href="#DMG-0003">DMG-0003</a> has no safety impact). The attack needs a device on the bus inside the cabin or at the mirror connector and ends when it is removed. The window control does not start any movement of its own while requests are missing (SWR-0009: manual movement only while the switch is held).</p>
+<p class="caption">links</p>
+<table><tr><th>addresses</th><td><a href="#THR-0002">THR-0002</a> Flooding the body network so that switch requests are lost</td></tr><tr><th>delivers (from)</th><td>WP-0011 Threat analysis and risk assessment</td></tr></table>
+<h2 id="CLM-0002">CLM-0002 The customer&#x27;s bootloader keeps manipulated software images out</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>monitored_by</th><td>the customer&#x27;s cybersecurity monitoring of its basic software, as agreed at the TARA hand-over (CMR-0004)</td></tr></table>
+<h3>Claim</h3>
+<p>The risk of <a href="#THR-0003">THR-0003</a> is carried by the customer: only software images signed by the customer can be written into the door module.</p>
+<h3>Rationale</h3>
+<p>The item definition (<a href="#ITM-0001">ITM-0001</a>) states that the bootloader of the basic software accepts only signed images and that reprogramming needs its security access. The customer confirmed both at the TARA hand-over and takes the risk into its own analysis (CMR-0004).</p>
+<p class="caption">links</p>
+<table><tr><th>addresses</th><td><a href="#THR-0003">THR-0003</a> Manipulated software image without anti-pinch reversal</td></tr><tr><th>delivers (from)</th><td>WP-0011 Threat analysis and risk assessment</td></tr></table>
+<h1>Items in this document</h1><table><thead><tr><th>item</th><th>title</th><th>state</th><th>content hash</th></tr></thead><tr><td><a href="#AST-0001">AST-0001</a></td><td>Switch request received over the body network</td><td>approved</td><td><code>5d68876d1dba</code></td></tr><tr><td><a href="#AST-0002">AST-0002</a></td><td>Software image of the window control</td><td>approved</td><td><code>c0e25beb8e39</code></td></tr><tr><td><a href="#CLM-0001">CLM-0001</a></td><td>Loss of window movement during a bus flooding attack is acceptable</td><td>approved</td><td><code>dbf5bc7b707a</code></td></tr><tr><td><a href="#CLM-0002">CLM-0002</a></td><td>The customer&#x27;s bootloader keeps manipulated software images out</td><td>approved</td><td><code>8e63c92972ab</code></td></tr><tr><td><a href="#CSG-0001">CSG-0001</a></td><td>Only authentic and fresh switch requests move the window</td><td>approved</td><td><code>0a01c1134f61</code></td></tr><tr><td><a href="#DMG-0001">DMG-0001</a></td><td>An occupant is trapped by a closing window</td><td>approved</td><td><code>bc370925c358</code></td></tr><tr><td><a href="#DMG-0002">DMG-0002</a></td><td>The window opens while the vehicle is parked and locked</td><td>approved</td><td><code>eb4d33a7c6ab</code></td></tr><tr><td><a href="#DMG-0003">DMG-0003</a></td><td>The window cannot be moved from the switch panel</td><td>approved</td><td><code>4a829cc1f33e</code></td></tr><tr><td><a href="#ITM-0001">ITM-0001</a></td><td>Window control of the front door module</td><td>approved</td><td><code>b1521b9145d6</code></td></tr><tr><td><a href="#PLN-0008">PLN-0008</a></td><td>Cybersecurity plan of the window control software</td><td>approved</td><td><code>d35e37e838d7</code></td></tr><tr><td><a href="#THR-0001">THR-0001</a></td><td>Forged open request while the vehicle is parked</td><td>approved</td><td><code>69c1eb1df9c6</code></td></tr><tr><td><a href="#THR-0002">THR-0002</a></td><td>Flooding the body network so that switch requests are lost</td><td>approved</td><td><code>014c711d377b</code></td></tr><tr><td><a href="#THR-0003">THR-0003</a></td><td>Manipulated software image without anti-pinch reversal</td><td>approved</td><td><code>aff863555a67</code></td></tr></table>
+<p class="caption">Generated by tools/document.py from the items of the project. The items are the source: change them, not this document.</p>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script><script>if (window.mermaid) { mermaid.initialize({startOnLoad: true}); }</script>
+</body></html>

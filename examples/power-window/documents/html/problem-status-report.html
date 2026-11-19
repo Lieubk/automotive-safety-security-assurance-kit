@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Problem status report</title><style>
+:root { --ink: #1d2430; --muted: #5b6575; --line: #d6dbe3; --soft: #f4f6f9; --accent: #2d5b8a; --warn: #a33a1f; }
+body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: #fff;
+       max-width: 60rem; margin: 2rem auto; padding: 0 1rem; }
+h1 { font-size: 1.6rem; border-bottom: 2px solid var(--accent); padding-bottom: .3rem; margin-top: 2.5rem; }
+h2 { font-size: 1.25rem; margin-top: 2rem; } h3 { font-size: 1.05rem; } h4 { font-size: .95rem; }
+table { border-collapse: collapse; width: 100%; margin: .6rem 0 1rem; font-size: .9rem; }
+th, td { border: 1px solid var(--line); padding: .3rem .5rem; text-align: left; vertical-align: top; }
+th { background: var(--soft); } code, pre { font-family: Consolas, "Courier New", monospace; font-size: .88rem; }
+pre { background: var(--soft); padding: .6rem; overflow-x: auto; } .caption { color: var(--muted); font-size: .85rem; margin: .8rem 0 .1rem; }
+.note { border-left: 4px solid var(--warn); padding: .2rem .6rem; color: var(--warn); }
+.banner { background: var(--warn); color: #fff; padding: .4rem .8rem; font-weight: 600; }
+.meta td:first-child { width: 14rem; color: var(--muted); } nav ul { columns: 2; } a { color: var(--accent); }
+@page { size: A4; margin: 16mm 14mm 18mm; @bottom-right { content: counter(page) " / " counter(pages); font-size: 9pt; color: #5b6575; } }
+@media print { body { max-width: none; margin: 0; padding: 0; font-size: 10.5pt; } nav { display: none; }
+  h1 { page-break-before: always; } h1.title { page-break-before: avoid; } h1, h2, h3, h4 { break-after: avoid; }
+  thead { display: table-header-group; } tr, pre, .note { break-inside: avoid; } a { color: inherit; text-decoration: none; }
+  .banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style></head><body>
+<h1 class="title">Problem status report</h1>
+<table class="meta"><tr><td>Project</td><td>Power window control</td></tr><tr><td>Generated</td><td>2026-11-19T14:15:09+00:00</td></tr><tr><td>Commit</td><td>68d1561</td></tr><tr><td>Uncommitted changes</td><td>no</td></tr><tr><td>Baseline</td><td>none</td></tr><tr><td>Items shown</td><td>3</td></tr></table>
+<h2>Revision history</h2><table><tr><th>date</th><th>record</th><th>what</th><th>by</th></tr><tr><td>2026-11-19</td><td>REV-0002</td><td>review approved of 1 items shown here</td><td>Demonstration data - no review by a person took place</td></tr></table>
+<nav><ul><li>Problem resolution strategy</li><li>Problems</li><li>Problem reports</li><li>Trend reports</li><li>Open findings</li></ul></nav>
+<h1>Problem resolution strategy</h1>
+<h2 id="PLN-0006">PLN-0006 Problem resolution strategy</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>kind</th><td>problem-resolution</td></tr><tr><th>urgent_severities</th><td>critical</td></tr></table>
+<p class="caption">alerts</p>
+<table><thead><tr><th>severity</th><th>audience</th><th>within_days</th><th>channel</th></tr></thead><tr><td>critical</td><td>Customer, Software lead</td><td>1</td><td>mail</td></tr><tr><td>major</td><td>Software lead, Platform team</td><td>2</td><td>mail</td></tr></table>
+<h3>Scope</h3>
+<p>A problem is every deviation from an approved item that is found after its approval: a failed test case whose cause is not the test itself, a finding of a review on an item that was not the subject of that review, and every report of the customer or of the team of the window lifter platform. Everyone in the project may report one; the customer and the platform team receive the alerts this plan names.</p>
+<p>Problems in the customer&#x27;s basic software and in the door module are reported to the customer and not resolved here. Problems found by the customer on the vehicle reach the project as a report of the customer and are recorded like any other.</p>
+<h3>Approach</h3>
+<p>Every problem is a <code>problem-report</code> in <code>records/problems/</code>, moved through the states of the schema:</p>
+<ol><li><strong>open</strong> - recorded by whoever found it, with what happens, how to reproduce it and where it was found; a provisional severity.</li><li><strong>analysed</strong> - the Software lead, or the developer the lead names, finds the cause, the origin and the impact (other items, other users of the same component); the Software lead confirms the severity.</li><li><strong>in-resolution</strong> - the route is chosen: a correction through the authoring skill of the item and a review; a change request once the item is in a baseline that is not internal; for a component of the window lifter platform, a report to the platform team and the corrected release taken over.</li><li><strong>resolved</strong> - the correction is approved, the change request implemented, or the corrected release integrated.</li><li><strong>closed</strong> - accepted by the Software lead, with the run in which the exposing test case passes or the review of the correction as evidence.</li></ol>
+<p>A problem that is not one, or a duplicate, is rejected with the reason.</p>
+<p>Urgent problems (<code>urgent_severities</code>): the Software lead decides within one day on an immediate action - stop of deliveries, a containment in the software, or none with the reason - and it is recorded in the report.</p>
+<p>Alerts (<code>alerts</code>): critical problems go to the customer and the Software lead within one day; major problems to the Software lead and, when a component of the platform is affected, to the platform team within two days. The alert is recorded as a communication record about the problem.</p>
+<p>Trends: with every project status report, <code>traceability.py problems</code> is read for origin, detection and age; the Software lead writes the reading and the actions as a problem trend report.</p>
+<h3>Criteria</h3>
+<ul><li>critical: safety relevant, security relevant, or a delivery has to be stopped;</li><li>major: a software requirement is not met;</li><li>minor: everything else.</li></ul>
+<p>Closure: the exposing test case passed in a final run on a build that contains the correction, or a final review of the corrected item; every change request that resolves the problem is closed.</p>
+<h3>Environment and tools</h3>
+<p>Problem reports are items under version control; <code>python tools/traceability.py problems</code> lists them with their age, <code>history &lt;ID&gt;</code> gives the states over the commits. <code>python tools/record.py communication</code> records alerts, <code>problem-trends</code> the trend report.</p>
+<h3>Responsibilities</h3>
+<table><thead><tr><th>Activity</th><th>Responsible</th><th>Approves or decides</th></tr></thead><tr><td>Recording a problem</td><td>whoever found it</td><td>-</td></tr><tr><td>Cause, impact and origin</td><td>Software lead or the developer the lead names</td><td>severity: Software lead</td></tr><tr><td>Urgent action</td><td>proposed by the Software lead</td><td>Software lead; with the customer when a delivery is affected</td></tr><tr><td>Alerts</td><td>Configuration manager</td><td>-</td></tr><tr><td>Route to the resolution</td><td>Software lead</td><td>the change control board for baselined items (PLN-0002)</td></tr><tr><td>Closure</td><td>Configuration manager</td><td>Software lead accepts</td></tr><tr><td>Trend analysis</td><td>Software lead</td><td>-</td></tr></table>
+<p class="caption">links</p>
+<table><tr><th>delivers (from)</th><td>WP-0007 Configuration management and problem resolution</td></tr></table>
+<h1>Problems</h1>
+<p class="caption">problems</p>
+<table><thead><tr><th>item</th><th>title</th><th>state</th><th>severity</th><th>origin</th><th>detected_by</th><th>reported_at</th><th>closed_at</th><th>age_days</th><th>affects</th><th>change_requests</th></tr></thead><tr><td><a href="#PRB-0001">PRB-0001</a></td><td>Automatic closing ends 20 ms before the window has stood still for 200 ms</td><td>closed</td><td>major</td><td>code</td><td>qualification-test</td><td>2026-06-16</td><td>2026-06-22</td><td>6</td><td>CMP-0002</td><td></td></tr></table>
+<table><tr><th>as of</th><td>2026-11-19</td></tr><tr><th>figures: total</th><td>1</td></tr><tr><th>figures: rejected</th><td>0</td></tr><tr><th>figures: unresolved</th><td>0</td></tr><tr><th>figures: by state</th><td>closed: 1</td></tr><tr><th>figures: by severity</th><td>major: 1</td></tr><tr><th>figures: by origin</th><td>code: 1</td></tr><tr><th>figures: by detection</th><td>qualification-test: 1</td></tr><tr><th>figures: unresolved by age</th><td>up to 7 days: 0; 8 to 30 days: 0; over 30 days: 0</td></tr></table>
+<h1>Problem reports</h1>
+<h2 id="PRB-0001">PRB-0001 Automatic closing ends 20 ms before the window has stood still for 200 ms</h2>
+<table><tr><th>status</th><td>closed</td></tr><tr><th>severity</th><td>major</td></tr><tr><th>reported_by</th><td>Software tester</td></tr><tr><th>reported_at</th><td>2026-06-16</td></tr><tr><th>detected_by</th><td>qualification-test</td></tr><tr><th>found_in</th><td>WindowCmd of window lifter platform release 3.2.0 as taken over; the test function of SQT-0008 on the software of integration step application, while the qualification tests were written (that run was not recorded)</td></tr><tr><th>origin</th><td>code</td></tr></table>
+<p class="caption">closure</p>
+<table><thead><tr><th>accepted_by</th><th>accepted_at</th><th>evidence</th></tr></thead><tr><td>Software lead</td><td>2026-06-22</td><td>RUN-0004</td></tr></table>
+<h3>Description</h3>
+<p>SWR-0008, criterion 1: after AUTO_CLOSE the movement command is to stay &quot;closing&quot; until the window speed has been 0 mm/s for 200 ms at an opening of 5 mm or less. Observed: the movement command changes to &quot;stopped&quot; between 180 ms and 195 ms after the window speed became 0 mm/s.</p>
+<p>To reproduce: the test function of SQT-0008, step 1, on the software of integration step application, built from WindowCmd of platform release 3.2.0. The check &quot;command closing 195 ms after the speed became 0&quot; fails. Environment: software-in-the-loop on the host, as PLN-0005 describes.</p>
+<h3>Cause and impact</h3>
+<p>WindowCmd counts the 20 ms cycles at 0 mm/s inside the closed limit and ends the automatic closing when the count reaches 10. The first counted cycle is already the one in which the speed is 0, so the tenth comes 180 ms after it, not 200 ms (<code>WINDOWCMD_END_STOP_CYCLES</code> used with &quot;at least&quot; instead of &quot;more than&quot;).</p>
+<p>Impact: a comfort function (QM). The window stands at 5 mm or less when it happens; the motor stops 20 ms earlier than required, which the user does not notice and which does not touch the obstacle detection. Every product that uses WindowCmd of platform release 3.2.0 has the same deviation; that is why the platform team was alerted (CMR-0001). Severity major: a software requirement is not met.</p>
+<h3>Resolution</h3>
+<p>Reported to the platform team on 2026-06-16 with the failing step. The platform team released WindowCmd 3.2.1 with the comparison corrected; nothing else changed. Release 3.2.1 is taken over unchanged (CMP-0002, <code>tests/integration/integration.yaml</code>), and the integration and the qualification are repeated on it: BLD-0002, RUN-0003 and RUN-0004. No baseline listed CMP-0002 yet, so no change request was needed.</p>
+<p class="caption">links</p>
+<table><tr><th>affects</th><td>CMP-0002 WindowCmd - window command logic</td></tr></table>
+<h1>Trend reports</h1>
+<h2 id="PTR-0001">PTR-0001 Problem status and trends as of 2026-06-24</h2>
+<table><tr><th>status</th><td>final</td></tr><tr><th>as_of</th><td>2026-06-24</td></tr><tr><th>period</th><td>2026-06-08 to 2026-06-24</td></tr><tr><th>reported_by</th><td>Demonstration data - no person reported</td></tr><tr><th>figures</th><td>total: 1; rejected: 0; unresolved: 0; by_state: closed: 1; by_severity: major: 1; by_origin: code: 1; by_detection: qualification-test: 1; unresolved_by_age: up to 7 days: 0; 8 to 30 days: 0; over 30 days: 0</td></tr></table>
+<p class="caption">problems</p>
+<table><thead><tr><th>item</th><th>state</th><th>severity</th><th>origin</th><th>detected_by</th><th>age_days</th></tr></thead><tr><td><a href="#PRB-0001">PRB-0001</a></td><td>closed</td><td>major</td><td>code</td><td>qualification-test</td><td>6</td></tr></table>
+<h3>Assessment</h3>
+<p>Demonstration data - no person analysed. One problem in release R1.0, closed after six days: <a href="#PRB-0001">PRB-0001</a>, found by the qualification test in the code of a component taken over from the window lifter platform. One problem shows no trend. What it does show: the unit and integration tests of the platform release did not check the end condition of the automatic closing against its 200 ms, and only the qualification test derived from the criterion of SWR-0008 did. Action decided: none in this project beyond what <a href="#PRB-0001">PRB-0001</a> did; the platform team was told the failing step with the alert (CMR-0001). Next reading with the status report before the delivery.</p>
+<h1>Open findings</h1>
+<p>The trace check reports no error and no warning here.</p>
+<h1>Items in this document</h1><table><thead><tr><th>item</th><th>title</th><th>state</th><th>content hash</th></tr></thead><tr><td><a href="#PLN-0006">PLN-0006</a></td><td>Problem resolution strategy</td><td>approved</td><td><code>74af3d7060ae</code></td></tr><tr><td><a href="#PRB-0001">PRB-0001</a></td><td>Automatic closing ends 20 ms before the window has stood still for 200 ms</td><td>closed</td><td><code>8d0a20066ba7</code></td></tr><tr><td><a href="#PTR-0001">PTR-0001</a></td><td>Problem status and trends as of 2026-06-24</td><td>final</td><td><code>960808d804c7</code></td></tr></table>
+<p class="caption">Generated by tools/document.py from the items of the project. The items are the source: change them, not this document.</p>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script><script>if (window.mermaid) { mermaid.initialize({startOnLoad: true}); }</script>
+</body></html>

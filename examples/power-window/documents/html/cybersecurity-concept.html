@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cybersecurity goals and concept</title><style>
+:root { --ink: #1d2430; --muted: #5b6575; --line: #d6dbe3; --soft: #f4f6f9; --accent: #2d5b8a; --warn: #a33a1f; }
+body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: #fff;
+       max-width: 60rem; margin: 2rem auto; padding: 0 1rem; }
+h1 { font-size: 1.6rem; border-bottom: 2px solid var(--accent); padding-bottom: .3rem; margin-top: 2.5rem; }
+h2 { font-size: 1.25rem; margin-top: 2rem; } h3 { font-size: 1.05rem; } h4 { font-size: .95rem; }
+table { border-collapse: collapse; width: 100%; margin: .6rem 0 1rem; font-size: .9rem; }
+th, td { border: 1px solid var(--line); padding: .3rem .5rem; text-align: left; vertical-align: top; }
+th { background: var(--soft); } code, pre { font-family: Consolas, "Courier New", monospace; font-size: .88rem; }
+pre { background: var(--soft); padding: .6rem; overflow-x: auto; } .caption { color: var(--muted); font-size: .85rem; margin: .8rem 0 .1rem; }
+.note { border-left: 4px solid var(--warn); padding: .2rem .6rem; color: var(--warn); }
+.banner { background: var(--warn); color: #fff; padding: .4rem .8rem; font-weight: 600; }
+.meta td:first-child { width: 14rem; color: var(--muted); } nav ul { columns: 2; } a { color: var(--accent); }
+@page { size: A4; margin: 16mm 14mm 18mm; @bottom-right { content: counter(page) " / " counter(pages); font-size: 9pt; color: #5b6575; } }
+@media print { body { max-width: none; margin: 0; padding: 0; font-size: 10.5pt; } nav { display: none; }
+  h1 { page-break-before: always; } h1.title { page-break-before: avoid; } h1, h2, h3, h4 { break-after: avoid; }
+  thead { display: table-header-group; } tr, pre, .note { break-inside: avoid; } a { color: inherit; text-decoration: none; }
+  .banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style></head><body>
+<h1 class="title">Cybersecurity goals and concept</h1>
+<table class="meta"><tr><td>Project</td><td>Power window control</td></tr><tr><td>Generated</td><td>2026-11-19T14:15:22+00:00</td></tr><tr><td>Commit</td><td>68d1561</td></tr><tr><td>Uncommitted changes</td><td>no</td></tr><tr><td>Baseline</td><td>none</td></tr><tr><td>Items shown</td><td>3</td></tr></table>
+<h2>Revision history</h2><table><tr><th>date</th><th>record</th><th>what</th><th>by</th></tr><tr><td>2026-11-19</td><td>REV-0011</td><td>review approved of 3 items shown here</td><td>Demonstration data - no review by a person took place</td></tr></table>
+<nav><ul><li>Cybersecurity goals</li><li>Cybersecurity claims</li><li>Requirements derived from the goals</li><li>Open findings</li></ul></nav>
+<h1>Cybersecurity goals</h1>
+<h2 id="CSG-0001">CSG-0001 Only authentic and fresh switch requests move the window</h2>
+<table><tr><th>status</th><td>approved</td></tr></table>
+<h3>Statement</h3>
+<p>The window shall move on a request received over the body network only if the request comes from the driver&#x27;s switch panel, has not been changed on its way and has not been received before.</p>
+<h3>Rationale</h3>
+<p>THR-0001, risk value 4, treatment reduce. Handed to the customer for the cybersecurity concept of the door module (clause 9 is the customer&#x27;s); the expected control is the secured communication of the customer&#x27;s communication stack for the switch request (IFC-0006).</p>
+<p class="caption">links</p>
+<table><tr><th>addresses</th><td>THR-0001 Forged open request while the vehicle is parked</td></tr><tr><th>delivers (from)</th><td>WP-0011 Threat analysis and risk assessment</td></tr></table>
+<h1>Cybersecurity claims</h1>
+<h2 id="CLM-0001">CLM-0001 Loss of window movement during a bus flooding attack is acceptable</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>monitored_by</th><td>reported to the customer with the TARA (CMR-0004); bus attacks are watched by the customer&#x27;s vehicle security monitoring</td></tr></table>
+<h3>Claim</h3>
+<p>The risk of THR-0002 can be retained: while the body network is flooded the window does not move, and that harms nobody.</p>
+<h3>Rationale</h3>
+<p>A window that stays where it is traps nobody (DMG-0003 has no safety impact). The attack needs a device on the bus inside the cabin or at the mirror connector and ends when it is removed. The window control does not start any movement of its own while requests are missing (SWR-0009: manual movement only while the switch is held).</p>
+<p class="caption">links</p>
+<table><tr><th>addresses</th><td>THR-0002 Flooding the body network so that switch requests are lost</td></tr><tr><th>delivers (from)</th><td>WP-0011 Threat analysis and risk assessment</td></tr></table>
+<h2 id="CLM-0002">CLM-0002 The customer&#x27;s bootloader keeps manipulated software images out</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>monitored_by</th><td>the customer&#x27;s cybersecurity monitoring of its basic software, as agreed at the TARA hand-over (CMR-0004)</td></tr></table>
+<h3>Claim</h3>
+<p>The risk of THR-0003 is carried by the customer: only software images signed by the customer can be written into the door module.</p>
+<h3>Rationale</h3>
+<p>The item definition (ITM-0001) states that the bootloader of the basic software accepts only signed images and that reprogramming needs its security access. The customer confirmed both at the TARA hand-over and takes the risk into its own analysis (CMR-0004).</p>
+<p class="caption">links</p>
+<table><tr><th>addresses</th><td>THR-0003 Manipulated software image without anti-pinch reversal</td></tr><tr><th>delivers (from)</th><td>WP-0011 Threat analysis and risk assessment</td></tr></table>
+<h1>Requirements derived from the goals</h1>
+<table><thead><tr><th>cybersecurity-goal</th><th>derived_from (from)</th></tr></thead><tr><td><a href="#CSG-0001">CSG-0001</a> Only authentic and fresh switch requests move the window</td><td>-</td></tr></table>
+<h1>Open findings</h1>
+<p>The trace check reports no error and no warning here.</p>
+<h1>Items in this document</h1><table><thead><tr><th>item</th><th>title</th><th>state</th><th>content hash</th></tr></thead><tr><td><a href="#CLM-0001">CLM-0001</a></td><td>Loss of window movement during a bus flooding attack is acceptable</td><td>approved</td><td><code>dbf5bc7b707a</code></td></tr><tr><td><a href="#CLM-0002">CLM-0002</a></td><td>The customer&#x27;s bootloader keeps manipulated software images out</td><td>approved</td><td><code>8e63c92972ab</code></td></tr><tr><td><a href="#CSG-0001">CSG-0001</a></td><td>Only authentic and fresh switch requests move the window</td><td>approved</td><td><code>0a01c1134f61</code></td></tr></table>
+<p class="caption">Generated by tools/document.py from the items of the project. The items are the source: change them, not this document.</p>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script><script>if (window.mermaid) { mermaid.initialize({startOnLoad: true}); }</script>
+</body></html>

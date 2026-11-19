@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cybersecurity plan</title><style>
+:root { --ink: #1d2430; --muted: #5b6575; --line: #d6dbe3; --soft: #f4f6f9; --accent: #2d5b8a; --warn: #a33a1f; }
+body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: #fff;
+       max-width: 60rem; margin: 2rem auto; padding: 0 1rem; }
+h1 { font-size: 1.6rem; border-bottom: 2px solid var(--accent); padding-bottom: .3rem; margin-top: 2.5rem; }
+h2 { font-size: 1.25rem; margin-top: 2rem; } h3 { font-size: 1.05rem; } h4 { font-size: .95rem; }
+table { border-collapse: collapse; width: 100%; margin: .6rem 0 1rem; font-size: .9rem; }
+th, td { border: 1px solid var(--line); padding: .3rem .5rem; text-align: left; vertical-align: top; }
+th { background: var(--soft); } code, pre { font-family: Consolas, "Courier New", monospace; font-size: .88rem; }
+pre { background: var(--soft); padding: .6rem; overflow-x: auto; } .caption { color: var(--muted); font-size: .85rem; margin: .8rem 0 .1rem; }
+.note { border-left: 4px solid var(--warn); padding: .2rem .6rem; color: var(--warn); }
+.banner { background: var(--warn); color: #fff; padding: .4rem .8rem; font-weight: 600; }
+.meta td:first-child { width: 14rem; color: var(--muted); } nav ul { columns: 2; } a { color: var(--accent); }
+@page { size: A4; margin: 16mm 14mm 18mm; @bottom-right { content: counter(page) " / " counter(pages); font-size: 9pt; color: #5b6575; } }
+@media print { body { max-width: none; margin: 0; padding: 0; font-size: 10.5pt; } nav { display: none; }
+  h1 { page-break-before: always; } h1.title { page-break-before: avoid; } h1, h2, h3, h4 { break-after: avoid; }
+  thead { display: table-header-group; } tr, pre, .note { break-inside: avoid; } a { color: inherit; text-decoration: none; }
+  .banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style></head><body>
+<h1 class="title">Cybersecurity plan</h1>
+<table class="meta"><tr><td>Project</td><td>Power window control</td></tr><tr><td>Generated</td><td>2026-11-19T14:15:20+00:00</td></tr><tr><td>Commit</td><td>68d1561</td></tr><tr><td>Uncommitted changes</td><td>no</td></tr><tr><td>Baseline</td><td>none</td></tr><tr><td>Items shown</td><td>1</td></tr></table>
+<h2>Revision history</h2><table><tr><th>date</th><th>record</th><th>what</th><th>by</th></tr><tr><td>2026-11-19</td><td>REV-0009</td><td>review approved of 1 items shown here</td><td>Demonstration data - no review by a person took place</td></tr></table>
+<nav><ul><li>Plan</li><li>Interface agreements</li><li>Post-development</li></ul></nav>
+<h1>Plan</h1>
+<h2 id="PLN-0008">PLN-0008 Cybersecurity plan of the window control software</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>kind</th><td>cybersecurity</td></tr></table>
+<p class="caption">tara_method</p>
+<table><thead><tr><th>impact_categories</th><th>impact_meaning</th><th>feasibility_approach</th><th>feasibility_meaning</th><th>risk_matrix</th><th>retain_up_to</th></tr></thead><tr><td>safety, financial, operational, privacy</td><td>severe: a road user can be killed or badly injured, or a loss that threatens the customer&#x27;s business; major: a road user can be injured, or a vehicle function is lost for many vehicles; moderate: a nuisance for the user of one vehicle, a loss the owner notices, a function lost until the next workshop visit; negligible: nothing a road user notices. The safety rating is the one the functional safety lead derives from the severity of the matching hazard of the customer&#x27;s hazard analysis.</td><td>attack-vector</td><td>high: from outside the vehicle without touching it, over a remote interface; medium: with a device on the body network, plugged in at the diagnostic port or at bus wiring that can be reached without opening a locked vehicle; low: with a session on the diagnostic port that needs credentials or a security access of the customer&#x27;s basic software; very-low: with the door module opened and its hardware changed.</td><td>severe: 3, 4, 5, 5; major: 2, 3, 4, 5; moderate: 1, 2, 3, 4; negligible: 1, 1, 2, 2</td><td>2</td></tr></table>
+<p class="caption">cybersecurity_activities</p>
+<table><thead><tr><th>subclause</th><th>decision</th><th>responsible</th><th>rationale</th><th>work_products</th><th>due</th></tr></thead><tr><td>6.4.1</td><td>performed</td><td>Project lead</td><td></td><td></td><td></td></tr><tr><td>6.4.2</td><td>performed</td><td>Cybersecurity lead</td><td></td><td>WP-06-01</td><td></td></tr><tr><td>6.4.3</td><td>performed</td><td>Cybersecurity lead</td><td></td><td></td><td></td></tr><tr><td>6.4.4</td><td>performed</td><td>Cybersecurity lead</td><td>WindowCmd and MotorDrive are taken over unchanged from platform release 3.2.0; the TARA of this plan covers their use on the body network of this door module, nothing else is repeated for them</td><td></td><td></td></tr><tr><td>6.4.5</td><td>not-applicable</td><td>Cybersecurity lead</td><td>the software is developed for the customer&#x27;s door module; no component is developed out of context</td><td></td><td></td></tr><tr><td>6.4.6</td><td>by-customer</td><td>Customer</td><td>the only off-the-shelf part is the customer&#x27;s basic software (CMP-0006), which the customer integrates and answers for</td><td></td><td></td></tr><tr><td>6.4.7</td><td>performed</td><td>Cybersecurity lead</td><td></td><td>WP-06-02</td><td></td></tr><tr><td>6.4.8</td><td>not-applicable</td><td>Project lead</td><td>the customer assesses the cybersecurity of the vehicle; no separate assessment of the window control software is agreed</td><td></td><td></td></tr><tr><td>6.4.9</td><td>by-customer</td><td>Customer</td><td>the customer releases the door module for production with its software</td><td></td><td></td></tr><tr><td>15.3</td><td>performed</td><td>Cybersecurity engineer</td><td></td><td></td><td>2026-04-03</td></tr><tr><td>15.4</td><td>performed</td><td>Cybersecurity engineer</td><td></td><td></td><td>2026-04-03</td></tr><tr><td>15.5</td><td>performed</td><td>Cybersecurity engineer</td><td></td><td></td><td>2026-04-03</td></tr><tr><td>15.6</td><td>performed</td><td>Cybersecurity engineer</td><td></td><td></td><td>2026-04-10</td></tr><tr><td>15.7</td><td>performed</td><td>Cybersecurity engineer</td><td></td><td></td><td>2026-04-10</td></tr><tr><td>15.8</td><td>performed</td><td>Cybersecurity engineer</td><td></td><td></td><td>2026-04-10</td></tr><tr><td>15.9</td><td>performed</td><td>Cybersecurity lead</td><td></td><td></td><td>2026-04-17</td></tr></table>
+<h3>Scope</h3>
+<p>The window control software (SYE-0001, the components of CMP-0001) inside the customer&#x27;s front door module. The customer asked for a threat analysis and risk assessment of the window control function at component level, on the customer&#x27;s item definition (ITM-0001), and owns the item, its concept and the vehicle: clauses 9 and 11 to 14 of ISO/SAE 21434 are the customer&#x27;s. In scope here, as <code>scope.cybersecurity</code> of <code>project.yaml</code> says: clause 6 for this project and clause 15 for the analysis.</p>
+<h3>Approach</h3>
+<p>Assets are taken from the interfaces of the item definition that cross the boundary of the window control software, and from what the software holds. Threat scenarios are found per asset and property with STRIDE. Ratings follow <code>tara_method</code> above; the risk value of a threat scenario is that of the highest impact it leads to. A risk to reduce gives a cybersecurity goal, which goes to the customer for the cybersecurity concept; a risk shared with the customer or retained gives a cybersecurity claim. <code>python tools/traceability.py tara</code> shows the analysis.</p>
+<h3>Criteria</h3>
+<p>The analysis is complete when every asset is threatened by a threat scenario, every damage scenario is reached, every threat scenario has a treatment, and the goals and claims are reviewed. A risk value above 2 is not retained without the decision of the cybersecurity lead.</p>
+<h3>Environment and tools</h3>
+<p>The items in this repository; <code>tools/traceability.py tara</code> and <code>clauses</code>.</p>
+<h3>Responsibilities</h3>
+<p>Cybersecurity lead: this plan, the treatment decisions, the cybersecurity case. Cybersecurity engineer: the analysis. Functional safety lead: the safety ratings. Project lead: responsibilities and resources. Customer: the item definition, the concept, everything in the vehicle.</p>
+<p class="caption">links</p>
+<table><tr><th>delivers (from)</th><td>WP-0011 Threat analysis and risk assessment</td></tr></table>
+<h1>Interface agreements</h1>
+<p>Nothing of this kind in the project.</p>
+<h1>Post-development</h1>
+<p>Nothing of this kind in the project.</p>
+<h1>Items in this document</h1><table><thead><tr><th>item</th><th>title</th><th>state</th><th>content hash</th></tr></thead><tr><td><a href="#PLN-0008">PLN-0008</a></td><td>Cybersecurity plan of the window control software</td><td>approved</td><td><code>d35e37e838d7</code></td></tr></table>
+<p class="caption">Generated by tools/document.py from the items of the project. The items are the source: change them, not this document.</p>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script><script>if (window.mermaid) { mermaid.initialize({startOnLoad: true}); }</script>
+</body></html>

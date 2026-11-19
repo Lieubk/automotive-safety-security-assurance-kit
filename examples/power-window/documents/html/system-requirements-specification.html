@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System requirements specification</title><style>
+:root { --ink: #1d2430; --muted: #5b6575; --line: #d6dbe3; --soft: #f4f6f9; --accent: #2d5b8a; --warn: #a33a1f; }
+body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: #fff;
+       max-width: 60rem; margin: 2rem auto; padding: 0 1rem; }
+h1 { font-size: 1.6rem; border-bottom: 2px solid var(--accent); padding-bottom: .3rem; margin-top: 2.5rem; }
+h2 { font-size: 1.25rem; margin-top: 2rem; } h3 { font-size: 1.05rem; } h4 { font-size: .95rem; }
+table { border-collapse: collapse; width: 100%; margin: .6rem 0 1rem; font-size: .9rem; }
+th, td { border: 1px solid var(--line); padding: .3rem .5rem; text-align: left; vertical-align: top; }
+th { background: var(--soft); } code, pre { font-family: Consolas, "Courier New", monospace; font-size: .88rem; }
+pre { background: var(--soft); padding: .6rem; overflow-x: auto; } .caption { color: var(--muted); font-size: .85rem; margin: .8rem 0 .1rem; }
+.note { border-left: 4px solid var(--warn); padding: .2rem .6rem; color: var(--warn); }
+.banner { background: var(--warn); color: #fff; padding: .4rem .8rem; font-weight: 600; }
+.meta td:first-child { width: 14rem; color: var(--muted); } nav ul { columns: 2; } a { color: var(--accent); }
+@page { size: A4; margin: 16mm 14mm 18mm; @bottom-right { content: counter(page) " / " counter(pages); font-size: 9pt; color: #5b6575; } }
+@media print { body { max-width: none; margin: 0; padding: 0; font-size: 10.5pt; } nav { display: none; }
+  h1 { page-break-before: always; } h1.title { page-break-before: avoid; } h1, h2, h3, h4 { break-after: avoid; }
+  thead { display: table-header-group; } tr, pre, .note { break-inside: avoid; } a { color: inherit; text-decoration: none; }
+  .banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style></head><body>
+<h1 class="title">System requirements specification</h1>
+<table class="meta"><tr><td>Project</td><td>Power window control</td></tr><tr><td>Generated</td><td>2026-11-19T14:14:41+00:00</td></tr><tr><td>Commit</td><td>68d1561</td></tr><tr><td>Uncommitted changes</td><td>no</td></tr><tr><td>Baseline</td><td>none</td></tr><tr><td>Items shown</td><td>4</td></tr></table>
+<h2>Revision history</h2><table><tr><th>date</th><th>record</th><th>what</th><th>by</th></tr><tr><td>2026-11-19</td><td>REV-0001</td><td>review approved of 4 items shown here</td><td>Demonstration data - no review by a person took place</td></tr></table>
+<nav><ul><li>System requirements</li><li>Traceability to the stakeholder requirements</li><li>Allocation to the system architecture</li><li>Open findings</li></ul></nav>
+<h1>System requirements</h1>
+<h2 id="SYR-0001">SYR-0001 Limitation of the closing force</h2>
+<p class="note">Received from Front Door Module - System Requirements Specification, version 2.1, identifier DM-SYS-041.</p>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>asil</th><td>B</td></tr><tr><th>security_relevant</th><td>no</td></tr><tr><th>kind</th><td>functional</td></tr><tr><th>priority</th><td>must</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>verification_method</th><td>test</td></tr><tr><th>origin</th><td>derived</td></tr></table>
+<h3>Statement</h3>
+<p>While the window closes with a window opening of more than 5 mm, the door module shall keep the force on an obstacle in the path of the glass at or below 80 N.</p>
+<h3>Verification criteria</h3>
+<p>A test body with a stiffness of 10 N/mm is placed on the upper edge of the glass at window openings of 10 mm, 150 mm and 400 mm, at supply voltages of 9 V, 13.5 V and 16 V. The peak force in each of the nine runs is at most 80 N.</p>
+<p class="caption">links</p>
+<table><tr><th>derived_from (from)</th><td>SWR-0003 Window speed, SWR-0004 Obstacle detection during closing</td></tr><tr><th>fulfils (from)</th><td>SYE-0001 Window control software, SYE-0002 Window drive hardware</td></tr></table>
+<h2 id="SYR-0002">SYR-0002 Reversal after an obstacle</h2>
+<p class="note">Received from Front Door Module - System Requirements Specification, version 2.1, identifier DM-SYS-042.</p>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>asil</th><td>B</td></tr><tr><th>security_relevant</th><td>no</td></tr><tr><th>kind</th><td>functional</td></tr><tr><th>priority</th><td>must</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>verification_method</th><td>test</td></tr><tr><th>origin</th><td>derived</td></tr></table>
+<h3>Statement</h3>
+<p>When an obstacle has been detected while the window closes, the door module shall open the window by 120 mm from the position of detection, or to the fully open position if less than 120 mm of travel remain.</p>
+<h3>Verification criteria</h3>
+<p>With the test body of DM-SYS-041 at window openings of 10 mm and 150 mm the glass comes to rest 120 mm +/- 5 mm further open than at the moment of contact. At 400 mm it comes to rest fully open (480 mm).</p>
+<p class="caption">links</p>
+<table><tr><th>derived_from (from)</th><td>SWR-0005 End of the reversal, SWR-0007 Priority of the reversal request</td></tr><tr><th>fulfils (from)</th><td>SYE-0001 Window control software, SYE-0002 Window drive hardware</td></tr></table>
+<h2 id="SYR-0003">SYR-0003 Automatic closing by one touch</h2>
+<p class="note">Received from Front Door Module - System Requirements Specification, version 2.1, identifier DM-SYS-017.</p>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>asil</th><td>QM</td></tr><tr><th>security_relevant</th><td>no</td></tr><tr><th>kind</th><td>functional</td></tr><tr><th>priority</th><td>must</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>verification_method</th><td>test</td></tr><tr><th>origin</th><td>derived</td></tr></table>
+<h3>Statement</h3>
+<p>When the switch request AUTO_CLOSE is received, the door module shall close the window completely without the request being held, unless a later switch request or a detected obstacle ends the movement.</p>
+<h3>Verification criteria</h3>
+<p>AUTO_CLOSE applied for 100 ms at window openings of 480 mm and 200 mm: the window reaches the fully closed position. OPEN applied during the movement: the closing movement ends within 100 ms.</p>
+<p class="caption">links</p>
+<table><tr><th>derived_from (from)</th><td>SWR-0008 Automatic closing</td></tr><tr><th>fulfils (from)</th><td>SYE-0001 Window control software</td></tr></table>
+<h2 id="SYR-0004">SYR-0004 Manual movement while the switch is held</h2>
+<p class="note">Received from Front Door Module - System Requirements Specification, version 2.1, identifier DM-SYS-016.</p>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>asil</th><td>QM</td></tr><tr><th>security_relevant</th><td>no</td></tr><tr><th>kind</th><td>functional</td></tr><tr><th>priority</th><td>must</td></tr><tr><th>release</th><td>R1.0</td></tr><tr><th>verification_method</th><td>test</td></tr><tr><th>origin</th><td>derived</td></tr></table>
+<h3>Statement</h3>
+<p>While the switch request is OPEN or CLOSE, the door module shall move the window in the requested direction, starting and ending the movement within 100 ms after the request has changed.</p>
+<h3>Verification criteria</h3>
+<p>OPEN and CLOSE each applied for 1 s at a window opening of 240 mm: the motor is driven in the requested direction from at most 100 ms after the start of the request until at most 100 ms after its end.</p>
+<p class="caption">links</p>
+<table><tr><th>derived_from (from)</th><td>SWR-0009 Manual movement</td></tr><tr><th>fulfils (from)</th><td>SYE-0001 Window control software</td></tr></table>
+<h1>Traceability to the stakeholder requirements</h1>
+<table><thead><tr><th>system-requirement</th><th>derived_from</th></tr></thead><tr><td><a href="#SYR-0001">SYR-0001</a> Limitation of the closing force</td><td>-</td></tr><tr><td><a href="#SYR-0002">SYR-0002</a> Reversal after an obstacle</td><td>-</td></tr><tr><td><a href="#SYR-0003">SYR-0003</a> Automatic closing by one touch</td><td>-</td></tr><tr><td><a href="#SYR-0004">SYR-0004</a> Manual movement while the switch is held</td><td>-</td></tr></table>
+<h1>Allocation to the system architecture</h1>
+<table><thead><tr><th>system-requirement</th><th>fulfils (from)</th></tr></thead><tr><td><a href="#SYR-0001">SYR-0001</a> Limitation of the closing force</td><td>SYE-0001 Window control software, SYE-0002 Window drive hardware</td></tr><tr><td><a href="#SYR-0002">SYR-0002</a> Reversal after an obstacle</td><td>SYE-0001 Window control software, SYE-0002 Window drive hardware</td></tr><tr><td><a href="#SYR-0003">SYR-0003</a> Automatic closing by one touch</td><td>SYE-0001 Window control software</td></tr><tr><td><a href="#SYR-0004">SYR-0004</a> Manual movement while the switch is held</td><td>SYE-0001 Window control software</td></tr></table>
+<h1>Open findings</h1>
+<p>The trace check reports no error and no warning here.</p>
+<h1>Items in this document</h1><table><thead><tr><th>item</th><th>title</th><th>state</th><th>content hash</th></tr></thead><tr><td><a href="#SYR-0001">SYR-0001</a></td><td>Limitation of the closing force</td><td>approved</td><td><code>c36e504b2d84</code></td></tr><tr><td><a href="#SYR-0002">SYR-0002</a></td><td>Reversal after an obstacle</td><td>approved</td><td><code>bc4b77a5dcc0</code></td></tr><tr><td><a href="#SYR-0003">SYR-0003</a></td><td>Automatic closing by one touch</td><td>approved</td><td><code>fa5255d29582</code></td></tr><tr><td><a href="#SYR-0004">SYR-0004</a></td><td>Manual movement while the switch is held</td><td>approved</td><td><code>988234538fd9</code></td></tr></table>
+<p class="caption">Generated by tools/document.py from the items of the project. The items are the source: change them, not this document.</p>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script><script>if (window.mermaid) { mermaid.initialize({startOnLoad: true}); }</script>
+</body></html>

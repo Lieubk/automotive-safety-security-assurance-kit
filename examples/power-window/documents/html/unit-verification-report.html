@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Software unit verification report</title><style>
+:root { --ink: #1d2430; --muted: #5b6575; --line: #d6dbe3; --soft: #f4f6f9; --accent: #2d5b8a; --warn: #a33a1f; }
+body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: #fff;
+       max-width: 60rem; margin: 2rem auto; padding: 0 1rem; }
+h1 { font-size: 1.6rem; border-bottom: 2px solid var(--accent); padding-bottom: .3rem; margin-top: 2.5rem; }
+h2 { font-size: 1.25rem; margin-top: 2rem; } h3 { font-size: 1.05rem; } h4 { font-size: .95rem; }
+table { border-collapse: collapse; width: 100%; margin: .6rem 0 1rem; font-size: .9rem; }
+th, td { border: 1px solid var(--line); padding: .3rem .5rem; text-align: left; vertical-align: top; }
+th { background: var(--soft); } code, pre { font-family: Consolas, "Courier New", monospace; font-size: .88rem; }
+pre { background: var(--soft); padding: .6rem; overflow-x: auto; } .caption { color: var(--muted); font-size: .85rem; margin: .8rem 0 .1rem; }
+.note { border-left: 4px solid var(--warn); padding: .2rem .6rem; color: var(--warn); }
+.banner { background: var(--warn); color: #fff; padding: .4rem .8rem; font-weight: 600; }
+.meta td:first-child { width: 14rem; color: var(--muted); } nav ul { columns: 2; } a { color: var(--accent); }
+@page { size: A4; margin: 16mm 14mm 18mm; @bottom-right { content: counter(page) " / " counter(pages); font-size: 9pt; color: #5b6575; } }
+@media print { body { max-width: none; margin: 0; padding: 0; font-size: 10.5pt; } nav { display: none; }
+  h1 { page-break-before: always; } h1.title { page-break-before: avoid; } h1, h2, h3, h4 { break-after: avoid; }
+  thead { display: table-header-group; } tr, pre, .note { break-inside: avoid; } a { color: inherit; text-decoration: none; }
+  .banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style></head><body>
+<h1 class="title">Software unit verification report</h1>
+<table class="meta"><tr><td>Project</td><td>Power window control</td></tr><tr><td>Generated</td><td>2026-11-19T14:14:52+00:00</td></tr><tr><td>Commit</td><td>68d1561</td></tr><tr><td>Uncommitted changes</td><td>no</td></tr><tr><td>Baseline</td><td>none</td></tr><tr><td>Items shown</td><td>22</td></tr></table>
+<h2>Revision history</h2><table><tr><th>date</th><th>record</th><th>what</th><th>by</th></tr><tr><td>2026-11-19</td><td>REV-0006</td><td>review approved of 20 items shown here</td><td>Demonstration data - no review by a person took place</td></tr></table>
+<nav><ul><li>Test cases and results</li><li>Latest unit test run</li><li>Static verification</li><li>Open findings</li></ul></nav>
+<h1>Test cases and results</h1>
+<p>Every unit test case with its steps, the expected result and its verdict in the latest run that has it.</p>
+<p class="caption">result summary</p>
+<table><tr><th>passed</th><td>20</td></tr><tr><th>total</th><td>20</td></tr></table>
+<table><thead><tr><th>test case</th><th>title</th><th>verifies</th><th>step</th><th>execution</th><th>preconditions</th><th>steps</th><th>expected result</th><th>verdict</th><th>run</th><th>executed</th><th>environment</th><th>reason or evidence</th></tr></thead><tr><td><a href="#UT-0001">UT-0001</a></td><td>HallCapture - first edge after initialisation</td><td>UNT-0001, UNT-0001, UNT-0001</td><td>-</td><td>automated</td><td>Test program of unit HallCapture (<code>tests/unit/test_HallCapture.c</code> with
+<code>src/windowpos/HallCapture.c</code>). The two exclusive area services are replaced by stubs
+that count their calls. &quot;Read&quot; means a call of <code>HallCapture_GetSnapshot</code> that returns
+<code>E_OK</code>.</td><td>1. Call <code>HallCapture_Init</code> and read.
+2. Call <code>HallCapture_OnEdge(1000)</code> and read.
+3. Call <code>HallCapture_OnEdge(5000)</code>, then <code>HallCapture_Init</code>, and read.
+4. Call <code>HallCapture_OnEdge(5100)</code> and read.</td><td>1. <code>pulse_count</code> 0, <code>rejected_count</code> 0, <code>period_us</code> 0.
+2. <code>pulse_count</code> 1, <code>rejected_count</code> 0, <code>last_edge_us</code> 1000, <code>period_us</code> 0.
+3. <code>pulse_count</code> 0, <code>last_edge_us</code> 0, <code>period_us</code> 0.
+4. <code>pulse_count</code> 1, <code>rejected_count</code> 0, <code>period_us</code> 0: the edge is a first edge again and is
+   not measured against the edge at 5000.</td><td>passed</td><td><a href="#RUN-0001">RUN-0001</a></td><td>2026-11-19</td><td>host (cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 (-std=c99 -pedantic -Wall -Wextra -Werror))</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_HallCapture.log</td></tr><tr><td><a href="#UT-0002">UT-0002</a></td><td>HallCapture - pulse period, also across a wrap of the capture timer</td><td>UNT-0001</td><td>-</td><td>automated</td><td>Test program of unit HallCapture (<code>tests/unit/test_HallCapture.c</code> with
+<code>src/windowpos/HallCapture.c</code>). The two exclusive area services are replaced by stubs
+that count their calls. &quot;Read&quot; means a call of <code>HallCapture_GetSnapshot</code> that returns
+<code>E_OK</code>.</td><td>1. <code>HallCapture_Init</code>, edges at 10000 and 13333; read.
+2. Edge at 20000; read.
+3. <code>HallCapture_Init</code>, edges at 4294967040 (0xFFFFFF00) and 3840 (0x00000F00); read.</td><td>1. <code>pulse_count</code> 2, <code>last_edge_us</code> 13333, <code>period_us</code> 3333.
+2. <code>pulse_count</code> 3, <code>period_us</code> 6667.
+3. <code>pulse_count</code> 2, <code>last_edge_us</code> 3840, <code>period_us</code> 4096 (256 us before the wrap and 3840 us
+   after it).</td><td>passed</td><td><a href="#RUN-0001">RUN-0001</a></td><td>2026-11-19</td><td>host (cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 (-std=c99 -pedantic -Wall -Wextra -Werror))</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_HallCapture.log</td></tr><tr><td><a href="#UT-0003">UT-0003</a></td><td>HallCapture - shortest accepted pulse interval</td><td>UNT-0001</td><td>-</td><td>automated</td><td>Test program of unit HallCapture (<code>tests/unit/test_HallCapture.c</code> with
+<code>src/windowpos/HallCapture.c</code>). The two exclusive area services are replaced by stubs
+that count their calls. &quot;Read&quot; means a call of <code>HallCapture_GetSnapshot</code> that returns
+<code>E_OK</code>.</td><td>1. <code>HallCapture_Init</code>, edge at 1000, edge at 1399; read.
+2. Edge at 1400; read.
+3. Edge at 1400 again; read.</td><td>1. Rejected: <code>pulse_count</code> 1, <code>rejected_count</code> 1, <code>last_edge_us</code> 1000, <code>period_us</code> 0.
+2. Accepted: <code>pulse_count</code> 2, <code>rejected_count</code> 1, <code>last_edge_us</code> 1400, <code>period_us</code> 400 - measured
+   from the last accepted edge, not from the rejected one.
+3. Rejected: <code>pulse_count</code> 2, <code>rejected_count</code> 2, <code>period_us</code> 400.</td><td>passed</td><td><a href="#RUN-0001">RUN-0001</a></td><td>2026-11-19</td><td>host (cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 (-std=c99 -pedantic -Wall -Wextra -Werror))</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_HallCapture.log</td></tr><tr><td><a href="#UT-0004">UT-0004</a></td><td>HallCapture - limits of the pulse counter and of the rejected edge counter</td><td>UNT-0001</td><td>-</td><td>automated</td><td>Test program of unit HallCapture (<code>tests/unit/test_HallCapture.c</code> with
+<code>src/windowpos/HallCapture.c</code>). The two exclusive area services are replaced by stubs
+that count their calls. &quot;Read&quot; means a call of <code>HallCapture_GetSnapshot</code> that returns
+<code>E_OK</code>.</td><td>1. <code>HallCapture_Init</code>, 65535 edges 1000 us apart, the first at 0; read.
+2. One more edge; read.
+3. One more edge; read.
+4. <code>HallCapture_Init</code>, edge at 0, then 65535 edges with time stamp 1; read.
+5. One more edge with time stamp 1; read.</td><td>1. <code>pulse_count</code> 65535.
+2. <code>pulse_count</code> 0.
+3. <code>pulse_count</code> 1, <code>period_us</code> 1000, <code>rejected_count</code> 0.
+4. <code>rejected_count</code> 65535.
+5. <code>rejected_count</code> 65535, <code>pulse_count</code> 1.</td><td>passed</td><td><a href="#RUN-0001">RUN-0001</a></td><td>2026-11-19</td><td>host (cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 (-std=c99 -pedantic -Wall -Wextra -Werror))</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_HallCapture.log</td></tr><tr><td><a href="#UT-0005">UT-0005</a></td><td>HallCapture - snapshot inside the exclusive area, and null pointer</td><td>UNT-0001</td><td>-</td><td>automated</td><td>Test program of unit HallCapture (<code>tests/unit/test_HallCapture.c</code> with
+<code>src/windowpos/HallCapture.c</code>). The two exclusive area services are replaced by stubs
+that count their calls. &quot;Read&quot; means a call of <code>HallCapture_GetSnapshot</code> that returns
+<code>E_OK</code>.</td><td>1. <code>HallCapture_Init</code>, edges at 2000, 5000 and 5100. Clear the stub counters and call
+   <code>HallCapture_GetSnapshot</code> with a valid pointer.
+2. Clear the stub counters and call <code>HallCapture_GetSnapshot</code> with a null pointer.</td><td>1. <code>E_OK</code>. The exclusive area was entered once and left once, was never nested and is left
+   at the end. <code>pulse_count</code> 2, <code>rejected_count</code> 1, <code>last_edge_us</code> 5000, <code>period_us</code> 3000.
+2. <code>E_NOT_OK</code>. The exclusive area was neither entered nor left.</td><td>passed</td><td><a href="#RUN-0001">RUN-0001</a></td><td>2026-11-19</td><td>host (cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 (-std=c99 -pedantic -Wall -Wextra -Werror))</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_HallCapture.log</td></tr><tr><td><a href="#UT-0006">UT-0006</a></td><td>WindowPos - state after initialisation</td><td>UNT-0002, UNT-0002, UNT-0002</td><td>-</td><td>automated</td><td>Test program of unit WindowPos (<code>tests/unit/test_WindowPos.c</code> with
+<code>src/windowpos/WindowPos.c</code>). <code>HallCapture_GetSnapshot</code> is replaced by a stub that
+returns prepared pulse data and a prepared return value. &quot;Referenced&quot; means 40 steps
+with direction opening and no pulse; unless a period is given, the pulse data keeps the
+speed at 0 mm/s.</td><td>1. <code>WindowPos_Init</code>; read position and speed.
+2. Reference the position; one step closing with 2 new pulses 4000 us apart, the last one
+   100 us before <code>now_us</code>; read position and speed.
+3. <code>WindowPos_Init</code>; read position and speed.</td><td>1. <code>WindowPos_GetPosition</code> returns <code>E_NOT_OK</code> and delivers 65535; <code>WindowPos_GetSpeed</code> returns
+   <code>E_OK</code> and delivers 0.
+2. Position <code>E_OK</code>, 958; speed <code>E_OK</code>, 125.
+3. As in step 1.</td><td>passed</td><td><a href="#RUN-0001">RUN-0001</a></td><td>2026-11-19</td><td>host (cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 (-std=c99 -pedantic -Wall -Wextra -Werror))</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_WindowPos.log</td></tr><tr><td><a href="#UT-0007">UT-0007</a></td><td>WindowPos - referencing at the fully open end stop</td><td>UNT-0002</td><td>-</td><td>automated</td><td>Test program of unit WindowPos (<code>tests/unit/test_WindowPos.c</code> with
+<code>src/windowpos/WindowPos.c</code>). <code>HallCapture_GetSnapshot</code> is replaced by a stub that
+returns prepared pulse data and a prepared return value. &quot;Referenced&quot; means 40 steps
+with direction opening and no pulse; unless a period is given, the pulse data keeps the
+speed at 0 mm/s.</td><td>1. <code>WindowPos_Init</code>; 39 steps opening without pulse; read the position. One more step; read.
+   300 more such steps; read.
+2. <code>WindowPos_Init</code>; 39 steps opening, 1 step stopped, 39 steps opening; read. One more step
+   opening; read.
+3. <code>WindowPos_Init</code>; 39 steps opening; 1 step opening at 100 mm/s (2 pulses 5000 us apart);
+   60 ms later 39 steps opening without pulse; read. One more step; read.
+4. <code>WindowPos_Init</code>; 100 steps closing and 100 steps stopped, without pulse; read.
+5. 40 steps opening; read. 1 step closing with 100 pulses; read. 40 steps opening without
+   pulse; read.</td><td>1. <code>E_NOT_OK</code>, 65535; then <code>E_OK</code>, 960; still <code>E_OK</code>, 960 after the 300 steps (the cycle count
+   stops at 40).
+2. <code>E_NOT_OK</code>; then <code>E_OK</code>, 960.
+3. <code>E_NOT_OK</code>; then <code>E_OK</code>, 960.
+4. <code>E_NOT_OK</code>.
+5. 960, 860, 960. Every step of the test returns <code>E_OK</code>.</td><td>passed</td><td><a href="#RUN-0001">RUN-0001</a></td><td>2026-11-19</td><td>host (cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 (-std=c99 -pedantic -Wall -Wextra -Werror))</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_WindowPos.log</td></tr><tr><td><a href="#UT-0008">UT-0008</a></td><td>WindowPos - position counting, run-out and travel limits</td><td>UNT-0002, UNT-0002</td><td>-</td><td>automated</td><td>Test program of unit WindowPos (<code>tests/unit/test_WindowPos.c</code> with
+<code>src/windowpos/WindowPos.c</code>). <code>HallCapture_GetSnapshot</code> is replaced by a stub that
+returns prepared pulse data and a prepared return value. &quot;Referenced&quot; means 40 steps
+with direction opening and no pulse; unless a period is given, the pulse data keeps the
+speed at 0 mm/s.</td><td>1. Reference the position. One step closing with 100 pulses.
+2. One step opening with 20 pulses.
+3. One step stopped with 3 pulses.
+4. One step closing with 5 pulses, one step stopped with 2 pulses.
+5. Steps opening with 83, 1, 1 and 200 pulses.
+6. Steps closing with 959, 1, 1 and 500 pulses.
+7. Set the pulse counter of the stub to 65530 and do one step closing. Then one step opening
+   with 10 pulses (the counter wraps to 4).</td><td>1. 860.
+2. 880.
+3. 883: counted in the last drive direction.
+4. 876.
+5. 959, 960, 960, 960.
+6. 1, 0, 0, 0.
+7. 0 after the first step, 10 after the second.</td><td>passed</td><td><a href="#RUN-0001">RUN-0001</a></td><td>2026-11-19</td><td>host (cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 (-std=c99 -pedantic -Wall -Wextra -Werror))</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_WindowPos.log</td></tr><tr><td><a href="#UT-0009">UT-0009</a></td><td>WindowPos - speed from the pulse period and the time since the last pulse</td><td>UNT-0002, UNT-0002</td><td>-</td><td>automated</td><td>Test program of unit WindowPos (<code>tests/unit/test_WindowPos.c</code> with
+<code>src/windowpos/WindowPos.c</code>). <code>HallCapture_GetSnapshot</code> is replaced by a stub that
+returns prepared pulse data and a prepared return value. &quot;Referenced&quot; means 40 steps
+with direction opening and no pulse; unless a period is given, the pulse data keeps the
+speed at 0 mm/s. The speed is read after every step.</td><td>1. <code>WindowPos_Init</code>. 2 pulses with period 3333 us, the last one 500 us before <code>now_us</code>; step
+   closing.
+2. No new pulse; steps 5000 us and 10000 us after the last pulse.
+3. One new pulse with period 12500 us, 2500 us before <code>now_us</code>.
+4. One new pulse with period 3334 us.
+5. One new pulse with period 5000 us, step with direction stopped. One new pulse with
+   period 2500 us, step with direction opening.
+6. Read the position.</td><td>1. 150.
+2. 100, then 50.
+3. 40: the longer of period and elapsed time counts.
+4. 149: rounded down from 149.97.
+5. 100, then 200: the speed does not depend on the drive direction.
+6. <code>E_NOT_OK</code>: the speed does not need a referenced position.</td><td>passed</td><td><a href="#RUN-0001">RUN-0001</a></td><td>2026-11-19</td><td>host (cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 (-std=c99 -pedantic -Wall -Wextra -Werror))</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_WindowPos.log</td></tr><tr><td><a href="#UT-0010">UT-0010</a></td><td>WindowPos - speed limits: standstill and maximum</td><td>UNT-0002</td><td>-</td><td>automated</td><td>Test program of unit WindowPos (<code>tests/unit/test_WindowPos.c</code> with
+<code>src/windowpos/WindowPos.c</code>). <code>HallCapture_GetSnapshot</code> is replaced by a stub that
+returns prepared pulse data and a prepared return value. &quot;Referenced&quot; means 40 steps
+with direction opening and no pulse; unless a period is given, the pulse data keeps the
+speed at 0 mm/s. All steps with direction closing; the speed is read
+after every step.</td><td>1. <code>WindowPos_Init</code>. 2 pulses with period 3333 us; step 49999 us after the last pulse; step
+   50000 us after the last pulse.
+2. One new pulse that comes with a period of 3000 us; then a second new pulse with period
+   4000 us.
+3. New pulses with periods 49999 us, 50000 us and 5000 us, one per step.
+4. New pulses with periods 1001 us, 1000 us and 400 us, one per step.
+5. One new pulse with period 4000 us and a time stamp 100 us later than <code>now_us</code>.
+6. One new pulse with period 3333 us and time stamp 4294963200 (0xFFFFF000); <code>now_us</code> =
+   1280 (0x00000500).</td><td>1. 10, then 0.
+2. 0 after the first pulse, whatever its period; 125 after the second.
+3. 10, 0, 100: a period of 50000 us gives 0 without a new standstill.
+4. 499, 500, 500.
+5. 125: the time since the pulse counts as 0.
+6. 93: 5376 us have passed across the wrap of the time base.</td><td>passed</td><td><a href="#RUN-0001">RUN-0001</a></td><td>2026-11-19</td><td>host (cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 (-std=c99 -pedantic -Wall -Wextra -Werror))</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_WindowPos.log</td></tr><tr><td><a href="#UT-0011">UT-0011</a></td><td>WindowPos - refused step: invalid direction and failure of the capture service</td><td>UNT-0002</td><td>-</td><td>automated</td><td>Test program of unit WindowPos (<code>tests/unit/test_WindowPos.c</code> with
+<code>src/windowpos/WindowPos.c</code>). <code>HallCapture_GetSnapshot</code> is replaced by a stub that
+returns prepared pulse data and a prepared return value. &quot;Referenced&quot; means 40 steps
+with direction opening and no pulse; unless a period is given, the pulse data keeps the
+speed at 0 mm/s.</td><td>1. Reference the position; one step closing with 2 pulses 4000 us apart.
+2. 10 new pulses pending, period 2000 us. Step with direction 3; step with direction 255.
+3. Step with direction closing.
+4. 4 new pulses pending, period 5000 us; the stub returns <code>E_NOT_OK</code>. Step closing.
+5. The stub returns <code>E_OK</code> again. Step closing.</td><td>1. Position 958, speed 125.
+2. Both steps return <code>E_NOT_OK</code>; the stub was not called; position 958, speed 125.
+3. <code>E_OK</code>; the stub was called once; position 948, speed 250.
+4. <code>E_NOT_OK</code>; position 948, speed 250.
+5. <code>E_OK</code>; position 944, speed 100.</td><td>passed</td><td><a href="#RUN-0001">RUN-0001</a></td><td>2026-11-19</td><td>host (cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 (-std=c99 -pedantic -Wall -Wextra -Werror))</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_WindowPos.log</td></tr><tr><td><a href="#UT-0012">UT-0012</a></td><td>WindowPos - null pointers at the read functions</td><td>UNT-0002, UNT-0002</td><td>-</td><td>automated</td><td>Test program of unit WindowPos (<code>tests/unit/test_WindowPos.c</code> with
+<code>src/windowpos/WindowPos.c</code>). <code>HallCapture_GetSnapshot</code> is replaced by a stub that
+returns prepared pulse data and a prepared return value. &quot;Referenced&quot; means 40 steps
+with direction opening and no pulse; unless a period is given, the pulse data keeps the
+speed at 0 mm/s.</td><td>1. <code>WindowPos_Init</code>; call <code>WindowPos_GetPosition</code> and <code>WindowPos_GetSpeed</code> with a null pointer.
+2. Reference the position; call both functions with a null pointer again.</td><td>1. <code>E_NOT_OK</code> from both.
+2. <code>E_NOT_OK</code> from both. The test program ends normally.</td><td>passed</td><td><a href="#RUN-0001">RUN-0001</a></td><td>2026-11-19</td><td>host (cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 (-std=c99 -pedantic -Wall -Wextra -Werror))</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_WindowPos.log</td></tr><tr><td><a href="#UT-0013">UT-0013</a></td><td>AntiPinch - settling time and start of monitoring</td><td>UNT-0003, UNT-0003, UNT-0003</td><td>-</td><td>automated</td><td>Test program of unit AntiPinch (<code>tests/unit/test_AntiPinch.c</code> with
+<code>src/antipinch/AntiPinch.c</code>); no stubs. A step is written as (position, speed, drive
+direction); positions in counts of 0.5 mm, speeds in mm/s. &quot;Monitoring at p / v&quot; means
+<code>AntiPinch_Init</code> followed by 20 steps (p, v, closing). The status is read with
+<code>AntiPinch_GetStatus</code> after every step named.</td><td>1. <code>AntiPinch_Init</code>.
+2. 5 steps (600, 150, opening) and 5 steps (600, 0, stopped).
+3. 1 step (600, 0, closing).
+4. 9 steps (600, 150, closing) and 9 steps (600, 40, closing): closing cycles 2 to 19.
+5. 1 step (600, 150, closing): closing cycle 20.
+6. 1 step (600, 150, stopped).
+7. 19 steps (600, 140, closing); then 1 more.
+8. 1 step (600, 140, opening).
+9. <code>AntiPinch_Init</code>; 10 steps (600, 100, closing); 1 step (600, 100, opening); 19 steps
+   (600, 100, closing).</td><td>1. IDLE, request FALSE, reference speed 0.
+2. IDLE, request FALSE.
+3. SETTLING, request FALSE.
+4. SETTLING, request FALSE, reference speed 0: the fall from 150 to 40 causes no reaction.
+5. MONITORING, request FALSE, reference speed 150.
+6. IDLE, reference speed 0.
+7. SETTLING after 19 steps; MONITORING with reference speed 140 after the 20th.
+8. IDLE, reference speed 0.
+9. IDLE after the opening step; SETTLING after the 19 steps. Every step of the test returns
+   <code>E_OK</code>.</td><td>passed</td><td><a href="#RUN-0001">RUN-0001</a></td><td>2026-11-19</td><td>host (cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 (-std=c99 -pedantic -Wall -Wextra -Werror))</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_AntiPinch.log</td></tr><tr><td><a href="#UT-0014">UT-0014</a></td><td>AntiPinch - obstacle detected by a speed drop</td><td>UNT-0003</td><td>-</td><td>automated</td><td>Test program of unit AntiPinch (<code>tests/unit/test_AntiPinch.c</code> with
+<code>src/antipinch/AntiPinch.c</code>); no stubs. A step is written as (position, speed, drive
+direction); positions in counts of 0.5 mm, speeds in mm/s. &quot;Monitoring at p / v&quot; means
+<code>AntiPinch_Init</code> followed by 20 steps (p, v, closing). The status is read with
+<code>AntiPinch_GetStatus</code> after every step named.</td><td>1. Monitoring at 600 / 150; 10 further steps (600, 150, closing).
+2. 1 step (600, 129, closing).
+3. 1 step (599, 129, closing).
+4. 1 step (598, 20, stopped); 1 step (598, 0, opening).
+5. Monitoring at 300 / 180; 2 steps (300, 0, closing).</td><td>1. MONITORING, request FALSE, reference speed 150.
+2. MONITORING, request FALSE, reference speed 150 (held).
+3. REVERSING, request TRUE, reference speed 0: set in the second cycle of the drop, 10 ms
+   after it at the latest.
+4. REVERSING, request TRUE after each step.
+5. MONITORING, request FALSE after the first step; REVERSING, request TRUE after the second.</td><td>passed</td><td><a href="#RUN-0001">RUN-0001</a></td><td>2026-11-19</td><td>host (cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 (-std=c99 -pedantic -Wall -Wextra -Werror))</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_AntiPinch.log</td></tr><tr><td><a href="#UT-0015">UT-0015</a></td><td>AntiPinch - limits of the speed drop and of its confirmation</td><td>UNT-0003</td><td>-</td><td>automated</td><td>Test program of unit AntiPinch (<code>tests/unit/test_AntiPinch.c</code> with
+<code>src/antipinch/AntiPinch.c</code>); no stubs. A step is written as (position, speed, drive
+direction); positions in counts of 0.5 mm, speeds in mm/s. &quot;Monitoring at p / v&quot; means
+<code>AntiPinch_Init</code> followed by 20 steps (p, v, closing). The status is read with
+<code>AntiPinch_GetStatus</code> after every step named.</td><td>1. Monitoring at 600 / 150; 40 steps (600, 130, closing).
+2. Monitoring at 600 / 150; five times: 1 step (600, 129, closing), 1 step (600, 150,
+   closing).
+3. 2 steps (600, 129, closing).</td><td>1. MONITORING, request FALSE after every step.
+2. MONITORING, request FALSE after every step; reference speed 150 after every pair.
+3. MONITORING, request FALSE after the first step; REVERSING, request TRUE after the second.</td><td>passed</td><td><a href="#RUN-0001">RUN-0001</a></td><td>2026-11-19</td><td>host (cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 (-std=c99 -pedantic -Wall -Wextra -Werror))</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_AntiPinch.log</td></tr><tr><td><a href="#UT-0016">UT-0016</a></td><td>AntiPinch - edge of the protected zone and position not referenced</td><td>UNT-0003</td><td>-</td><td>automated</td><td>Test program of unit AntiPinch (<code>tests/unit/test_AntiPinch.c</code> with
+<code>src/antipinch/AntiPinch.c</code>); no stubs. A step is written as (position, speed, drive
+direction); positions in counts of 0.5 mm, speeds in mm/s. &quot;Monitoring at p / v&quot; means
+<code>AntiPinch_Init</code> followed by 20 steps (p, v, closing). The status is read with
+<code>AntiPinch_GetStatus</code> after every step named.</td><td>1. Monitoring at 10 / 150; 10 steps (10, 100, closing).
+2. Monitoring at 11 / 150; 2 steps (11, 100, closing).
+3. Monitoring at 11 / 150; steps (11, 100, closing), (10, 100, closing), (10, 100, closing).
+4. 2 steps (11, 100, closing).
+5. Monitoring at 65535 / 150; 2 steps (65535, 100, closing).</td><td>1. MONITORING, request FALSE.
+2. MONITORING, request FALSE after the first step; REVERSING, request TRUE after the second.
+3. MONITORING, request FALSE: a drop that continues below the zone limit is not confirmed.
+4. MONITORING, request FALSE after the first step; REVERSING, request TRUE after the second.
+5. As in step 2: an unknown position counts as inside the protected zone.</td><td>passed</td><td><a href="#RUN-0001">RUN-0001</a></td><td>2026-11-19</td><td>host (cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 (-std=c99 -pedantic -Wall -Wextra -Werror))</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_AntiPinch.log</td></tr><tr><td><a href="#UT-0017">UT-0017</a></td><td>AntiPinch - reference speed: lower limit and tracking</td><td>UNT-0003, UNT-0003</td><td>-</td><td>automated</td><td>Test program of unit AntiPinch (<code>tests/unit/test_AntiPinch.c</code> with
+<code>src/antipinch/AntiPinch.c</code>); no stubs. A step is written as (position, speed, drive
+direction); positions in counts of 0.5 mm, speeds in mm/s. &quot;Monitoring at p / v&quot; means
+<code>AntiPinch_Init</code> followed by 20 steps (p, v, closing). The status is read with
+<code>AntiPinch_GetStatus</code> after every step named.</td><td>1. <code>AntiPinch_Init</code>; 20 steps (600, 30, closing).
+2. 10 further steps (600, 30, closing).
+3. 2 steps (600, 29, closing).
+4. Monitoring at 600 / 150; 100 steps (600, v, closing) with v = 150 minus half the step
+   number, rounded down: from 150 to 100 mm/s at 100 mm/s per second.
+5. 200 steps (600, 100, closing).
+6. 200 steps (600, 115, closing).</td><td>1. MONITORING, reference speed 50.
+2. MONITORING, request FALSE, reference speed 50.
+3. MONITORING, request FALSE after the first step; REVERSING, request TRUE after the second.
+4. MONITORING, request FALSE after every step; reference speed at the end between 100 and
+   110.
+5. Reference speed 100.
+6. MONITORING, request FALSE, reference speed 115.</td><td>passed</td><td><a href="#RUN-0001">RUN-0001</a></td><td>2026-11-19</td><td>host (cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 (-std=c99 -pedantic -Wall -Wextra -Werror))</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_AntiPinch.log</td></tr><tr><td><a href="#UT-0018">UT-0018</a></td><td>AntiPinch - end of the reversal by travel</td><td>UNT-0003</td><td>-</td><td>automated</td><td>Test program of unit AntiPinch (<code>tests/unit/test_AntiPinch.c</code> with
+<code>src/antipinch/AntiPinch.c</code>); no stubs. A step is written as (position, speed, drive
+direction); positions in counts of 0.5 mm, speeds in mm/s. &quot;Monitoring at p / v&quot; means
+<code>AntiPinch_Init</code> followed by 20 steps (p, v, closing). The status is read with
+<code>AntiPinch_GetStatus</code> after every step named.</td><td>1. Monitoring at 600 / 150; 2 steps (600, 100, closing).
+2. Steps (600, 0, stopped), (700, 150, opening), (839, 150, opening).
+3. 1 step (840, 150, opening).
+4. Monitoring at 800 / 150; 2 steps (800, 100, closing); 1 step (959, 150, opening).
+5. 1 step (960, 150, opening).
+6. 20 steps (960, 150, closing).</td><td>1. REVERSING, request TRUE.
+2. REVERSING, request TRUE after each step.
+3. IDLE, request FALSE.
+4. REVERSING, request TRUE.
+5. IDLE, request FALSE.
+6. MONITORING, request FALSE: the next closing movement is supervised as usual.</td><td>passed</td><td><a href="#RUN-0001">RUN-0001</a></td><td>2026-11-19</td><td>host (cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 (-std=c99 -pedantic -Wall -Wextra -Werror))</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_AntiPinch.log</td></tr><tr><td><a href="#UT-0019">UT-0019</a></td><td>AntiPinch - end of the reversal by time</td><td>UNT-0003</td><td>-</td><td>automated</td><td>Test program of unit AntiPinch (<code>tests/unit/test_AntiPinch.c</code> with
+<code>src/antipinch/AntiPinch.c</code>); no stubs. A step is written as (position, speed, drive
+direction); positions in counts of 0.5 mm, speeds in mm/s. &quot;Monitoring at p / v&quot; means
+<code>AntiPinch_Init</code> followed by 20 steps (p, v, closing). The status is read with
+<code>AntiPinch_GetStatus</code> after every step named.</td><td>1. Monitoring at 65535 / 150; 2 steps (65535, 100, closing).
+2. 399 steps (65535, 150, opening).
+3. 1 more step.
+4. Monitoring at 600 / 150; 2 steps (600, 100, closing); 399 steps (600, 0, opening).
+5. 1 more step.</td><td>1. REVERSING, request TRUE.
+2. REVERSING, request TRUE.
+3. IDLE, request FALSE.
+4. REVERSING, request TRUE.
+5. IDLE, request FALSE.</td><td>passed</td><td><a href="#RUN-0001">RUN-0001</a></td><td>2026-11-19</td><td>host (cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 (-std=c99 -pedantic -Wall -Wextra -Werror))</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_AntiPinch.log</td></tr><tr><td><a href="#UT-0020">UT-0020</a></td><td>AntiPinch - arguments out of range, and null pointer</td><td>UNT-0003, UNT-0003</td><td>-</td><td>automated</td><td>Test program of unit AntiPinch (<code>tests/unit/test_AntiPinch.c</code> with
+<code>src/antipinch/AntiPinch.c</code>); no stubs. A step is written as (position, speed, drive
+direction); positions in counts of 0.5 mm, speeds in mm/s. &quot;Monitoring at p / v&quot; means
+<code>AntiPinch_Init</code> followed by 20 steps (p, v, closing). The status is read with
+<code>AntiPinch_GetStatus</code> after every step named.</td><td>1. <code>AntiPinch_Init</code>; steps (961, 0, stopped), (65534, 0, opening), (600, 501, opening),
+   (600, 100, direction value 3).
+2. 1 step (961, 0, closing).
+3. <code>AntiPinch_Init</code>; steps (960, 500, closing), (0, 0, closing), (65535, 0, closing).
+4. 1 step (600, 80, direction value 3).
+5. <code>AntiPinch_Init</code>; 5 steps (600, 80, closing); 1 step (600, 501, closing).
+6. 1 step (960, 150, opening).
+7. 398 steps (961, 150, opening).
+8. 1 more step (961, 150, opening).
+9. Monitoring at 600 / 150; 1 step (961, 150, closing).
+10. Monitoring at 600 / 150; 1 step (600, 150, direction value 255).
+11. Call <code>AntiPinch_GetStatus</code> with a null pointer.</td><td>1. <code>E_NOT_OK</code> from every step; IDLE, request FALSE.
+2. <code>E_NOT_OK</code>; REVERSING, request TRUE: reversal from the first closing cycle on.
+3. <code>E_OK</code> from every step; SETTLING.
+4. <code>E_NOT_OK</code>; REVERSING, request TRUE: a direction out of range does not end the closing
+   movement.
+5. <code>E_NOT_OK</code> from the last step; REVERSING, request TRUE.
+6. <code>E_OK</code>; REVERSING, request TRUE: this reversal has no target position.
+7. <code>E_NOT_OK</code> from every step; REVERSING, request TRUE.
+8. <code>E_NOT_OK</code>; IDLE, request FALSE: the refused cycles were counted, 400 in total.
+9. <code>E_NOT_OK</code>; REVERSING, request TRUE.
+10. <code>E_NOT_OK</code>; REVERSING, request TRUE.
+11. <code>E_NOT_OK</code>.</td><td>passed</td><td><a href="#RUN-0001">RUN-0001</a></td><td>2026-11-19</td><td>host (cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 (-std=c99 -pedantic -Wall -Wextra -Werror))</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_AntiPinch.log</td></tr></table>
+<h1>Latest unit test run</h1>
+<p>The run with its structural coverage and the files it was run on.</p>
+<h2 id="RUN-0001">RUN-0001 </h2>
+<table><tr><th>status</th><td>final</td></tr><tr><th>level</th><td>unit</td></tr><tr><th>item_under_test</th><td>fb933f1</td></tr><tr><th>environment</th><td>host (cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 (-std=c99 -pedantic -Wall -Wextra -Werror))</td></tr><tr><th>executed_at</th><td>2026-11-19T00:55:32+00:00</td></tr></table>
+<p class="caption">results</p>
+<table><thead><tr><th>test</th><th>verdict</th><th>evidence</th></tr></thead><tr><td><a href="#UT-0001">UT-0001</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_HallCapture.log</td></tr><tr><td><a href="#UT-0002">UT-0002</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_HallCapture.log</td></tr><tr><td><a href="#UT-0003">UT-0003</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_HallCapture.log</td></tr><tr><td><a href="#UT-0004">UT-0004</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_HallCapture.log</td></tr><tr><td><a href="#UT-0005">UT-0005</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_HallCapture.log</td></tr><tr><td><a href="#UT-0006">UT-0006</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_WindowPos.log</td></tr><tr><td><a href="#UT-0007">UT-0007</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_WindowPos.log</td></tr><tr><td><a href="#UT-0008">UT-0008</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_WindowPos.log</td></tr><tr><td><a href="#UT-0009">UT-0009</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_WindowPos.log</td></tr><tr><td><a href="#UT-0010">UT-0010</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_WindowPos.log</td></tr><tr><td><a href="#UT-0011">UT-0011</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_WindowPos.log</td></tr><tr><td><a href="#UT-0012">UT-0012</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_WindowPos.log</td></tr><tr><td><a href="#UT-0013">UT-0013</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_AntiPinch.log</td></tr><tr><td><a href="#UT-0014">UT-0014</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_AntiPinch.log</td></tr><tr><td><a href="#UT-0015">UT-0015</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_AntiPinch.log</td></tr><tr><td><a href="#UT-0016">UT-0016</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_AntiPinch.log</td></tr><tr><td><a href="#UT-0017">UT-0017</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_AntiPinch.log</td></tr><tr><td><a href="#UT-0018">UT-0018</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_AntiPinch.log</td></tr><tr><td><a href="#UT-0019">UT-0019</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_AntiPinch.log</td></tr><tr><td><a href="#UT-0020">UT-0020</a></td><td>passed</td><td>verification/evidence/<a href="#RUN-0001">RUN-0001</a>/test_AntiPinch.log</td></tr></table>
+<p class="caption">coverage</p>
+<table><thead><tr><th>unit</th><th>file</th><th>statement_percent</th><th>branch_percent</th></tr></thead><tr><td>UNT-0003</td><td>src/antipinch/AntiPinch.c</td><td>100.0</td><td>100.0</td></tr><tr><td>UNT-0001</td><td>src/windowpos/HallCapture.c</td><td>100.0</td><td>100.0</td></tr><tr><td>UNT-0002</td><td>src/windowpos/WindowPos.c</td><td>100.0</td><td>100.0</td></tr></table>
+<p class="caption">sources</p>
+<table><thead><tr><th>file</th><th>hash</th></tr></thead><tr><td>src/antipinch/AntiPinch.c</td><td>6f89e47360a3</td></tr><tr><td>src/antipinch/AntiPinch.h</td><td>345ab5ac10d9</td></tr><tr><td>src/windowpos/HallCapture.c</td><td>6ff986fc1967</td></tr><tr><td>src/windowpos/HallCapture.h</td><td>dad803ad6278</td></tr><tr><td>src/windowpos/WindowPos.c</td><td>c8724dd66d39</td></tr><tr><td>src/windowpos/WindowPos.h</td><td>b3aba40f4110</td></tr><tr><td>tests/unit/test_AntiPinch.c</td><td>25c7c87a2e64</td></tr><tr><td>tests/unit/test_HallCapture.c</td><td>b1c12079697b</td></tr><tr><td>tests/unit/test_WindowPos.c</td><td>44f9b3868c9c</td></tr></table>
+<h1>Static verification</h1>
+<h2 id="SAR-0001">SAR-0001 </h2>
+<table><tr><th>status</th><td>final</td></tr><tr><th>item_under_test</th><td>fb933f1</td></tr><tr><th>tool</th><td>Microsoft C/C++ 19.51.36248 x64, compiler static analysis (/analyze), no coding-guideline rule set</td></tr><tr><th>executed_at</th><td>2026-11-19T00:55:43+00:00</td></tr></table>
+<p class="caption">results</p>
+<table><thead><tr><th>unit</th><th>files</th><th>open_findings</th><th>evidence</th></tr></thead><tr><td>UNT-0001</td><td>src/windowpos/HallCapture.c</td><td>0</td><td>verification/evidence/<a href="#SAR-0001">SAR-0001</a>/static-analysis.log</td></tr><tr><td>UNT-0002</td><td>src/windowpos/WindowPos.c</td><td>0</td><td>verification/evidence/<a href="#SAR-0001">SAR-0001</a>/static-analysis.log</td></tr><tr><td>UNT-0003</td><td>src/antipinch/AntiPinch.c</td><td>0</td><td>verification/evidence/<a href="#SAR-0001">SAR-0001</a>/static-analysis.log</td></tr></table>
+<p class="caption">sources</p>
+<table><thead><tr><th>file</th><th>hash</th></tr></thead><tr><td>src/antipinch/AntiPinch.c</td><td>6f89e47360a3</td></tr><tr><td>src/antipinch/AntiPinch.h</td><td>345ab5ac10d9</td></tr><tr><td>src/windowpos/HallCapture.c</td><td>6ff986fc1967</td></tr><tr><td>src/windowpos/HallCapture.h</td><td>dad803ad6278</td></tr><tr><td>src/windowpos/WindowPos.c</td><td>c8724dd66d39</td></tr><tr><td>src/windowpos/WindowPos.h</td><td>b3aba40f4110</td></tr></table>
+<h1>Open findings</h1>
+<p>The trace check reports no error and no warning here.</p>
+<h1>Items in this document</h1><table><thead><tr><th>item</th><th>title</th><th>state</th><th>content hash</th></tr></thead><tr><td><a href="#RUN-0001">RUN-0001</a></td><td></td><td>final</td><td><code>b0a81e1563e7</code></td></tr><tr><td><a href="#SAR-0001">SAR-0001</a></td><td></td><td>final</td><td><code>c95075b4de1e</code></td></tr><tr><td><a href="#UT-0001">UT-0001</a></td><td>HallCapture - first edge after initialisation</td><td>approved</td><td><code>296bc53176c2</code></td></tr><tr><td><a href="#UT-0002">UT-0002</a></td><td>HallCapture - pulse period, also across a wrap of the capture timer</td><td>approved</td><td><code>e9d364903fed</code></td></tr><tr><td><a href="#UT-0003">UT-0003</a></td><td>HallCapture - shortest accepted pulse interval</td><td>approved</td><td><code>c5cce9a972b0</code></td></tr><tr><td><a href="#UT-0004">UT-0004</a></td><td>HallCapture - limits of the pulse counter and of the rejected edge counter</td><td>approved</td><td><code>356e08affe19</code></td></tr><tr><td><a href="#UT-0005">UT-0005</a></td><td>HallCapture - snapshot inside the exclusive area, and null pointer</td><td>approved</td><td><code>9280e9352c73</code></td></tr><tr><td><a href="#UT-0006">UT-0006</a></td><td>WindowPos - state after initialisation</td><td>approved</td><td><code>914edb7c3daa</code></td></tr><tr><td><a href="#UT-0007">UT-0007</a></td><td>WindowPos - referencing at the fully open end stop</td><td>approved</td><td><code>3d1fe8d46e38</code></td></tr><tr><td><a href="#UT-0008">UT-0008</a></td><td>WindowPos - position counting, run-out and travel limits</td><td>approved</td><td><code>8c04be417a02</code></td></tr><tr><td><a href="#UT-0009">UT-0009</a></td><td>WindowPos - speed from the pulse period and the time since the last pulse</td><td>approved</td><td><code>b20fd132e646</code></td></tr><tr><td><a href="#UT-0010">UT-0010</a></td><td>WindowPos - speed limits: standstill and maximum</td><td>approved</td><td><code>6d90729e9201</code></td></tr><tr><td><a href="#UT-0011">UT-0011</a></td><td>WindowPos - refused step: invalid direction and failure of the capture service</td><td>approved</td><td><code>84343b9d037c</code></td></tr><tr><td><a href="#UT-0012">UT-0012</a></td><td>WindowPos - null pointers at the read functions</td><td>approved</td><td><code>ae11cc053a6b</code></td></tr><tr><td><a href="#UT-0013">UT-0013</a></td><td>AntiPinch - settling time and start of monitoring</td><td>approved</td><td><code>e4b490bef709</code></td></tr><tr><td><a href="#UT-0014">UT-0014</a></td><td>AntiPinch - obstacle detected by a speed drop</td><td>approved</td><td><code>e6c0414befda</code></td></tr><tr><td><a href="#UT-0015">UT-0015</a></td><td>AntiPinch - limits of the speed drop and of its confirmation</td><td>approved</td><td><code>4a98f5ff3f74</code></td></tr><tr><td><a href="#UT-0016">UT-0016</a></td><td>AntiPinch - edge of the protected zone and position not referenced</td><td>approved</td><td><code>571f55538d29</code></td></tr><tr><td><a href="#UT-0017">UT-0017</a></td><td>AntiPinch - reference speed: lower limit and tracking</td><td>approved</td><td><code>589024b77794</code></td></tr><tr><td><a href="#UT-0018">UT-0018</a></td><td>AntiPinch - end of the reversal by travel</td><td>approved</td><td><code>817ce9997560</code></td></tr><tr><td><a href="#UT-0019">UT-0019</a></td><td>AntiPinch - end of the reversal by time</td><td>approved</td><td><code>39d93a71bb2f</code></td></tr><tr><td><a href="#UT-0020">UT-0020</a></td><td>AntiPinch - arguments out of range, and null pointer</td><td>approved</td><td><code>080694d031cf</code></td></tr></table>
+<p class="caption">Generated by tools/document.py from the items of the project. The items are the source: change them, not this document.</p>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script><script>if (window.mermaid) { mermaid.initialize({startOnLoad: true}); }</script>
+</body></html>

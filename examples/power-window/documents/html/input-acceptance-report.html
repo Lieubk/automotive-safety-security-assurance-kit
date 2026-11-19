@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Received inputs and their acceptance</title><style>
+:root { --ink: #1d2430; --muted: #5b6575; --line: #d6dbe3; --soft: #f4f6f9; --accent: #2d5b8a; --warn: #a33a1f; }
+body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: #fff;
+       max-width: 60rem; margin: 2rem auto; padding: 0 1rem; }
+h1 { font-size: 1.6rem; border-bottom: 2px solid var(--accent); padding-bottom: .3rem; margin-top: 2.5rem; }
+h2 { font-size: 1.25rem; margin-top: 2rem; } h3 { font-size: 1.05rem; } h4 { font-size: .95rem; }
+table { border-collapse: collapse; width: 100%; margin: .6rem 0 1rem; font-size: .9rem; }
+th, td { border: 1px solid var(--line); padding: .3rem .5rem; text-align: left; vertical-align: top; }
+th { background: var(--soft); } code, pre { font-family: Consolas, "Courier New", monospace; font-size: .88rem; }
+pre { background: var(--soft); padding: .6rem; overflow-x: auto; } .caption { color: var(--muted); font-size: .85rem; margin: .8rem 0 .1rem; }
+.note { border-left: 4px solid var(--warn); padding: .2rem .6rem; color: var(--warn); }
+.banner { background: var(--warn); color: #fff; padding: .4rem .8rem; font-weight: 600; }
+.meta td:first-child { width: 14rem; color: var(--muted); } nav ul { columns: 2; } a { color: var(--accent); }
+@page { size: A4; margin: 16mm 14mm 18mm; @bottom-right { content: counter(page) " / " counter(pages); font-size: 9pt; color: #5b6575; } }
+@media print { body { max-width: none; margin: 0; padding: 0; font-size: 10.5pt; } nav { display: none; }
+  h1 { page-break-before: always; } h1.title { page-break-before: avoid; } h1, h2, h3, h4 { break-after: avoid; }
+  thead { display: table-header-group; } tr, pre, .note { break-inside: avoid; } a { color: inherit; text-decoration: none; }
+  .banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style></head><body>
+<h1 class="title">Received inputs and their acceptance</h1>
+<table class="meta"><tr><td>Project</td><td>Power window control</td></tr><tr><td>Generated</td><td>2026-11-19T14:14:39+00:00</td></tr><tr><td>Commit</td><td>68d1561</td></tr><tr><td>Uncommitted changes</td><td>no</td></tr><tr><td>Baseline</td><td>none</td></tr><tr><td>Items shown</td><td>10</td></tr></table>
+<h2>Revision history</h2><table><tr><th>date</th><th>record</th><th>what</th><th>by</th></tr><tr><td>2026-11-19</td><td>REV-0001</td><td>review approved of 9 items shown here</td><td>Demonstration data - no review by a person took place</td></tr><tr><td>2026-11-19</td><td>REV-0008</td><td>review approved of 1 items shown here</td><td>Demonstration data - no review by a person took place</td></tr></table>
+<nav><ul><li>Received items</li><li>Questions to the source</li><li>Query details</li><li>Open findings</li></ul></nav>
+<h1>Received items</h1>
+<p>What the customer delivered, as registered unchanged with its source, version and identifier.</p>
+<table><thead><tr><th>id</th><th>type</th><th>title</th><th>status</th><th>assessment</th></tr></thead><tr><td><a href="#ITM-0001">ITM-0001</a></td><td>item-definition</td><td>Window control of the front door module</td><td>approved</td><td></td></tr><tr><td><a href="#SYE-0001">SYE-0001</a></td><td>system-element</td><td>Window control software</td><td>approved</td><td></td></tr><tr><td><a href="#SYE-0002">SYE-0002</a></td><td>system-element</td><td>Window drive hardware</td><td>approved</td><td></td></tr><tr><td><a href="#SYI-0001">SYI-0001</a></td><td>system-interface</td><td>Hall sensor pulse signal</td><td>approved</td><td></td></tr><tr><td><a href="#SYI-0002">SYI-0002</a></td><td>system-interface</td><td>Motor command to the bridge driver</td><td>approved</td><td></td></tr><tr><td><a href="#SYI-0003">SYI-0003</a></td><td>system-interface</td><td>Switch request on the body network</td><td>approved</td><td></td></tr><tr><td><a href="#SYR-0001">SYR-0001</a></td><td>system-requirement</td><td>Limitation of the closing force</td><td>approved</td><td></td></tr><tr><td><a href="#SYR-0002">SYR-0002</a></td><td>system-requirement</td><td>Reversal after an obstacle</td><td>approved</td><td></td></tr><tr><td><a href="#SYR-0003">SYR-0003</a></td><td>system-requirement</td><td>Automatic closing by one touch</td><td>approved</td><td></td></tr><tr><td><a href="#SYR-0004">SYR-0004</a></td><td>system-requirement</td><td>Manual movement while the switch is held</td><td>approved</td><td></td></tr></table>
+<h1>Questions to the source</h1>
+<p>Nothing of this kind in the project.</p>
+<h1>Query details</h1>
+<p>Nothing of this kind in the project.</p>
+<h1>Open findings</h1>
+<p>The trace check reports no error and no warning here.</p>
+<h1>Items in this document</h1><table><thead><tr><th>item</th><th>title</th><th>state</th><th>content hash</th></tr></thead><tr><td><a href="#ITM-0001">ITM-0001</a></td><td>Window control of the front door module</td><td>approved</td><td><code>b1521b9145d6</code></td></tr><tr><td><a href="#SYE-0001">SYE-0001</a></td><td>Window control software</td><td>approved</td><td><code>907b42951f13</code></td></tr><tr><td><a href="#SYE-0002">SYE-0002</a></td><td>Window drive hardware</td><td>approved</td><td><code>15c31a07b3d9</code></td></tr><tr><td><a href="#SYI-0001">SYI-0001</a></td><td>Hall sensor pulse signal</td><td>approved</td><td><code>fd6d4321eb97</code></td></tr><tr><td><a href="#SYI-0002">SYI-0002</a></td><td>Motor command to the bridge driver</td><td>approved</td><td><code>b98500184175</code></td></tr><tr><td><a href="#SYI-0003">SYI-0003</a></td><td>Switch request on the body network</td><td>approved</td><td><code>69ea995a587b</code></td></tr><tr><td><a href="#SYR-0001">SYR-0001</a></td><td>Limitation of the closing force</td><td>approved</td><td><code>c36e504b2d84</code></td></tr><tr><td><a href="#SYR-0002">SYR-0002</a></td><td>Reversal after an obstacle</td><td>approved</td><td><code>bc4b77a5dcc0</code></td></tr><tr><td><a href="#SYR-0003">SYR-0003</a></td><td>Automatic closing by one touch</td><td>approved</td><td><code>fa5255d29582</code></td></tr><tr><td><a href="#SYR-0004">SYR-0004</a></td><td>Manual movement while the switch is held</td><td>approved</td><td><code>988234538fd9</code></td></tr></table>
+<p class="caption">Generated by tools/document.py from the items of the project. The items are the source: change them, not this document.</p>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script><script>if (window.mermaid) { mermaid.initialize({startOnLoad: true}); }</script>
+</body></html>

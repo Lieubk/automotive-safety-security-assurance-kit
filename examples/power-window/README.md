@@ -12,6 +12,10 @@ every name, number, threshold and timing are made up for this example. Nothing h
 taken from a real project, and no conformance with any regulation or standard is
 claimed.
 
+**Documents:** [documents/](documents/) holds 31 documents generated from these items -
+specifications, architecture and design, test specifications and reports, traceability,
+TARA, safety and cybersecurity plans and cases - as PDF, HTML, Word and Excel.
+
 ## What the example shows
 
 The project is a **software supplier**. It receives system requirements, system

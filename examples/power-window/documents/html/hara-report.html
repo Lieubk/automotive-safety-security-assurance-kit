@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hazard analysis and risk assessment</title><style>
+:root { --ink: #1d2430; --muted: #5b6575; --line: #d6dbe3; --soft: #f4f6f9; --accent: #2d5b8a; --warn: #a33a1f; }
+body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: #fff;
+       max-width: 60rem; margin: 2rem auto; padding: 0 1rem; }
+h1 { font-size: 1.6rem; border-bottom: 2px solid var(--accent); padding-bottom: .3rem; margin-top: 2.5rem; }
+h2 { font-size: 1.25rem; margin-top: 2rem; } h3 { font-size: 1.05rem; } h4 { font-size: .95rem; }
+table { border-collapse: collapse; width: 100%; margin: .6rem 0 1rem; font-size: .9rem; }
+th, td { border: 1px solid var(--line); padding: .3rem .5rem; text-align: left; vertical-align: top; }
+th { background: var(--soft); } code, pre { font-family: Consolas, "Courier New", monospace; font-size: .88rem; }
+pre { background: var(--soft); padding: .6rem; overflow-x: auto; } .caption { color: var(--muted); font-size: .85rem; margin: .8rem 0 .1rem; }
+.note { border-left: 4px solid var(--warn); padding: .2rem .6rem; color: var(--warn); }
+.banner { background: var(--warn); color: #fff; padding: .4rem .8rem; font-weight: 600; }
+.meta td:first-child { width: 14rem; color: var(--muted); } nav ul { columns: 2; } a { color: var(--accent); }
+@page { size: A4; margin: 16mm 14mm 18mm; @bottom-right { content: counter(page) " / " counter(pages); font-size: 9pt; color: #5b6575; } }
+@media print { body { max-width: none; margin: 0; padding: 0; font-size: 10.5pt; } nav { display: none; }
+  h1 { page-break-before: always; } h1.title { page-break-before: avoid; } h1, h2, h3, h4 { break-after: avoid; }
+  thead { display: table-header-group; } tr, pre, .note { break-inside: avoid; } a { color: inherit; text-decoration: none; }
+  .banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style></head><body>
+<h1 class="title">Hazard analysis and risk assessment</h1>
+<table class="meta"><tr><td>Project</td><td>Power window control</td></tr><tr><td>Generated</td><td>2026-11-19T14:15:29+00:00</td></tr><tr><td>Commit</td><td>68d1561</td></tr><tr><td>Uncommitted changes</td><td>no</td></tr><tr><td>Baseline</td><td>none</td></tr><tr><td>Items shown</td><td>1</td></tr></table>
+<h2>Revision history</h2><table><tr><th>date</th><th>record</th><th>what</th><th>by</th></tr><tr><td>2026-11-19</td><td>REV-0008</td><td>review approved of 1 items shown here</td><td>Demonstration data - no review by a person took place</td></tr></table>
+<nav><ul><li>Item definition</li><li>Hazardous events</li><li>Hazardous event details</li><li>Safety goals</li><li>Open findings</li></ul></nav>
+<h1>Item definition</h1>
+<h2 id="ITM-0001">ITM-0001 Window control of the front door module</h2>
+<p class="note">Received from Front Door Module - Item Definition for Cybersecurity, version 1.0, identifier ID-FDM-WIN.</p>
+<table><tr><th>status</th><td>approved</td></tr></table>
+<h3>Boundary and functions</h3>
+<p>The item is the window control of the front door module: the window control software (SYE-0001) and the window drive hardware (SYE-0002) with its motor and Hall sensor. Outside the item: the driver&#x27;s switch panel and the other door modules, the body network, the central gateway, the diagnostic tester, the basic software of the door module. Functions: opening and closing on a switch request, automatic closing by one touch, reversal after an obstacle.</p>
+<h3>Preliminary architecture</h3>
+<p>Window control software (SYE-0001) and window drive hardware (SYE-0002), connected by the Hall sensor pulse signal (SYI-0001) and the motor command to the bridge driver (SYI-0002). Switch requests reach the software over the body network (SYI-0003) through the communication stack of the basic software.</p>
+<h3>Operational environment</h3>
+<p>The body network links the door modules, the switch panel and the central gateway. The gateway connects it to the diagnostic port inside the cabin and to the telematics unit. Bus wiring runs through the door hinge and to the mirror connector. Workshops reprogram the door module through the diagnostic port; the bootloader is part of the basic software. Vehicles are parked unattended.</p>
+<h3>Assumptions</h3>
+<p>The communication stack of the basic software can protect the authenticity and freshness of signals on the body network. The bootloader accepts only signed software images.</p>
+<h1>Hazardous events</h1>
+<p>Nothing of this kind in the project.</p>
+<h1>Hazardous event details</h1>
+<p>Nothing of this kind in the project.</p>
+<h1>Safety goals</h1>
+<p>Nothing of this kind in the project.</p>
+<h1>Open findings</h1>
+<p>The trace check reports no error and no warning here.</p>
+<h1>Items in this document</h1><table><thead><tr><th>item</th><th>title</th><th>state</th><th>content hash</th></tr></thead><tr><td><a href="#ITM-0001">ITM-0001</a></td><td>Window control of the front door module</td><td>approved</td><td><code>b1521b9145d6</code></td></tr></table>
+<p class="caption">Generated by tools/document.py from the items of the project. The items are the source: change them, not this document.</p>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script><script>if (window.mermaid) { mermaid.initialize({startOnLoad: true}); }</script>
+</body></html>

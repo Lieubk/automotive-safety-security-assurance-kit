@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Safety analysis report</title><style>
+:root { --ink: #1d2430; --muted: #5b6575; --line: #d6dbe3; --soft: #f4f6f9; --accent: #2d5b8a; --warn: #a33a1f; }
+body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: #fff;
+       max-width: 60rem; margin: 2rem auto; padding: 0 1rem; }
+h1 { font-size: 1.6rem; border-bottom: 2px solid var(--accent); padding-bottom: .3rem; margin-top: 2.5rem; }
+h2 { font-size: 1.25rem; margin-top: 2rem; } h3 { font-size: 1.05rem; } h4 { font-size: .95rem; }
+table { border-collapse: collapse; width: 100%; margin: .6rem 0 1rem; font-size: .9rem; }
+th, td { border: 1px solid var(--line); padding: .3rem .5rem; text-align: left; vertical-align: top; }
+th { background: var(--soft); } code, pre { font-family: Consolas, "Courier New", monospace; font-size: .88rem; }
+pre { background: var(--soft); padding: .6rem; overflow-x: auto; } .caption { color: var(--muted); font-size: .85rem; margin: .8rem 0 .1rem; }
+.note { border-left: 4px solid var(--warn); padding: .2rem .6rem; color: var(--warn); }
+.banner { background: var(--warn); color: #fff; padding: .4rem .8rem; font-weight: 600; }
+.meta td:first-child { width: 14rem; color: var(--muted); } nav ul { columns: 2; } a { color: var(--accent); }
+@page { size: A4; margin: 16mm 14mm 18mm; @bottom-right { content: counter(page) " / " counter(pages); font-size: 9pt; color: #5b6575; } }
+@media print { body { max-width: none; margin: 0; padding: 0; font-size: 10.5pt; } nav { display: none; }
+  h1 { page-break-before: always; } h1.title { page-break-before: avoid; } h1, h2, h3, h4 { break-after: avoid; }
+  thead { display: table-header-group; } tr, pre, .note { break-inside: avoid; } a { color: inherit; text-decoration: none; }
+  .banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style></head><body>
+<h1 class="title">Safety analysis report</h1>
+<table class="meta"><tr><td>Project</td><td>Power window control</td></tr><tr><td>Generated</td><td>2026-11-19T14:15:33+00:00</td></tr><tr><td>Commit</td><td>68d1561</td></tr><tr><td>Uncommitted changes</td><td>no</td></tr><tr><td>Baseline</td><td>none</td></tr><tr><td>Items shown</td><td>2</td></tr></table>
+<h2>Revision history</h2><table><tr><th>date</th><th>record</th><th>what</th><th>by</th></tr><tr><td>2026-11-19</td><td>REV-0013</td><td>review approved of 2 items shown here</td><td>Demonstration data - no review by a person took place</td></tr></table>
+<nav><ul><li>Analyses</li><li>Analysis details</li><li>Open findings</li></ul></nav>
+<h1>Analyses</h1>
+<table><thead><tr><th>id</th><th>title</th><th>method</th><th>level</th><th>analyses</th></tr></thead><tr><td><a href="#SAN-0001">SAN-0001</a></td><td>Software FMEA of the ASIL B components</td><td>fmea</td><td>software</td><td>CMP-0003, CMP-0004, CMP-0005, CMP-0006, IFC-0002, IFC-0004</td></tr><tr><td><a href="#SAN-0002">SAN-0002</a></td><td>Dependent failures between WindowCmd and the ASIL B components</td><td>dfa</td><td>software</td><td>CMP-0002, CMP-0003, CMP-0004, CMP-0005, VIEW-0004</td></tr></table>
+<h1>Analysis details</h1>
+<h2 id="SAN-0001">SAN-0001 Software FMEA of the ASIL B components</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>method</th><td>fmea</td></tr><tr><th>level</th><td>software</td></tr></table>
+<p class="caption">findings</p>
+<table><thead><tr><th>id</th><th>fault</th><th>effect</th><th>state</th><th>measure</th><th>carried_by</th><th>rationale</th></tr></thead><tr><td>F1</td><td>WindowPos keeps its last speed when Hall edges stop arriving</td><td>AntiPinch sees no slow-down at an obstacle and does not reverse; the customer&#x27;s anti-pinch requirement (SYR-0002) is violated</td><td>closed</td><td>a closing movement that cannot be supervised is reversed</td><td>SWR-0006</td><td></td></tr><tr><td>F2</td><td>the reversal request of AntiPinch arrives while WindowCmd still commands closing</td><td>the motor keeps closing against the obstacle</td><td>closed</td><td>the reversal request has priority over every command of WindowCmd</td><td>SWR-0007</td><td></td></tr><tr><td>F3</td><td>AntiPinch runs later than its period under load</td><td>the reversal starts after the force limit is exceeded</td><td>closed</td><td>AntiPinch runs in the 5 ms task with a time budget; the load is measured by the customer on the target</td><td>VIEW-0004</td><td></td></tr><tr><td>F4</td><td>the basic software delivers a wrong bridge output state</td><td>MotorDrive reports a direction the motor does not have</td><td>closed</td><td>none in the delivered software: the bridge driver and its diagnostics are the customer&#x27;s</td><td></td><td>the bridge output (IFC-0008) is provided by the customer&#x27;s basic software, whose safety is the customer&#x27;s</td></tr></table>
+<h3>Scope</h3>
+<p>The components of ASIL B - WindowPos, AntiPinch, MotorDrive - and the interfaces of the basic software they use, measured against the system requirements of ASIL B the customer allocated to the software (SYR-0001, SYR-0002). The basic software itself is analysed by the customer.</p>
+<h3>Method</h3>
+<p>For each output of each component, the guide words no value, wrong value, too late, too early and stuck, followed to the movement of the window.</p>
+<h3>Results</h3>
+<p>Four findings, all closed: three carried by software requirements and the execution model, one left with the customer and argued. The analysis assumes the timing figures of the execution model, which only the customer&#x27;s measurement on the target confirms.</p>
+<p class="caption">links</p>
+<table><tr><th>analyses</th><td>CMP-0003 WindowPos - window position and speed acquisition, CMP-0004 AntiPinch - anti-pinch detection, CMP-0005 MotorDrive - motor actuation, CMP-0006 BswPlatform - basic software of the door module, IFC-0002 Window motion, IFC-0004 Movement command</td></tr><tr><th>delivers (from)</th><td>WP-0012 Functional safety</td></tr></table>
+<h2 id="SAN-0002">SAN-0002 Dependent failures between WindowCmd and the ASIL B components</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>method</th><td>dfa</td></tr><tr><th>level</th><td>software</td></tr></table>
+<p class="caption">findings</p>
+<table><thead><tr><th>id</th><th>fault</th><th>effect</th><th>state</th><th>measure</th><th>carried_by</th></tr></thead><tr><td>D1</td><td>WindowCmd (QM) writes into data of AntiPinch or WindowPos</td><td>corrupted obstacle detection</td><td>closed</td><td>the components exchange data only through their interfaces; no component has access to another&#x27;s data, which the static analysis and the code review check</td><td>VIEW-0001</td></tr><tr><td>D2</td><td>WindowCmd uses up the execution time of the 5 ms task</td><td>AntiPinch runs late</td><td>closed</td><td>time budgets per entry function in the execution model, measured by the customer</td><td>VIEW-0004</td></tr><tr><td>D3</td><td>a wrong command of WindowCmd overrides a reversal</td><td>closing against an obstacle</td><td>closed</td><td>the reversal has priority over every command</td><td>SWR-0007</td></tr></table>
+<h3>Scope</h3>
+<p>Freedom from interference of WindowCmd (QM) with WindowPos, AntiPinch and MotorDrive (ASIL B) in the same software: memory, execution time and the exchange of commands.</p>
+<h3>Method</h3>
+<p>The dependent failure initiators shared memory, shared execution time and shared information, per pair of components.</p>
+<h3>Results</h3>
+<p>Three initiators, each answered by the design. Memory protection by the hardware is not assumed: the argument rests on the interfaces and the checks of the code.</p>
+<p class="caption">links</p>
+<table><tr><th>analyses</th><td>CMP-0002 WindowCmd - window command logic, CMP-0003 WindowPos - window position and speed acquisition, CMP-0004 AntiPinch - anti-pinch detection, CMP-0005 MotorDrive - motor actuation, VIEW-0004 Execution model</td></tr><tr><th>delivers (from)</th><td>WP-0012 Functional safety</td></tr></table>
+<h1>Open findings</h1>
+<p>The trace check reports no error and no warning here.</p>
+<h1>Items in this document</h1><table><thead><tr><th>item</th><th>title</th><th>state</th><th>content hash</th></tr></thead><tr><td><a href="#SAN-0001">SAN-0001</a></td><td>Software FMEA of the ASIL B components</td><td>approved</td><td><code>49d83ec45e3f</code></td></tr><tr><td><a href="#SAN-0002">SAN-0002</a></td><td>Dependent failures between WindowCmd and the ASIL B components</td><td>approved</td><td><code>c1c261675337</code></td></tr></table>
+<p class="caption">Generated by tools/document.py from the items of the project. The items are the source: change them, not this document.</p>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script><script>if (window.mermaid) { mermaid.initialize({startOnLoad: true}); }</script>
+</body></html>

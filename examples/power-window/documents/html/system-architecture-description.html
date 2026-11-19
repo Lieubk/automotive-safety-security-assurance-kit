@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System architecture description</title><style>
+:root { --ink: #1d2430; --muted: #5b6575; --line: #d6dbe3; --soft: #f4f6f9; --accent: #2d5b8a; --warn: #a33a1f; }
+body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: #fff;
+       max-width: 60rem; margin: 2rem auto; padding: 0 1rem; }
+h1 { font-size: 1.6rem; border-bottom: 2px solid var(--accent); padding-bottom: .3rem; margin-top: 2.5rem; }
+h2 { font-size: 1.25rem; margin-top: 2rem; } h3 { font-size: 1.05rem; } h4 { font-size: .95rem; }
+table { border-collapse: collapse; width: 100%; margin: .6rem 0 1rem; font-size: .9rem; }
+th, td { border: 1px solid var(--line); padding: .3rem .5rem; text-align: left; vertical-align: top; }
+th { background: var(--soft); } code, pre { font-family: Consolas, "Courier New", monospace; font-size: .88rem; }
+pre { background: var(--soft); padding: .6rem; overflow-x: auto; } .caption { color: var(--muted); font-size: .85rem; margin: .8rem 0 .1rem; }
+.note { border-left: 4px solid var(--warn); padding: .2rem .6rem; color: var(--warn); }
+.banner { background: var(--warn); color: #fff; padding: .4rem .8rem; font-weight: 600; }
+.meta td:first-child { width: 14rem; color: var(--muted); } nav ul { columns: 2; } a { color: var(--accent); }
+@page { size: A4; margin: 16mm 14mm 18mm; @bottom-right { content: counter(page) " / " counter(pages); font-size: 9pt; color: #5b6575; } }
+@media print { body { max-width: none; margin: 0; padding: 0; font-size: 10.5pt; } nav { display: none; }
+  h1 { page-break-before: always; } h1.title { page-break-before: avoid; } h1, h2, h3, h4 { break-after: avoid; }
+  thead { display: table-header-group; } tr, pre, .note { break-inside: avoid; } a { color: inherit; text-decoration: none; }
+  .banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style></head><body>
+<h1 class="title">System architecture description</h1>
+<table class="meta"><tr><td>Project</td><td>Power window control</td></tr><tr><td>Generated</td><td>2026-11-19T14:14:42+00:00</td></tr><tr><td>Commit</td><td>68d1561</td></tr><tr><td>Uncommitted changes</td><td>no</td></tr><tr><td>Baseline</td><td>none</td></tr><tr><td>Items shown</td><td>5</td></tr></table>
+<h2>Revision history</h2><table><tr><th>date</th><th>record</th><th>what</th><th>by</th></tr><tr><td>2026-11-19</td><td>REV-0001</td><td>review approved of 5 items shown here</td><td>Demonstration data - no review by a person took place</td></tr></table>
+<nav><ul><li>Context and structure</li><li>System elements</li><li>Element descriptions</li><li>System interfaces</li><li>Dynamic behavior</li><li>Design decisions</li><li>Allocation of the system requirements</li></ul></nav>
+<h1>Context and structure</h1>
+<p>Nothing of this kind in the project.</p>
+<h1>System elements</h1>
+<table><thead><tr><th>id</th><th>title</th><th>kind</th><th>asil</th><th>security_relevant</th></tr></thead><tr><td><a href="#SYE-0001">SYE-0001</a></td><td>Window control software</td><td>software</td><td>B</td><td>no</td></tr><tr><td><a href="#SYE-0002">SYE-0002</a></td><td>Window drive hardware</td><td>hardware</td><td>B</td><td>no</td></tr></table>
+<h1>Element descriptions</h1>
+<h2 id="SYE-0001">SYE-0001 Window control software</h2>
+<p class="note">Received from Front Door Module - System Architecture Description, version 1.4.</p>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>asil</th><td>B</td></tr><tr><th>security_relevant</th><td>no</td></tr><tr><th>kind</th><td>software</td></tr></table>
+<h3>Responsibility</h3>
+<p>The application software of the door module that moves the window. It evaluates the switch request on the body network and the Hall sensor pulse signal and commands the motor through the bridge driver. It tracks the window opening and the window speed, detects an obstacle during closing and reverses the window.</p>
+<p>Not part of this element: network management, diagnostics, supply monitoring and the drivers of the microcontroller. They belong to the basic software, which the customer provides and integrates.</p>
+<p>Resources assigned to this element on the microcontroller of the window drive hardware: 16384 bytes of program flash, 1024 bytes of static RAM, 256 bytes of stack in each of its two tasks, 64 bytes of the interrupt stack, and 10 % of the processor time.</p>
+<h3>Dynamic behavior</h3>
+<ul><li>Cycle times: 5 ms for position, speed, obstacle detection and motor command; 20 ms for the evaluation of the switch request.</li><li>Time budget of the obstacle reaction: at most 20 ms from the moment the window speed has fallen 20 mm/s below its previous steady value until the motor command has changed to the opening direction.</li><li>Start-up: the element is ready 50 ms after the reset is released, with the motor stopped.</li><li>The window opening is not stored over a reset in release R1.0. After a reset it is unknown until the window has been driven against the fully open end stop once.</li></ul>
+<p class="caption">links</p>
+<table><tr><th>fulfils</th><td>SYR-0001 Limitation of the closing force, SYR-0002 Reversal after an obstacle, SYR-0003 Automatic closing by one touch, SYR-0004 Manual movement while the switch is held</td></tr><tr><th>derived_from (from)</th><td>SWR-0001 Window opening from Hall pulses, SWR-0002 Reference of the window opening at the open end stop, SWR-0004 Obstacle detection during closing</td></tr></table>
+<h2 id="SYE-0002">SYE-0002 Window drive hardware</h2>
+<p class="note">Received from Front Door Module - System Architecture Description, version 1.4.</p>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>asil</th><td>B</td></tr><tr><th>security_relevant</th><td>no</td></tr><tr><th>kind</th><td>hardware</td></tr></table>
+<h3>Responsibility</h3>
+<p>Moves the glass and delivers the signals the software needs:</p>
+<ul><li>DC motor with worm gear and cable regulator; glass travel 480 mm between the fully closed and the fully open end stop.</li><li>Hall sensor on the motor shaft with a ring magnet: one pulse per 0.5 mm of glass travel, the same in both directions.</li><li>H-bridge driver with direction inputs and pulse width modulation.</li><li>Microcontroller: 32 bit, one core, 128 KB program flash, 16 KB RAM, a free-running 32 bit capture timer with a resolution of 1 us.</li></ul>
+<h3>Dynamic behavior</h3>
+<ul><li>Glass speed in steady movement: 80 mm/s to 200 mm/s over the supply range of 9 V to 16 V, which is 160 to 400 Hall pulses per second.</li><li>After the bridge has been switched on, the first Hall pulse follows within 60 ms.</li><li>After the bridge has been switched off or reversed, the glass runs on for at most 3 Hall pulses (1.5 mm).</li><li>A new bridge command changes the motor voltage within 1 ms.</li></ul>
+<p class="caption">links</p>
+<table><tr><th>fulfils</th><td>SYR-0001 Limitation of the closing force, SYR-0002 Reversal after an obstacle</td></tr></table>
+<h1>System interfaces</h1>
+<h2 id="SYI-0001">SYI-0001 Hall sensor pulse signal</h2>
+<p class="note">Received from Front Door Module - System Architecture Description, version 1.4.</p>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>asil</th><td>B</td></tr><tr><th>security_relevant</th><td>no</td></tr><tr><th>kind</th><td>hardware-software</td></tr></table>
+<h3>Definition</h3>
+<p>Digital signal of the Hall sensor at a capture input of the microcontroller timer.</p>
+<table><thead><tr><th>Property</th><th>Value</th></tr></thead><tr><td>Meaning of one rising edge</td><td>0.5 mm of glass travel; no direction information</td></tr><tr><td>Capture timer</td><td>free running, 32 bit, 1 count = 1 us, wraps every 4294.967296 s</td></tr><tr><td>Notification</td><td>the software is called at every rising edge with the captured timer value</td></tr><tr><td>Edge spacing in steady movement</td><td>2.5 ms (200 mm/s) to 6.25 ms (80 mm/s)</td></tr><tr><td>Edge spacing below 400 us</td><td>not caused by glass travel; such an edge is a disturbance and carries no travel information</td></tr><tr><td>Reading the timer</td><td>the software can read the current timer value at any time</td></tr></table>
+<h3>Dynamic behavior</h3>
+<p>Edges are spaced further apart while the drive starts, stops or works against an obstacle. A standing window produces no edges.</p>
+<p class="caption">links</p>
+<table><tr><th>derived_from (from)</th><td>SWR-0001 Window opening from Hall pulses, SWR-0003 Window speed</td></tr><tr><th>realizes (from)</th><td>IFC-0001 Hall edge notification, IFC-0007 Capture time base</td></tr></table>
+<h2 id="SYI-0002">SYI-0002 Motor command to the bridge driver</h2>
+<p class="note">Received from Front Door Module - System Architecture Description, version 1.4.</p>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>asil</th><td>B</td></tr><tr><th>security_relevant</th><td>no</td></tr><tr><th>kind</th><td>hardware-software</td></tr></table>
+<h3>Definition</h3>
+<p>Control inputs of the H-bridge driver, set by the software.</p>
+<table><thead><tr><th>Signal</th><th>Values</th><th>Effect</th></tr></thead><tr><td>Direction</td><td>off, opening, closing</td><td>off connects both motor terminals to ground (brake)</td></tr><tr><td>Duty cycle</td><td>0 % to 100 % in steps of 1 %</td><td>share of the supply voltage applied to the motor; pulse width modulation at 20 kHz</td></tr></table>
+<p>A new command takes effect at the motor terminals within 1 ms.</p>
+<h3>Dynamic behavior</h3>
+<p>The bridge driver switches itself off on over-temperature and reports this as a fault with the acknowledgement of the next command.</p>
+<p class="caption">links</p>
+<table><tr><th>derived_from (from)</th><td>SWR-0007 Priority of the reversal request</td></tr><tr><th>realizes (from)</th><td>IFC-0008 Bridge output</td></tr></table>
+<h2 id="SYI-0003">SYI-0003 Switch request on the body network</h2>
+<p class="note">Received from Front Door Module - System Architecture Description, version 1.4.</p>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>asil</th><td>QM</td></tr><tr><th>security_relevant</th><td>no</td></tr><tr><th>kind</th><td>bus</td></tr></table>
+<h3>Definition</h3>
+<p>Signal <code>WindowSwitchRequest</code> in the cyclic frame of the door switch panel.</p>
+<table><thead><tr><th>Property</th><th>Value</th></tr></thead><tr><td>Length</td><td>3 bit</td></tr><tr><td>Values</td><td>0 NONE, 1 OPEN, 2 CLOSE, 3 AUTO_CLOSE, 4 to 6 reserved, 7 signal not available</td></tr><tr><td>Cycle time</td><td>20 ms</td></tr><tr><td>Loss</td><td>the signal counts as lost when no frame has been received for 100 ms</td></tr></table>
+<h3>Dynamic behavior</h3>
+<p>OPEN and CLOSE are sent for as long as the switch is held in its first position. AUTO_CLOSE is sent for as long as the switch is pulled to its second position, at least for three frames; NONE follows when the switch is released.</p>
+<p class="caption">links</p>
+<table><tr><th>derived_from (from)</th><td>SWR-0008 Automatic closing, SWR-0009 Manual movement</td></tr><tr><th>located_in (from)</th><td>AST-0001 Switch request received over the body network</td></tr><tr><th>realizes (from)</th><td>IFC-0006 Switch request</td></tr></table>
+<h1>Dynamic behavior</h1>
+<p>Nothing of this kind in the project.</p>
+<h1>Design decisions</h1>
+<p>Nothing of this kind in the project.</p>
+<h1>Allocation of the system requirements</h1>
+<table><thead><tr><th>system-requirement</th><th>fulfils (from)</th></tr></thead><tr><td>SYR-0001 Limitation of the closing force</td><td><a href="#SYE-0001">SYE-0001</a> Window control software, <a href="#SYE-0002">SYE-0002</a> Window drive hardware</td></tr><tr><td>SYR-0002 Reversal after an obstacle</td><td><a href="#SYE-0001">SYE-0001</a> Window control software, <a href="#SYE-0002">SYE-0002</a> Window drive hardware</td></tr><tr><td>SYR-0003 Automatic closing by one touch</td><td><a href="#SYE-0001">SYE-0001</a> Window control software</td></tr><tr><td>SYR-0004 Manual movement while the switch is held</td><td><a href="#SYE-0001">SYE-0001</a> Window control software</td></tr></table>
+<h1>Items in this document</h1><table><thead><tr><th>item</th><th>title</th><th>state</th><th>content hash</th></tr></thead><tr><td><a href="#SYE-0001">SYE-0001</a></td><td>Window control software</td><td>approved</td><td><code>907b42951f13</code></td></tr><tr><td><a href="#SYE-0002">SYE-0002</a></td><td>Window drive hardware</td><td>approved</td><td><code>15c31a07b3d9</code></td></tr><tr><td><a href="#SYI-0001">SYI-0001</a></td><td>Hall sensor pulse signal</td><td>approved</td><td><code>fd6d4321eb97</code></td></tr><tr><td><a href="#SYI-0002">SYI-0002</a></td><td>Motor command to the bridge driver</td><td>approved</td><td><code>b98500184175</code></td></tr><tr><td><a href="#SYI-0003">SYI-0003</a></td><td>Switch request on the body network</td><td>approved</td><td><code>69ea995a587b</code></td></tr></table>
+<p class="caption">Generated by tools/document.py from the items of the project. The items are the source: change them, not this document.</p>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script><script>if (window.mermaid) { mermaid.initialize({startOnLoad: true}); }</script>
+</body></html>

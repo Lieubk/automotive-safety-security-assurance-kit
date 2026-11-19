@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Software tool evaluation and component qualification</title><style>
+:root { --ink: #1d2430; --muted: #5b6575; --line: #d6dbe3; --soft: #f4f6f9; --accent: #2d5b8a; --warn: #a33a1f; }
+body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: #fff;
+       max-width: 60rem; margin: 2rem auto; padding: 0 1rem; }
+h1 { font-size: 1.6rem; border-bottom: 2px solid var(--accent); padding-bottom: .3rem; margin-top: 2.5rem; }
+h2 { font-size: 1.25rem; margin-top: 2rem; } h3 { font-size: 1.05rem; } h4 { font-size: .95rem; }
+table { border-collapse: collapse; width: 100%; margin: .6rem 0 1rem; font-size: .9rem; }
+th, td { border: 1px solid var(--line); padding: .3rem .5rem; text-align: left; vertical-align: top; }
+th { background: var(--soft); } code, pre { font-family: Consolas, "Courier New", monospace; font-size: .88rem; }
+pre { background: var(--soft); padding: .6rem; overflow-x: auto; } .caption { color: var(--muted); font-size: .85rem; margin: .8rem 0 .1rem; }
+.note { border-left: 4px solid var(--warn); padding: .2rem .6rem; color: var(--warn); }
+.banner { background: var(--warn); color: #fff; padding: .4rem .8rem; font-weight: 600; }
+.meta td:first-child { width: 14rem; color: var(--muted); } nav ul { columns: 2; } a { color: var(--accent); }
+@page { size: A4; margin: 16mm 14mm 18mm; @bottom-right { content: counter(page) " / " counter(pages); font-size: 9pt; color: #5b6575; } }
+@media print { body { max-width: none; margin: 0; padding: 0; font-size: 10.5pt; } nav { display: none; }
+  h1 { page-break-before: always; } h1.title { page-break-before: avoid; } h1, h2, h3, h4 { break-after: avoid; }
+  thead { display: table-header-group; } tr, pre, .note { break-inside: avoid; } a { color: inherit; text-decoration: none; }
+  .banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style></head><body>
+<h1 class="title">Software tool evaluation and component qualification</h1>
+<table class="meta"><tr><td>Project</td><td>Power window control</td></tr><tr><td>Generated</td><td>2026-11-19T14:15:35+00:00</td></tr><tr><td>Commit</td><td>68d1561</td></tr><tr><td>Uncommitted changes</td><td>no</td></tr><tr><td>Baseline</td><td>none</td></tr><tr><td>Items shown</td><td>2</td></tr></table>
+<h2>Revision history</h2><table><tr><th>date</th><th>record</th><th>what</th><th>by</th></tr><tr><td>2026-11-19</td><td>REV-0013</td><td>review approved of 2 items shown here</td><td>Demonstration data - no review by a person took place</td></tr></table>
+<nav><ul><li>Software components qualified</li><li>Component qualifications</li><li>Elements proven in use</li><li>Proven in use arguments</li><li>Tools</li><li>Evaluations</li><li>Open findings</li></ul></nav>
+<h1>Software components qualified</h1>
+<p>Nothing of this kind in the project.</p>
+<h1>Component qualifications</h1>
+<p>Nothing of this kind in the project.</p>
+<h1>Elements proven in use</h1>
+<p>Nothing of this kind in the project.</p>
+<h1>Proven in use arguments</h1>
+<p>Nothing of this kind in the project.</p>
+<h1>Tools</h1>
+<table><thead><tr><th>id</th><th>tool</th><th>impact</th><th>detection</th><th>confidence</th><th>asil</th><th>qualification_method</th></tr></thead><tr><td><a href="#TEV-0001">TEV-0001</a></td><td>Microsoft C/C++ 19</td><td>TI2</td><td>TD1</td><td>TCL1</td><td>B</td><td></td></tr><tr><td><a href="#TEV-0002">TEV-0002</a></td><td>gcc 13 with gcov</td><td>TI2</td><td>TD1</td><td>TCL1</td><td>B</td><td></td></tr></table>
+<h1>Evaluations</h1>
+<h2 id="TEV-0001">TEV-0001 Microsoft C/C++ compiler and its static analysis</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>tool</th><td>Microsoft C/C++ 19</td></tr><tr><th>impact</th><td>TI2</td></tr><tr><th>detection</th><td>TD1</td></tr><tr><th>confidence</th><td>TCL1</td></tr><tr><th>asil</th><td>B</td></tr></table>
+<h3>Use cases</h3>
+<p>Builds of the integration steps on the host (BLD-0001, BLD-0002) and the static analysis of the units (SAR-0001). The delivered product is source code; the customer compiles it with the target compiler. An error of this tool could hide a fault of the code in a test or let a defect pass the analysis.</p>
+<h3>Classification rationale</h3>
+<p>A fault hidden by a wrong host build would show in the other host build with gcc (RUN-0001) or in the customer&#x27;s tests on the target, which run on code compiled by another compiler. The analysis supplements reviews of the code, which do not rely on it.</p>
+<p class="caption">links</p>
+<table><tr><th>delivers (from)</th><td>WP-0012 Functional safety</td></tr></table>
+<h2 id="TEV-0002">TEV-0002 gcc and gcov for unit tests and structural coverage</h2>
+<table><tr><th>status</th><td>approved</td></tr><tr><th>tool</th><td>gcc 13 with gcov</td></tr><tr><th>impact</th><td>TI2</td></tr><tr><th>detection</th><td>TD1</td></tr><tr><th>confidence</th><td>TCL1</td></tr><tr><th>asil</th><td>B</td></tr></table>
+<h3>Use cases</h3>
+<p>Builds and runs of the unit tests and the measurement of statement and branch coverage (RUN-0001). A wrong coverage figure could let an untested branch pass.</p>
+<h3>Classification rationale</h3>
+<p>The unit test cases are derived from the unit designs and reviewed against them; a branch without a test case is found in that review, independently of the measured figure. The tests also run with the Microsoft compiler in the integration steps.</p>
+<p class="caption">links</p>
+<table><tr><th>delivers (from)</th><td>WP-0012 Functional safety</td></tr></table>
+<h1>Open findings</h1>
+<table><thead><tr><th>level</th><th>rule</th><th>item</th><th>message</th></tr></thead><tr><td>warning</td><td>COV-71</td><td>PLN-0010</td><td>no approved safety plan with a tcl_determination: the confidence levels of the tools are not assessed</td></tr></table>
+<h1>Items in this document</h1><table><thead><tr><th>item</th><th>title</th><th>state</th><th>content hash</th></tr></thead><tr><td><a href="#TEV-0001">TEV-0001</a></td><td>Microsoft C/C++ compiler and its static analysis</td><td>approved</td><td><code>206f55a05b5d</code></td></tr><tr><td><a href="#TEV-0002">TEV-0002</a></td><td>gcc and gcov for unit tests and structural coverage</td><td>approved</td><td><code>1d4976143604</code></td></tr></table>
+<p class="caption">Generated by tools/document.py from the items of the project. The items are the source: change them, not this document.</p>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script><script>if (window.mermaid) { mermaid.initialize({startOnLoad: true}); }</script>
+</body></html>
