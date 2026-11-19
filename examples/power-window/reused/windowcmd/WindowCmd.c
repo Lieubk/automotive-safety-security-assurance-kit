@@ -2,7 +2,8 @@
  * @file    WindowCmd.c
  * @brief   Command logic of the window lifter: manual movement and automatic closing.
  *
- * Window lifter platform release 3.2.0, taken over without change (CMP-0002).
+ * Window lifter platform release 3.2.1 (3.2.0 with the correction of PRB-0001), taken
+ * over without change (CMP-0002).
  */
 #include "WindowCmd.h"
 #include "WindowPos.h"

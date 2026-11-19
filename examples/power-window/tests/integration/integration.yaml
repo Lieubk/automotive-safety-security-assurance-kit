@@ -16,7 +16,7 @@ include:
 # Components taken over as received: the version integrated and its files.
 delivered:
   CMP-0002:
-    version: "window lifter platform 3.2.0, WindowCmd"
+    version: "window lifter platform 3.2.1, WindowCmd"
     files: [reused/windowcmd/WindowCmd.c]
   CMP-0005:
     version: "window lifter platform 3.2.0, MotorDrive"

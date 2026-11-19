@@ -2,7 +2,8 @@
  * @file    WindowCmd.h
  * @brief   Command logic of the window lifter: manual movement and automatic closing.
  *
- * Window lifter platform release 3.2.0, taken over without change (CMP-0002).
+ * Window lifter platform release 3.2.1 (3.2.0 with the correction of PRB-0001), taken
+ * over without change (CMP-0002).
  * Uses IFC-0002 (window motion), IFC-0003 (detection status), IFC-0004 (movement
  * command), IFC-0005 (motor state) and IFC-0006 (switch request). One call of
  * WindowCmd_Step() is one cycle of 20 ms.
