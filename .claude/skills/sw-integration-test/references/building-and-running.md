@@ -95,7 +95,8 @@ it rests on, then the code of both sides of the interface. Propose with the text
 
 The user confirms. Until then the case stays failed. Not allowed: deleting or weakening
 the case, replacing an integrated component by a double, recording `not-run` for a case
-that failed. Where SUP.9 is in scope a confirmed defect also gets a `problem-report`.
+that failed. Where SUP.9 is in scope a confirmed defect also gets a `problem-report`,
+recorded by `/problem-resolution`.
 
 ## Regression
 

@@ -44,7 +44,7 @@ type and no rule for the process, so its evidence lives outside the toolkit.
 | Supporting | SUP.4 | Joint Review | extended | catalog |
 | Supporting | SUP.7 | Documentation | extended | catalog |
 | Supporting | SUP.8 | Configuration Management | vda | authoring for baselines: `/baseline` |
-| Supporting | SUP.9 | Problem Resolution Management | vda | checked |
+| Supporting | SUP.9 | Problem Resolution Management | vda | authoring: `/problem-resolution` |
 | Supporting | SUP.10 | Change Request Management | vda | authoring for change requests: `/change-request` |
 | Management | MAN.3 | Project Management | vda | authoring: `/project-plan`, `/work-breakdown`, `/project-status` |
 | Management | MAN.5 | Risk Management | extended | catalog |

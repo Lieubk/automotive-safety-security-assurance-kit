@@ -55,7 +55,7 @@ on the vehicle at worst.
 
 Where the project is responsible for problem resolution (SUP.9 in `scope.processes`)
 and the design was already baselined or delivered, the problem is also recorded as a
-`problem-report`; ask the user whether that applies.
+`problem-report` (`/problem-resolution`); ask the user whether that applies.
 
 ## While the answer is open
 

@@ -74,9 +74,9 @@ subject - and it is not to be lost either.
 - An imported item: a `query` to its source (below).
 - An item of the project: a `problem-report` that `affects` it, written now, with the
   user's yes. `check` then warns `PROBLEM` on the item while the report is not resolved.
-  Who resolves it is a matter of problem resolution (SUP.9); where that process is out
-  of scope, the report still keeps the problem visible, and its resolution is the
-  authoring skill of the item followed by `/review`.
+  It is written by `/problem-resolution`, which also takes it further (SUP.9); where
+  that process is out of scope, the report still keeps the problem visible, and its
+  resolution is the authoring skill of the item followed by `/review`.
 
 ```markdown
 ---
@@ -85,6 +85,9 @@ type: problem-report
 title: Run time of the QM task is bounded by nothing
 status: open
 severity: major
+reported_by: <the reviewers, as the user names them>
+reported_at: '<date of the review>'
+detected_by: review
 found_in: "review of IFC-0002, CMP-0003, CMP-0004 on <date>, at commit <commit>"
 links:
   affects: [VIEW-0004]

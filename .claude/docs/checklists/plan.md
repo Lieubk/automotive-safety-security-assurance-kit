@@ -1,6 +1,6 @@
 # Plan review checklist
 
-Version 3. Applies to: `plan`. Supports: MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6,
+Version 4. Applies to: `plan`. Supports: MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6,
 MAN.3.BP7, SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1,
 SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1.
 
@@ -162,8 +162,9 @@ empty, ask the user; do not assume a value.
 |---|---|---|---|
 | PLN-90 | The activities from recording to closure are described, and the states agree with the `problem-report` lifecycle in `schema/items.yaml` | compare `Approach` with the schema | semantic |
 | PLN-91 | The severity classes are defined by criteria and agree with the values of `severity` | read `Criteria`; compare with the schema | semantic |
-| PLN-92 | Urgent cases are covered: who may authorise an immediate action and how it is recorded in `urgent_action` | read `Approach`, `Responsibilities` | semantic |
-| PLN-93 | Alert notification is defined: which problems are made known to whom, and how fast | read `Approach` | semantic |
+| PLN-99 | `urgent_severities` and `alerts` are present and name only severities of the schema | `check`: no `SCHEMA` finding on the item and no `COV-39` finding on the plan | script |
+| PLN-92 | Urgent cases are covered: `urgent_severities` names the severities that need an immediate decision, `Approach` says who may authorise it, and how fast; it is recorded in `urgent_action` | read `urgent_severities`, `Approach`, `Responsibilities` | semantic |
+| PLN-93 | Alert notification is defined: `alerts` names, per severity, the parties to be told and how fast; the parties are those that other software, other systems or other users depend on (customer, suppliers of affected components, safety and security managers) | read `alerts` and `Scope` | semantic |
 | PLN-94 | It is defined when a problem leads to a change request and how the two stay linked | read `Approach`; compare with the change request management plan | semantic |
 | PLN-95 | The interfaces are named: who may report a problem and who is informed, including customer, suppliers and other users of the same software | read `Scope`, `Responsibilities` | semantic |
 | PLN-96 | It is defined how the effect of a resolution is shown before a problem is closed (retest or review) | read `Criteria` | semantic |

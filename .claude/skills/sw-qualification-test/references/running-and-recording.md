@@ -57,7 +57,8 @@ python tools/record.py test-run --level software-qualification --results <report
 | the case expects something the requirement does not say | correct the item; its approval becomes stale; `/review` |
 | the test code, the double or the bench does not do what the item says | correct it; name every case it affects |
 
-The user confirms. Where SUP.9 is in scope a confirmed defect gets a `problem-report`.
+The user confirms. Where SUP.9 is in scope a confirmed defect gets a `problem-report`,
+recorded by `/problem-resolution`.
 
 ## A project without a runner
 

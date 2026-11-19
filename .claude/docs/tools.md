@@ -17,6 +17,8 @@ example is `examples/power-window`). They need Python 3 and PyYAML.
 | `impact <ID>` | see what a change to an item affects | every item that depends on it, by distance |
 | `audit <BL-ID>` | compare a baseline record with the items as they are now | one line per difference; exit code 1 when there are any |
 | `progress [--as-of DATE] [--json]` | compare the plan with what the items show: per work package its state read from the items it delivers, lateness, effort against estimate; milestones against baselines; open corrective actions | a tree of work packages, milestones, corrective actions, a summary line |
+| `problems [--as-of DATE] [--json]` | see every problem report with state, severity, origin, detection, age and the change requests that resolve it, and counts by severity, origin, detection and age | a list and a summary line |
+| `history <ID>` | see the states an item had, from the commits that changed its file | date, commit, state per change; NOT ASSESSED with exit code 2 when git cannot be read |
 | `diff <ID> [--since REV-ID]` | see what changed in an item since a review saw it, as subject or as reference (an upstream item since the review of what builds on it); the reviewed text is taken from the git history by its content hash | a unified diff; "unchanged"; or NOT ASSESSED with exit code 2 when the reviewed text is in no commit |
 | `matrix` | produce the traceability tables for the link pairs in scope | Markdown tables |
 | `hash [ID ...]` | get content hashes | `ID hash` per line |
@@ -37,7 +39,7 @@ ratings:
 
 Finding levels: `error` (approved items, or always-wrong structure), `warning` (items
 in review, or missing consistency evidence), `info` (drafts). Rule names: `FORMAT`,
-`SCHEMA`, `LINK` (structure), `COV-01` to `COV-38` (coverage rules of
+`SCHEMA`, `LINK` (structure), `COV-01` to `COV-42` (coverage rules of
 `schema/items.yaml`), `SUSPECT` (an upstream item, or the code of a unit, changed after
 the review), `CONSISTENCY` (a review did not record what the item was compared with, or
 did not record the code of a unit), `UPSTREAM` (approved above something that is not),
@@ -59,6 +61,7 @@ active. The summary line says how many.
 | `review --reconfirm --reviewer NAME --verdict approved\|rework [--findings FILE] ID ...` | record that items which did not change were compared with new versions of what they build on. No checklist and no check results; refused for an item whose present content has no approving review. The new versions are recorded as references. The code review of a unit is carried over as it was recorded, so code that changed since stays `SUSPECT`; it cannot be combined with `--item-under-test` |
 | `baseline --tag TAG --purpose TEXT` | write a baseline record: the approved plans and engineering items with hash and status (an internal purpose: all of them). Refused while the trace check reports errors, unless the purpose is an internal one |
 | `status-report --reported-by NAME --assessment FILE [--as-of DATE] [--period TEXT]` | write a project status report: the figures of `progress` and `check` for the date, and the reporter's assessment from the file, in their words. Refused without an assessment |
+| `problem-trends --reported-by NAME --assessment FILE [--as-of DATE] [--period TEXT]` | write a problem trend report: the list and figures of `problems` for the date, and the analyst's assessment from the file, in their words. Refused without an assessment |
 | `communication --subject ID --audience WHO --channel TEXT [--agreement TEXT] [--sent-at DATE] [--practice BP]` | record what was made known to whom, and what was agreed; `--subject`, `--audience` and `--practice` may repeat. `--practice` names the communicate practices the record serves; `practices` counts it for those only |
 
 Input file formats are in the tool's help (`python tools/record.py --help` and the
@@ -86,7 +89,7 @@ module text). Records are final when written and are never edited afterwards.
   open, `QUERY` warns on every approved item it is about, and says so when the question
   has no `asked_at` yet, that is, it has not been put to its source.
 - A problem found in an item of the project outside a review of it is a
-  `problem-report` with an `affects` link; `PROBLEM` warns on the approved item until the
+  `problem-report` with an `affects` link (`/problem-resolution`); `PROBLEM` warns on the approved item until the
   report is resolved. `record.py review` refuses a finding on an item that is not a
   subject.
 - A requirement that uses what another requirement of its level defines links to it

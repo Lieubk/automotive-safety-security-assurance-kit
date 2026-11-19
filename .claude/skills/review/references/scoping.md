@@ -46,7 +46,7 @@ table says what to expect.
 | Anything else of the `engineering` lifecycle | for example `system-requirement` written by the project, `software-integration-test` | whichever checklist names the type; if none does, the semantic part is NOT ASSESSED |
 
 Cite a checklist as its file name without `.md`, followed by `v` and the number of its
-version line: `software-requirements v2`, `software-unit-code v2`, `plan v3`. The tool
+version line: `software-requirements v2`, `software-unit-code v2`, `plan v4`. The tool
 looks the file up and refuses a citation it cannot find or whose version is not the one
 in the file. It also accepts the title without the word "checklist"
 (`software requirements review v2`); use the file name, it cannot be mistyped as easily.

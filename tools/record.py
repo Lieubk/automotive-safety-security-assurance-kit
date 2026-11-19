@@ -111,6 +111,13 @@ Commands
         The reviewer names are the people accountable for the verdict: pass what
         the user states, never an invented name.
 
+    problem-trends --reported-by NAME --assessment FILE [--as-of DATE] [--period TEXT]
+        final problem trend report: every problem report known on the date with
+        its state, severity, origin, detection and age, and the counts by state,
+        severity, origin, detection and age (the figures of `traceability.py
+        problems`), with the analyst's assessment from the file, in their words.
+        Refused without an assessment.
+
     baseline --tag TAG --purpose TEXT
         final baseline record: the approved plans and engineering items with
         content hash and status (for an internal purpose: all of them, whatever
@@ -724,6 +731,36 @@ def cmd_status_report(project, args):
     return 0
 
 
+def cmd_problem_trends(project, args):
+    as_of = trace.as_date(args.as_of) if args.as_of else datetime.date.today()
+    problems = [] if as_of else ["--as-of must be a date YYYY-MM-DD"]
+    text = Path(args.assessment).read_text(encoding="utf-8").strip() if args.assessment and Path(args.assessment).is_file() else ""
+    if not text:
+        problems.append("--assessment names no file with text: the report carries the analyst's reading of the "
+                        "figures - trends, recurring causes and the actions decided - in their words")
+    if problems:
+        return stop(problems)
+    data = trace.problems(project, as_of)
+    front = {
+        "id": next_id(project, "problem-trend-report"),
+        "type": "problem-trend-report",
+        "status": "final",
+        "title": "Problem status and trends as of %s" % as_of,
+        "as_of": str(as_of),
+        "period": args.period,
+        "reported_by": args.reported_by,
+        "problems": [{k: e[k] for k in ("item", "state", "severity", "origin", "detected_by", "age_days")}
+                     for e in data["problems"]],
+        "figures": data["figures"],
+    }
+    if not args.period:
+        del front["period"]
+    path = write_item(project, "problem-trend-report", front, "\n## Assessment\n\n%s\n" % text)
+    figures = data["figures"]
+    print("wrote %s: %d problems, %d unresolved" % (path, figures["total"], figures["unresolved"]))
+    return 0
+
+
 def cmd_baseline(project, args):
     internal = (project.config.get("trace") or {}).get("internal_baselines") or []
     errors = [f for f in project.check() if f["level"] == "error"]
@@ -818,6 +855,11 @@ def main():
     status.add_argument("--assessment", required=True, help="text file with the reporter's assessment")
     status.add_argument("--as-of", help="date the figures are measured against (default: today)")
     status.add_argument("--period")
+    trends = sub.add_parser("problem-trends")
+    trends.add_argument("--reported-by", required=True)
+    trends.add_argument("--assessment", required=True, help="text file with the analyst's reading")
+    trends.add_argument("--as-of", help="date the ages are measured to (default: today)")
+    trends.add_argument("--period")
     baseline = sub.add_parser("baseline")
     baseline.add_argument("--tag", required=True)
     baseline.add_argument("--purpose", required=True)
@@ -832,7 +874,8 @@ def main():
     project = Project(args.project)
     commands = {"next-id": cmd_next_id, "test-run": cmd_test_run, "analysis-run": cmd_analysis_run,
                 "review": cmd_review, "baseline": cmd_baseline, "communication": cmd_communication,
-                "status-report": cmd_status_report, "build": cmd_build}
+                "status-report": cmd_status_report, "build": cmd_build,
+                "problem-trends": cmd_problem_trends}
     return commands[args.command](project, args)
 
 

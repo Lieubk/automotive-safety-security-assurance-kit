@@ -693,7 +693,8 @@ class OpenPoints(Case):
     def test_an_open_problem_report_stays_visible_on_the_approved_item(self):
         items = base_items()
         items["PRB-0001"] = ({"type": "problem-report", "title": "Task bound missing", "status": "open",
-                              "severity": "major", "found_in": "review REV-0001",
+                              "severity": "major", "found_in": "review REV-0001", "reported_by": "Reviewer",
+                              "reported_at": "2026-01-03", "detected_by": "review",
                               "links": {"affects": ["VIEW-0003"]}}, {"Description": "Nothing bounds the task."})
         fixture = self.make(items)
         self.assertIn(("PROBLEM", "VIEW-0003"), fixture.rules("warning"))
@@ -872,6 +873,114 @@ class Scope(Case):
         fixture = self.make(items)
         self.assertNotIn(("COV-07", "SWR-0001"), fixture.rules("error"))
         self.assertIn(("COV-07", "SWR-0001"), fixture.rules("info"))
+
+
+PROBLEM_SCOPE = SCOPE + ["SUP.9"]
+
+
+def problem_items(**problem):
+    """The base thread with a problem-resolution strategy and one problem report, closed and alerted."""
+    items = base_items()
+    items["PLN-0003"] = ({"type": "plan", "title": "Problem resolution strategy", "status": "approved",
+                          "kind": "problem-resolution", "urgent_severities": ["critical"],
+                          "alerts": [{"severity": "major", "audience": ["Software lead"]},
+                                     {"severity": "critical", "audience": ["Software lead", "Customer"]}]},
+                         {"Scope": "All problems.", "Approach": "Record, analyse, resolve, close.", "Criteria": "Retest.",
+                          "Environment and tools": "Items.", "Responsibilities": "Software lead."})
+    front = {"type": "problem-report", "title": "Detection too late", "status": "closed", "severity": "major",
+             "reported_by": "Tester", "reported_at": "2026-01-03", "detected_by": "unit-test",
+             "found_in": "abc123, RUN-0001", "origin": "code",
+             "closure": {"accepted_by": "Software lead", "accepted_at": "2026-01-10", "evidence": "RUN-0001"},
+             "links": {"affects": ["UNT-0001"]}}
+    front.update(problem)
+    items["PRB-0001"] = (front, {"Description": "Late.", "Cause and impact": "A wrong limit.", "Resolution": "Fixed."})
+    items["CMR-0001"] = ({"type": "communication-record", "status": "final", "subject": "PRB-0001",
+                          "audience": ["Software lead"], "channel": "mail", "sent_at": "2026-01-03"}, {})
+    return items
+
+
+class ProblemResolution(Case):
+    def make(self, items=None, **kwargs):
+        kwargs.setdefault("scope", PROBLEM_SCOPE)
+        return super().make(problem_items() if items is None else items, **kwargs)
+
+    def test_recorded_alerted_and_closed_problem_has_no_findings(self):
+        self.assertEqual(self.make().findings(), [])
+
+    def test_urgent_problem_without_authorised_action(self):
+        items = problem_items(severity="critical", status="open")
+        items["CMR-0001"][0]["audience"] = ["Software lead", "Customer"]
+        fixture = self.make(items)
+        self.assertIn(("COV-39", "PRB-0001"), fixture.rules("warning"))      # open: a warning
+        fixture.edit("PRB-0001", status="analysed")
+        self.assertIn(("COV-39", "PRB-0001"), fixture.rules("error"))        # analysed: an error
+        fixture.edit("PRB-0001", urgent_action={"action": "none: the function is disabled in the release",
+                                                "authorised_by": "Software lead", "authorised_at": "2026-01-03"})
+        self.assertNotIn("COV-39", {r for r, _ in fixture.rules("error")})
+
+    def test_problem_not_alerted_as_the_strategy_asks(self):
+        items = problem_items(severity="critical")
+        messages = [f["message"] for f in self.make(items).findings("error") if f["rule"] == "COV-40"]
+        self.assertTrue(messages and "alerts Customer" in messages[0], messages)
+
+    def test_problem_in_a_baselined_item_needs_a_change_request(self):
+        items = problem_items(status="in-resolution", links={"affects": ["SWR-0001"]})
+        items["PRB-0001"][0].pop("closure")
+        items["BL-0001"] = ({"type": "baseline", "status": "final", "tag": "r1", "purpose": "release candidate",
+                             "items": [{"item": "SWR-0001", "hash": "x", "status": "approved"}]}, {})
+        self.assertIn(("COV-41", "PRB-0001"), self.make(items).rules())
+        items["CR-0001"] = ({"type": "change-request", "title": "Correct the limit", "status": "submitted",
+                             "requester": "Software lead", "links": {"resolves": ["PRB-0001"]}},
+                            {"Description": "Correct it."})
+        self.assertNotIn(("COV-41", "PRB-0001"), self.make(items).rules())
+
+    def test_closure_needs_evidence_and_closed_change_requests(self):
+        items = problem_items(closure={"accepted_by": "Software lead", "accepted_at": "2026-01-10",
+                                       "evidence": "RUN-0099"})
+        items["CR-0001"] = ({"type": "change-request", "title": "Correct the limit", "status": "submitted",
+                             "requester": "Software lead", "links": {"resolves": ["PRB-0001"]}},
+                            {"Description": "Correct it."})
+        messages = [f["message"] for f in self.make(items).findings("error") if f["rule"] == "COV-42"]
+        self.assertEqual(len(messages), 2, messages)
+
+    def test_closed_problem_without_closure(self):
+        items = problem_items()
+        items["PRB-0001"][0].pop("closure")
+        self.assertIn(("SCHEMA", "PRB-0001"), self.make(items).rules())
+
+    def test_problems_with_ages_and_figures(self):
+        from traceability import problems
+        items = problem_items()
+        items["PRB-0002"] = ({"type": "problem-report", "title": "Later", "status": "open", "severity": "minor",
+                              "reported_by": "Tester", "reported_at": "2026-02-01", "detected_by": "review",
+                              "found_in": "abc123"}, {"Description": "Later."})
+        project = Project(self.make(items).root)
+        data = problems(project, as_of(2026, 1, 20))
+        self.assertEqual([e["item"] for e in data["problems"]], ["PRB-0001"])     # PRB-0002 not known yet
+        self.assertEqual(data["problems"][0]["age_days"], 7)                      # reported to accepted
+        later = problems(project, as_of(2026, 2, 11))
+        self.assertEqual(later["figures"]["unresolved"], 1)
+        self.assertEqual(later["figures"]["by_origin"], {"None": 1, "code": 1})
+        self.assertEqual(later["figures"]["unresolved_by_age"]["8 to 30 days"], 1)
+
+    def test_history_reads_the_states_from_git(self):
+        fixture = self.make()
+        git = ["git", "-c", "user.name=tester", "-c", "user.email=tester", "-C", str(fixture.root)]
+        subprocess.run(git[:1] + ["init", "-q", str(fixture.root)], check=True)
+        fixture.edit("PRB-0001", status="open")
+        subprocess.run(git + ["add", "-A"], check=True)
+        subprocess.run(git + ["commit", "-q", "-m", "open"], check=True)
+        fixture.edit("PRB-0001", status="closed")
+        subprocess.run(git + ["commit", "-q", "-am", "closed"], check=True)
+        done = subprocess.run([sys.executable, str(Path(__file__).resolve().parents[1] / "traceability.py"),
+                               "--project", str(fixture.root), "history", "PRB-0001"], capture_output=True, text=True)
+        states = [line.split()[-1] for line in done.stdout.splitlines()]
+        self.assertEqual(states, ["open", "closed"], done.stdout + done.stderr)
+
+
+def as_of(year, month, day):
+    import datetime
+    return datetime.date(year, month, day)
 
 
 INTEGRATION_SCOPE = SCOPE + ["SWE.5", "SWE.6"]

@@ -72,7 +72,8 @@ Whether an input was registered and accepted is looked up; the tools report the 
 | `project` | MAN.3 | `/project-plan` |
 | `software-integration` | SWE.5 | `/sw-integration-test` |
 | `software-qualification-test` | SWE.6 | `/sw-qualification-test` |
-| `system-integration`, `system-qualification-test`, `quality-assurance`, `problem-resolution` | SYS.4, SYS.5, SUP.1, SUP.9 | by hand: a `plan` item with the sections of the schema |
+| `problem-resolution` | SUP.9 | `/problem-resolution` |
+| `system-integration`, `system-qualification-test`, `quality-assurance` | SYS.4, SYS.5, SUP.1 | by hand: a `plan` item with the sections of the schema |
 
 These skills draft the plan of their process; their base practice tables say so.
 If one of them is not installed, its plan is written by hand like the others. A plan
@@ -152,7 +153,7 @@ Question 2, by type:
 | `change-request` | SUP.10 | `/change-request` | - |
 | `work-package` | MAN.3 | `/work-breakdown` | `/review` |
 | `corrective-action` | MAN.3 | `/project-status` | - |
-| `problem-report` | SUP.9 | none today | - |
+| `problem-report` | SUP.9 | `/problem-resolution` | - |
 
 To name the IDs behind a count, run
 `python tools/traceability.py list --type <type> --status <state>`.
@@ -164,7 +165,7 @@ Question 3:
 |---|---|---|
 | `UPSTREAM` | `approved, but <target> (<role>) is in state draft` or `in-review` | the item rests on something not approved. Recommend `/review` of the target first; if the target is an input, its acceptance review. The tool refuses to approve anything above it until then |
 | `QUERY` | `open query <QRY-ID> is about this approved item` | a question to the source is open. The item stays approved; say what waits for the answer. The user gets the answer; `/import-inputs <QRY-ID>` records it. With "(not put to its source yet)": the question still has to be sent; the user adds `asked_at` when it is |
-| `PROBLEM` | `problem report <PRB-ID> (...) concerns this approved item` | a known problem in the item is not resolved. Recommend the authoring skill of the item, then `/review`; inside a baseline `/change-request` first |
+| `PROBLEM` | `problem report <PRB-ID> (...) concerns this approved item` | a known problem in the item is not resolved. Recommend `/problem-resolution <PRB-ID>`: it chooses the route - the authoring skill of the item and `/review`, inside a baseline `/change-request` first |
 | `COV-19` | `review ... left findings open: ...` on an item in `draft` or `in-review` | the last review of the item ended in rework. Recommend the authoring skill to work on the findings, then `/review`; for an imported input the finding cites a query, and the next step is the answer to it |
 | `COV-19` | `stale approval: content changed since review ...` or `approved, but no final review record covers it` | `/review` |
 | `COV-19` | `review ... still has open findings`, or an earlier finding on the same content `open and not closed by a later finding entry` | the authoring skill to rework the item, then `/review`, which closes the earlier finding explicitly |
@@ -189,7 +190,9 @@ and the notes of the process under `aspice/3.1/notes/`, and then goes to `/revie
 | `no evidence yet` in `practices` for a "communicate" or "summarize and communicate" practice, or for SUP.8.BP6 | no baseline or no communication record exists yet | `/baseline`, when the items are approved |
 | `COV-20` | a change request past `submitted` names no affected item | `/change-request` |
 | `change-request` items in a state other than `closed` or `rejected` in `status` | changes under way | `/change-request` |
-| `problem-report` items not `closed` or `rejected` | problems open | by hand; a change to baselined items goes through `/change-request` |
+| `problem-report` items not `closed` or `rejected` | problems open; `python tools/traceability.py problems` lists them with their age | `/problem-resolution` |
+| `COV-39`, `COV-40` | an urgent problem without an authorised action; a problem not alerted to the parties the strategy names | `/problem-resolution <PRB-ID>`: the decision and the alert come from people |
+| `COV-41`, `COV-42` | a problem in a baselined item without a change request; a closed problem without accepted closure, evidence, or with a change request still open | `/problem-resolution <PRB-ID>`; `/change-request` |
 
 ## Stop 7: nothing open
 

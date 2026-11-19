@@ -18,6 +18,9 @@ Commands
     audit ID           compare a baseline record with the items as they are now
     progress           work packages, milestones and corrective actions against the
                        plan as of a date (--as-of; default today); --json
+    problems           problem reports with state, severity, origin, detection and age
+                       as of a date (--as-of; default today), and the figures; --json
+    history ID         the states an item had in the commits that changed it, from git
     diff ID            what changed in an item since a review saw it, as subject or as
                        reference (--since REV-ID; default: the newest), from git
     practices [PROC]   per base practice of the processes in scope (or of one
@@ -416,6 +419,16 @@ class Project:
     def builds_of(self, step_name, succeeded=False):
         return [b for b in self.of_type("build-record") if b.status == "final" and b.front.get("step") == step_name
                 and (not succeeded or b.front.get("result") == "succeeded")]
+
+    def problem_plan(self):
+        """The approved plan of kind problem-resolution, or None."""
+        return next((p for p in sorted(self.of_type("plan"), key=lambda p: record_number(p.id))
+                     if p.status == "approved" and p.front.get("kind") == "problem-resolution"), None)
+
+    def problem_gap(self, rule_id, problem, message):
+        """Urgency and alerts matter from the first day: a warning while the problem is open, an error after."""
+        self.add("warning" if problem.status == "open" else "error", rule_id, problem.id, message,
+                 self.own_supports(rule_id, problem))
 
     def build_step(self, run):
         """The integration step of the build a test run names, or None."""
@@ -1162,8 +1175,72 @@ class Project:
         if qualification is not None and steps:
             judge(qualification, steps[-1].get("name"), "SWE.6.BP4")
 
+    def cov_39(self, rule):
+        plan = self.problem_plan()
+        if plan is None:
+            return                                        # COV-27 reports the missing plan
+        urgent = [str(s) for s in as_list(plan.front.get("urgent_severities"))]
+        allowed = self.types["problem-report"]["attributes"]["severity"]["values"]
+        for severity in urgent:
+            if severity not in allowed:
+                self.add("error", rule, plan.id, "urgent_severities names %s, which is not a severity (%s)"
+                         % (severity, ", ".join(allowed)), self.rules[rule]["supports"])
+        for problem in self.of_type("problem-report"):
+            if self.live(problem) and str(problem.front.get("severity")) in urgent \
+                    and not isinstance(problem.front.get("urgent_action"), dict):
+                self.problem_gap(rule, problem, "severity %s is urgent by %s, but no urgent_action records what was "
+                                 "authorised, by whom and when" % (problem.front.get("severity"), plan.id))
+
+    def cov_40(self, rule):
+        plan = self.problem_plan()
+        if plan is None:
+            return
+        alert_rules = [r for r in as_list(plan.front.get("alerts")) if isinstance(r, dict)]
+        told = defaultdict(set)
+        for record in self.of_type("communication-record"):
+            if record.status == "final":
+                for subject in as_list(record.front.get("subject")):
+                    told[str(subject)] |= {str(a).strip().lower() for a in as_list(record.front.get("audience"))}
+        for problem in self.of_type("problem-report"):
+            if not self.live(problem):
+                continue
+            for alert in alert_rules:
+                if str(alert.get("severity")) != str(problem.front.get("severity")):
+                    continue
+                missing = [str(a) for a in as_list(alert.get("audience")) if str(a).strip().lower() not in told[problem.id]]
+                if missing:
+                    self.problem_gap(rule, problem, "severity %s: no final communication record alerts %s, as %s asks"
+                                     % (problem.front.get("severity"), ", ".join(missing), plan.id))
+
+    def cov_41(self, rule):
+        internal = as_list((self.config.get("trace") or {}).get("internal_baselines"))
+        baselined = {str(e.get("item")) for b in self.of_type("baseline")
+                     if b.status == "final" and b.front.get("purpose") not in internal
+                     for e in as_list(b.front.get("items")) if isinstance(e, dict)}
+        for problem in self.of_type("problem-report"):
+            if problem.status not in ("in-resolution", "resolved", "closed"):
+                continue
+            hit = [target for target, _ in problem.targets("affects") if target in baselined]
+            if hit and not self.sources(problem.id, "resolves", ["change-request"]):
+                self.gap(rule, problem, "affects %s, which a baseline lists, but no change request resolves it"
+                         % ", ".join(hit))
+
+    def cov_42(self, rule):
+        for problem in self.of_type("problem-report"):
+            if problem.status != "closed":
+                continue
+            closure = problem.front.get("closure")
+            if isinstance(closure, dict):
+                for ref in as_list(closure.get("evidence")):
+                    record = self.items.get(str(ref))
+                    if record is None or record.type not in ("test-run", "review-record") or record.status != "final":
+                        self.gap(rule, problem, "closure evidence %s is not a final test run or review record" % ref)
+            for change in self.sources(problem.id, "resolves", ["change-request"]):
+                if change.status != "closed":
+                    self.gap(rule, problem, "closed, but %s, which resolves it, is %s" % (change.id, change.status))
+
     def cov_26(self, rule):
-        internal =as_list((self.config.get("trace") or {}).get("internal_baselines"))
+        internal = as_list((self.config.get("trace") or {}).get("internal_baselines"))
         told = set()
         for record in self.of_type("communication-record"):
             if record.status == "final":
@@ -1533,6 +1610,102 @@ def cmd_progress(project, args):
     return 0
 
 
+def problems(project, as_of):
+    """Problem reports known on a date, with their present state and their age on that date."""
+    entries = []
+    for problem in sorted(project.of_type("problem-report"), key=lambda p: record_number(p.id)):
+        reported = as_date(problem.front.get("reported_at"))
+        if reported and reported > as_of:
+            continue                                      # not known yet on that date
+        closure = problem.front.get("closure") if isinstance(problem.front.get("closure"), dict) else {}
+        closed = as_date(closure.get("accepted_at")) if problem.status == "closed" else None
+        end = closed if closed and closed <= as_of else as_of
+        entries.append({
+            "item": problem.id, "title": problem.title, "state": problem.status,
+            "severity": problem.front.get("severity"), "origin": problem.front.get("origin"),
+            "detected_by": problem.front.get("detected_by"),
+            "reported_at": str(reported) if reported else None, "closed_at": str(closed) if closed else None,
+            "age_days": (end - reported).days if reported else None,
+            "affects": [t for t, _ in problem.targets("affects")],
+            "change_requests": [{"item": c.id, "state": c.status}
+                                for c in project.sources(problem.id, "resolves", ["change-request"])],
+        })
+    counted = [e for e in entries if e["state"] != "rejected"]
+    unresolved = [e for e in counted if e["state"] in UNRESOLVED]
+
+    def by(key):
+        out = defaultdict(int)
+        for entry in counted:
+            out[str(entry[key])] += 1
+        return dict(sorted(out.items()))
+
+    figures = {"total": len(counted), "rejected": len(entries) - len(counted), "unresolved": len(unresolved),
+               "by_state": by("state"), "by_severity": by("severity"), "by_origin": by("origin"),
+               "by_detection": by("detected_by"),
+               "unresolved_by_age": {"up to 7 days": sum(1 for e in unresolved if (e["age_days"] or 0) <= 7),
+                                     "8 to 30 days": sum(1 for e in unresolved if 7 < (e["age_days"] or 0) <= 30),
+                                     "over 30 days": sum(1 for e in unresolved if (e["age_days"] or 0) > 30)}}
+    return {"as_of": str(as_of), "problems": entries, "figures": figures}
+
+
+def cmd_problems(project, args):
+    as_of = as_date(args.as_of) if args.as_of else datetime.date.today()
+    if as_of is None:
+        print("--as-of must be a date YYYY-MM-DD")
+        return 2
+    data = problems(project, as_of)
+    if args.json:
+        print(json.dumps(data, indent=2))
+        return 0
+    print("Problems as of %s (states as they are now; ages to that date)" % as_of)
+    for e in data["problems"]:
+        changes = ", ".join("%s %s" % (c["item"], c["state"]) for c in e["change_requests"]) or "-"
+        print("%-9s %-13s %-8s %-18s %-19s age %4s days  affects %s  changes %s  %s"
+              % (e["item"], e["state"], e["severity"], e["origin"] or "-", e["detected_by"], e["age_days"],
+                 ", ".join(e["affects"]) or "-", changes, e["title"]))
+    f = data["figures"]
+    print("%d problems, %d unresolved, %d rejected | by severity: %s | by origin: %s | by detection: %s | "
+          "unresolved by age: %s"
+          % (f["total"], f["unresolved"], f["rejected"],
+             ", ".join("%s %d" % kv for kv in f["by_severity"].items()) or "-",
+             ", ".join("%s %d" % kv for kv in f["by_origin"].items()) or "-",
+             ", ".join("%s %d" % kv for kv in f["by_detection"].items()) or "-",
+             ", ".join("%s %d" % kv for kv in f["unresolved_by_age"].items())))
+    return 0
+
+
+def cmd_history(project, args):
+    """The states an item had in the commits that changed its file, oldest first."""
+    item = project.items.get(args.id)
+    if item is None:
+        print("no such item: %s" % args.id)
+        return 1
+    rel = item.path.relative_to(project.root).as_posix()
+    done = subprocess.run(["git", "log", "--follow", "--format=%h %ad", "--date=short", "--", rel],
+                          cwd=str(project.root), capture_output=True, text=True)
+    if done.returncode != 0:
+        print("NOT ASSESSED: the history is read from git, and git gave: %s" % done.stderr.strip())
+        return 2
+    commits = [line.split(" ", 1) for line in reversed(done.stdout.strip().splitlines()) if line.strip()]
+    last = None
+    for commit, date in commits:
+        shown = subprocess.run(["git", "show", "%s:./%s" % (commit, rel)], cwd=str(project.root),
+                               capture_output=True, text=True, encoding="utf-8", errors="replace").stdout
+        match = FRONT_MATTER.match(shown.replace("\r\n", "\n"))
+        try:
+            status = str((yaml.safe_load(match.group(1)) or {}).get("status")) if match else "?"
+        except yaml.YAMLError:
+            status = "?"
+        if status != last:
+            print("%s  %s  %s" % (date, commit, status))
+            last = status
+    if not commits:
+        print("%s is in no commit yet: its history starts with the next commit" % item.id)
+    elif item.status != last:
+        print("%-10s  %-7s  %s" % ("now", "working", item.status))
+    return 0
+
+
 def reviewed_text(item, reviewed_hash):
     """(text, commit) of the item file as it was when it had the given content hash, from git; or (None, reason)."""
     folder, name = item.path.parent, item.path.name
@@ -1751,6 +1924,10 @@ def main():
     listing.add_argument("--type")
     listing.add_argument("--status")
     listing.add_argument("--imported", action="store_true", help="only inputs received from outside the scope")
+    problems_parser = sub.add_parser("problems")
+    problems_parser.add_argument("--as-of", help="the date ages are measured to (default: today)")
+    problems_parser.add_argument("--json", action="store_true")
+    sub.add_parser("history").add_argument("id")
     practices = sub.add_parser("practices")
     practices.add_argument("process", nargs="?")
     practices.add_argument("--json", action="store_true")
@@ -1758,7 +1935,8 @@ def main():
     project = Project(args.project)
     return {"check": cmd_check, "matrix": cmd_matrix, "show": cmd_show, "impact": cmd_impact,
             "hash": cmd_hash, "status": cmd_status, "list": cmd_list, "audit": cmd_audit, "practices": cmd_practices,
-            "diff": cmd_diff, "progress": cmd_progress}[args.command](project, args)
+            "diff": cmd_diff, "progress": cmd_progress,
+            "problems": cmd_problems, "history": cmd_history}[args.command](project, args)
 
 
 if __name__ == "__main__":

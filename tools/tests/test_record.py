@@ -385,6 +385,35 @@ class Integration(RecordCase):
         self.assertIn("qualified on a build of the last step", out)
 
 
+class ProblemTrends(RecordCase):
+    def add_problem(self):
+        front = {"id": "PRB-0099", "type": "problem-report", "title": "Late stop", "status": "open", "severity": "major",
+                 "reported_by": "Tester", "reported_at": "2026-06-01", "detected_by": "qualification-test",
+                 "found_in": "abc123"}
+        path = self.project / "records" / "problems" / "PRB-0099.md"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("---\n" + yaml.safe_dump(front, sort_keys=False) + "---\n\n## Description\n\nx\n", encoding="utf-8")
+
+    def test_a_trend_report_needs_the_analysts_assessment(self):
+        code, out = self.record("problem-trends", "--reported-by", "S. Lead", "--assessment",
+                                str(Path(self.tmp.name) / "none.txt"))
+        self.assertEqual(code, 1)
+        self.assertIn("analyst's reading", out)
+
+    def test_a_trend_report_carries_the_figures_and_the_assessment(self):
+        self.add_problem()
+        assessment = Path(self.tmp.name) / "assessment.txt"
+        assessment.write_text("One problem, from qualification; no trend yet.", encoding="utf-8")
+        code, out = self.record("problem-trends", "--reported-by", "S. Lead", "--assessment", assessment,
+                                "--as-of", "2026-06-15")
+        self.assertEqual(code, 0, out)
+        folder = self.project / "records" / "problem-trends"
+        record = self.front("records/problem-trends/" + sorted(p.name for p in folder.glob("PTR-*.md"))[-1])
+        self.assertEqual(record["problems"], [{"item": "PRB-0099", "state": "open", "severity": "major",
+                                               "origin": None, "detected_by": "qualification-test", "age_days": 14}])
+        self.assertEqual(record["figures"]["unresolved_by_age"]["8 to 30 days"], 1)
+
+
 class StatusReports(RecordCase):
     def test_a_report_needs_the_reporters_assessment(self):
         code, out = self.record("status-report", "--reported-by", "P. Lead", "--assessment", str(Path(self.tmp.name) / "none.txt"))

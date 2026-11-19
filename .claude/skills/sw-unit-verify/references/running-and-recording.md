@@ -219,7 +219,8 @@ Propose the classification with the texts it rests on; the user confirms. Until 
 case stays failed. Not allowed, whatever the pressure: deleting the case, removing or
 loosening a check, setting `regression: false`, recording `not-run` for a case that
 failed. Where SUP.9 is in the project's scope, a confirmed defect also needs a
-`problem-report` item that names the run in `found_in`; say so in the hand-over.
+`problem-report` that names the run in `found_in`: `/problem-resolution` records it;
+say so in the hand-over.
 
 ## A unit without code
 

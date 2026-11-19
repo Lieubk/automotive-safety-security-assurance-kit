@@ -134,6 +134,22 @@ structures:
     mandatory: [name, components]
     keys: [doubles, environment, description]
     note: "the steps in the order they are carried out. components: the software components added in the step (a composition stands for the components inside it); doubles: components a test double stands in for in the step. A step contains everything added up to it; a component that is never integrated by this project is a double of the last step, and Scope says who integrates it"
+  urgent-action:                   # problem-report.urgent_action
+    shape: mapping
+    mandatory: [action, authorised_by, authorised_at]
+    keys: []
+    dates: [authorised_at]
+    note: "the immediate action decided before the full resolution, or 'none' with the reason; who authorised it and when"
+  closure:                         # problem-report.closure
+    shape: mapping
+    mandatory: [accepted_by, accepted_at, evidence]
+    keys: [note]
+    dates: [accepted_at]
+    note: "the formal acceptance of the closure: who accepted it, when, and the test run or review record that shows the resolution works"
+  alert-rules:                     # plan.alerts when kind is problem-resolution
+    mandatory: [severity, audience]
+    keys: [within_days, channel]
+    note: "problems of this severity are made known to every party named under audience (a list), within the days given"
   progress:                        # work-package.progress - tracking, not plan: excluded from the content hash
     shape: mapping
     mandatory: []
@@ -350,6 +366,8 @@ types:
       milestones: {structure: milestones, required: optional, note: "project plans: the milestones of the life cycle, each with its date and the baseline purpose that marks it"}
       coverage_targets: {required: optional, note: "unit-verification plans: structural coverage a unit must reach, per ASIL, as {<ASIL>: {statement_percent, branch_percent, mcdc_percent}} with any subset of the metrics; an ASIL without an entry has no target"}
       integration_steps: {structure: integration-steps, required: optional, note: "software-integration plans: the integration steps in order (conditions)"}
+      urgent_severities: {required: optional, note: "problem-resolution plans: the severities for which an urgent action has to be authorised and recorded (conditions)"}
+      alerts: {structure: alert-rules, required: optional, note: "problem-resolution plans: who is alerted to problems of which severity (conditions)"}
     sections:
       Scope: before-review         # what the plan covers and what it leaves to others
       Approach: before-review      # methods, their order, and how they depend on ASIL
@@ -503,7 +521,7 @@ types:
     prefix: CMR
     folder: records/communication
     lifecycle: record
-    supports: [SYS.2.BP8, SYS.3.BP8, SYS.4.BP9, SYS.5.BP7, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7, SWE.4.BP7, SWE.5.BP9, SWE.6.BP7, "13-04"]
+    supports: [SYS.2.BP8, SYS.3.BP8, SYS.4.BP9, SYS.5.BP7, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7, SWE.4.BP7, SWE.5.BP9, SWE.6.BP7, SUP.9.BP6, "13-04"]
     attributes:
       id: {required: always}
       type: {required: always}
@@ -550,12 +568,17 @@ types:
     attributes:
       use: [common]
       severity: {values: [critical, major, minor], required: always}
+      reported_by: {required: always, note: "who found and reported the problem, by role or name"}
+      reported_at: {format: date, required: always}
+      detected_by: {values: [review, static-analysis, unit-test, integration-test, qualification-test, system-test, customer, field, other], required: always, note: "the activity that exposed the problem"}
       found_in: {required: always, note: "commit, tag or baseline ID, and the test run or review that exposed it"}
-      urgent_action: {required: optional, note: "containment decided before the full resolution, with who authorised it"}
+      origin: {values: [input, requirements, architecture, design, code, test-specification, test-environment, tool, other], required: before-review, note: "the work product in which the cause lies, once the cause is known"}
+      urgent_action: {structure: urgent-action, required: optional, note: "mandatory for a severity the problem-resolution plan names as urgent (COV-39)"}
+      closure: {structure: closure, required: optional, note: "mandatory in state closed"}
     sections:
-      Description: always
-      Cause and impact: before-review
-      Resolution: before-approval
+      Description: always               # what happens, how to reproduce it, in which environment
+      Cause and impact: before-review   # the cause, what else is affected: other items, variants, releases, parties
+      Resolution: before-approval       # what is done about it: the actions, or the change request that carries them
 
   corrective-action:
     prefix: CA
@@ -591,6 +614,24 @@ types:
       check: {required: optional, note: "summary of the trace check at the time of the report; generated"}
     sections:
       Assessment: always           # the reporter's reading of the figures, risks and what is decided
+
+  problem-trend-report:            # problem status and trends as of a date, with the analyst's reading
+    prefix: PTR
+    folder: records/problem-trends
+    lifecycle: record
+    supports: [SUP.9.BP3, SUP.9.BP8, SUP.9.BP9, "15-12"]
+    attributes:
+      id: {required: always}
+      type: {required: always}
+      status: {required: always}
+      title: {required: optional}
+      as_of: {format: date, required: always}
+      period: {required: optional}
+      reported_by: {required: always, note: "the person who stands behind the analysis"}
+      problems: {required: always, may_be_empty: true, note: "generated from `traceability.py problems`: one entry per problem with state, severity, origin, detection and age"}
+      figures: {required: always, note: "generated: counts by state, severity, origin and detection, opened and closed in the period, open problems by age"}
+    sections:
+      Assessment: always           # the analyst's reading: trends, recurring causes, and the actions decided
 
   baseline:
     prefix: BL
@@ -642,6 +683,9 @@ conditions:
   - {types: [architecture-view], when: {kind: [fault-reaction]}, attributes: [table], structure: fault-reactions, stage: before-review}
   - {types: [software-unit], when: {origin: [generated]}, attributes: [generated_from], stage: before-review}
   - {types: [unit-test, software-integration-test, software-qualification-test, system-integration-test, system-qualification-test], when: {execution: [automated]}, attributes: [script], stage: before-approval}
+  - {types: [plan], when: {kind: [problem-resolution]}, attributes: [urgent_severities], stage: before-review}
+  - {types: [plan], when: {kind: [problem-resolution]}, attributes: [alerts], structure: alert-rules, stage: before-review}
+  - {types: [problem-report], when: {status: [closed]}, attributes: [closure], structure: closure, stage: always}
   - {types: any, when: {status: [rejected]}, attributes: [rejection_reason], stage: always}
   - {types: [change-request], when: {status: [approved, rejected, implemented, verified, closed]}, attributes: [decision], stage: always}
 
@@ -789,6 +833,10 @@ coverage:
   - {id: COV-36, subject: project, expect: "for every step of the approved software-integration plan, the latest final build record of that step succeeded, contains every component integrated up to that step - a developed component with each of its live units that has code - and recorded every file it built as it is now", waiver: "none; while no unit of the step has code the finding is pending", supports: [SWE.5.BP4]}
   - {id: COV-37, subject: software-integration-test, expect: "names a step of the approved software-integration plan; every step of that plan has at least one live software-integration-test", waiver: "none", supports: [SWE.5.BP3, SWE.5.BP5]}
   - {id: COV-38, subject: test-run, expect: "the latest final run of level software-integration of each step, and the latest final run of level software-qualification, name the latest final successful build of that step (for qualification: of the last step), made from the item under test of the run", waiver: "software-qualification: no approved software-integration plan exists, because the integrated software comes from outside the scope", supports: [SWE.5.BP6, SWE.6.BP4]}
+  - {id: COV-39, subject: problem-report, expect: "a live problem report of a severity that the approved problem-resolution plan names under urgent_severities records an urgent_action with who authorised it and when", waiver: "none; an action of 'none' with its reason is a decision too", supports: [SUP.9.BP5]}
+  - {id: COV-40, subject: problem-report, expect: "a live problem report of a severity that the approved problem-resolution plan names under alerts is the subject of a final communication record whose audience names every party the alert rule lists", waiver: "none", supports: [SUP.9.BP6]}
+  - {id: COV-41, subject: problem-report, expect: "from state in-resolution on: if it affects an item listed by a final baseline whose purpose is not internal, a change request resolves it", waiver: "none", supports: [SUP.9.BP7, SUP.10.BP2]}
+  - {id: COV-42, subject: problem-report, expect: "in state closed: the closure names who accepted it, when, and evidence that is a final test run or review record; every change request that resolves it is closed", waiver: "none", supports: [SUP.9.BP8]}
   - {id: COV-26, subject: baseline, expect: "at least one final communication-record names the baseline as subject", waiver: "baseline purpose marked internal in the project configuration", supports: [SYS.2.BP8, SYS.3.BP8, SYS.4.BP9, SYS.5.BP7, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7, SWE.4.BP7, SWE.5.BP9, SWE.6.BP7]}
 
 # ---------------------------------------------------------------------------
