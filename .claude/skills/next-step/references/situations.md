@@ -79,6 +79,7 @@ Whether an input was registered and accepted is looked up; the tools report the 
 | `cybersecurity-monitoring` | ISO/SAE 21434 clause 8 | `/vulnerability-management` |
 | `safety` | ISO 26262 part 2 | `/safety-plan` |
 | `release` | SPL.2 | `/release` |
+| `operation-and-service` | ISO 26262 part 7 | by hand, with `plan.md` |
 | `system-integration` | SYS.4 | `/sys-integration-test` |
 | `system-qualification-test` | SYS.5 | `/sys-qualification-test` |
 
@@ -205,6 +206,8 @@ and the notes of the process under `aspice/3.1/notes/`, and then goes to `/revie
 | `COV-39`, `COV-40` | an urgent problem without an authorised action; a problem not alerted to the parties the strategy names | `/problem-resolution <PRB-ID>`: the decision and the alert come from people |
 | `COV-50`, `COV-51`, `COV-52` | a risk rated outside the scales or with an unknown category; a risk above the threshold neither treated nor accepted by a named person; a risk in treatment without an indicator | `/risk-management <RSK-ID>` |
 | `COV-74` | a release without a recorded delivery or receipt | `/release` |
+| `COV-75` | a supplied or reused component of ASIL A to D without qualification | `/component-qualification` |
+| `COV-76` | a supplier agreement without an evaluation that selected the supplier | `/supplier-monitoring` |
 | `COV-63`, `COV-64`, `COV-71` to `COV-73` | the safety plan leaves a clause or a method table undecided; a tool unevaluated or its confidence level not as the plan determines; a planned confirmation measure without its record | `/safety-plan` |
 | `COV-65`, `COV-66` | an ASIL other than the plan's determination gives; a hazardous event without a goal of its ASIL | `/hara <ID>` |
 | `COV-67`, `COV-70` | a safety goal no requirement refines; a decomposition without its dependent failures analysis | `/safety-concept` |

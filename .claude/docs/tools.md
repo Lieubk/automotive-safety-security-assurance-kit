@@ -19,8 +19,8 @@ example is `examples/power-window`). They need Python 3 and PyYAML.
 | `progress [--as-of DATE] [--json]` | compare the plan with what the items show: per work package its state read from the items it delivers, lateness, effort against estimate; milestones against baselines; open corrective actions | a tree of work packages, milestones, corrective actions, a summary line |
 | `problems [--as-of DATE] [--json]` | see every problem report with state, severity, origin, detection, age and the change requests that resolve it, and counts by severity, origin, detection and age | a list and a summary line |
 | `tara [--json]` | see the TARA by risk value: per threat scenario its assets, damage scenarios, highest impact, feasibility, the risk value written and the value of the cybersecurity plan's matrix, the treatment and the goals or claims that address it | a list and a summary line |
-| `safety [PART] [--json]` | see, per clause of ISO 26262 under `scope.safety` (or of the part given), the decision of the safety plan, the items that give evidence (requirements, elements and units only with an ASIL above QM) and the open findings; then the hazardous events by ASIL with their goals | a block per clause |
-| `clauses [CLAUSE] [--json]` | see, per subclause of ISO/SAE 21434 under `scope.cybersecurity` (or of the clause given), the decision of the cybersecurity plan, the items that provide each work product, and the open findings of the rules behind it | a block per subclause |
+| `safety [PART] [--json]` | see, per clause of ISO 26262 under `scope.safety` (or of the part given), its state for the process gate, the decision of the safety plan, the items that give evidence (requirements, elements and units only with an ASIL above QM) and the open findings; then the hazardous events by ASIL with their goals | a block per clause |
+| `clauses [CLAUSE] [--json]` | see, per subclause of ISO/SAE 21434 under `scope.cybersecurity` (or of the clause given), its state for the process gate, the decision of the cybersecurity plan, the items that provide each work product, and the open findings of the rules behind it | a block per subclause |
 | `risks [--as-of DATE] [--json]` | see the risks by exposure: state, category, owner, above the threshold of the risk-management plan or not, treatment actions open and overdue, indicators at their threshold, corrective actions | a list and a summary line |
 | `suppliers [--as-of DATE] [--json]` | see per supplier agreement the meetings held against the agreed rhythm, the communication records about it, the open items no later review closed, and the corrective actions | one block per agreement |
 | `quality [--as-of DATE] [--json]` | see the checks of the quality assurance plan with their last record, every finding with the state of its action, how far it is overdue and the escalation due by the plan, and whether the reports were communicated | lists and a summary line |
@@ -46,7 +46,7 @@ ratings:
 
 Finding levels: `error` (approved items, or always-wrong structure), `warning` (items
 in review, or missing consistency evidence), `info` (drafts). Rule names: `FORMAT`,
-`SCHEMA`, `LINK` (structure), `COV-01` to `COV-74` (coverage rules of
+`SCHEMA`, `LINK` (structure), `COV-01` to `COV-76` (coverage rules of
 `schema/items.yaml`), `SUSPECT` (an upstream item, or the code of a unit, changed after
 the review), `CONSISTENCY` (a review did not record what the item was compared with, or
 did not record the code of a unit), `UPSTREAM` (approved above something that is not),
@@ -152,6 +152,30 @@ module text). Records are final when written and are never edited afterwards.
 | `import FILE --type T --source NAME --version V [--received DATE] [--id-attribute A] [--title-attribute A] [--text-attribute A] [--attribute ATTR=REQIF-ATTRIBUTE ...] [--dry-run]` | register a ReqIF delivery (`--attribute` takes a value such as the ASIL over from a ReqIF attribute): one imported item in state draft per object, text unchanged, `imported` with source, version, date and source identifier. Refused when the source already has imported items |
 | `compare FILE --source NAME` | see what a new version changes against the imported items of the source: new, changed and removed objects |
 | `export --type T [--type T ...] --out FILE [--title TEXT]` | deliver items to an ALM tool: identifier, title, text, type, status and ASIL per object, links between exported items as relations |
+
+## Spreadsheets - `python tools/xlsx.py [--project DIR] <command>`
+
+No package beyond the standard library. A column is named by its header text or its letter.
+
+| Command | Use it to |
+|---|---|
+| `sheets FILE` | see the sheets of a workbook, their size and the widest of their first rows, to find the header row |
+| `import FILE --sheet S --type T --source NAME --version V --column source_id=COL --column text=COL [--column title=COL] [--column ATTR=COL ...] [--header-row N] [--received DATE] [--dry-run]` | register requirements delivered as a sheet: one imported item per row, unchanged, with the attributes named (for example `asil=ASIL`) |
+| `compare FILE --sheet S --source NAME --column ...` | see what a new version of the sheet changes against the imported items: new, changed, removed |
+| `export --type T [--type T ...] --out FILE.xlsx` | deliver items as a sheet: identifier, type, title, status, ASIL, text, links, content hash |
+| `results FILE --sheet S --column test=COL --column verdict=COL [--column reason=COL] --out results.json` | turn a sheet of test results (a test specification and report in Excel) into the file `record.py test-run --results` reads; pass, ok -> passed; fail, nok, ng -> failed; blocked; anything else -> not-run with the cell as reason; rows of unknown test cases are named and left out |
+
+## ALM tools - `python tools/alm.py [--project DIR] <command> polarion|codebeamer|jama`
+
+Over the REST interfaces of the tools; credentials only from the environment (`ALM_TOKEN`
+or the variable `--token-env` names, or `ALM_USER` and `ALM_PASSWORD`). Written from the
+public descriptions of the interfaces and tested against a simulated server: try it with
+`--dry-run` on your server first. `--text-field` and `--map ATTR=FIELD` adapt field names.
+
+| Command | Use it to |
+|---|---|
+| `pull polarion --url URL --alm-project P [--query Q]`, `pull codebeamer --url URL --tracker ID`, `pull jama --url URL --alm-project P --item-type ID`, each with `--type T --source NAME --version V [--map ATTR=FIELD ...] [--compare] [--dry-run]` | register the work items as imported items, or with `--compare` see what changed against them |
+| `push <tool> --url URL <scope> --type T [--type T ...] [--work-item-type NAME] [--parent ID] [--dry-run]` | create work items for the project's own items, or update those created before; the pairing of IDs is kept in `.alm/map.json` of the project, which belongs under version control |
 
 ## AUTOSAR models - `python tools/arxml.py [--project DIR] <command>`
 

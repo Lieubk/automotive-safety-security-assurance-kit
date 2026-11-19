@@ -234,6 +234,10 @@ structures:
     mandatory: [path, feasibility]
     keys: [factors, vector, note]
     note: "path: the steps of the attack from its entry point to the asset; feasibility: high, medium, low or very-low by the approach of the cybersecurity plan; factors: the ratings that led to it (attack potential: elapsed_time, expertise, knowledge, window, equipment; CVSS: the exploitability metrics); vector: the attack vector for the attack-vector approach"
+  evaluation-criteria:             # supplier-evaluation.criteria
+    mandatory: [criterion, result]
+    keys: [evidence, note]
+    note: "criterion: what the supplier has to show, for example a process for functional safety or cybersecurity, competence, past assessments, capacity; result met, partly-met or not-met; evidence: what was looked at"
   safety-activities:               # plan.safety_activities when kind is safety
     mandatory: [clause, decision, responsible]
     keys: [rationale, work_products, due]
@@ -465,7 +469,7 @@ types:
     supports: [MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6, MAN.3.BP7, SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1, SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1, "08-12", "08-52", "08-04", "08-13", "08-27", "08-28"]
     attributes:
       use: [common]
-      kind: {values: [project, unit-verification, software-integration, software-qualification-test, system-integration, system-qualification-test, configuration-management, quality-assurance, problem-resolution, change-request-management, risk-management, cybersecurity, cybersecurity-interface-agreement, cybersecurity-monitoring, cybersecurity-incident-response, production-control, end-of-cybersecurity-support, safety, development-interface-agreement, release], required: always}
+      kind: {values: [project, unit-verification, software-integration, software-qualification-test, system-integration, system-qualification-test, configuration-management, quality-assurance, problem-resolution, change-request-management, risk-management, cybersecurity, cybersecurity-interface-agreement, cybersecurity-monitoring, cybersecurity-incident-response, production-control, end-of-cybersecurity-support, safety, development-interface-agreement, release, operation-and-service], required: always}
       milestones: {structure: milestones, required: optional, note: "project plans: the milestones of the life cycle, each with its date and the baseline purpose that marks it"}
       coverage_targets: {required: optional, note: "unit-verification plans: structural coverage a unit must reach, per ASIL, as {<ASIL>: {statement_percent, branch_percent, mcdc_percent}} with any subset of the metrics; an ASIL without an entry has no target"}
       integration_steps: {structure: integration-steps, required: optional, note: "software-integration and system-integration plans: the integration steps in order (conditions)"}
@@ -587,6 +591,40 @@ types:
     sections:
       Release note: always         # functional content, changes since the last release, known limitations and open problems, in the words of who releases
 
+  supplier-evaluation:             # the evaluation of a candidate supplier's capability, and the selection decision
+    prefix: SEV
+    folder: plans/suppliers
+    lifecycle: engineering
+    supports: ["21434:7.4.1", "21434:7.4.2", "26262-8:5", "26262-8:5.5.1"]
+    attributes:
+      use: [common]
+      supplier: {required: always, note: "the candidate, as the supplier agreement will name it (COV-76)"}
+      scope_of_supply: {required: before-review, note: "what the supplier is to deliver"}
+      criteria: {structure: evaluation-criteria, required: before-review}
+      result: {values: [selected, selected-with-conditions, not-selected], required: before-review}
+      decided_by: {required: before-approval, note: "who decided the selection, and when"}
+    sections:
+      Request for quotation: before-review   # what was asked of the supplier for functional safety and cybersecurity
+      Evaluation: before-review              # what the evidence of each criterion showed
+      Decision: before-approval              # the selection, its conditions, and who decided
+
+  component-qualification:         # qualification of a software component not developed for this project under the standard
+    prefix: CQL
+    folder: spec/software/qualification
+    lifecycle: engineering
+    supports: ["26262-8:12", "26262-8:12.5.1", "26262-8:12.5.2", "26262-8:12.5.3"]
+    attributes:
+      use: [common]
+      version: {required: always, note: "the version of the component that is qualified"}
+      method: {required: before-review, note: "analysis of the specification and documentation, tests against the requirements, or both"}
+      evidence: {required: before-review, note: "the test runs, reports and documentation the qualification rests on"}
+      result: {values: [qualified, qualified-with-restrictions, not-qualified], required: before-review}
+      restrictions: {required: optional, note: "mandatory for qualified-with-restrictions"}
+    sections:
+      Specification: before-review           # what the component does, its interfaces, configuration and assumptions of use
+      Qualification: before-review           # what was verified, how, with which results
+      Restrictions: optional
+
   # ---- ISO 26262 (functional safety); active only for the parts under scope.safety
 
   hazardous-event:                 # a hazard in an operational situation, classified, with its ASIL
@@ -659,7 +697,7 @@ types:
     prefix: CFM
     folder: records/safety
     lifecycle: record
-    supports: ["26262-2:6", "26262-2:6.5.5"]
+    supports: ["26262-2:6", "26262-2:6.5.5", "26262-8:5.5.4"]
     attributes:
       id: {required: always}
       type: {required: always}
@@ -1030,7 +1068,7 @@ types:
     prefix: SAG
     folder: plans/suppliers
     lifecycle: engineering
-    supports: [ACQ.4.BP1, "02-01", "26262-8:5", "26262-8:5.5.5"]
+    supports: [ACQ.4.BP1, "02-01", "26262-8:5", "26262-8:5.5.5", "26262-8:5.5.3"]
     attributes:
       use: [common]
       supplier: {required: always, note: "the supplier, by name or role, and the contract or order the agreement belongs to"}
@@ -1160,11 +1198,12 @@ plan_kinds:
   cybersecurity-interface-agreement: ["21434:7.4.3", "21434:WP-07-01"]
   cybersecurity-monitoring: ["21434:8.3", "21434:WP-08-01", "21434:WP-08-02"]
   cybersecurity-incident-response: ["21434:13.3", "21434:WP-13-01"]
-  production-control: ["21434:12", "21434:WP-12-01", "21434:WP-10-02"]
+  production-control: ["21434:12", "21434:WP-12-01", "21434:WP-10-02", "26262-7:5", "26262-7:6", "26262-7:6.5.1", "26262-7:6.5.2"]
   end-of-cybersecurity-support: ["21434:14.3", "21434:WP-14-01", "21434:14.4"]
   safety: ["26262-2:6", "26262-2:6.5.3", "26262-4:5", "26262-5:5", "26262-6:5", "26262-2:6.5.1", "26262-2:6.5.2", "26262-6:5.5.1"]
   development-interface-agreement: ["26262-8:5", "26262-8:5.5.2"]
   release: [SPL.2.BP1, SPL.2.BP2, SPL.2.BP3, SPL.2.BP4, SPL.2.BP6, SPL.2.BP7, SPL.2.BP8]
+  operation-and-service: ["26262-7:5", "26262-7:7", "26262-7:7.5.1"]
 
 # ---------------------------------------------------------------------------
 # Conditional requirements: attributes or sections that become mandatory when
@@ -1205,6 +1244,7 @@ conditions:
   - {types: [plan], when: {kind: [safety]}, attributes: [method_selection], structure: method-selection, stage: before-review}
   - {types: [plan], when: {kind: [safety]}, attributes: [confirmation_measures], structure: confirmation-plan, stage: before-review}
   - {types: [tool-evaluation], when: {confidence: [TCL2, TCL3]}, attributes: [qualification_method, evidence], stage: before-review}
+  - {types: [component-qualification], when: {result: [qualified-with-restrictions]}, attributes: [restrictions], stage: before-review}
   - {types: [weakness], when: {vulnerability: [true]}, attributes: [risk_value, treatment], stage: before-review}
   - {types: any, when: {status: [rejected]}, attributes: [rejection_reason], stage: always}
   - {types: [change-request], when: {status: [approved, rejected, implemented, verified, closed]}, attributes: [decision], stage: always}
@@ -1315,6 +1355,10 @@ links:
     meaning: "the safety analysis examines the target; a change of the target makes the analysis suspect"
     pairs:
       - {from: safety-analysis, to: [item-definition, system-element, system-interface, software-component, software-interface, software-unit, architecture-view, design-decision], supports: ["26262-9:8", "26262-9:7", "26262-6:7", "26262-4:6"]}
+  qualifies:
+    meaning: "the qualification shows the component fit for its use here; a change of the component makes it suspect"
+    pairs:
+      - {from: component-qualification, to: [software-component], supports: ["26262-8:12"]}
   located_in:
     meaning: "the asset is held, processed or carried by the target; a change of the target makes the asset suspect"
     pairs:
@@ -1423,6 +1467,8 @@ coverage:
   - {id: COV-72, subject: project, expect: "every tool named in a final build-record or static-analysis-run is covered by a live tool-evaluation", waiver: "none", supports: ["26262-8:11"]}
   - {id: COV-73, subject: project, expect: "for every entry of confirmation_measures of the approved safety plan, a final confirmation-measure record of that kind and subject exists with at least the independence planned and a result other than failed or rejected", waiver: "none", supports: ["26262-2:6"]}
   - {id: COV-74, subject: release, expect: "its baseline is final and not internal; a final communication-record names the release as delivered, with the receipt stated under agreement", waiver: "none", supports: [SPL.2.BP13, SPL.2.BP11, "21434:6.4.9", "26262-2:6"]}
+  - {id: COV-75, subject: software-component, expect: "origin supplied or reused, ASIL A to D -> an approved component-qualification of result qualified or qualified-with-restrictions qualifies it", waiver: "the safety plan decides clause 8:12 not-applicable or by-customer, with the rationale (for example developed under ISO 26262 by the party of the interface agreement)", supports: ["26262-8:12"]}
+  - {id: COV-76, subject: supplier-agreement, expect: "an approved supplier-evaluation with result selected or selected-with-conditions names the same supplier", waiver: "none", supports: ["21434:7.4.1", "26262-8:5"]}
   - {id: COV-26, subject: baseline, expect: "at least one final communication-record names the baseline as subject", waiver: "baseline purpose marked internal in the project configuration", supports: [SYS.2.BP8, SYS.3.BP8, SYS.4.BP9, SYS.5.BP7, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7, SWE.4.BP7, SWE.5.BP9, SWE.6.BP7]}
 
 # ---------------------------------------------------------------------------

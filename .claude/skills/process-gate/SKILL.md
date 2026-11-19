@@ -30,7 +30,12 @@ rating and no capability level.
    after the script name when the project is not the current directory. If the
    commands do not run, stop: every verdict is NOT ASSESSED, with the reason (for
    example PyYAML is missing).
-3. With a process as argument run `python tools/traceability.py practices <PROCESS>`.
+3. With `26262` or `21434` (optionally a part or clause: `26262 6`, `21434 15`) as
+   argument, the gate runs per clause of that standard: read `references/standards.md`
+   and use `python tools/traceability.py safety [PART] --json` or
+   `python tools/traceability.py clauses [CLAUSE] --json` in place of `practices`; the
+   steps below apply to clauses as they do to base practices.
+   With a process as argument run `python tools/traceability.py practices <PROCESS>`.
    If it answers "<PROCESS> is not in the scope of this project", stop: "<PROCESS>: NOT
    ASSESSED - out of scope." Do not gate a process the project is not responsible for.
    Without an argument run `python tools/traceability.py practices`.

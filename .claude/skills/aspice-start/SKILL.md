@@ -92,7 +92,10 @@ statement, not a default: if nobody has decided yet, leave the value empty.
 When the highest ASIL is above QM, ask which parts of ISO 26262 the team is responsible
 for and which the customer or a supplier performs (show the parts of
 `iso-26262/2018/catalog.yaml` with their level); a software supplier typically has parts
-2 (clause 6), 6, 8 and 9. Write them under `scope.safety`.
+2 (clause 6), 6, 8 and 9. Write them under `scope.safety`. Part 5 (hardware) and part 12
+(motorcycles) are outside what the toolkit supports: if named, say so; the catalog lists
+them, no rule checks them. Organization-level clauses (ISO 26262-2 clauses 5 and 7,
+ISO/SAE 21434 clause 5) are the organization's: the plans decide them `by-organization`.
 When the product is cybersecurity relevant, ask which clauses of ISO/SAE 21434 the team
 is responsible for and which the customer or a supplier performs (show the clauses of
 `iso-sae-21434/2021/catalog.yaml` with their level: organization, project, lifecycle,

@@ -50,7 +50,7 @@ type and no rule for the process, so its evidence lives outside the toolkit.
 | Management | MAN.5 | Risk Management | extended | authoring: `/risk-management` |
 | Acquisition | ACQ.4 | Supplier Monitoring | vda | authoring: `/supplier-monitoring` |
 | Supply | SPL.2 | Product Release | extended | authoring: `/release` |
-| Reuse | REU.2 | Reuse Program Management | other | catalog |
+| Reuse | REU.2 | Reuse Program Management | other | catalog; organization level, out of scope |
 
 Before showing the table, compare the skills named in it with the result of Glob
 `.claude/skills/*/SKILL.md`. A skill that is not installed is shown as "not installed"

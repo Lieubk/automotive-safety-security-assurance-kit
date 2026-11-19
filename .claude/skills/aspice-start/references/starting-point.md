@@ -77,6 +77,7 @@ The standards add plans of their own, by the parts or clauses under `scope.safet
 | ISO 26262 part 2 (clause 6) | `safety` |
 | ISO 26262 part 6 | `unit-verification`, `software-integration`, `software-qualification-test` - also when SWE.4 to SWE.6 come in a later phase: write short strategies now, and the integration steps once the architecture is drafted, since they name its components |
 | ISO 26262 part 4 | `system-integration` |
+| ISO 26262 part 7 | `production-control`, `operation-and-service` |
 | ISO 26262 part 8 | `configuration-management`, `change-request-management`, `development-interface-agreement` |
 | ISO/SAE 21434 clause 6 or 15 | `cybersecurity` |
 | ISO/SAE 21434 clause 7 | `cybersecurity-interface-agreement` |

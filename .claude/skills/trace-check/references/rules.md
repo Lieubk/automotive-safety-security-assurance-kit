@@ -96,7 +96,7 @@ code need SWE.3 in scope.
 
 ## Coverage rules
 
-`COV-01` to `COV-74`; `COV-19` is listed above. A rule is active only when at least one
+`COV-01` to `COV-76`; `COV-19` is listed above. A rule is active only when at least one
 process in the column "Processes" is in `scope.processes`. "Accept" names the waiver the
 schema allows. A waiver is content of an item or of `project.yaml`; it is written by
 the authoring skill and reviewed like everything else. This skill does not apply
@@ -178,6 +178,8 @@ requirement. Nothing is written on the requirement.
 | `COV-72` | the project | every tool named in a final build or analysis record is evaluated | a tool used without evaluation | 26262-8:11 | parts in scope | `/safety-plan` | No |
 | `COV-73` | approved safety plan | every planned confirmation measure has its final record with the planned independence and a passing result | confirmation planned and never done, or by someone not independent enough | 26262-2:6 | parts in scope | `/safety-plan` | No |
 | `COV-74` | final release record | its baseline is final and not internal; a final communication record names the release, with the receipt under `agreement` | a release nobody delivered, or delivered without a confirmed receipt (warning) | SPL.2.BP13, SPL.2.BP11, 21434:6.4.9, 26262-2:6 | SPL.2 or the clauses in scope | `/release` | No |
+| `COV-75` | software component of origin supplied or reused, ASIL A to D | an approved qualification qualifies it | a component nobody showed fit for its safety requirements | 26262-8:12 | parts in scope | `/component-qualification`; waived by the safety plan's decision on 8:12 | Yes |
+| `COV-76` | supplier agreement | an approved supplier evaluation selected the supplier | a supplier chosen without evaluation | 21434:7.4.1, 26262-8:5 | clauses or parts in scope | `/supplier-monitoring` | No |
 
 ## Link roles and the practices behind `UPSTREAM`, `SUSPECT` and `CONSISTENCY`
 

@@ -1430,6 +1430,7 @@ class Cybersecurity(Case):
         concept = {w["work_product"]: w for w in rows["9.5"]["work_products"]}
         self.assertEqual(concept["WP-09-06"]["items"], 1)                  # SWR-0001, derived from the goal
         self.assertEqual(rows["6.4.2"]["decision"], "performed")
+        self.assertEqual(rows["9.4"]["state"], "evidence present")
 
 
 FS_CONFIG = {"scope": {"processes": SCOPE, "safety": [2, 3, 6, 8, 9]}}
@@ -1600,10 +1601,51 @@ class FunctionalSafety(Case):
         self.assertIn("SWR-0001", evidence)
         self.assertNotIn("SWR-0002", evidence)
 
+    def test_a_supplier_agreement_needs_the_evaluation_that_selected_the_supplier(self):
+        items = fs_items()
+        items["SAG-0001"] = ({"type": "supplier-agreement", "title": "Library supply", "status": "approved",
+                              "supplier": "Example Libraries Ltd", "components": ["CMP-0002"],
+                              "exchanges": [{"name": "releases", "direction": "from-supplier", "content": "library"}],
+                              "meetings": [{"name": "progress", "kind": "progress", "cadence": 30}]},
+                             {"Joint processes": "x", "Interfaces and responsibilities": "x", "Deviations and escalation": "x"})
+        self.assertIn(("COV-76", "SAG-0001"), self.make(items).rules())
+        items["SEV-0001"] = ({"type": "supplier-evaluation", "title": "Evaluation", "status": "approved",
+                              "supplier": "Example Libraries Ltd", "scope_of_supply": "library", "result": "selected",
+                              "criteria": [{"criterion": "process", "result": "met"}], "decided_by": "P. Lead, 2026-01-02"},
+                             {"Request for quotation": "x", "Evaluation": "x", "Decision": "x"})
+        self.assertNotIn(("COV-76", "SAG-0001"), self.make(items).rules())
+
+    def test_supplied_asil_components_are_qualified_unless_the_plan_waives_it(self):
+        items = fs_items()
+        items["CMP-0002"][0]["origin"] = "supplied"
+        items["CMP-0002"][0]["supplier"] = "Library vendor"
+        fixture = self.make(items)
+        self.assertIn(("COV-75", "CMP-0002"), fixture.rules())
+        items["CQL-0001"] = ({"type": "component-qualification", "title": "Detection library 1.0", "status": "approved",
+                              "version": "1.0", "method": "tests", "evidence": "RUN-0001", "result": "qualified",
+                              "links": {"qualifies": ["CMP-0002"]}},
+                             {"Specification": "x", "Qualification": "x"})
+        self.assertNotIn(("COV-75", "CMP-0002"), self.make(items).rules())
+        items = fs_items()
+        items["CMP-0002"][0]["origin"] = "supplied"
+        items["CMP-0002"][0]["supplier"] = "Customer"
+        for entry in items["PLN-0009"][0]["safety_activities"]:
+            if entry["clause"] == "8:12":
+                entry.update(decision="not-applicable", rationale="developed under ISO 26262 by the customer, see the DIA")
+        self.assertNotIn(("COV-75", "CMP-0002"), self.make(items).rules())
+
     def test_safety_rows_show_decision_and_evidence_per_clause(self):
         from traceability import safety_rows
         rows = {r["clause"]: r for r in safety_rows(Project(self.make().root))}
         self.assertEqual(rows["6:7"]["decision"], "performed")
+        self.assertEqual(rows["6:7"]["state"], "evidence present")
+        items = fs_items()
+        for entry in items["PLN-0009"][0]["safety_activities"]:
+            if entry["clause"] == "9:5":
+                entry.update(decision="by-customer")
+        items["PLN-0009"][0]["safety_activities"] = [e for e in items["PLN-0009"][0]["safety_activities"] if e["clause"] != "8:7"]
+        rows = {r["clause"]: r for r in safety_rows(Project(self.make(items).root))}
+        self.assertEqual((rows["9:5"]["state"], rows["8:7"]["state"]), ("not ours", "not decided"))
         evidence = {e["item"] for e in rows["6:7"]["evidence"]}
         self.assertIn("CMP-0002", evidence)
         self.assertIn("SAN-0001", evidence)

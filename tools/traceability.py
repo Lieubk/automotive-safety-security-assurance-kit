@@ -1712,6 +1712,29 @@ class Project:
                 self.add("warning", rule, release.id, "delivered (%s), but no record states the receipt under agreement"
                          % ", ".join(n.id for n in notices), self.rules[rule]["supports"])
 
+    def cov_75(self, rule):
+        plan = self.plan_in_work("safety")
+        entry = self.safety_entries(plan, "safety_activities", "clause").get("8:12") if plan else None
+        if entry and entry.get("decision") in ("not-applicable", "by-customer") and entry.get("rationale"):
+            return                                        # waived by the safety plan, with its reason
+        for component in self.of_type("software-component"):
+            if not self.live(component) or component.front.get("origin") not in ("supplied", "reused") \
+                    or ASIL_RANK.get(str(component.front.get("asil")), 0) == 0:
+                continue
+            good = [q for q in self.sources(component.id, "qualifies", ["component-qualification"])
+                    if q.status == "approved" and q.front.get("result") in ("qualified", "qualified-with-restrictions")]
+            if not good:
+                self.gap(rule, component, "origin %s, ASIL %s, but no approved qualification qualifies it"
+                         % (component.front.get("origin"), component.front.get("asil")))
+
+    def cov_76(self, rule):
+        selected = {str(e.front.get("supplier")).strip().lower() for e in self.of_type("supplier-evaluation")
+                    if e.status == "approved" and e.front.get("result") in ("selected", "selected-with-conditions")}
+        for agreement in self.of_type("supplier-agreement"):
+            name = str(agreement.front.get("supplier") or "").strip().lower()
+            if self.live(agreement) and not any(s and (s in name or name in s) for s in selected):
+                self.gap(rule, agreement, "no approved supplier evaluation selected %s" % agreement.front.get("supplier"))
+
     # ---- ISO 26262
 
     def safety_plan(self):
@@ -2691,6 +2714,28 @@ def tara(project):
             "threat_scenarios": entries, "figures": figures}
 
 
+NOT_OURS = ("by-customer", "by-supplier", "by-organization", "not-applicable")
+
+
+def clause_state(decision, structure, evidence, findings):
+    """The observation for a clause, in the order the process gate reads it (references/standards.md there)."""
+    if decision is None:
+        return "not decided"
+    if decision in NOT_OURS:
+        return "not ours"
+    if not structure:
+        return "no evidence structure"
+    if any(f["level"] == "error" for f in findings):
+        return "findings open"
+    if not evidence:
+        return "no evidence yet"
+    if any(e["status"] not in ("approved", "final") for e in evidence):
+        return "evidence not settled"
+    if findings:
+        return "warnings open"
+    return "evidence present"
+
+
 def safety_rows(project, only=None):
     """Per clause of ISO 26262 under scope.safety (or of the part asked for): the decision of the safety plan,
     the items whose types give evidence for it, and the open findings of the rules behind it."""
@@ -2710,6 +2755,16 @@ def safety_rows(project, only=None):
             items = [i for i in project.items.values() if project.live(i) and (
                 (i.type in types and i.type != "plan") or (i.type == "plan" and i.front.get("kind") in kinds))
                 and project.fs_related(i)]
+            own = {i.id for i in items if i.type not in ("review-record", "test-run")}
+
+            def covers(record):
+                """A review or a run counts for the clause only when it covers items of the clause itself."""
+                if record.type == "review-record":
+                    return bool({str(e.get("item")) for e in as_list(record.front.get("subject")) if isinstance(e, dict)} & own)
+                if record.type == "test-run":
+                    return bool({str(e.get("test")) for e in as_list(record.front.get("results")) if isinstance(e, dict)} & own)
+                return True
+            items = [i for i in items if covers(i)]
             entry = decisions.get("%s:%s" % (part["id"], clause["id"])) or {}
             open_findings = [f for f in findings if f["level"] != "info"
                              and any(str(s) == ref or str(s).startswith(ref + ".") for s in f["supports"])]
@@ -2722,6 +2777,7 @@ def safety_rows(project, only=None):
                          "evidence": [{"item": i.id, "status": i.status, "hash": i.hash} for i in sorted(items, key=lambda i: i.id)],
                          "findings": [{"rule": f["rule"], "item": f["item"], "level": f["level"], "message": f["message"]}
                                       for f in open_findings]})
+            rows[-1]["state"] = clause_state(rows[-1]["decision"], bool(types or kinds), rows[-1]["evidence"], open_findings)
     return rows
 
 
@@ -2739,7 +2795,7 @@ def cmd_safety(project, args):
             + ("; plan %s" % row["plan"] if row["plan"] and not row["plan"].endswith("(approved)") else "")
         evidence = "%d items (%d approved or final; %s)" % (row["items"], row["approved_or_final"], ", ".join(row["types"])) \
             if row["items"] else "no evidence (%s)" % (", ".join(row["types"]) or "no item type of the toolkit")
-        print("26262-%-6s %s  [%s]\n    %s" % (row["clause"], row["name"], decision, evidence))
+        print("26262-%-6s %s  [%s]\n    %s: %s" % (row["clause"], row["name"], decision, row["state"], evidence))
         for f in row["findings"]:
             print("    %-7s %-7s %-10s %s" % (f["level"], f["rule"], f["item"], f["message"]))
     events = [e for e in project.of_type("hazardous-event") if project.live(e)]
@@ -2815,8 +2871,11 @@ def clause_rows(project, only=None):
                                               for i in sorted(items, key=lambda i: i.id)]})
             open_findings = [f for f in findings if ref in map(str, f["supports"]) and f["level"] != "info"]
             entry = decisions.get(str(sub["id"])) or {}
+            evidence = [e for wp in products for e in wp["evidence"]]
+            structure = any(wp["types"] for wp in products) or any(ref in map(str, r["supports"]) for r in project.schema["coverage"])
             rows.append({"subclause": str(sub["id"]), "name": sub["name"], "in_scope": key in project.cs_scope,
                          "decision": entry.get("decision"), "responsible": entry.get("responsible"),
+                         "state": clause_state(entry.get("decision"), structure, evidence, open_findings),
                          "work_products": products,
                          "findings": [{"rule": f["rule"], "item": f["item"], "level": f["level"], "message": f["message"]}
                                       for f in open_findings]})
@@ -2834,7 +2893,7 @@ def cmd_clauses(project, args):
         return 0
     for row in rows:
         decision = "%s, %s" % (row["decision"], row["responsible"]) if row["decision"] else "no entry in the cybersecurity plan"
-        print("21434:%-7s %s  [%s]" % (row["subclause"], row["name"], decision))
+        print("21434:%-7s %s  [%s]  %s" % (row["subclause"], row["name"], decision, row["state"]))
         for wp in row["work_products"]:
             print("    %s %s: %s" % (wp["work_product"], wp["name"], "%d items (%d approved or final; %s)"
                                     % (wp["items"], wp["approved_or_final"], ", ".join(wp["types"]))

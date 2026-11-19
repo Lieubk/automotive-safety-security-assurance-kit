@@ -22,7 +22,9 @@ Early. One vertical slice works end to end and is demonstrated by the example:
 | Exchange | ReqIF import, comparison of a new version, export (`tools/reqif.py`); AUTOSAR Classic models to architecture items and back to a comparison (`tools/arxml.py`); pipeline templates for GitHub Actions and GitLab CI (`ci/`) |
 | Skills | project scoping and input registration; project management and risk management (MAN.3, MAN.5); SYS.2 to SYS.5 and SWE.1 to SWE.6; reviews and quality assurance; baselines, change requests and problem resolution; supplier monitoring; trace check, process gates and a mock assessment |
 | Hooks | imported inputs, final records and baselined items are protected; every written item is checked |
-| Not yet | exchange with ALM tools beyond ReqIF, hardware development (ISO 26262-5) beyond the catalog, a record for the release for post-development of ISO/SAE 21434, Automotive SPICE 4.0 |
+| Out of scope | hardware development (ISO 26262 part 5) and the hardware-related clauses 8:13; organization-level requirements (ISO/SAE 21434 clause 5, ISO 26262-2 clauses 5 and 7, REU.2, capability level 3) - a project refers to the organization's evidence; motorcycles (ISO 26262 part 12). The catalogs list them; no rule or skill covers them |
+| Exchange | ReqIF, Excel (requirements in and out, test results in), Polarion, codebeamer and Jama Connect over REST (written from their public interface descriptions, tested against a simulated server), AUTOSAR ARXML |
+| Not yet | Automotive SPICE 4.0 (waits for the PAM 4.0 document) |
 
 ## What it does not do
 

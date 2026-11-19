@@ -416,9 +416,11 @@ documents:
         findings: {processes: [MAN.5]}
 
   supplier-monitoring-report:
-    title: Supplier monitoring report
-    supports: [ACQ.4.BP1, ACQ.4.BP2, ACQ.4.BP3, ACQ.4.BP4, ACQ.4.BP5, "02-01", "13-09"]
+    title: Supplier selection and monitoring report
+    supports: [ACQ.4.BP1, ACQ.4.BP2, ACQ.4.BP3, ACQ.4.BP4, ACQ.4.BP5, "02-01", "13-09", "21434:7.4.1", "26262-8:5.5.1"]
     chapters:
+      - title: Supplier evaluations
+        items: {types: [supplier-evaluation]}
       - title: Supplier agreements
         items: {types: [supplier-agreement]}
       - title: State of the agreements
@@ -539,9 +541,13 @@ documents:
         findings: {processes: ["26262:9", "26262:6", "26262:4"]}
 
   tool-qualification-report:
-    title: Software tool evaluation and qualification
-    supports: ["26262-8:11", "26262-8:11.5.1", "26262-8:11.5.2"]
+    title: Software tool evaluation and component qualification
+    supports: ["26262-8:11", "26262-8:11.5.1", "26262-8:11.5.2", "26262-8:12", "26262-8:12.5.2"]
     chapters:
+      - title: Software components qualified
+        table: {types: [component-qualification], columns: [id, title, version, result, qualifies]}
+      - title: Component qualifications
+        items: {types: [component-qualification]}
       - title: Tools
         table: {types: [tool-evaluation], columns: [id, tool, impact, detection, confidence, asil, qualification_method]}
       - title: Evaluations

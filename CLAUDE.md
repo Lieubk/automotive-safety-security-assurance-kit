@@ -43,7 +43,7 @@ repository - one item per file - and a trace engine checks them.
 | `/sys-qualification-test` | SYS.5 | system qualification strategy, test cases from system requirements, bench and vehicle runs |
 | `/review` | all | the only way an item becomes approved |
 | `/trace-check` | all | explain what the trace engine reports |
-| `/process-gate` | all | readiness of a process, practice by practice |
+| `/process-gate` | all | readiness of a process practice by practice, or of ISO 26262 and ISO/SAE 21434 clause by clause |
 | `/mock-assessment` | all | rehearsal of an assessment: evidence pack, questions, ratings by named people, consistency |
 | `/baseline` | SUP.8 | baselines and their communication |
 | `/change-request` | SUP.10 | changes to baselined items |
@@ -62,6 +62,7 @@ repository - one item per file - and a trace engine checks them.
 | `/hara` | ISO 26262-3 | item definition, hazardous events classified, ASIL, safety goals |
 | `/safety-concept` | ISO 26262-3, 4, 6, 9 | functional, technical and software safety requirements, ASIL inheritance, decomposition, validation |
 | `/safety-analysis` | ISO 26262-9, 6, 4 | FMEA, FTA, DFA with findings carried into requirements or design |
+| `/component-qualification` | ISO 26262-8 | qualification of supplied or reused software components of ASIL A to D |
 | `/release` | SPL.2, ISO 26262-2, ISO/SAE 21434 6.4.9 | release plan, release record from a baseline with approval and release note, delivery and receipt |
 | `/documents` | all | 34 kinds of documents from the items - specifications, SAD, SDD, test specifications and reports, traceability, release, QA, problem, project, risk, TARA and cybersecurity reports - as HTML, Word or Excel, neutral or in the customer's template |
 | `/next-step` | - | where the project stands and what to do next |
@@ -78,6 +79,7 @@ python tools/traceability.py practices SWE.1    # evidence and open findings per
 python tools/traceability.py clauses           # ISO/SAE 21434: decision, evidence and findings per subclause
 python tools/traceability.py safety            # ISO 26262: decision, evidence and findings per clause
 python tools/document.py build software-architecture-description --format docx   # documents from the items
+python tools/xlsx.py sheets inputs/delivery.xlsx    # Excel exchange; tools/alm.py for Polarion, codebeamer, Jama
 python -m unittest discover -s tools/tests      # tests of the engine and the hooks
 python tools/skill_lint.py                      # mechanical checks of skills, agents, checklists
 ```

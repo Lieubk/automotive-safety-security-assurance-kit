@@ -37,6 +37,13 @@ named people, and are recorded as they state them.
 
 ## Steps
 
+### 0. Selection (ISO/SAE 21434 7.4.1, 7.4.2; ISO 26262-8:5)
+- Where the standards are in scope and the supplier is still to be chosen, read
+  `references/supplier-selection.md`: what the request for quotation asks for safety and
+  cybersecurity, the criteria and their evidence, and the decision of a named person, as
+  a `supplier-evaluation` reviewed with `/review`. `COV-76` asks for an approved
+  evaluation that selected the supplier of each agreement.
+
 ### 1. The agreement (BP1)
 - No agreement for the supplier, or the user says terms changed: read
   `references/agreement-template.md`, ask the questions listed there and draft one SAG

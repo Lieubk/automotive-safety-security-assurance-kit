@@ -13,8 +13,10 @@ version and the date received. The result is a set of imported items in state `d
 and a set of `query` items, ready for an input acceptance review through `/review`.
 
 A ReqIF delivery is registered with `tools/reqif.py` (see "A delivery as ReqIF" in
-`references/registering-inputs.md`); other documents are read and the item files
-written by the skill.
+`references/registering-inputs.md`), an Excel delivery with `tools/xlsx.py import`, and
+work items in the customer's Polarion, codebeamer or Jama Connect with
+`tools/alm.py pull` (`.claude/docs/tools.md` has the options); each has a `compare` for
+the next version. Other documents are read and the item files written by the skill.
 
 Cybersecurity work products the customer delivers - item definition, threat
 scenarios, cybersecurity goals and claims, cybersecurity requirements - are registered

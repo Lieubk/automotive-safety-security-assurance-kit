@@ -1,6 +1,6 @@
 # Plan review checklist
 
-Version 10. Applies to: `plan`. Supports: MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6,
+Version 11. Applies to: `plan`. Supports: MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6,
 MAN.3.BP7, SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1,
 SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1, MAN.5.BP1, MAN.5.BP2, the subclauses of
 ISO/SAE 21434 that the cybersecurity kinds name, and the clauses of ISO 26262 the kind safety
@@ -242,7 +242,7 @@ empty, ask the user; do not assume a value.
 | PLN-158 | The plan says who is told of an incident, how fast, who decides the remedy, how progress is followed and when an incident is closed | read `Approach`, `Criteria`, `Responsibilities` | semantic |
 | PLN-159 | It agrees with the escalation of the problem resolution strategy and with the interface agreement | read next to those plans | semantic |
 
-## Kind production-control (21434:12)
+## Kind production-control (21434:12, 26262-7:6)
 
 | ID | Check | How to check | Kind |
 |---|---|---|---|
@@ -288,3 +288,10 @@ empty, ask the user; do not assume a value.
 | PLN-179 | The build of a release and its environment are named, and the build comes from configured items | read `Environment and tools` | semantic |
 | PLN-180 | Support, media and packaging are stated per classification | read `Approach`, `Environment and tools` | semantic |
 | PLN-181 | Who approves a release and how the receipt is confirmed is stated, and the people named agree | ask them; the note names who and when | accountable |
+
+## Kind operation-and-service (26262-7:5, 26262-7:7)
+
+| ID | Check | How to check | Kind |
+|---|---|---|---|
+| PLN-182 | The plan says what keeps the safety-related properties in operation, service and decommissioning: instructions for users and workshops, field monitoring of safety-related events, and how they reach problem resolution | read `Approach` | semantic |
+| PLN-183 | It agrees with what the safety concept requires of production, operation, service and decommissioning | read next to those requirements | semantic |
