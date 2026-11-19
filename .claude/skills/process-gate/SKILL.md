@@ -84,7 +84,9 @@ For each practice with `evidence present`:
 - Read at least three of the items or records behind it, or all if there are fewer.
   Choose as `references/verdicts.md` says, not the three that look best.
 - Read the row of the practice in `aspice/3.1/notes/<PROCESS>.md` and compare what it
-  says must be true with what the sampled items contain.
+  says must be true with what the sampled items contain. Under `aspice.version` 4.0 the
+  notes are those of 3.1: read the rows of the practices its `maps_to` names, and the
+  intent of the 4.0 practice in `aspice/4.0/processes/<PROCESS>.yaml`.
 - Report what was read (IDs), what was looked for, and what was found, with the text.
 - No concern: the practice is PASS, stated as "deterministic part by the engine, sample
   of N of M read". A concern: CONCERNS, as a proposal the user confirms or rejects.

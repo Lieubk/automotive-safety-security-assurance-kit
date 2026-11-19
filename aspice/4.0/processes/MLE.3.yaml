@@ -1,0 +1,98 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: MLE.3
+name: Machine Learning Training
+group: MLE
+scope: extended
+purpose: Optimise the ML model until it meets the ML requirements.
+outcomes:
+- n: 1
+  text: An approach for training and validating the model is specified.
+- n: 2
+  text: The data set for training and validation is created.
+- n: 3
+  text: The model, with its hyperparameter values, is optimised to meet the ML requirements.
+- n: 4
+  text: Training and validation data tie back to the ML data requirements, consistently and traceably both ways.
+- n: 5
+  text: Optimisation results are summarised and the trained model is agreed and shared with all concerned.
+base_practices:
+- id: MLE.3.BP1
+  name: Specify ML training and validation approach
+  intent: 'Specify how the model will be trained and validated: entry and exit criteria, hyperparameter tuning,
+    creation of data sets and environment.'
+  outcomes:
+  - 1
+  evidence:
+  - Training and validation approach
+  rule_ids: []
+  maps_to: []
+- id: MLE.3.BP2
+  name: Create ML training and validation data set
+  intent: Pick data from the collection managed under SUP.11 and assign it to training and validation as the approach
+    says.
+  outcomes:
+  - 2
+  evidence:
+  - Training and validation data set
+  rule_ids: []
+  maps_to: []
+- id: MLE.3.BP3
+  name: Create and optimize ML model
+  intent: Build the model from the architecture and train it on the data until the requirements and exit criteria
+    are met.
+  outcomes:
+  - 3
+  evidence:
+  - Trained model with hyperparameter values
+  - Training logs
+  rule_ids: []
+  maps_to: []
+- id: MLE.3.BP4
+  name: Ensure consistency and establish bidirectional traceability
+  intent: Keep the data set and the data requirements consistent and linked both ways.
+  outcomes:
+  - 4
+  evidence:
+  - Traceability between data set and data requirements
+  rule_ids: []
+  maps_to: []
+- id: MLE.3.BP5
+  name: Summarize and communicate agreed trained ML model
+  intent: Summarise what the optimisation achieved and inform all concerned of the agreed trained model.
+  outcomes:
+  - 5
+  evidence:
+  - Training summary and communication records
+  rule_ids: []
+  maps_to: []
+output_work_products:
+- id: 08-65
+  name: ML training and validation approach
+  outcomes:
+  - 1
+- id: 03-51
+  name: ML data set
+  outcomes:
+  - 2
+- id: 01-53
+  name: Trained ML model
+  outcomes:
+  - 3
+  - 5
+- id: 01-54
+  name: Hyperparameter
+  outcomes:
+  - 3
+- id: 13-51
+  name: Consistency evidence
+  outcomes:
+  - 4
+- id: 13-52
+  name: Communication evidence
+  outcomes:
+  - 5
+catalog_only: true

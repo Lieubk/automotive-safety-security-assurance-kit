@@ -16,6 +16,7 @@ repository - one item per file - and a trace engine checks them.
 | `plans/`, `spec/`, `verification/`, `records/` | the project's items, in the folders `schema/items.yaml` names |
 | `src/`, `tests/` | code and test code |
 | `aspice/3.1/` | process catalog (`processes/`) and notes per process (`notes/`) |
+| `aspice/4.0/` | catalog of Automotive SPICE 4.0 built from the draft 3.991, each practice mapped to 3.1 (`maps_to`); chosen by `aspice.version` in `project.yaml` |
 | `iso-26262/2018/` | catalog of ISO 26262: parts, clauses, requirement numbers, work products, table titles, purposes in our words |
 | `iso-sae-21434/2021/` | catalog of ISO/SAE 21434: clauses, subclauses, requirement and work product identifiers, objectives in our words |
 | `schema/` | item types, links and coverage rules (`items.yaml`), file layout (`item-format.md`), generated documents (`documents.yaml`) |
@@ -64,7 +65,7 @@ repository - one item per file - and a trace engine checks them.
 | `/safety-analysis` | ISO 26262-9, 6, 4 | FMEA, FTA, DFA with findings carried into requirements or design |
 | `/component-qualification` | ISO 26262-8 | qualification of supplied or reused software components of ASIL A to D |
 | `/release` | SPL.2, ISO 26262-2, ISO/SAE 21434 6.4.9 | release plan, release record from a baseline with approval and release note, delivery and receipt |
-| `/documents` | all | 34 kinds of documents from the items - specifications, SAD, SDD, test specifications and reports, traceability, release, QA, problem, project, risk, TARA and cybersecurity reports - as HTML, Word or Excel, neutral or in the customer's template |
+| `/documents` | all | 40 kinds of documents from the items - specifications, SAD, SDD, test specifications and reports, traceability, release, QA, problem, project, risk, TARA and cybersecurity reports - as HTML, Word or Excel, neutral or in the customer's template |
 | `/next-step` | - | where the project stands and what to do next |
 
 Processes without a skill of their own are still in the catalog and covered by the

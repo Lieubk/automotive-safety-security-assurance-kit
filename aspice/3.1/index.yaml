@@ -1,11 +1,47 @@
 version: '3.1'
 processes:
+- id: ACQ.3
+  name: Contract Agreement
+  group: ACQ
+  scope: other
+  base_practices: 7
+  file: processes/ACQ.3.yaml
 - id: ACQ.4
   name: Supplier Monitoring
   group: ACQ
   scope: vda
   base_practices: 5
   file: processes/ACQ.4.yaml
+- id: ACQ.11
+  name: Technical Requirements
+  group: ACQ
+  scope: other
+  base_practices: 10
+  file: processes/ACQ.11.yaml
+- id: ACQ.12
+  name: Legal and Administrative Requirements
+  group: ACQ
+  scope: other
+  base_practices: 10
+  file: processes/ACQ.12.yaml
+- id: ACQ.13
+  name: Project Requirements
+  group: ACQ
+  scope: other
+  base_practices: 15
+  file: processes/ACQ.13.yaml
+- id: ACQ.14
+  name: Request for Proposals
+  group: ACQ
+  scope: other
+  base_practices: 8
+  file: processes/ACQ.14.yaml
+- id: ACQ.15
+  name: Supplier Qualification
+  group: ACQ
+  scope: other
+  base_practices: 5
+  file: processes/ACQ.15.yaml
 - id: MAN.3
   name: Project Management
   group: MAN
@@ -18,12 +54,30 @@ processes:
   scope: extended
   base_practices: 7
   file: processes/MAN.5.yaml
+- id: MAN.6
+  name: Measurement
+  group: MAN
+  scope: other
+  base_practices: 11
+  file: processes/MAN.6.yaml
+- id: PIM.3
+  name: Process Improvement
+  group: PIM
+  scope: other
+  base_practices: 9
+  file: processes/PIM.3.yaml
 - id: REU.2
   name: Reuse Program Management
   group: REU
   scope: other
   base_practices: 8
   file: processes/REU.2.yaml
+- id: SPL.1
+  name: Supplier Tendering
+  group: SPL
+  scope: other
+  base_practices: 8
+  file: processes/SPL.1.yaml
 - id: SPL.2
   name: Product Release
   group: SPL

@@ -1,0 +1,110 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: SUP.9
+name: Problem Resolution Management
+group: SUP
+scope: vda
+purpose: Make sure problems are identified, recorded and analysed, and that their resolution is managed and controlled.
+outcomes:
+- n: 1
+  text: Problems get unique identities, are recorded and are classified.
+- n: 2
+  text: Problems are analysed and assessed so that a fitting solution can be chosen.
+- n: 3
+  text: Resolution of problems is started.
+- n: 4
+  text: Problems are followed until they are closed.
+- n: 5
+  text: Status of problems and identified trends are reported to stakeholders.
+base_practices:
+- id: SUP.9.BP1
+  name: Identify and record the problem
+  intent: Give each problem a unique identity, a description, a status and the information needed to reproduce and
+    diagnose it.
+  outcomes:
+  - 1
+  evidence:
+  - Problem records with identity, status and supporting information
+  rule_ids: []
+  maps_to:
+  - SUP.9.BP2
+  - SUP.9.BP3
+- id: SUP.9.BP2
+  name: Determine the cause and the impact of the problem
+  intent: Analyse the problem for cause and impact and put it in a category.
+  outcomes:
+  - 2
+  evidence:
+  - Problem analysis evidence with category
+  rule_ids: []
+  maps_to:
+  - SUP.9.BP4
+- id: SUP.9.BP3
+  name: Authorize urgent resolution action
+  intent: Where the category calls for urgent resolution, obtain authorisation for immediate action.
+  outcomes:
+  - 3
+  evidence:
+  - Authorisation of urgent action
+  rule_ids: []
+  maps_to:
+  - SUP.9.BP5
+- id: SUP.9.BP4
+  name: Raise alert notifications
+  intent: Where the category shows high impact on other systems or parties, raise an alert.
+  outcomes:
+  - 3
+  evidence:
+  - Alert notifications
+  rule_ids: []
+  maps_to:
+  - SUP.9.BP6
+- id: SUP.9.BP5
+  name: Initiate problem resolution
+  intent: Start suitable actions for the category, including their review, or raise a change request.
+  outcomes:
+  - 3
+  evidence:
+  - Resolution actions or linked change requests
+  rule_ids: []
+  maps_to:
+  - SUP.9.BP7
+- id: SUP.9.BP6
+  name: Track problems to closure
+  intent: Follow problem status, linked change requests included, until closure, which relevant stakeholders accept.
+  outcomes:
+  - 4
+  evidence:
+  - Status history and closure acceptance
+  rule_ids: []
+  maps_to:
+  - SUP.9.BP8
+- id: SUP.9.BP7
+  name: Report the status of problem resolution activities
+  intent: Collect and analyse problem data, find trends, start related actions and report to stakeholders regularly.
+  outcomes:
+  - 5
+  evidence:
+  - Problem status report with trend analysis
+  rule_ids: []
+  maps_to:
+  - SUP.9.BP3
+  - SUP.9.BP9
+output_work_products:
+- id: 13-07
+  name: Problem record
+  outcomes:
+  - 1
+  - 3
+  - 4
+- id: 15-55
+  name: Problem analysis evidence
+  outcomes:
+  - 2
+- id: 15-12
+  name: Problem status report
+  outcomes:
+  - 5

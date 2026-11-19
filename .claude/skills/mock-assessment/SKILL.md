@@ -38,7 +38,8 @@ assessment, and no capability level follows from it.
 
 ### 1. Evidence pack
 - Read `references/rehearsal.md`, "The evidence pack". Per base practice: the row of
-  `aspice/3.1/notes/<PROCESS>.md` (what must be true, typical evidence), the state and
+  `aspice/3.1/notes/<PROCESS>.md` (what must be true, typical evidence; under 4.0 the
+  rows of the 3.1 practices in `maps_to`, with the 4.0 intent), the state and
   the `by` of `practices --json`, the items and records behind it, open findings of
   `check`, and the verdict of the process gate if one exists.
 - With `aspice.target_level` 2 or higher, add the generic practices per process:
@@ -65,7 +66,8 @@ assessment, and no capability level follows from it.
 - `python tools/record.py self-assessment --ratings <file> --process <ID> ... --check-only`
   lists practices without a rating and the flags: a rating outside the band of the
   observation, and a rating above that of a practice it depends on by a rule of the
-  catalog (a recommendation is listed too, without the need for a reason).
+  catalog (a recommendation is listed too, without the need for a reason). Under 4.0
+  the catalog carries no dependencies: say that this part of the check did not run.
 - Put every flag to the assessors: they change the rating or give the reason; the
   reason goes into the note. Repeat until the command reports no gap.
 

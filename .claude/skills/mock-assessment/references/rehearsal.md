@@ -11,7 +11,7 @@ Per process, one block per base practice:
 | the evidence itself | the items and records of the types in `by` (`list --type`), the run, build, review and quality records, with their IDs |
 | what stands against it | the lines of `check` whose bracket names the practice |
 | the gate's view | the verdict of the latest process gate, if one exists, with its date |
-| what depends on what | `depends_on` in `aspice/3.1/processes/<PROCESS>.yaml`: the practices whose rating this one depends on, by rule or by recommendation |
+| what depends on what | `depends_on` in `aspice/<version>/processes/<PROCESS>.yaml`: the practices whose rating this one depends on, by rule or by recommendation. The 4.0 catalog has none (its draft's consistency rules are not reproduced); say so in the pack |
 
 An assessor reads evidence and talks to people; the pack is for both. Quote IDs, so that
 each piece can be opened during the rehearsal.

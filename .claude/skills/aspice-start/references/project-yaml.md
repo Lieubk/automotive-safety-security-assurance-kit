@@ -13,13 +13,14 @@ project:
   name: ""                 # what the team calls the project
   product: ""              # what is being developed, in a few words
 aspice:
-  version: "3.1"           # process catalog under aspice/<version>/
+  version: "3.1"           # process catalog under aspice/<version>/: "3.1", or "4.0"
+                           # (built from the draft 3.991, which is not for assessments)
   target_level: 2          # 1, 2 or 3: capability level the processes in scope aim at
 scope:
   role: ""                 # manufacturer | system-supplier | software-supplier |
                            # component-supplier | engineering-service
   processes: []            # what the team is responsible for: process IDs from
-                           # aspice/3.1/index.yaml. Never written empty: the trace
+                           # aspice/<version>/index.yaml. Never written empty: the trace
                            # engine reads an empty list as "every process in scope"
   assessment_scope: []     # what an assessment will rate, when that differs from
                            # `processes`; empty when it does not differ or when no
@@ -99,7 +100,7 @@ people:                    # who is accountable; review records need these names
 | `scope.safety` | trace engine, safety skills | Only the rules of ISO 26262 whose clauses belong to these parts run, and `COV-27` asks for the plans their clauses need (safety plan; verification, integration and qualification strategies for part 6; configuration and change management for part 8). An empty list means none. |
 | `scope.cybersecurity` | trace engine, cybersecurity skills | Only the rules of ISO/SAE 21434 whose subclauses belong to these clauses run, and `COV-27` asks for the plans of their kinds. Unlike `processes`, an empty list means none. |
 | `scope.assessment_scope` | skills and people | No effect on the checks. `/aspice-start` and `/next-step` warn while it names a process that `processes` does not. |
-| `aspice.version` | `practices` command | Selects the catalog the base practices are read from. |
+| `aspice.version` | `practices`, `generic`, `record.py self-assessment` | Selects the catalog the base and generic practices are read from. Under `4.0` a practice shows the evidence of the 3.1 practices it maps to (`maps_to`), and the line of each practice says so; the coverage rules stay those of `schema/items.yaml`. |
 | `aspice.target_level` | people | A target, never a result. See "Target level" in `roles-and-processes.md`. |
 | `inputs` | `/import-inputs`, `/next-step` | The record of what was received and when. An entry whose `source` appears in no item has not been registered yet. |
 | `safety`, `security` | skills and people | The highest `asil` an item of this product can carry; whether `security_relevant` has to be considered at all. |
@@ -115,7 +116,7 @@ people:                    # who is accountable; review records need these names
 
 ## Rules for writing it
 
-- `scope.processes` holds IDs exactly as in `aspice/3.1/index.yaml`, in the order of
+- `scope.processes` holds IDs exactly as in `aspice/<version>/index.yaml`, in the order of
   the V: SYS.1 to SYS.3, SWE.1 to SWE.6, SYS.4, SYS.5, then supporting, management
   and the rest. A process that is not in the index cannot be put in scope: the
   `practices` command would report it as not in the catalog.

@@ -1,0 +1,116 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: ACQ.4
+name: Supplier Monitoring
+group: ACQ
+scope: vda
+purpose: Follow and judge how an external supplier under contract performs against what was agreed with it.
+outcomes:
+- n: 1
+  text: Customer and supplier carry out the activities they agreed to do together.
+- n: 2
+  text: The information both sides agreed to share is passed on regularly.
+- n: 3
+  text: The supplier's performance is watched and compared with the agreement.
+- n: 4
+  text: Needed changes to the agreement are negotiated and written into it.
+base_practices:
+- id: ACQ.4.BP1
+  name: Agree on and maintain joint activities, joint interfaces, and information to be exchanged
+  intent: Both sides settle and keep up to date what they do jointly, which interfaces they use, who is responsible,
+    and how often they meet and report.
+  outcomes:
+  - 1
+  - 2
+  evidence:
+  - Agreement with the supplier covering joint activities, interfaces and exchange rhythm
+  rule_ids: []
+  maps_to:
+  - ACQ.4.BP1
+- id: ACQ.4.BP2
+  name: Exchange all agreed information
+  intent: The agreed information is actually passed over the agreed joint interfaces.
+  outcomes:
+  - 2
+  evidence:
+  - Log or copies of information exchanged
+  rule_ids: []
+  maps_to:
+  - ACQ.4.BP2
+- id: ACQ.4.BP3
+  name: Review development work products with the supplier
+  intent: Development results are examined with the supplier at the agreed rhythm, with technical issues and risks
+    discussed and open actions followed.
+  outcomes:
+  - 1
+  - 3
+  evidence:
+  - Minutes of technical reviews with action lists
+  rule_ids: []
+  maps_to:
+  - ACQ.4.BP3
+- id: ACQ.4.BP4
+  name: Review progress of the supplier
+  intent: Supplier progress in schedule, quality and cost is examined regularly; open actions are followed to closure
+    and risks are mitigated.
+  outcomes:
+  - 3
+  evidence:
+  - Progress review records with open points and risk actions
+  rule_ids: []
+  maps_to:
+  - ACQ.4.BP4
+- id: ACQ.4.BP5
+  name: Act to correct deviations
+  intent: When agreed objectives are missed, action is taken, and any renegotiated objectives are written into the
+    agreement.
+  outcomes:
+  - 3
+  - 4
+  evidence:
+  - Corrective actions and the updated agreement
+  rule_ids: []
+  maps_to:
+  - ACQ.4.BP5
+output_work_products:
+- id: 02-01
+  name: Commitment/Agreement
+  outcomes:
+  - 1
+  - 4
+- id: 13-01
+  name: Acceptance record
+  outcomes:
+  - 3
+- id: 13-52
+  name: Communication evidence
+  outcomes:
+  - 2
+- id: 13-09
+  name: Meeting support record
+  outcomes:
+  - 1
+  - 3
+- id: 13-14
+  name: Progress status record
+  outcomes:
+  - 3
+- id: 13-16
+  name: Change request
+  outcomes:
+  - 4
+- id: 13-19
+  name: Review record
+  outcomes:
+  - 3
+- id: 14-02
+  name: Corrective action
+  outcomes:
+  - 4
+- id: 15-01
+  name: Analysis report
+  outcomes:
+  - 3

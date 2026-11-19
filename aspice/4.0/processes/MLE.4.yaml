@@ -1,0 +1,119 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: MLE.4
+name: Machine Learning Model Testing
+group: MLE
+scope: extended
+purpose: Make sure that the trained model and the deployed model comply with the ML requirements.
+outcomes:
+- n: 1
+  text: An approach for testing the ML model is defined.
+- n: 2
+  text: A test data set is created.
+- n: 3
+  text: The trained model is tested.
+- n: 4
+  text: The deployed model is derived from the trained model and tested.
+- n: 5
+  text: Test approach and ML requirements, test data set and data requirements, and test approach and test results
+    are consistent and linked in both directions.
+- n: 6
+  text: Test results are summarised and shared, with the deployed model, with all concerned.
+base_practices:
+- id: MLE.4.BP1
+  name: Specify an ML test approach
+  intent: Define test scenarios and their data distributions, expected result per datum, entry and exit criteria,
+    data set creation and test environment.
+  outcomes:
+  - 1
+  evidence:
+  - ML test approach
+  rule_ids: []
+  maps_to: []
+- id: MLE.4.BP2
+  name: Create ML test data set
+  intent: Build a test data set, kept apart from training, from the collection managed under SUP.11 as the approach
+    says.
+  outcomes:
+  - 2
+  evidence:
+  - ML test data set
+  rule_ids: []
+  maps_to: []
+- id: MLE.4.BP3
+  name: Test trained ML model
+  intent: Test the trained model with the test data set and record and evaluate results and logs.
+  outcomes:
+  - 3
+  evidence:
+  - Test results and logs for the trained model
+  rule_ids: []
+  maps_to: []
+- id: MLE.4.BP4
+  name: Derive deployed ML model
+  intent: Obtain the deployed model from the trained model as the architecture says; it is used for tests and for
+    delivery to integration.
+  outcomes:
+  - 4
+  evidence:
+  - Deployed ML model
+  rule_ids: []
+  maps_to: []
+- id: MLE.4.BP5
+  name: Test deployed ML model
+  intent: Test the deployed model with the test data set and record and evaluate results and logs.
+  outcomes:
+  - 4
+  evidence:
+  - Test results and logs for the deployed model
+  rule_ids: []
+  maps_to: []
+- id: MLE.4.BP6
+  name: Ensure consistency and establish bidirectional traceability
+  intent: Keep test approach, requirements, test data and test results consistent and linked both ways.
+  outcomes:
+  - 5
+  evidence:
+  - Traceability and consistency results
+  rule_ids: []
+  maps_to: []
+- id: MLE.4.BP7
+  name: Summarize and communicate results
+  intent: Summarise results and inform all concerned, handing over the deployed model.
+  outcomes:
+  - 6
+  evidence:
+  - Test summary and communication records
+  rule_ids: []
+  maps_to: []
+output_work_products:
+- id: 08-64
+  name: ML test approach
+  outcomes:
+  - 1
+- id: 03-51
+  name: ML data set
+  outcomes:
+  - 2
+- id: 13-50
+  name: Test result
+  outcomes:
+  - 3
+  - 4
+- id: 11-50
+  name: Deployed ML model
+  outcomes:
+  - 4
+  - 6
+- id: 13-51
+  name: Consistency evidence
+  outcomes:
+  - 5
+- id: 13-52
+  name: Communication evidence
+  outcomes:
+  - 6
+catalog_only: true

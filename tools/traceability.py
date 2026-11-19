@@ -3138,27 +3138,28 @@ def practice_rows(project, process_id=None):
             continue
         for bp in yaml.safe_load(source.read_text(encoding="utf-8"))["base_practices"]:
             ref = bp["id"]
-            types = [name for name, spec in schema["types"].items() if ref in map(str, spec.get("supports") or [])]
-            kinds = [kind for kind, refs in schema["plan_kinds"].items() if ref in refs]
+            refs = set(bp["maps_to"]) if "maps_to" in bp else {ref}     # 4.0: the 3.1 practices that carry it
+            types = [name for name, spec in schema["types"].items() if refs & set(map(str, spec.get("supports") or []))]
+            kinds = [kind for kind, kind_refs in schema["plan_kinds"].items() if refs & set(map(str, kind_refs))]
             roles = sorted({role for role, link in schema["links"].items()
-                            for pair in link["pairs"] if ref in pair["supports"]})
-            rules = sorted(r["id"] for r in schema["coverage"] if ref in r["supports"])
+                            for pair in link["pairs"] if refs & set(map(str, pair["supports"]))})
+            rules = sorted(r["id"] for r in schema["coverage"] if refs & set(map(str, r["supports"])))
             held = [i for i in project.items.values() if i.type in types and project.live(i)
                     and (i.type != "plan" or i.front.get("kind") in kinds or not kinds)
                     and (i.type != "test-run" or RUN_LEVELS.get(i.front.get("level")) == pid)
                     and (i.type != "communication-record" or not i.front.get("practices")
-                         or ref in map(str, as_list(i.front.get("practices"))))]
+                         or (refs | {ref}) & set(map(str, as_list(i.front.get("practices")))))]
             if not types:                                 # evidenced by links or rules only: count what carries them
                 carriers = {i.id: i for role, link in schema["links"].items() for pair in link["pairs"]
-                            if ref in pair["supports"] for i in project.of_type(pair["from"])
+                            if refs & set(map(str, pair["supports"])) for i in project.of_type(pair["from"])
                             if project.live(i) and i.targets(role)}
-                subjects = {r["subject"] for r in schema["coverage"] if ref in r["supports"]}
+                subjects = {r["subject"] for r in schema["coverage"] if refs & set(map(str, r["supports"]))}
                 carriers.update({i.id: i for i in project.items.values()
                                  if not roles and i.type in subjects and project.live(i)})
                 held = list(carriers.values())
             settled = [i for i in held
                        if i.status in project.lifecycle(i).get("stages", {}).get("before-approval", [])]
-            mine = [f for f in findings if ref in f["supports"]]
+            mine = [f for f in findings if refs & set(map(str, f["supports"]))]
             errors = sum(1 for f in mine if f["level"] == "error")
             warnings = sum(1 for f in mine if f["level"] == "warning")
             if not (types or roles or rules):
@@ -3175,20 +3176,49 @@ def practice_rows(project, process_id=None):
                 state = "evidence present"
             rows.append({"practice": ref, "name": bp["name"], "state": state, "evidence": len(held),
                          "settled": len(settled), "errors": errors, "warnings": warnings,
-                         "by": types + ["link " + r for r in roles] + rules})
+                         "by": types + ["link " + r for r in roles] + rules
+                         + (["as 3.1 %s" % ", ".join(sorted(refs))] if "maps_to" in bp and refs else [])})
     return rows
 
 
+STATE_RANK = {"findings open": 0, "no evidence yet": 1, "evidence not settled": 2, "warnings open": 3,
+              "evidence present": 4, "no evidence structure": 5}
+
+
 def generic_rows(project, process_id):
-    """Per generic practice of level 2, what the repository holds for one process. Observations only."""
+    """Per generic practice of level 2, what the repository holds for one process. Observations only.
+    For a model whose generic practices map onto those of 3.1 (`maps_to` in its capability levels), the
+    observations of the mapped practices are combined: the worst state, all evidence, all notes."""
     version = str((project.config.get("aspice") or {}).get("version") or project.schema.get("aspice_version"))
     catalog = yaml.safe_load((ROOT / "aspice" / version / "capability-levels.yaml").read_text(encoding="utf-8"))
+    practices = [g for pa in catalog["process_attributes"] if pa["id"] in ("PA 2.1", "PA 2.2")
+                 for g in pa.get("generic_practices", [])]
+    rows = generic_rows_31(project, process_id, version)
+    if not any("maps_to" in g for g in practices):
+        return rows
+    by_id = {r["practice"]: r for r in rows}
+    out = []
+    for gp in practices:
+        mapped = [by_id[g] for g in gp.get("maps_to") or [] if g in by_id]
+        if not mapped:
+            out.append({"practice": gp["id"], "name": gp["name"], "state": "no evidence structure", "evidence": [], "note": ""})
+            continue
+        out.append({"practice": gp["id"], "name": gp["name"],
+                    "state": min((r["state"] for r in mapped), key=lambda s: STATE_RANK.get(s, 9)),
+                    "evidence": sorted({e for r in mapped for e in r["evidence"]}),
+                    "note": "; ".join("%s (3.1): %s" % (r["practice"], r["note"]) for r in mapped if r["note"])})
+    return out
+
+
+def generic_rows_31(project, process_id, version):
+    catalog = yaml.safe_load((ROOT / "aspice" / "3.1" / "capability-levels.yaml").read_text(encoding="utf-8"))
     names = {g["id"]: g["name"] for pa in catalog["process_attributes"] if pa["id"] in ("PA 2.1", "PA 2.2")
              for g in pa.get("generic_practices", [])}
     schema = project.schema
     findings = project.check()
-    bps = [bp["id"] for bp in yaml.safe_load((ROOT / "aspice" / version / "processes" / (process_id + ".yaml"))
-                                             .read_text(encoding="utf-8"))["base_practices"]]
+    bps = [r for bp in yaml.safe_load((ROOT / "aspice" / version / "processes" / (process_id + ".yaml"))
+                                      .read_text(encoding="utf-8"))["base_practices"]
+           for r in (bp["maps_to"] if "maps_to" in bp else [bp["id"]])]
     kinds = [kind for kind, refs in schema["plan_kinds"].items() if set(refs) & set(bps)]
     types = [name for name, spec in schema["types"].items() if set(map(str, spec.get("supports") or [])) & set(bps)
              and name not in ("communication-record", "review-record", "plan")]
@@ -3295,8 +3325,9 @@ def generic_rows(project, process_id):
 def cmd_generic(project, args):
     wanted = [args.process] if args.process else sorted(project.scope or [])
     out = []
+    version = str((project.config.get("aspice") or {}).get("version") or project.schema.get("aspice_version"))
     for pid in wanted:
-        if not (ROOT / "aspice" / "3.1" / "processes" / (pid + ".yaml")).is_file():
+        if not (ROOT / "aspice" / version / "processes" / (pid + ".yaml")).is_file():
             print("%s is not a process of the catalog" % pid)
             return 1
         out += [dict(r, process=pid) for r in generic_rows(Project(project.root), pid)]

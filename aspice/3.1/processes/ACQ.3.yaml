@@ -1,0 +1,103 @@
+id: ACQ.3
+name: Contract Agreement
+group: ACQ
+scope: other
+purpose: Reach agreement with the chosen supplier on a contract and have it approved and awarded.
+outcomes:
+- n: 1
+  text: The contract is negotiated, reviewed, approved and handed to the winning supplier.
+- n: 2
+  text: The contract states without ambiguity what each side expects, owes, delivers and answers for.
+- n: 3
+  text: Ways to watch the supplier's capability and performance, and to counter known risks, were examined for use
+    in the contract terms.
+- n: 4
+  text: Bidders are told how the selection came out.
+base_practices:
+- id: ACQ.3.BP1
+  name: Negotiate the contract/agreement
+  intent: All relevant subjects of the agreement are negotiated with the supplier, such as requirements, acceptance
+    and evaluation criteria, links between payment and acceptance, and joint processes.
+  outcomes:
+  - 1
+  evidence:
+  - Negotiation minutes
+  - Agreed list of contract subjects
+  rule_ids: []
+- id: ACQ.3.BP2
+  name: Specify rights and duties
+  intent: The contract states clearly what each party expects, is responsible for, must deliver and is liable for.
+  outcomes:
+  - 2
+  evidence:
+  - Contract text with responsibilities and deliverables
+  rule_ids: []
+- id: ACQ.3.BP3
+  name: Review contract/agreement for supplier capability monitoring
+  intent: A way to follow the supplier's capability and performance is considered and, where fitting, put into the
+    contract terms.
+  outcomes:
+  - 3
+  evidence:
+  - Contract review record covering supplier monitoring
+  rule_ids: []
+- id: ACQ.3.BP4
+  name: Review contract/agreement for risk mitigation actions
+  intent: A way to counter identified risks is considered and, where fitting, put into the contract terms.
+  outcomes:
+  - 3
+  evidence:
+  - Contract review record covering risk handling
+  rule_ids: []
+- id: ACQ.3.BP5
+  name: Approve contract/agreement
+  intent: The stakeholders concerned give their approval to the contract.
+  outcomes:
+  - 1
+  evidence:
+  - Approval record with names and date
+  rule_ids: []
+- id: ACQ.3.BP6
+  name: Award contract/agreement
+  intent: The contract is given to the bidder that was selected.
+  outcomes:
+  - 1
+  evidence:
+  - Signed or awarded contract
+  rule_ids: []
+- id: ACQ.3.BP7
+  name: Communicate result to tenderers
+  intent: After the award, all bidders are informed of the selection decision.
+  outcomes:
+  - 4
+  evidence:
+  - Notification letters or messages to bidders
+  rule_ids: []
+output_work_products:
+- id: 02-00
+  name: Contract
+  outcomes:
+  - 1
+  - 2
+  - 3
+- id: 02-01
+  name: Commitment/agreement
+  outcomes:
+  - 1
+- id: 13-04
+  name: Communication record
+  outcomes:
+  - 4
+- id: 13-05
+  name: Contract review record
+  outcomes:
+  - 1
+- id: 13-09
+  name: Meeting support record
+  outcomes:
+  - 1
+- id: 15-01
+  name: Analysis report
+  outcomes:
+  - 3
+catalog_only: true

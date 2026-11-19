@@ -1791,5 +1791,47 @@ class Integration(Case):
         self.assertEqual(self.make(items, scope=SCOPE + ["SWE.6"]).findings(), [])
 
 
+class Version40(unittest.TestCase):
+    """Automotive SPICE 4.0, from its draft: practices and generic practices read through `maps_to`."""
+    REPO = Path(__file__).resolve().parents[2]
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(prefix="v40test-", ignore_cleanup_errors=True)
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name) / "p"
+        shutil.copytree(str(self.REPO / "examples" / "power-window"), str(self.root), ignore=shutil.ignore_patterns("build"))
+        config = self.root / "project.yaml"
+        text = config.read_text(encoding="utf-8")
+        self.assertIn('  version: "3.1"', text)
+        config.write_text(text.replace('  version: "3.1"', '  version: "4.0"', 1), encoding="utf-8")
+
+    def test_the_catalogs_are_valid_and_every_mapping_names_a_practice_of_31(self):
+        for version in ("3.1", "4.0"):
+            done = subprocess.run([sys.executable, str(self.REPO / "tools" / "catalog.py"), "validate", "--version", version],
+                                  capture_output=True, text=True)
+            self.assertEqual(done.returncode, 0, done.stdout)
+            self.assertIn("0 errors | 0 warnings", done.stdout)
+
+    def test_a_practice_of_40_shows_the_evidence_of_the_31_practices_it_maps_to(self):
+        from traceability import practice_rows
+        p31 = Project(self.REPO / "examples" / "power-window")
+        p40 = Project(self.root)
+        rows31 = {r["practice"]: r for r in practice_rows(p31, "SWE.1")}
+        rows40 = {r["practice"]: r for r in practice_rows(p40, "SWE.1")}
+        self.assertEqual(len(rows40), 6)
+        self.assertEqual(rows40["SWE.1.BP5"]["by"][-1], "as 3.1 SWE.1.BP6, SWE.1.BP7")
+        self.assertEqual(rows40["SWE.1.BP6"]["state"], rows31["SWE.1.BP8"]["state"])     # communicate
+        self.assertGreaterEqual(rows40["SWE.1.BP1"]["evidence"], rows31["SWE.1.BP1"]["evidence"])
+
+    def test_generic_practices_of_40_combine_the_observations_of_31(self):
+        from traceability import generic_rows
+        rows = {r["practice"]: r for r in generic_rows(Project(self.root), "SWE.1")}
+        self.assertEqual(sorted(rows), ["GP 2.1.%d" % n for n in range(1, 7)] + ["GP 2.2.%d" % n for n in range(1, 5)])
+        self.assertEqual(rows["GP 2.1.6"]["name"], "Manage the interfaces between involved parties")
+        done = subprocess.run([sys.executable, str(self.REPO / "tools" / "traceability.py"), "--project", str(self.root),
+                               "generic", "SWE.1"], capture_output=True, text=True)
+        self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
+
+
 if __name__ == "__main__":
     unittest.main()

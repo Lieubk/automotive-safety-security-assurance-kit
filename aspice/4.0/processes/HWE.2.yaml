@@ -1,0 +1,136 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: HWE.2
+name: Hardware Design
+group: HWE
+scope: extended
+purpose: Provide an analysed hardware design, based on the hardware requirements, that can be manufactured, and
+  derive the data needed for production.
+outcomes:
+- n: 1
+  text: A hardware architecture and detailed design exist, identifying the elements and describing their behaviour,
+    interfaces and dynamic interaction.
+- n: 2
+  text: Architecture and detailed design are analysed and special characteristics are identified.
+- n: 3
+  text: Hardware requirements and hardware design are consistent and linked in both directions.
+- n: 4
+  text: Production data is derived from the detailed design and passed to all concerned.
+- n: 5
+  text: Information for production testing is derived from the detailed design and passed to all concerned.
+- n: 6
+  text: The agreed design and the special characteristics are made known to all concerned.
+base_practices:
+- id: HWE.2.BP1
+  name: Develop hardware architecture
+  intent: Create the architecture that identifies hardware components and record why it was chosen.
+  outcomes:
+  - 1
+  evidence:
+  - Hardware architecture with rationale
+  rule_ids: []
+  maps_to: []
+- id: HWE.2.BP2
+  name: Develop hardware detailed design
+  intent: From the architecture components create the detailed design and schematics for the variants, and derive
+    layout, bill of materials and production data.
+  outcomes:
+  - 1
+  - 4
+  - 5
+  evidence:
+  - Detailed design, schematics, layout, bill of materials, production data
+  rule_ids: []
+  maps_to: []
+- id: HWE.2.BP3
+  name: Specify dynamic aspects
+  intent: Evaluate and describe how relevant hardware elements behave over time and interact.
+  outcomes:
+  - 1
+  evidence:
+  - Description of dynamic behaviour
+  rule_ids: []
+  maps_to: []
+- id: HWE.2.BP4
+  name: Analyze the hardware architecture and the hardware detailed design
+  intent: Examine architecture and detailed design for technical aspects such as manufacturability, support project
+    estimates and identify special characteristics.
+  outcomes:
+  - 2
+  evidence:
+  - Design analysis results
+  - List of special characteristics
+  rule_ids: []
+  maps_to: []
+- id: HWE.2.BP5
+  name: Ensure consistency and establish bidirectional traceability
+  intent: Keep hardware elements and requirements, and detailed design and architecture components, consistent and
+    linked.
+  outcomes:
+  - 3
+  evidence:
+  - Traceability and consistency results
+  rule_ids: []
+  maps_to: []
+- id: HWE.2.BP6
+  name: Communicate agreed hardware architecture and hardware detailed design
+  intent: Pass architecture, detailed design, special characteristics and production data to those concerned.
+  outcomes:
+  - 4
+  - 5
+  - 6
+  evidence:
+  - Communication records
+  rule_ids: []
+  maps_to: []
+output_work_products:
+- id: 04-52
+  name: Hardware Architecture
+  outcomes:
+  - 1
+- id: 04-53
+  name: Hardware Detailed Design
+  outcomes:
+  - 1
+- id: 15-51
+  name: Analysis Results
+  outcomes:
+  - 2
+- id: 13-51
+  name: Consistency Evidence
+  outcomes:
+  - 3
+- id: 17-57
+  name: Special Characteristics
+  outcomes:
+  - 2
+  - 6
+- id: 13-52
+  name: Communication Evidence
+  outcomes:
+  - 6
+- id: 04-54
+  name: Hardware Schematics
+  outcomes:
+  - 1
+- id: 14-54
+  name: Hardware Bill of Materials
+  outcomes:
+  - 4
+- id: 04-55
+  name: Hardware Layout
+  outcomes:
+  - 4
+- id: 03-54
+  name: Hardware Production Data
+  outcomes:
+  - 4
+  - 5
+- id: 04-56
+  name: Hardware Element Interface
+  outcomes:
+  - 1
+catalog_only: true

@@ -1,0 +1,116 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: MAN.5
+name: Risk Management
+group: MAN
+scope: extended
+purpose: Regularly find, analyse, treat and monitor risks of the process and of the product.
+outcomes:
+- n: 1
+  text: Sources of risk are identified and kept up to date.
+- n: 2
+  text: Potential undesirable events are identified as the project proceeds.
+- n: 3
+  text: Risks are analysed and the order of treatment is determined.
+- n: 4
+  text: Measures for risk are defined, used and evaluated, showing how risk status and treatment progress develop.
+- n: 5
+  text: Fitting treatment corrects or avoids the effect of a risk, according to its priority, probability and consequence
+    or another set threshold.
+base_practices:
+- id: MAN.5.BP1
+  name: Identify sources of risks
+  intent: Find the sources of risk together with affected parties and keep them current.
+  outcomes:
+  - 1
+  evidence:
+  - List of risk sources
+  rule_ids: []
+  maps_to:
+  - MAN.5.BP1
+  - MAN.5.BP2
+- id: MAN.5.BP2
+  name: Identify potential undesirable events
+  intent: Find the undesirable events that could occur within the scope of risk management.
+  outcomes:
+  - 2
+  evidence:
+  - Identified potential events
+  rule_ids: []
+  maps_to:
+  - MAN.5.BP3
+- id: MAN.5.BP3
+  name: Determine risks
+  intent: Estimate probability and severity of events to set priorities for treatment.
+  outcomes:
+  - 3
+  evidence:
+  - Risk analysis
+  rule_ids: []
+  maps_to:
+  - MAN.5.BP4
+- id: MAN.5.BP4
+  name: Define risk treatment options
+  intent: Choose for each risk whether to accept, mitigate, avoid or transfer it.
+  outcomes:
+  - 5
+  evidence:
+  - Selected treatment option per risk
+  rule_ids: []
+  maps_to:
+  - MAN.5.BP5
+- id: MAN.5.BP5
+  name: Define and perform risk treatment activities
+  intent: Define and carry out the activities for the chosen treatment options.
+  outcomes:
+  - 5
+  evidence:
+  - Risk action requests and their execution
+  rule_ids: []
+  maps_to:
+  - MAN.5.BP5
+- id: MAN.5.BP6
+  name: Monitor risks
+  intent: Re-evaluate risks regularly to see how their status and treatment progress change.
+  outcomes:
+  - 4
+  evidence:
+  - Risk status reports
+  - Risk measures
+  rule_ids: []
+  maps_to:
+  - MAN.5.BP6
+- id: MAN.5.BP7
+  name: Take corrective action
+  intent: Take corrective action where treatment does not work.
+  outcomes:
+  - 5
+  evidence:
+  - Corrective actions
+  rule_ids: []
+  maps_to:
+  - MAN.5.BP7
+output_work_products:
+- id: 08-55
+  name: Risk measure
+  outcomes:
+  - 4
+- id: 13-20
+  name: Risk action request
+  outcomes:
+  - 5
+- id: 14-02
+  name: Corrective action
+  outcomes:
+  - 5
+- id: 15-08
+  name: Risk analysis
+  outcomes:
+  - 3
+- id: 15-09
+  name: Risk status
+  outcomes:
+  - 4

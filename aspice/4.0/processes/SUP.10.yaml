@@ -1,0 +1,105 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: SUP.10
+name: Change Request Management
+group: SUP
+scope: vda
+purpose: Make sure change requests are managed, tracked and carried out.
+outcomes:
+- n: 1
+  text: Requests for change are recorded and identified.
+- n: 2
+  text: Change requests are analysed, their relations to other requests found and their impact estimated.
+- n: 3
+  text: Change requests are approved and prioritised before implementation.
+- n: 4
+  text: Change requests and the affected work products are linked in both directions.
+- n: 5
+  text: Implementation of change requests is confirmed.
+- n: 6
+  text: Change requests are followed to closure and their status is passed on to those affected.
+base_practices:
+- id: SUP.10.BP1
+  name: Identify and record the change requests
+  intent: Define where change requests apply and give each a unique identity, description, initiator, reason and
+    status.
+  outcomes:
+  - 1
+  evidence:
+  - Change request records with status
+  rule_ids: []
+  maps_to:
+  - SUP.10.BP2
+  - SUP.10.BP3
+- id: SUP.10.BP2
+  name: Analyze and assess change requests
+  intent: Have relevant parties analyse each request against criteria, find affected work products and related requests,
+    and judge impact.
+  outcomes:
+  - 2
+  evidence:
+  - Change analysis criteria and analysis results in the request
+  rule_ids: []
+  maps_to:
+  - SUP.10.BP4
+- id: SUP.10.BP3
+  name: Approve change requests before implementation
+  intent: Rank requests and approve them for implementation, based on the analysis and available resources.
+  outcomes:
+  - 3
+  evidence:
+  - Approval record, for example of a change control board
+  rule_ids: []
+  maps_to:
+  - SUP.10.BP5
+- id: SUP.10.BP4
+  name: Establish bidirectional traceability
+  intent: Link change requests to the work products they affect and, where a problem triggered them, to its problem
+    report.
+  outcomes:
+  - 4
+  evidence:
+  - Traceability record
+  rule_ids: []
+  maps_to:
+  - SUP.10.BP8
+- id: SUP.10.BP5
+  name: Confirm the implementation of change requests
+  intent: Have relevant stakeholders confirm the implementation before closing.
+  outcomes:
+  - 5
+  evidence:
+  - Confirmation of implementation in the request
+  rule_ids: []
+  maps_to:
+  - SUP.10.BP6
+- id: SUP.10.BP6
+  name: Track change requests to closure
+  intent: Follow requests to closure and tell all affected parties their status.
+  outcomes:
+  - 6
+  evidence:
+  - Status history and status communication
+  rule_ids: []
+  maps_to:
+  - SUP.10.BP7
+output_work_products:
+- id: 18-57
+  name: Change analysis criteria
+  outcomes:
+  - 2
+- id: 13-16
+  name: Change request
+  outcomes:
+  - 1
+  - 2
+  - 3
+  - 5
+  - 6
+- id: 13-22
+  name: Traceability record
+  outcomes:
+  - 4

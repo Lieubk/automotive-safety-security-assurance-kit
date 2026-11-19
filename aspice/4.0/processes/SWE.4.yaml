@@ -1,0 +1,98 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: SWE.4
+name: Software Unit Verification
+group: SWE
+scope: vda
+purpose: Verify that software units agree with the detailed design.
+outcomes:
+- n: 1
+  text: Verification measures for the units are defined.
+- n: 2
+  text: Measures are chosen for the release scope, with regression in mind.
+- n: 3
+  text: Units are verified with the chosen measures and the results recorded.
+- n: 4
+  text: Measures and units, and results and measures, are consistent and linked in both directions.
+- n: 5
+  text: Results of unit verification are summarised and shared with all concerned.
+base_practices:
+- id: SWE.4.BP1
+  name: Specify software unit verification measures
+  intent: Define measures for every unit of the detailed design, with pass/fail criteria, environment and entry/exit
+    criteria.
+  outcomes:
+  - 1
+  evidence:
+  - Unit verification measures, such as unit tests or analysis rules
+  rule_ids: []
+  maps_to:
+  - SWE.4.BP1
+  - SWE.4.BP2
+- id: SWE.4.BP2
+  name: Select software unit verification measures
+  intent: Record the choice of measures with regression criteria and sufficient coverage of the release scope.
+  outcomes:
+  - 2
+  evidence:
+  - Selection of unit verification measures
+  rule_ids: []
+  maps_to:
+  - SWE.4.BP1
+- id: SWE.4.BP3
+  name: Perform software unit verification
+  intent: Run the chosen measures on the units and record outcomes with pass/fail data.
+  outcomes:
+  - 3
+  evidence:
+  - Unit verification results
+  rule_ids: []
+  maps_to:
+  - SWE.4.BP3
+  - SWE.4.BP4
+- id: SWE.4.BP4
+  name: Ensure consistency and establish bidirectional traceability
+  intent: Link measures to units and results to measures, and keep them consistent.
+  outcomes:
+  - 4
+  evidence:
+  - Traceability and consistency results
+  rule_ids: []
+  maps_to:
+  - SWE.4.BP5
+  - SWE.4.BP6
+- id: SWE.4.BP5
+  name: Summarize and communicate results
+  intent: Condense the results into a summary and pass it on.
+  outcomes:
+  - 5
+  evidence:
+  - Summary of unit verification results
+  rule_ids: []
+  maps_to:
+  - SWE.4.BP7
+output_work_products:
+- id: 08-60
+  name: Verification Measure
+  outcomes:
+  - 1
+- id: 08-58
+  name: Verification Measure Selection Set
+  outcomes:
+  - 2
+- id: 15-52
+  name: Verification Results
+  outcomes:
+  - 3
+  - 4
+- id: 13-51
+  name: Consistency Evidence
+  outcomes:
+  - 4
+- id: 13-52
+  name: Communication Evidence
+  outcomes:
+  - 5

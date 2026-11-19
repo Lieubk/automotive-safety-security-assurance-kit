@@ -1,0 +1,108 @@
+id: ACQ.14
+name: Request for Proposals
+group: ACQ
+scope: other
+purpose: Prepare and issue the acquisition requirements, covering contract, project, finance and technical terms,
+  for a call for proposals or invitation to tender.
+outcomes:
+- n: 1
+  text: Rules for inviting and evaluating proposals are set in line with acquisition policy and strategy.
+- n: 2
+  text: The requirements that go with the call for proposals are assembled as a baseline, technical ones and others.
+- n: 3
+  text: Contract terms of reference and conditions for the call are set.
+- n: 4
+  text: It is set how costs are calculated and payments are made.
+- n: 5
+  text: Project terms of reference for the call are set.
+- n: 6
+  text: Technical terms of reference for the call are set.
+- n: 7
+  text: The call is prepared and issued following acquisition policy and the applicable laws and policies.
+base_practices:
+- id: ACQ.14.BP1
+  name: Define rules for CFP / ITT
+  intent: Set rules for inviting and evaluating proposals that follow the acquisition policy and strategy.
+  outcomes:
+  - 1
+  evidence:
+  - Tendering rules
+  rule_ids: []
+- id: ACQ.14.BP2
+  name: Assemble requirements
+  intent: Gather the baseline technical and non-technical requirements that go with the call.
+  outcomes:
+  - 2
+  evidence:
+  - Requirement specification attached to the call
+  rule_ids: []
+- id: ACQ.14.BP3
+  name: Establish terms and conditions for CFP / ITT
+  intent: Set the contract terms of reference and conditions for the call.
+  outcomes:
+  - 3
+  evidence:
+  - Terms and conditions in the call
+  rule_ids: []
+- id: ACQ.14.BP4
+  name: Define financial terms
+  intent: Lay down how costs are to be stated and how payments will be made.
+  outcomes:
+  - 4
+  evidence:
+  - Financial section of the call
+  rule_ids: []
+- id: ACQ.14.BP5
+  name: Define project terms
+  intent: Set project terms of reference for the call.
+  outcomes:
+  - 5
+  evidence:
+  - Project section of the call
+  rule_ids: []
+- id: ACQ.14.BP6
+  name: Define technical terms
+  intent: Set technical terms of reference for the call.
+  outcomes:
+  - 6
+  evidence:
+  - Technical section of the call
+  rule_ids: []
+- id: ACQ.14.BP7
+  name: Identify relevant regulations
+  intent: Find the laws, requirements and policies that matter for preparing the call.
+  outcomes:
+  - 7
+  evidence:
+  - List of applicable regulations
+  rule_ids: []
+- id: ACQ.14.BP8
+  name: Prepare and issue a CFP / ITT
+  intent: Prepare the call and send it out following acquisition policy and the applicable laws.
+  outcomes:
+  - 7
+  evidence:
+  - Issued request for proposal
+  - Distribution record
+  rule_ids: []
+output_work_products:
+- id: 02-01
+  name: Commitment/agreement
+  outcomes:
+  - 3
+- id: 12-01
+  name: Request for proposal
+  outcomes:
+  - 7
+- id: 17-00
+  name: Requirement specification
+  outcomes:
+  - 2
+  - 4
+  - 5
+  - 6
+- id: 19-11
+  name: Validation strategy
+  outcomes:
+  - 1
+catalog_only: true

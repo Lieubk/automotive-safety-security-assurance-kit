@@ -10,6 +10,9 @@ Usage:
     python tools/catalog.py validate [--version 3.1]
     python tools/catalog.py index    [--version 3.1]    # rewrites index.yaml
 
+For a version other than 3.1 (4.0, built from its draft), `maps_to` of each base practice
+must name base practices of the 3.1 catalog: the toolkit's evidence structures carry them.
+
 Requires PyYAML. Exit code 0 = valid, 1 = errors.
 """
 import argparse
@@ -93,7 +96,7 @@ def check_process(pid, p, all_bps, errors, warnings):
         seen.add(wid)
         if not wp.get("name"):
             err("work product %s has no name" % wid)
-        if not wp.get("outcomes"):
+        if not wp.get("outcomes") and not p.get("outcomes_unmapped"):
             warnings.append("%s: work product %s has no outcome mapping" % (pid, wid))
         bad = set(wp.get("outcomes") or []) - valid
         if bad:
@@ -144,6 +147,14 @@ def main():
     errors, warnings = [], []
     for pid, p in procs.items():
         check_process(pid, p, all_bps, errors, warnings)
+    if args.version != "3.1":                   # a later model is evidenced through the 3.1 practices it maps to
+        _, base = load("3.1")
+        known = {bp.get("id") for q in base.values() for bp in (q or {}).get("base_practices") or []}
+        for pid, p in procs.items():
+            for bp in (p or {}).get("base_practices") or []:
+                bad = [m for m in bp.get("maps_to") or [] if m not in known]
+                if bad:
+                    errors.append("%s: %s maps to %s, not a base practice of 3.1" % (pid, bp.get("id"), ", ".join(bad)))
 
     index_path = folder.parent / "index.yaml"
     if not errors:

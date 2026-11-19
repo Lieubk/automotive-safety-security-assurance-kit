@@ -1,0 +1,99 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: SUP.11
+name: Machine Learning Data Management
+group: SUP
+scope: extended
+purpose: Define ML data in line with the ML data requirements, keep its integrity and quality, and make it available
+  to those who need it.
+outcomes:
+- n: 1
+  text: An ML data management system with a data life cycle is set up.
+- n: 2
+  text: An approach to ML data quality, with quality criteria, is developed.
+- n: 3
+  text: Collected ML data is processed to agree with the ML data requirements.
+- n: 4
+  text: ML data is checked against the quality criteria and updated as needed.
+- n: 5
+  text: ML data is agreed and made known to all concerned.
+base_practices:
+- id: SUP.11.BP1
+  name: Establish an ML data management system
+  intent: Set up a system that supports data management activities, the sources of data, a data life cycle with
+    status model and the interfaces to affected parties.
+  outcomes:
+  - 1
+  evidence:
+  - ML data management system description
+  rule_ids: []
+  maps_to: []
+- id: SUP.11.BP2
+  name: Develop an ML data quality approach
+  intent: Develop an approach for analysing data quality against criteria, including activities that help avoid
+    bias.
+  outcomes:
+  - 2
+  evidence:
+  - ML data quality approach with criteria
+  rule_ids: []
+  maps_to: []
+- id: SUP.11.BP3
+  name: Collect ML data
+  intent: Identify and keep watching the sources of raw data, and collect raw data as the data requirements say.
+  outcomes:
+  - 3
+  evidence:
+  - Collected raw data with source information
+  rule_ids: []
+  maps_to: []
+- id: SUP.11.BP4
+  name: Process ML data
+  intent: Process raw data, by annotating, analysing and structuring it, as the data requirements say.
+  outcomes:
+  - 3
+  evidence:
+  - Processed ML data
+  rule_ids: []
+  maps_to: []
+- id: SUP.11.BP5
+  name: Assure quality of ML data
+  intent: Carry out the activities of the quality approach so that the data meets the criteria.
+  outcomes:
+  - 4
+  evidence:
+  - Records of data quality checks
+  rule_ids: []
+  maps_to: []
+- id: SUP.11.BP6
+  name: Communicate agreed processed ML data
+  intent: Inform all affected parties of the agreed processed data and give them access to it.
+  outcomes:
+  - 5
+  evidence:
+  - Communication records
+  rule_ids: []
+  maps_to: []
+output_work_products:
+- id: 16-52
+  name: ML data management system
+  outcomes:
+  - 1
+- id: 19-50
+  name: ML data quality approach
+  outcomes:
+  - 2
+- id: 03-53
+  name: ML data
+  outcomes:
+  - 3
+  - 4
+  - 5
+- id: 13-52
+  name: Communication evidence
+  outcomes:
+  - 5
+catalog_only: true

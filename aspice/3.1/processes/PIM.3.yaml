@@ -1,0 +1,168 @@
+id: PIM.3
+name: Process Improvement
+group: PIM
+scope: other
+purpose: Keep raising the organisation's effectiveness and efficiency through processes that match business needs.
+outcomes:
+- n: 1
+  text: Resources are committed to sustain improvement actions.
+- n: 2
+  text: Problems arising from inside or outside the organisation are named as improvement opportunities, with reasons
+    for change.
+- n: 3
+  text: The present state of the processes that prompted improvement is analysed.
+- n: 4
+  text: Improvement goals are set and ranked, and the resulting process changes are defined, planned and put in
+    place.
+- n: 5
+  text: The effects of the changed processes are watched, measured and checked against the goals.
+- n: 6
+  text: What was learned is shared across the organisation.
+- n: 7
+  text: Results of improvements are assessed and reuse elsewhere in the organisation is considered.
+base_practices:
+- id: PIM.3.BP1
+  name: Establish commitment
+  intent: Management supports the process group and provides resources and enablers such as training, methods and
+    infrastructure to sustain improvement.
+  outcomes:
+  - 1
+  evidence:
+  - Commitment statement
+  - Resource allocation
+  rule_ids: []
+- id: PIM.3.BP2
+  name: Identify issues
+  intent: Continuously analyse processes and interfaces, including customer input, to find issues that justify change.
+  outcomes:
+  - 2
+  - 3
+  evidence:
+  - Improvement opportunities
+  - Change requests
+  rule_ids: []
+- id: PIM.3.BP3
+  name: Establish process improvement goals
+  intent: Analyse the current state of the processes behind the improvement stimuli and set improvement goals.
+  outcomes:
+  - 3
+  evidence:
+  - Goals
+  - Assessment or audit report
+  rule_ids: []
+- id: PIM.3.BP4
+  name: Prioritize improvements
+  intent: Rank the improvement goals and activities.
+  outcomes:
+  - 4
+  evidence:
+  - Prioritised improvement list
+  rule_ids: []
+- id: PIM.3.BP5
+  name: Plan process changes
+  intent: Define and plan the process changes that follow from the goals.
+  outcomes:
+  - 4
+  evidence:
+  - Improvement plan
+  rule_ids: []
+- id: PIM.3.BP6
+  name: Implement process changes
+  intent: Put the improved processes in place, update process descriptions and train people.
+  outcomes:
+  - 4
+  evidence:
+  - Updated process descriptions
+  - Training material
+  rule_ids: []
+- id: PIM.3.BP7
+  name: Confirm process improvement
+  intent: Monitor and measure the effects of the new processes and confirm them against the goals.
+  outcomes:
+  - 5
+  evidence:
+  - Process measures
+  - Evaluation report
+  rule_ids: []
+- id: PIM.3.BP8
+  name: Communicate results of improvement
+  intent: Share what was learned and the progress made beyond the improvement project, including with the customer
+    where fitting.
+  outcomes:
+  - 6
+  evidence:
+  - Communication records
+  rule_ids: []
+- id: PIM.3.BP9
+  name: Evaluate the results of the improvement project
+  intent: Judge whether the solution worked and could be used elsewhere in the organisation.
+  outcomes:
+  - 7
+  evidence:
+  - Evaluation report
+  rule_ids: []
+output_work_products:
+- id: 02-01
+  name: Commitment/agreement
+  outcomes:
+  - 1
+- id: 05-00
+  name: Goals
+  outcomes:
+  - 4
+- id: 06-04
+  name: Training material
+  outcomes:
+  - 4
+  - 6
+- id: 07-04
+  name: Process measure
+  outcomes:
+  - 6
+- id: 08-00
+  name: Plan
+  outcomes:
+  - 2
+  - 4
+  - 7
+- id: 08-29
+  name: Improvement plan
+  outcomes:
+  - 4
+- id: 10-00
+  name: Process description
+  outcomes:
+  - 4
+- id: 13-04
+  name: Communication record
+  outcomes:
+  - 6
+- id: 13-16
+  name: Change request
+  outcomes:
+  - 2
+- id: 15-05
+  name: Evaluation report
+  outcomes:
+  - 2
+  - 3
+  - 4
+  - 5
+  - 7
+- id: 15-13
+  name: Assessment/audit report
+  outcomes:
+  - 3
+  - 5
+- id: 15-16
+  name: Improvement opportunity
+  outcomes:
+  - 2
+  - 3
+  - 4
+  - 7
+- id: 16-06
+  name: Process repository
+  outcomes:
+  - 4
+catalog_only: true

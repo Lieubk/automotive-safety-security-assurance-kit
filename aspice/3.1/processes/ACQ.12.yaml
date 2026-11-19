@@ -1,0 +1,148 @@
+id: ACQ.12
+name: Legal and Administrative Requirements
+group: ACQ
+scope: other
+purpose: Define the contractual side of an award - expectations, liabilities and legal matters - in line with national
+  and international contract law.
+outcomes:
+- n: 1
+  text: A contract approach is set that follows the relevant laws, guidance and policies.
+- n: 2
+  text: Agreement and contract terms describe how the supplier will satisfy needs and expectations.
+- n: 3
+  text: Acceptance criteria exist, and so do ways to deal with failure to meet the contract.
+- n: 4
+  text: The acquirer's rights regarding intellectual property, including taking over, changing or assessing it,
+    are fixed.
+- n: 5
+  text: Warranties and service level agreements are included where they apply.
+- n: 6
+  text: It is set out how suppliers deliver further items such as a quality plan or escrow.
+- n: 7
+  text: Accepted criteria for proprietary, regulatory and other liability questions are set.
+base_practices:
+- id: ACQ.12.BP1
+  name: Identify relevant regulations
+  intent: Find the laws, rules and policies - national, international and those of regulators - that the contract
+    has to respect.
+  outcomes:
+  - 1
+  evidence:
+  - List of applicable regulations
+  rule_ids: []
+- id: ACQ.12.BP2
+  name: Consider relevant regulations
+  intent: Take the laws, guidance and policies found into account when choosing the contract approach.
+  outcomes:
+  - 2
+  evidence:
+  - Contract approach description
+  rule_ids: []
+- id: ACQ.12.BP3
+  name: Agree on (contractual) terms and conditions
+  intent: Agree the terms and conditions, such as responsibilities, payment basis, maintenance and upgrades.
+  outcomes:
+  - 2
+  evidence:
+  - Terms and conditions document
+  rule_ids: []
+- id: ACQ.12.BP4
+  name: Ensure usage of agreed terms and conditions
+  intent: Make sure the agreed terms are the ones used when describing how the supplier will meet needs.
+  outcomes:
+  - 2
+  evidence:
+  - Contract referring to the agreed terms
+  rule_ids: []
+- id: ACQ.12.BP5
+  name: Establish acceptance criteria
+  intent: Define criteria by which deliveries are accepted.
+  outcomes:
+  - 3
+  evidence:
+  - Acceptance criteria
+  rule_ids: []
+- id: ACQ.12.BP6
+  name: Establish escalation mechanisms
+  intent: Define how breaches of the contract are handled, including control of contract changes.
+  outcomes:
+  - 3
+  evidence:
+  - Escalation and breach procedure in the contract
+  rule_ids: []
+- id: ACQ.12.BP7
+  name: Establish management of intellectual property rights
+  intent: Fix the acquirer's rights to take over, change or evaluate intellectual property, directly or not.
+  outcomes:
+  - 4
+  evidence:
+  - IP clause in the contract
+  rule_ids: []
+- id: ACQ.12.BP8
+  name: Provide for warranties and service level agreements
+  intent: Include warranties and service levels where they apply.
+  outcomes:
+  - 5
+  evidence:
+  - Warranty and service level clauses
+  rule_ids: []
+- id: ACQ.12.BP9
+  name: Define provision for the suppliers
+  intent: State what else the supplier must deliver, for instance a quality plan or escrow arrangement.
+  outcomes:
+  - 6
+  evidence:
+  - Contract clauses on additional deliverables
+  rule_ids: []
+- id: ACQ.12.BP10
+  name: Establish criteria for liability issues
+  intent: Agree which criteria apply to liability for the product, including rights of ownership and what regulators
+    demand.
+  outcomes:
+  - 7
+  evidence:
+  - Liability clause in the contract
+  rule_ids: []
+output_work_products:
+- id: 02-00
+  name: Contract
+  outcomes:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+- id: 02-01
+  name: Commitment/agreement
+  outcomes:
+  - 2
+  - 4
+  - 5
+  - 6
+  - 7
+- id: 10-00
+  name: Process description
+  outcomes:
+  - 1
+  - 3
+- id: 14-02
+  name: Corrective action register
+  outcomes:
+  - 3
+- id: 17-00
+  name: Requirement specification
+  outcomes:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+- id: 18-01
+  name: Acceptance criteria
+  outcomes:
+  - 3
+catalog_only: true

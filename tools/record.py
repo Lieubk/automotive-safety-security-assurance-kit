@@ -1042,7 +1042,8 @@ def generic_findings(project, processes, data):
             problems.append("%s %s: rating %r; one of N, P, L, F" % (key[0], key[1], entry.get("rating")))
         else:
             ratings[key] = entry
-    catalog = yaml.safe_load((trace.ROOT / "aspice" / "3.1" / "capability-levels.yaml").read_text(encoding="utf-8"))
+    version = str((project.config.get("aspice") or {}).get("version") or "3.1")
+    catalog = yaml.safe_load((trace.ROOT / "aspice" / version / "capability-levels.yaml").read_text(encoding="utf-8"))
     for pid in processes:
         for row in trace.generic_rows(Project(project.root), pid):
             observations.append({"process": pid, "practice": row["practice"], "state": row["state"]})

@@ -32,8 +32,9 @@ practices start from; none of the rows is evidence for a rating on its own.
    `project.yaml`, say so: without a scope the trace engine runs every rule. Every
    command of this skill takes `--project <dir>` after the script name when the
    project is not the current directory; `project.yaml` is then written there.
-3. Read `aspice/3.1/index.yaml` and list the installed skills with Glob
-   `.claude/skills/*/SKILL.md`. Step 3 states both as facts, not from memory.
+3. Read `aspice/<version>/index.yaml` (`aspice.version` of an existing file, 3.1
+   otherwise) and list the installed skills with Glob `.claude/skills/*/SKILL.md`.
+   Step 3 states both as facts, not from memory.
 4. Ask one step at a time, in the order below. After each answer restate what will be
    recorded and get a yes before the next question. "Not decided yet" is a valid
    answer: record an empty value and list it as open in the hand-over. Never derive
@@ -58,7 +59,11 @@ deliverer calls it), version, date received, format. The `level` values are in
 whether it is missing.
 
 ### 3. Processes the team is responsible for
-Show every process of `aspice/3.1/index.yaml`, grouped as in
+First ask which version of Automotive SPICE the customer or the assessment uses: `3.1`
+(the default) or `4.0`. Before the user decides, say what 4.0 means here, from "Model
+version" in `references/roles-and-processes.md`. Record the answer as `aspice.version`.
+
+Show every process of `aspice/<version>/index.yaml`, grouped as in
 `references/roles-and-processes.md`: ID, name, whether it is in the VDA scope, and
 what the toolkit has for it today (an authoring skill that is installed; or catalog,
 schema and trace rules only; or the catalog only). Mark the typical set of the role.

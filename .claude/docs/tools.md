@@ -44,6 +44,12 @@ ratings:
 | `findings open` | errors concern this practice |
 | `no evidence structure` | the schema has no item type, link or rule for this practice: the toolkit cannot tell, a person has to |
 
+With `aspice.version: "4.0"` in `project.yaml`, `practices` and `generic` read the 4.0
+catalog, built from the draft 3.991. A 4.0 practice shows the evidence of the 3.1
+practices it maps to (`maps_to` in its catalog file), and its `by` ends with "as 3.1
+...". Rules, checklists and notes stay those of 3.1; `self-assessment` checks no
+rating dependencies under 4.0, because the catalog carries none.
+
 Finding levels: `error` (approved items, or always-wrong structure), `warning` (items
 in review, or missing consistency evidence), `info` (drafts). Rule names: `FORMAT`,
 `SCHEMA`, `LINK` (structure), `COV-01` to `COV-76` (coverage rules of
@@ -221,6 +227,7 @@ with `tools/record.py` from a clean, committed tree. The toolkit's own checks ru
 |---|---|
 | What a process expects, practice by practice | `aspice/3.1/notes/<PROCESS>.md` |
 | Identifiers, outcomes, work products, rating dependencies | `aspice/3.1/processes/<PROCESS>.yaml` |
+| The same for Automotive SPICE 4.0 (built from the draft 3.991, not for assessments), with `maps_to` per practice | `aspice/4.0/processes/<PROCESS>.yaml`, `aspice/4.0/capability-levels.yaml` |
 | Traceability and consistency, key concepts | `aspice/3.1/notes/key-concepts.md` |
 | Capability levels and generic practices | `aspice/3.1/notes/capability-levels.md` |
 | Item types, attributes, links, coverage rules | `schema/items.yaml` |

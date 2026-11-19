@@ -1,0 +1,93 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: SWE.3
+name: Software Detailed Design and Unit Construction
+group: SWE
+scope: vda
+purpose: Create a detailed software design on the basis of the architecture, and build software units that match
+  it.
+outcomes:
+- n: 1
+  text: A detailed design exists with static and dynamic aspects.
+- n: 2
+  text: Software units described by the detailed design are implemented.
+- n: 3
+  text: Detailed design and architecture, and units and detailed design, are consistent and linked in both directions.
+- n: 4
+  text: The agreed detailed design is made known to all concerned.
+base_practices:
+- id: SWE.3.BP1
+  name: Specify the static aspects of the detailed design
+  intent: For each component describe the behaviour, structure, relations and interfaces of its units, with valid
+    value ranges and physical units of inputs and outputs.
+  outcomes:
+  - 1
+  evidence:
+  - Static part of the detailed design
+  rule_ids: []
+  maps_to:
+  - SWE.3.BP1
+  - SWE.3.BP2
+  - SWE.3.BP4
+- id: SWE.3.BP2
+  name: Specify the dynamic aspects of the detailed design
+  intent: Describe how units interact to give the dynamic behaviour of their component.
+  outcomes:
+  - 1
+  evidence:
+  - Dynamic part of the detailed design
+  rule_ids: []
+  maps_to:
+  - SWE.3.BP3
+- id: SWE.3.BP3
+  name: Develop software units
+  intent: Write and document the units so that they follow the detailed design and the coding principles.
+  outcomes:
+  - 2
+  evidence:
+  - Source code or models of software units
+  - Coding guideline
+  rule_ids: []
+  maps_to:
+  - SWE.3.BP8
+- id: SWE.3.BP4
+  name: Ensure consistency and establish bidirectional traceability
+  intent: Keep design, architecture, units and requirements consistent and linked as far as the practice demands.
+  outcomes:
+  - 3
+  evidence:
+  - Traceability and consistency results
+  rule_ids: []
+  maps_to:
+  - SWE.3.BP5
+  - SWE.3.BP6
+- id: SWE.3.BP5
+  name: Communicate agreed software detailed design and software units
+  intent: Inform all affected parties of the agreed design and units.
+  outcomes:
+  - 4
+  evidence:
+  - Communication records
+  rule_ids: []
+  maps_to:
+  - SWE.3.BP7
+output_work_products:
+- id: 04-05
+  name: Software Detailed Design
+  outcomes:
+  - 1
+- id: 11-05
+  name: Software Unit
+  outcomes:
+  - 2
+- id: 13-51
+  name: Consistency Evidence
+  outcomes:
+  - 3
+- id: 13-52
+  name: Communication Evidence
+  outcomes:
+  - 4

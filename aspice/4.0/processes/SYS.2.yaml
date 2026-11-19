@@ -1,0 +1,111 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: SYS.2
+name: System Requirements Analysis
+group: SYS
+scope: vda
+purpose: Establish a structured, analysed set of system requirements that agrees with the stakeholder requirements.
+outcomes:
+- n: 1
+  text: System requirements are written down.
+- n: 2
+  text: System requirements are grouped and given priorities.
+- n: 3
+  text: System requirements are checked for being correct and technically achievable.
+- n: 4
+  text: The effect of system requirements on their surroundings is examined.
+- n: 5
+  text: System requirements are consistent with the stakeholder requirements and traceable to and from them.
+- n: 6
+  text: The agreed system requirements and their effect on the surroundings are made known to everyone affected.
+base_practices:
+- id: SYS.2.BP1
+  name: Specify system requirements
+  intent: Derive functional and non-functional system requirements from the stakeholder requirements and write them
+    with the agreed qualities of a good requirement.
+  outcomes:
+  - 1
+  evidence:
+  - System requirements specification
+  rule_ids: []
+  maps_to:
+  - SYS.2.BP1
+  - SYS.2.BP5
+- id: SYS.2.BP2
+  name: Structure system requirements
+  intent: Arrange the requirements, for instance by function or variant, and rank them by need.
+  outcomes:
+  - 2
+  evidence:
+  - Requirements with structure and priority attributes
+  rule_ids: []
+  maps_to:
+  - SYS.2.BP2
+- id: SYS.2.BP3
+  name: Analyze system requirements
+  intent: Examine the requirements and their dependencies for correctness and technical feasibility, and give project
+    management input for estimates.
+  outcomes:
+  - 3
+  evidence:
+  - Analysis results on correctness and feasibility
+  rule_ids: []
+  maps_to:
+  - SYS.2.BP3
+- id: SYS.2.BP4
+  name: Analyze the impact on the system context
+  intent: Examine what the requirements mean for the elements around the system.
+  outcomes:
+  - 4
+  evidence:
+  - Impact analysis on the system context
+  rule_ids: []
+  maps_to:
+  - SYS.2.BP4
+- id: SYS.2.BP5
+  name: Ensure consistency and establish bidirectional traceability
+  intent: Keep system and stakeholder requirements consistent and linked in both directions.
+  outcomes:
+  - 5
+  evidence:
+  - Traceability between system and stakeholder requirements
+  - Consistency check result
+  rule_ids: []
+  maps_to:
+  - SYS.2.BP6
+  - SYS.2.BP7
+- id: SYS.2.BP6
+  name: Communicate agreed system requirements and impact on the system context
+  intent: Pass the agreed system requirements and the impact findings to everyone concerned.
+  outcomes:
+  - 6
+  evidence:
+  - Communication records to affected parties
+  rule_ids: []
+  maps_to:
+  - SYS.2.BP8
+output_work_products:
+- id: 17-00
+  name: Requirement
+  outcomes:
+  - 1
+- id: 17-54
+  name: Requirement Attribute
+  outcomes:
+  - 2
+- id: 15-51
+  name: Analysis Results
+  outcomes:
+  - 3
+  - 4
+- id: 13-51
+  name: Consistency Evidence
+  outcomes:
+  - 5
+- id: 13-52
+  name: Communication Evidence
+  outcomes:
+  - 6

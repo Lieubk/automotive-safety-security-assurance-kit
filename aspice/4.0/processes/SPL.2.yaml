@@ -1,0 +1,132 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: SPL.2
+name: Product Release
+group: SPL
+scope: extended
+purpose: Control how a product reaches its intended customer as a release.
+outcomes:
+- n: 1
+  text: It is decided what each release contains.
+- n: 2
+  text: The release package is put together from items under configuration control.
+- n: 3
+  text: Documentation accompanying the release is defined and produced.
+- n: 4
+  text: A release is approved only against set criteria.
+- n: 5
+  text: The intended customer receives the release package.
+base_practices:
+- id: SPL.2.BP1
+  name: Define the functional content of releases
+  intent: Decide which functions go into each release and by which criteria it will be judged ready.
+  outcomes:
+  - 1
+  evidence:
+  - Release content list and release criteria
+  rule_ids: []
+  maps_to:
+  - SPL.2.BP1
+- id: SPL.2.BP2
+  name: Define release package
+  intent: Decide what the package consists of, including supporting tools and information.
+  outcomes:
+  - 1
+  - 2
+  evidence:
+  - Release package definition
+  rule_ids: []
+  maps_to:
+  - SPL.2.BP2
+  - SPL.2.BP7
+  - SPL.2.BP8
+- id: SPL.2.BP3
+  name: Ensure unique identification of releases
+  intent: Give every release a unique identity that fits its purpose, for example through a classification and numbering
+    scheme.
+  outcomes:
+  - 2
+  evidence:
+  - Release classification and numbering scheme
+  rule_ids: []
+  maps_to:
+  - SPL.2.BP3
+- id: SPL.2.BP4
+  name: Build the release from items under configuration control
+  intent: Assemble the release only from items under configuration control so that its integrity is preserved.
+  outcomes:
+  - 2
+  evidence:
+  - Build record naming the configuration items used
+  rule_ids: []
+  maps_to:
+  - SPL.2.BP4
+  - SPL.2.BP5
+- id: SPL.2.BP5
+  name: Ensure release approval before delivery
+  intent: Check that the criteria are met and obtain approval before anything is delivered.
+  outcomes:
+  - 4
+  evidence:
+  - Signed release approval against the criteria
+  rule_ids: []
+  maps_to:
+  - SPL.2.BP10
+  - SPL.2.BP11
+- id: SPL.2.BP6
+  name: Provide a release note
+  intent: Accompany every release with a note on its main characteristics.
+  outcomes:
+  - 3
+  evidence:
+  - Release note
+  rule_ids: []
+  maps_to:
+  - SPL.2.BP9
+  - SPL.2.BP12
+- id: SPL.2.BP7
+  name: Communicate the type, service level and duration of support for a release
+  intent: Tell the customer what kind of support is offered, at which service level and for how long.
+  outcomes:
+  - 3
+  evidence:
+  - Statement of support type, level and duration
+  rule_ids: []
+  maps_to:
+  - SPL.2.BP6
+- id: SPL.2.BP8
+  name: Deliver the release package to the intended customer
+  intent: Hand the release package over to the customer, internal or external.
+  outcomes:
+  - 5
+  evidence:
+  - Delivery receipt or transfer record
+  rule_ids: []
+  maps_to:
+  - SPL.2.BP13
+output_work_products:
+- id: 11-03
+  name: Release note
+  outcomes:
+  - 3
+- id: 11-04
+  name: Product release package
+  outcomes:
+  - 1
+  - 2
+- id: 13-06
+  name: Delivery evidence
+  outcomes:
+  - 5
+- id: 13-13
+  name: Product release approval
+  outcomes:
+  - 4
+- id: 18-06
+  name: Product release criteria
+  outcomes:
+  - 1
+  - 4

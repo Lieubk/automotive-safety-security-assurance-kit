@@ -1,0 +1,99 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: SYS.3
+name: System Architectural Design
+group: SYS
+scope: vda
+purpose: Establish an analysed system architecture that agrees with the system requirements.
+outcomes:
+- n: 1
+  text: A system architecture exists that defines the system elements, their behaviour, interfaces, relations and
+    interactions.
+- n: 2
+  text: The architecture is analysed against set criteria and special characteristics are identified.
+- n: 3
+  text: The architecture and the system requirements are consistent and linked in both directions.
+- n: 4
+  text: The agreed architecture and the special characteristics are made known to all concerned.
+base_practices:
+- id: SYS.3.BP1
+  name: Specify static aspects of the system architecture
+  intent: 'Document the structure of the system: external interfaces, system elements, their interfaces and relations,
+    in view of the requirements.'
+  outcomes:
+  - 1
+  evidence:
+  - Static views of the system architecture
+  rule_ids: []
+  maps_to:
+  - SYS.3.BP1
+  - SYS.3.BP2
+  - SYS.3.BP3
+- id: SYS.3.BP2
+  name: Specify dynamic aspects of the system architecture
+  intent: Document how system elements behave and interact in the different modes of the system.
+  outcomes:
+  - 1
+  evidence:
+  - Dynamic views, for example timing or state descriptions
+  rule_ids: []
+  maps_to:
+  - SYS.3.BP4
+- id: SYS.3.BP3
+  name: Analyze system architecture
+  intent: Examine the architecture for aspects relevant over the product life, support project estimates, derive
+    special characteristics for hardware and record why design choices were made.
+  outcomes:
+  - 2
+  evidence:
+  - Architecture analysis with rationale and special characteristics
+  rule_ids: []
+  maps_to:
+  - SYS.3.BP5
+- id: SYS.3.BP4
+  name: Ensure consistency and establish bidirectional traceability
+  intent: Keep architecture elements and the system requirements about the physical product consistent and linked
+    both ways.
+  outcomes:
+  - 3
+  evidence:
+  - Traceability and consistency results
+  rule_ids: []
+  maps_to:
+  - SYS.3.BP6
+  - SYS.3.BP7
+- id: SYS.3.BP5
+  name: Communicate agreed system architecture
+  intent: Inform all affected parties of the agreed architecture and its special characteristics.
+  outcomes:
+  - 4
+  evidence:
+  - Communication records
+  rule_ids: []
+  maps_to:
+  - SYS.3.BP8
+output_work_products:
+- id: 04-06
+  name: System Architecture
+  outcomes:
+  - 1
+- id: 13-51
+  name: Consistency Evidence
+  outcomes:
+  - 3
+- id: 13-52
+  name: Communication Evidence
+  outcomes:
+  - 4
+- id: 15-51
+  name: Analysis Results
+  outcomes:
+  - 2
+- id: 17-57
+  name: Special Characteristics
+  outcomes:
+  - 2
+  - 4

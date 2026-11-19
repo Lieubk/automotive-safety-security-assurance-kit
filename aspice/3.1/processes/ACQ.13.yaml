@@ -1,0 +1,182 @@
+id: ACQ.13
+name: Project Requirements
+group: ACQ
+scope: other
+purpose: Set requirements so the acquisition project is planned, staffed, directed, organised and controlled well.
+outcomes:
+- n: 1
+  text: Financial, technical, contractual and project requirements agree with each other.
+- n: 2
+  text: Requirements for organisation, management, control and reporting of the project are stated.
+- n: 3
+  text: Requirements for a competent team with clear duties and goals are stated.
+- n: 4
+  text: The information that affected parties need to exchange is identified.
+- n: 5
+  text: Requirements exist for finishing and accepting interim work products and for releasing payments.
+- n: 6
+  text: Possible risks are identified.
+- n: 7
+  text: Requirements for who owns contact and relations with suppliers are stated.
+- n: 8
+  text: Rights of customer and supplier to use and pass on the product are stated.
+- n: 9
+  text: Requirements for support and maintenance are set.
+base_practices:
+- id: ACQ.13.BP1
+  name: Identify relevant groups
+  intent: Name who takes part in the acquisition and which experts it needs on money, technology, the contract and
+    the project.
+  outcomes:
+  - 1
+  evidence:
+  - List of stakeholders and experts
+  rule_ids: []
+- id: ACQ.13.BP2
+  name: Communicate with relevant groups
+  intent: Talk with those parties when financial, technical, contract and project requirements are set.
+  outcomes:
+  - 1
+  evidence:
+  - Review records of the requirements with these parties
+  rule_ids: []
+- id: ACQ.13.BP3
+  name: Define organizational requirements
+  intent: State how the project's people are organised and who is responsible at each level.
+  outcomes:
+  - 2
+  evidence:
+  - Project organisation requirements
+  rule_ids: []
+- id: ACQ.13.BP4
+  name: Define management requirements
+  intent: State requirements for management, control and reporting, such as phases, structure of work and supplier
+    process interfaces.
+  outcomes:
+  - 2
+  evidence:
+  - Management and reporting requirements
+  rule_ids: []
+- id: ACQ.13.BP5
+  name: Identify required competency
+  intent: Name the legal, contractual, technical and project competencies key people need.
+  outcomes:
+  - 3
+  evidence:
+  - Competency requirements
+  rule_ids: []
+- id: ACQ.13.BP6
+  name: Define responsibilities and goals
+  intent: State the duties and goals of the team members.
+  outcomes:
+  - 3
+  evidence:
+  - Role and goal descriptions
+  rule_ids: []
+- id: ACQ.13.BP7
+  name: Identify information needs
+  intent: Find out what information the parties need.
+  outcomes:
+  - 4
+  evidence:
+  - Information needs list
+  rule_ids: []
+- id: ACQ.13.BP8
+  name: Define exchange of information
+  intent: Decide how information is to be exchanged, including channels and frequency.
+  outcomes:
+  - 4
+  evidence:
+  - Communication arrangements
+  rule_ids: []
+- id: ACQ.13.BP9
+  name: Establish criteria for interim work products
+  intent: Set requirements for completing and accepting interim work products.
+  outcomes:
+  - 5
+  evidence:
+  - Interim acceptance criteria
+  rule_ids: []
+- id: ACQ.13.BP10
+  name: Establish payment requirements
+  intent: Set requirements for when payments are released, for instance tied to acceptance results.
+  outcomes:
+  - 5
+  evidence:
+  - Payment schedule tied to criteria
+  rule_ids: []
+- id: ACQ.13.BP11
+  name: Identify risks
+  intent: Find risks that come from the project life cycle and from suppliers.
+  outcomes:
+  - 6
+  evidence:
+  - Risk list
+  rule_ids: []
+- id: ACQ.13.BP12
+  name: Communicate risks
+  intent: Make sure the relevant parties are told of all identified risks.
+  outcomes:
+  - 6
+  evidence:
+  - Risk action requests
+  - Review records
+  rule_ids: []
+- id: ACQ.13.BP13
+  name: Define ownership of relationships
+  intent: State who owns which interaction with suppliers, for example contact persons and the open issue list.
+  outcomes:
+  - 7
+  evidence:
+  - Supplier interaction roles
+  rule_ids: []
+- id: ACQ.13.BP14
+  name: Define rights for use and distribution
+  intent: State what rights customer and supplier have to use and distribute the product.
+  outcomes:
+  - 8
+  evidence:
+  - Usage and distribution clause
+  rule_ids: []
+- id: ACQ.13.BP15
+  name: Establish support and maintenance requirements
+  intent: Set requirements for support and maintenance, such as training and who performs it.
+  outcomes:
+  - 9
+  evidence:
+  - Support and maintenance requirements
+  rule_ids: []
+output_work_products:
+- id: 02-00
+  name: Contract
+  outcomes:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+- id: 13-19
+  name: Review record
+  outcomes:
+  - 1
+- id: 13-20
+  name: Risk action request
+  outcomes:
+  - 6
+- id: 17-00
+  name: Requirement specification
+  outcomes:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+catalog_only: true

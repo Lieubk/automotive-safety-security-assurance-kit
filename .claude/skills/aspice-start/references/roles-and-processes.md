@@ -14,11 +14,28 @@ user add and remove.
 | Supplier of a software component | `component-supplier` | software requirements for the component, the architecture and interfaces around it | SWE.3, SWE.4; SWE.1 and SWE.2 when the component has requirements and an inner structure of its own to define; SWE.5 and SWE.6 when the team integrates and tests the component before delivery; SUP.8, SUP.9, SUP.10 | Is the component delivered as source or as a tested binary? Whose change and problem process applies? |
 | Engineering service on work packages | `engineering-service` | whatever the work package names | only the processes the work packages name, for example SWE.3 and SWE.4 for a design-and-implement package, or SWE.6 for a test package | Which supporting processes are the client's? Work done inside the client's configuration, change and problem management is not the team's process. |
 
+## Model version
+
+`aspice.version` selects the catalog under `aspice/<version>/`.
+
+- `3.1` is the released model and the default.
+- `4.0` is built here from the draft 3.991, a release its publisher marks as not for
+  assessments. The names of processes and practices follow the draft. Each 4.0 base
+  practice and generic practice is evidenced through the 3.1 practices it maps to
+  (`maps_to` in `aspice/4.0/`); rules, checklists and notes stay those of 3.1. The
+  rating consistency rules of 4.0 are not in the catalog, so `/mock-assessment` checks
+  no dependencies between ratings. HWE, MLE and SUP.11 are in the catalog only.
+- A change of version later re-reads the scope: process IDs the other catalog lacks are
+  shown and asked about.
+
 ## Processes that can be put in scope
 
-These are the processes of `aspice/3.1/index.yaml`; read the file and use its names
-and scope classes, and correct this table in what you show if they differ. `VDA` is
-the scope class of the index: `vda` (the basic set), `extended`, or `other`.
+These are the processes of `aspice/<version>/index.yaml`; read the file and use its
+names and scope classes, and correct this table in what you show if they differ. `VDA`
+is the scope class of the index: `vda` (the basic set), `extended`, or `other`. The
+table is written for 3.1; under 4.0 read the differences from the index (names, the
+groups HWE, MLE and VAL, SUP.11) - a process the toolkit only catalogs carries
+`catalog_only: true` in its file.
 
 Toolkit support has three levels. `authoring`: a skill drafts the work products with
 the user. `checked`: the catalog, the item schema and trace rules exist, the items are
@@ -51,6 +68,10 @@ type and no rule for the process, so its evidence lives outside the toolkit.
 | Acquisition | ACQ.4 | Supplier Monitoring | vda | authoring: `/supplier-monitoring` |
 | Supply | SPL.2 | Product Release | extended | authoring: `/release` |
 | Reuse | REU.2 | Reuse Program Management | other | catalog; organization level, out of scope |
+| Acquisition | ACQ.3, ACQ.11 to ACQ.15 | Contract Agreement; Technical, Legal and Administrative, Project and Financial Requirements; Request for Proposals; Supplier Qualification | other | catalog only |
+| Supply | SPL.1 | Supplier Tendering | other | catalog only |
+| Management | MAN.6 | Measurement | other | catalog only |
+| Process improvement | PIM.3 | Process Improvement | other | catalog only; organization level |
 
 Before showing the table, compare the skills named in it with the result of Glob
 `.claude/skills/*/SKILL.md`. A skill that is not installed is shown as "not installed"

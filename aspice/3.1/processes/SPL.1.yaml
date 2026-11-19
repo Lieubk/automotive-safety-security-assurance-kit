@@ -1,0 +1,112 @@
+id: SPL.1
+name: Supplier Tendering
+group: SPL
+scope: other
+purpose: Provide a contact point for customer enquiries and requests for proposal, produce and submit proposals,
+  and confirm the assignment with a suitable agreement.
+outcomes:
+- n: 1
+  text: A channel for answering customer enquiries and requests for proposal is set up and kept.
+- n: 2
+  text: Requests for proposal are judged by set criteria to decide whether to respond.
+- n: 3
+  text: It is decided whether preliminary surveys or feasibility studies are needed.
+- n: 4
+  text: Fitting people are named for the proposed work.
+- n: 5
+  text: A proposal answering the customer's request is prepared.
+- n: 6
+  text: Formal confirmation of the agreement is obtained.
+base_practices:
+- id: SPL.1.BP1
+  name: Establish communication interface
+  intent: Set up and maintain a channel for answering customer enquiries and requests for proposal.
+  outcomes:
+  - 1
+  evidence:
+  - Named contact point and procedure
+  rule_ids: []
+- id: SPL.1.BP2
+  name: Perform customer inquiry screening
+  intent: Screen enquiries for validity and route each to the right person quickly.
+  outcomes:
+  - 1
+  evidence:
+  - Enquiry log with routing
+  rule_ids: []
+- id: SPL.1.BP3
+  name: Establish customer proposal evaluation criteria
+  intent: Set criteria for deciding whether to submit a proposal.
+  outcomes:
+  - 2
+  evidence:
+  - Bid decision criteria
+  rule_ids: []
+- id: SPL.1.BP4
+  name: Evaluate customer request for proposal
+  intent: Judge each request for proposal against the criteria.
+  outcomes:
+  - 2
+  evidence:
+  - Proposal review record
+  rule_ids: []
+- id: SPL.1.BP5
+  name: Determine need for preliminary pre-studies
+  intent: Decide whether pre-studies are needed so that a firm quotation can be made from the requirements at hand.
+  outcomes:
+  - 3
+  evidence:
+  - Pre-study decision
+  rule_ids: []
+- id: SPL.1.BP6
+  name: Identify and nominate staff
+  intent: Name people with the right competence for the assignment.
+  outcomes:
+  - 4
+  evidence:
+  - Staffing proposal in the project plan
+  rule_ids: []
+- id: SPL.1.BP7
+  name: Prepare supplier proposal response
+  intent: Prepare the supplier's response to the customer's request.
+  outcomes:
+  - 5
+  evidence:
+  - Supplier proposal response
+  rule_ids: []
+- id: SPL.1.BP8
+  name: Establish confirmation of agreement
+  intent: Confirm the agreement formally in writing, signed by authorised persons, to protect both sides.
+  outcomes:
+  - 6
+  evidence:
+  - Signed agreement
+  rule_ids: []
+output_work_products:
+- id: 02-01
+  name: Commitment/agreement
+  outcomes:
+  - 6
+- id: 08-12
+  name: Project plan
+  outcomes:
+  - 4
+- id: 12-04
+  name: Supplier proposal response
+  outcomes:
+  - 5
+- id: 13-04
+  name: Communication record
+  outcomes:
+  - 1
+  - 6
+- id: 13-15
+  name: Proposal review record
+  outcomes:
+  - 3
+  - 4
+- id: 13-19
+  name: Review record
+  outcomes:
+  - 2
+catalog_only: true

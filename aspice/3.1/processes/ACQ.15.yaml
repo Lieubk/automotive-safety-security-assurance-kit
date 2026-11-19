@@ -1,0 +1,82 @@
+id: ACQ.15
+name: Supplier Qualification
+group: ACQ
+scope: other
+purpose: Judge whether prospective suppliers are qualified to enter tender evaluation, looking at technical background,
+  quality system, servicing and user support.
+outcomes:
+- n: 1
+  text: Criteria for qualifying suppliers exist.
+- n: 2
+  text: Supplier capability is determined where needed.
+- n: 3
+  text: Suppliers with the needed qualification are short-listed for evaluation of their tenders.
+- n: 4
+  text: Gaps in capability are found and assessed.
+- n: 5
+  text: Corrective action the acquirer requires is assessed and carried out.
+base_practices:
+- id: ACQ.15.BP1
+  name: Establish qualification criteria
+  intent: Set criteria for qualifying suppliers, such as technical background, quality system, servicing and user
+    support.
+  outcomes:
+  - 1
+  evidence:
+  - Supplier qualification criteria
+  rule_ids: []
+- id: ACQ.15.BP2
+  name: Evaluate supplier
+  intent: Determine each supplier's capability as needed against target levels set for it.
+  outcomes:
+  - 2
+  evidence:
+  - Supplier evaluation report
+  rule_ids: []
+- id: ACQ.15.BP3
+  name: Short-list suppliers with required qualification
+  intent: Select the suppliers that meet the qualification for tender evaluation.
+  outcomes:
+  - 3
+  evidence:
+  - Preferred suppliers register
+  rule_ids: []
+- id: ACQ.15.BP4
+  name: Evaluate any shortfalls
+  intent: Find and assess gaps in supplier capability, including the related risk.
+  outcomes:
+  - 4
+  evidence:
+  - Improvement opportunities
+  - Shortfall assessment
+  rule_ids: []
+- id: ACQ.15.BP5
+  name: Perform corrective actions
+  intent: Assess and carry out the corrective action the acquirer requires.
+  outcomes:
+  - 5
+  evidence:
+  - Corrective action register
+  rule_ids: []
+output_work_products:
+- id: 14-02
+  name: Corrective action register
+  outcomes:
+  - 5
+- id: 14-05
+  name: Preferred suppliers register
+  outcomes:
+  - 3
+- id: 15-16
+  name: Improvement opportunity
+  outcomes:
+  - 4
+- id: 15-21
+  name: Supplier evaluation report
+  outcomes:
+  - 2
+- id: 18-50
+  name: Supplier qualification criteria
+  outcomes:
+  - 1
+catalog_only: true

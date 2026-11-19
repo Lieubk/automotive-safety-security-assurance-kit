@@ -2,7 +2,7 @@
 
 A set of [Claude Code](https://claude.com/claude-code) skills, agents and hooks, plus
 deterministic tools, for developing automotive ECU software in line with Automotive
-SPICE 3.1. Requirements, architecture, design, test cases and evidence live as text
+SPICE 3.1 (and 4.0, from its draft), ISO 26262 and ISO/SAE 21434. Requirements, architecture, design, test cases and evidence live as text
 files in the repository - one item per file - and a trace engine checks them.
 
 The toolkit drafts and checks. People decide, review and are accountable.
@@ -13,9 +13,9 @@ Early. One vertical slice works end to end and is demonstrated by the example:
 
 | Area | State |
 |---|---|
-| Process catalog | 23 processes of Automotive SPICE 3.1 with base practices, work products and rating dependencies (identifiers and official names; descriptions in our own words) |
-| Item schema | 44 item types, 20 link roles, 62 coverage rules, scope-aware |
-| Documents | 34 kinds - specifications, SAD, SDD, test specifications and reports with verdicts, traceability, review, release note, QA, problem, change, project, risk, supplier, TARA report and worksheet, cybersecurity plan and case - generated from the items as HTML, Word or Excel (`tools/document.py`), in a neutral style or the customer's template, with commit, baseline and the items' hashes; DRAFT when items are not approved |
+| Process catalog | 32 processes of Automotive SPICE 3.1 with base practices, work products and rating dependencies, 23 of them covered by rules and skills and 9 in the catalog only; 32 processes of Automotive SPICE 4.0 built from the draft 3.991 (which its publisher marks as not for assessments), each base and generic practice mapped to the 3.1 practices whose evidence it reads. Identifiers and official names; descriptions in our own words |
+| Item schema | 53 item types, 23 link roles, 76 coverage rules, scope-aware |
+| Documents | 40 kinds - specifications, SAD, SDD, test specifications and reports with verdicts, traceability, review, release note, QA, problem, change, project, risk, supplier, TARA report and worksheet, cybersecurity plan and case - generated from the items as HTML, Word or Excel (`tools/document.py`), in a neutral style or the customer's template, with commit, baseline and the items' hashes; DRAFT when items are not approved |
 | ISO 26262 | parts in scope per project; safety plan with a decision per clause and methods per table, hazardous events and safety goals, ASIL carried through requirements and design, safety analyses (FMEA, FTA, DFA), decomposition, tool evaluation, confirmation measures, safety case; `traceability.py safety`; the standard's tables are stated by the project, not copied |
 | ISO/SAE 21434 | clauses in scope per project; TARA (assets, damage and threat scenarios, attack paths, risk values from the project's matrix, treatment), goals and claims, concept, security relevance down to code and tests, vulnerability management, cybersecurity case and assessment records; `traceability.py tara` and `clauses` |
 | Trace engine | structure, links, coverage, stale approvals, suspect links, impact, traceability matrices, evidence per base practice, changes since a review, progress against the plan, integration steps and the builds and runs on them at software and system level, problems, quality assurance, observations per generic practice of level 2 |
@@ -24,7 +24,7 @@ Early. One vertical slice works end to end and is demonstrated by the example:
 | Hooks | imported inputs, final records and baselined items are protected; every written item is checked |
 | Out of scope | hardware development (ISO 26262 part 5) and the hardware-related clauses 8:13; organization-level requirements (ISO/SAE 21434 clause 5, ISO 26262-2 clauses 5 and 7, REU.2, capability level 3) - a project refers to the organization's evidence; motorcycles (ISO 26262 part 12). The catalogs list them; no rule or skill covers them |
 | Exchange | ReqIF, Excel (requirements in and out, test results in), Polarion, codebeamer and Jama Connect over REST (written from their public interface descriptions, tested against a simulated server), AUTOSAR ARXML |
-| Not yet | Automotive SPICE 4.0 (waits for the PAM 4.0 document) |
+| Not yet | Automotive SPICE 4.0 from its released text: the catalog follows the draft 3.991 until then, without the rating consistency rules; HWE, MLE and SUP.11 in the catalog only |
 
 ## What it does not do
 
@@ -87,6 +87,7 @@ which processes you are responsible for, and writes `project.yaml`. From there
 
 ```
 aspice/3.1/        process catalog and notes per process
+aspice/4.0/        process catalog from the draft 3.991, mapped to 3.1
 schema/            item types, links, coverage rules; file layout of an item
 tools/             trace engine, record writer, validators, tests
 .claude/skills/    one skill per activity

@@ -1,0 +1,96 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: SYS.1
+name: Requirements Elicitation
+group: SYS
+scope: extended
+purpose: Collect and follow stakeholder needs over the whole life of the product or service, resulting in a set
+  of agreed requirements.
+outcomes:
+- n: 1
+  text: A continuing line of communication with the stakeholder is in place.
+- n: 2
+  text: Stakeholder expectations are understood, turned into requirements and agreed.
+- n: 3
+  text: Changes of stakeholder requirements are analysed so that their risk and impact can be handled.
+- n: 4
+  text: All affected parties can find out the status of stakeholder requirements.
+base_practices:
+- id: SYS.1.BP1
+  name: Obtain stakeholder expectations and requests
+  intent: Gather what stakeholders expect and ask for, by talking to them and reading their proposals and other
+    inputs, taking the target environment into account.
+  outcomes:
+  - 1
+  - 2
+  evidence:
+  - Recorded stakeholder requests with their source
+  rule_ids: []
+  maps_to:
+  - SYS.1.BP1
+- id: SYS.1.BP2
+  name: Understand stakeholder expectations
+  intent: Make sure everyone concerned reads each requirement in the same way.
+  outcomes:
+  - 2
+  evidence:
+  - Clarification records or review results with affected parties
+  rule_ids: []
+  maps_to:
+  - SYS.1.BP2
+  - SYS.1.BP6
+- id: SYS.1.BP3
+  name: Agree on requirements
+  intent: Turn expectations into formal requirements and get an explicit agreement from all concerned to proceed.
+  outcomes:
+  - 2
+  evidence:
+  - Agreed stakeholder requirements with agreement evidence
+  rule_ids: []
+  maps_to:
+  - SYS.1.BP3
+- id: SYS.1.BP4
+  name: Analyze stakeholder requirements changes
+  intent: Compare each change with the agreed requirements, assess impact and risk, and start change control and
+    mitigation.
+  outcomes:
+  - 3
+  evidence:
+  - Change analysis with impact and risk assessment
+  rule_ids: []
+  maps_to:
+  - SYS.1.BP5
+- id: SYS.1.BP5
+  name: Communicate requirements status
+  intent: Keep all affected parties able to see the state of their requirements, including changes, and to pass
+    on information.
+  outcomes:
+  - 1
+  - 4
+  evidence:
+  - Status reports on stakeholder requirements
+  rule_ids: []
+  maps_to:
+  - SYS.1.BP4
+  - SYS.1.BP6
+output_work_products:
+- id: 15-51
+  name: Analysis Results
+  outcomes:
+  - 3
+- id: 13-52
+  name: Communication Evidence
+  outcomes:
+  - 1
+  - 4
+- id: 17-00
+  name: Requirement
+  outcomes:
+  - 2
+- id: 17-54
+  name: Requirement Attribute
+  outcomes:
+  - 2

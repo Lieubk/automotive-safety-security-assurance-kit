@@ -1,0 +1,105 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: MLE.1
+name: Machine Learning Requirements Analysis
+group: MLE
+scope: extended
+purpose: Refine the software requirements that concern machine learning into a set of requirements for the ML part.
+outcomes:
+- n: 1
+  text: ML requirements, data requirements included, are specified from software requirements and architecture components.
+- n: 2
+  text: ML requirements are grouped and given priorities.
+- n: 3
+  text: ML requirements are checked for being correct and verifiable.
+- n: 4
+  text: What ML requirements imply for the environment where the model runs is examined.
+- n: 5
+  text: ML requirements are consistent and linked in both directions with software requirements and software architecture.
+- n: 6
+  text: The agreed ML requirements are made known to all concerned.
+base_practices:
+- id: MLE.1.BP1
+  name: Specify ML requirements
+  intent: Derive functional and non-functional ML requirements and requirements on the data, such as characteristics
+    and expected distributions.
+  outcomes:
+  - 1
+  evidence:
+  - ML requirements specification including data requirements
+  rule_ids: []
+  maps_to: []
+- id: MLE.1.BP2
+  name: Structure ML requirements
+  intent: Arrange the ML requirements, for instance by function or variant, and rank them by need.
+  outcomes:
+  - 2
+  evidence:
+  - Requirements with structure and priority attributes
+  rule_ids: []
+  maps_to: []
+- id: MLE.1.BP3
+  name: Analyze ML requirements
+  intent: Examine the requirements and their dependencies for correctness, feasibility and testability of the model,
+    and support project estimates.
+  outcomes:
+  - 3
+  evidence:
+  - Analysis results
+  rule_ids: []
+  maps_to: []
+- id: MLE.1.BP4
+  name: Analyze the impact on the ML operating environment
+  intent: Examine what the ML requirements mean for software component interfaces and the environment in which the
+    model runs.
+  outcomes:
+  - 4
+  evidence:
+  - Impact analysis on the ML operating environment
+  rule_ids: []
+  maps_to: []
+- id: MLE.1.BP5
+  name: Ensure consistency and establish bidirectional traceability
+  intent: Keep ML requirements consistent with, and linked both ways to, software requirements and architecture.
+  outcomes:
+  - 5
+  evidence:
+  - Traceability and consistency results
+  rule_ids: []
+  maps_to: []
+- id: MLE.1.BP6
+  name: Communicate agreed ML requirements
+  intent: Pass the agreed ML requirements and impact findings to everyone concerned.
+  outcomes:
+  - 6
+  evidence:
+  - Communication records
+  rule_ids: []
+  maps_to: []
+output_work_products:
+- id: 17-00
+  name: Requirement
+  outcomes:
+  - 1
+  - 2
+- id: 17-54
+  name: Requirement attribute
+  outcomes:
+  - 2
+- id: 13-52
+  name: Communication evidence
+  outcomes:
+  - 6
+- id: 13-51
+  name: Consistency evidence
+  outcomes:
+  - 5
+- id: 15-51
+  name: Analysis results
+  outcomes:
+  - 3
+  - 4
+catalog_only: true

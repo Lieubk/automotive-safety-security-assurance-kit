@@ -1,0 +1,142 @@
+id: ACQ.11
+name: Technical Requirements
+group: ACQ
+scope: other
+outcomes_unmapped: the table of the PAM does not pair these output work products with outcomes unambiguously; left unmapped rather than guessed
+purpose: Set the technical requirements of an acquisition, functional and non-functional, over the product's life,
+  as a baseline.
+outcomes:
+- n: 1
+  text: Technical requirements, with environmental, safety and security aspects where they apply, are defined to
+    fit needs and expectations.
+- n: 2
+  text: Present and developing needs of the acquisition are collected and stated.
+- n: 3
+  text: Requirements and candidate solutions reach every group they affect.
+- n: 4
+  text: A way exists to bring changed or new requirements into the baseline.
+- n: 5
+  text: A way exists to find and handle the effect of changing technology on the requirements.
+- n: 6
+  text: The requirements demand compliance with the applicable standards, including environmental, safety and security
+    ones where relevant.
+base_practices:
+- id: ACQ.11.BP1
+  name: Elicit needs
+  intent: Find out what each relevant group of users needs.
+  outcomes:
+  - 1
+  evidence:
+  - Notes or records of user group interviews and workshops
+  rule_ids: []
+- id: ACQ.11.BP2
+  name: Define technical requirements
+  intent: Write technical requirements, and candidate solutions where useful, covering environment, safety, security,
+    performance and supportability, to fit the user groups' needs.
+  outcomes:
+  - 1
+  evidence:
+  - Requirement specification
+  rule_ids: []
+- id: ACQ.11.BP3
+  name: Identify acquisition needs
+  intent: Collect and state the present and developing needs of the acquisition.
+  outcomes:
+  - 2
+  evidence:
+  - Customer request or needs list
+  rule_ids: []
+- id: ACQ.11.BP4
+  name: Ensure consistency
+  intent: Check that the technical requirements agree with the stated acquisition needs.
+  outcomes:
+  - 2
+  evidence:
+  - Consistency check or review record
+  rule_ids: []
+- id: ACQ.11.BP5
+  name: Identify affected groups
+  intent: Name every group that must be told about the requirements and candidate solutions.
+  outcomes:
+  - 3
+  evidence:
+  - Stakeholder groups list
+  rule_ids: []
+- id: ACQ.11.BP6
+  name: Communicate to affected groups
+  intent: Pass the requirements and candidate solutions to all groups named.
+  outcomes:
+  - 3
+  evidence:
+  - Communication records
+  rule_ids: []
+- id: ACQ.11.BP7
+  name: Establish a change mechanism
+  intent: Set up a way to bring changed or new technical requirements into the baseline.
+  outcomes:
+  - 4
+  evidence:
+  - Change management plan
+  - Change control records
+  rule_ids: []
+- id: ACQ.11.BP8
+  name: Track impact of changing technology
+  intent: Define how technology changes are noticed and judged, and carry their consequences into the requirements.
+  outcomes:
+  - 5
+  evidence:
+  - Technology monitoring plan
+  rule_ids: []
+- id: ACQ.11.BP9
+  name: Identify constraints and standards
+  intent: Find the constraints and standards that apply to the technical requirements.
+  outcomes:
+  - 6
+  evidence:
+  - List of applicable standards and constraints
+  rule_ids: []
+- id: ACQ.11.BP10
+  name: Ensure compliance of stated requirements
+  intent: Make sure the requirements call for compliance with the standards found, including environmental, safety
+    and security ones where relevant.
+  outcomes:
+  - 6
+  evidence:
+  - Requirement specification with standards references
+  - Validation results
+  rule_ids: []
+output_work_products:
+- id: 08-28
+  name: Change management plan
+  outcomes: []
+- id: 08-51
+  name: Technology monitoring plan
+  outcomes: []
+- id: 13-04
+  name: Communication record
+  outcomes: []
+- id: 13-17
+  name: Customer request
+  outcomes: []
+- id: 13-21
+  name: Change control record
+  outcomes: []
+- id: 13-24
+  name: Validation results
+  outcomes: []
+- id: 14-01
+  name: Change history
+  outcomes: []
+- id: 14-02
+  name: Corrective action register
+  outcomes: []
+- id: 14-50
+  name: Stakeholder groups list
+  outcomes: []
+- id: 17-00
+  name: Requirement specification
+  outcomes: []
+- id: 17-03
+  name: Customer requirements
+  outcomes: []
+catalog_only: true

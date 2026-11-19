@@ -1,0 +1,98 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: SWE.2
+name: Software Architectural Design
+group: SWE
+scope: vda
+purpose: Establish an analysed software architecture that agrees with the software requirements.
+outcomes:
+- n: 1
+  text: A software architecture exists with both static and dynamic aspects.
+- n: 2
+  text: The architecture is analysed against set criteria.
+- n: 3
+  text: The architecture and the software requirements are consistent and linked in both directions.
+- n: 4
+  text: The agreed architecture is made known to all concerned.
+base_practices:
+- id: SWE.2.BP1
+  name: Specify static aspects of the software architecture
+  intent: Document components, their external and mutual interfaces and relations, in view of the functional and
+    non-functional requirements.
+  outcomes:
+  - 1
+  evidence:
+  - Static views of the software architecture
+  rule_ids: []
+  maps_to:
+  - SWE.2.BP1
+  - SWE.2.BP2
+  - SWE.2.BP3
+  - SWE.2.BP5
+- id: SWE.2.BP2
+  name: Specify dynamic aspects of the software architecture
+  intent: Document how components behave and interact in the system modes, including concurrency.
+  outcomes:
+  - 1
+  evidence:
+  - Dynamic views of the software architecture
+  rule_ids: []
+  maps_to:
+  - SWE.2.BP4
+- id: SWE.2.BP3
+  name: Analyze software architecture
+  intent: Examine the architecture for relevant technical aspects such as timing and memory use, support project
+    estimates and record why design choices were made.
+  outcomes:
+  - 2
+  evidence:
+  - Architecture analysis with rationale
+  - Resource consumption targets
+  rule_ids: []
+  maps_to:
+  - SWE.2.BP6
+- id: SWE.2.BP4
+  name: Ensure consistency and establish bidirectional traceability
+  intent: Keep architecture and software requirements consistent and linked both ways.
+  outcomes:
+  - 3
+  evidence:
+  - Traceability and consistency results
+  rule_ids: []
+  maps_to:
+  - SWE.2.BP7
+  - SWE.2.BP8
+- id: SWE.2.BP5
+  name: Communicate agreed software architecture
+  intent: Inform all affected parties of the agreed architecture.
+  outcomes:
+  - 4
+  evidence:
+  - Communication records
+  rule_ids: []
+  maps_to:
+  - SWE.2.BP9
+output_work_products:
+- id: 04-04
+  name: Software Architecture
+  outcomes:
+  - 1
+- id: 13-51
+  name: Consistency Evidence
+  outcomes:
+  - 3
+- id: 13-52
+  name: Communication Evidence
+  outcomes:
+  - 4
+- id: 15-51
+  name: Analysis Results
+  outcomes:
+  - 2
+- id: 05-01
+  name: Resource Consumption Targets
+  outcomes:
+  - 2

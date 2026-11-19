@@ -1,0 +1,114 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: SYS.4
+name: System Integration and Integration Verification
+group: SYS
+scope: vda
+purpose: Put system elements together and check that the integrated whole matches the system architecture.
+outcomes:
+- n: 1
+  text: Verification measures for integration are defined from the architecture, including interfaces and interactions.
+- n: 2
+  text: System elements are integrated step by step into a complete system fitting the release scope.
+- n: 3
+  text: Verification measures are chosen for the release scope, with regression in mind.
+- n: 4
+  text: The integrated elements are verified with the chosen measures and the results recorded.
+- n: 5
+  text: Verification measures and architecture elements are consistent and linked in both directions.
+- n: 6
+  text: Results and the measures they belong to are linked in both directions.
+- n: 7
+  text: Results of integration and its verification are summarised and shared with all concerned.
+base_practices:
+- id: SYS.4.BP1
+  name: Specify verification measures for system integration
+  intent: Define the measures with their order, preconditions, techniques, pass/fail and entry/exit criteria and
+    the infrastructure needed, based on static and dynamic architecture.
+  outcomes:
+  - 1
+  evidence:
+  - Integration verification measures with criteria
+  rule_ids: []
+  maps_to:
+  - SYS.4.BP2
+  - SYS.4.BP3
+- id: SYS.4.BP2
+  name: Select verification measures
+  intent: Record which measures apply at each integration step, with regression criteria and enough coverage for
+    the release scope.
+  outcomes:
+  - 3
+  evidence:
+  - Selection of measures per integration step
+  rule_ids: []
+  maps_to:
+  - SYS.4.BP5
+- id: SYS.4.BP3
+  name: Integrate system elements and perform integration verification
+  intent: Build the system up in the planned order, run the chosen measures and record outcomes with pass/fail data.
+  outcomes:
+  - 2
+  - 4
+  evidence:
+  - Integration records and verification results
+  rule_ids: []
+  maps_to:
+  - SYS.4.BP1
+  - SYS.4.BP4
+  - SYS.4.BP6
+- id: SYS.4.BP4
+  name: Ensure consistency and establish bidirectional traceability
+  intent: Link measures to architecture and results to measures, and keep them consistent.
+  outcomes:
+  - 5
+  - 6
+  evidence:
+  - Traceability records between architecture, measures and results
+  rule_ids: []
+  maps_to:
+  - SYS.4.BP7
+  - SYS.4.BP8
+- id: SYS.4.BP5
+  name: Summarize and communicate results
+  intent: Condense integration results into a summary and pass it on to concerned parties.
+  outcomes:
+  - 7
+  evidence:
+  - Summary of integration verification results
+  rule_ids: []
+  maps_to:
+  - SYS.4.BP9
+output_work_products:
+- id: 08-60
+  name: Verification Measure
+  outcomes:
+  - 1
+- id: 06-50
+  name: Integration Sequence Instruction
+  outcomes:
+  - 2
+- id: 08-58
+  name: Verification Measure Selection Set
+  outcomes:
+  - 3
+- id: 15-52
+  name: Verification Results
+  outcomes:
+  - 4
+  - 6
+- id: 13-51
+  name: Consistency Evidence
+  outcomes:
+  - 5
+- id: 13-52
+  name: Communication Evidence
+  outcomes:
+  - 7
+- id: 11-06
+  name: Integrated System
+  outcomes:
+  - 2

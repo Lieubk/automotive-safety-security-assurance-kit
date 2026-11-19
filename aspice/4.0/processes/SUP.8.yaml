@@ -1,0 +1,154 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: SUP.8
+name: Configuration Management
+group: SUP
+scope: vda
+purpose: Set up and preserve the integrity of the important work products, and give those who need them access.
+outcomes:
+- n: 1
+  text: Criteria for choosing configuration items are defined and applied.
+- n: 2
+  text: The properties of configuration items are defined.
+- n: 3
+  text: Configuration management is set up.
+- n: 4
+  text: Modifications are controlled.
+- n: 5
+  text: Baselines are created.
+- n: 6
+  text: The state of configuration items is recorded and reported.
+- n: 7
+  text: Baselines are complete and consistent.
+- n: 8
+  text: Backup and recovery are confirmed to be available.
+base_practices:
+- id: SUP.8.BP1
+  name: Identify configuration items
+  intent: Define criteria for deciding which work products are placed under configuration management, then list
+    the items chosen.
+  outcomes:
+  - 1
+  evidence:
+  - Selection criteria and configuration item list
+  rule_ids: []
+  maps_to:
+  - SUP.8.BP2
+- id: SUP.8.BP2
+  name: Define configuration item properties
+  intent: Define the properties needed to control and change the items, such as status model, storage location and
+    access rights.
+  outcomes:
+  - 2
+  evidence:
+  - Configuration item properties in the item list
+  rule_ids: []
+  maps_to:
+  - SUP.8.BP1
+  - SUP.8.BP2
+- id: SUP.8.BP3
+  name: Establish configuration management
+  intent: Set up the mechanisms that control items and their properties, including control of parallel changes.
+  outcomes:
+  - 3
+  evidence:
+  - Configuration management system and its description
+  rule_ids: []
+  maps_to:
+  - SUP.8.BP1
+  - SUP.8.BP3
+  - SUP.8.BP4
+- id: SUP.8.BP4
+  name: Control modifications
+  intent: Apply the mechanisms when items are modified.
+  outcomes:
+  - 4
+  evidence:
+  - Change history of configuration items
+  rule_ids: []
+  maps_to:
+  - SUP.8.BP5
+- id: SUP.8.BP5
+  name: Establish baselines
+  intent: Create baselines for internal use and for delivery, from the items concerned.
+  outcomes:
+  - 5
+  evidence:
+  - Baseline records
+  rule_ids: []
+  maps_to:
+  - SUP.8.BP6
+- id: SUP.8.BP6
+  name: Summarize and communicate configuration status
+  intent: Record the status of items and baselines and report it to those affected.
+  outcomes:
+  - 6
+  evidence:
+  - Configuration status summary
+  rule_ids: []
+  maps_to:
+  - SUP.8.BP7
+- id: SUP.8.BP7
+  name: Ensure completeness and consistency
+  intent: Check that item information is correct and complete, and that baselines hold all required items in consistent
+    state.
+  outcomes:
+  - 7
+  evidence:
+  - Consistency check of baselines
+  rule_ids: []
+  maps_to:
+  - SUP.8.BP8
+- id: SUP.8.BP8
+  name: Verify backup and recovery mechanisms’ availability
+  intent: Check that suitable backup and recovery exist for the managed work products, and start measures if not.
+  outcomes:
+  - 8
+  evidence:
+  - Information on backup and recovery mechanisms
+  rule_ids: []
+  maps_to:
+  - SUP.8.BP9
+output_work_products:
+- id: 18-53
+  name: Configuration item selection criteria
+  outcomes:
+  - 1
+- id: 01-52
+  name: Configuration item list
+  outcomes:
+  - 1
+  - 2
+- id: 13-10
+  name: Configuration management record
+  outcomes:
+  - 3
+  - 4
+- id: 16-03
+  name: Configuration management system
+  outcomes:
+  - 3
+- id: 13-08
+  name: Baseline
+  outcomes:
+  - 5
+  - 7
+- id: 14-01
+  name: Change history
+  outcomes:
+  - 4
+- id: 15-56
+  name: Configuration status summary
+  outcomes:
+  - 6
+- id: 13-51
+  name: Consistency Evidence
+  outcomes:
+  - 7
+- id: 06-52
+  name: Backup and recovery mechanism information
+  outcomes:
+  - 8

@@ -1,0 +1,131 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: SUP.1
+name: Quality Assurance
+group: SUP
+scope: vda
+purpose: Give unbiased, independent confirmation that work products and processes meet the criteria set for them,
+  and see that deviations are resolved and do not return.
+outcomes:
+- n: 1
+  text: Quality assurance is done independently and objectively, free of conflicts of interest.
+- n: 2
+  text: Quality criteria for work products and for the performance of processes are defined.
+- n: 3
+  text: Work products and process performance are checked against the criteria, and the findings are documented
+    and reported to those concerned.
+- n: 4
+  text: Non-conformances are tracked, resolved and prevented from recurring.
+- n: 5
+  text: Non-conformances are escalated to suitable levels of management.
+- n: 6
+  text: Management makes sure escalated non-conformances get resolved.
+base_practices:
+- id: SUP.1.BP1
+  name: Ensure independence of quality assurance
+  intent: Make sure those doing quality assurance are independent of the work they check, for instance through organisation
+    and responsibilities.
+  outcomes:
+  - 1
+  evidence:
+  - Organisation structure showing independence
+  rule_ids: []
+  maps_to:
+  - SUP.1.BP1
+- id: SUP.1.BP2
+  name: Define criteria for quality assurance
+  intent: Set quality criteria for work products and for process tasks and their performance.
+  outcomes:
+  - 2
+  evidence:
+  - Quality criteria
+  rule_ids: []
+  maps_to:
+  - SUP.1.BP1
+- id: SUP.1.BP3
+  name: Assure quality of work products
+  intent: Select the work products to be checked, evaluate them against the criteria and document the outcome.
+  outcomes:
+  - 3
+  evidence:
+  - Quality records of work product checks
+  - Review records
+  rule_ids: []
+  maps_to:
+  - SUP.1.BP2
+- id: SUP.1.BP4
+  name: Assure quality of process activities
+  intent: Select the processes to be checked, evaluate them against criteria and target values and document the
+    outcome.
+  outcomes:
+  - 3
+  evidence:
+  - Quality records of process checks
+  rule_ids: []
+  maps_to:
+  - SUP.1.BP3
+- id: SUP.1.BP5
+  name: Summarize and communicate quality assurance activities and results
+  intent: Tell affected parties at regular intervals how quality assurance is going, which deviations exist and
+    which trends show.
+  outcomes:
+  - 3
+  evidence:
+  - Quality reports sent to affected parties
+  rule_ids: []
+  maps_to:
+  - SUP.1.BP4
+- id: SUP.1.BP6
+  name: Ensure resolution of non-conformances
+  intent: Analyse, follow, correct and resolve non-conformances and prevent their recurrence.
+  outcomes:
+  - 4
+  evidence:
+  - Corrective actions with status
+  rule_ids: []
+  maps_to:
+  - SUP.1.BP5
+- id: SUP.1.BP7
+  name: Escalate non-conformances
+  intent: Pass relevant non-conformances up to suitable management and other stakeholders so they get resolved.
+  outcomes:
+  - 5
+  - 6
+  evidence:
+  - Escalation path and escalation records
+  rule_ids: []
+  maps_to:
+  - SUP.1.BP6
+output_work_products:
+- id: 16-50
+  name: Organization structure
+  outcomes:
+  - 1
+- id: 18-52
+  name: Escalation path
+  outcomes:
+  - 5
+- id: 18-07
+  name: Quality criteria
+  outcomes:
+  - 2
+- id: 13-52
+  name: Communication evidence
+  outcomes:
+  - 3
+- id: 13-18
+  name: Quality record
+  outcomes:
+  - 3
+- id: 13-19
+  name: Review record
+  outcomes:
+  - 3
+- id: 14-02
+  name: Corrective action
+  outcomes:
+  - 4
+  - 6

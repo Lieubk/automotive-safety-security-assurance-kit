@@ -1,0 +1,89 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: VAL.1
+name: Validation
+group: VAL
+scope: extended
+purpose: Provide evidence that the finished product, used directly by end users, meets what it is intended for in
+  its real target environment.
+outcomes:
+- n: 1
+  text: Measures are defined that can show the intended use is met in the target environment.
+- n: 2
+  text: Measures are chosen with regression in mind.
+- n: 3
+  text: The product is validated with the chosen measures and the results recorded.
+- n: 4
+  text: Validation measures are linked to stakeholder requirements, and results to measures, with consistency kept.
+- n: 5
+  text: Validation results are summarised and shared with all concerned.
+base_practices:
+- id: VAL.1.BP1
+  name: Specify validation measures for product validation
+  intent: Define validation measures from stakeholder requirements, with techniques, criteria, sequence and environment.
+  outcomes:
+  - 1
+  evidence:
+  - Validation measures with pass/fail and entry/exit criteria
+  rule_ids: []
+  maps_to: []
+- id: VAL.1.BP2
+  name: Select validation measures
+  intent: Record why measures were chosen, with regression criteria and enough coverage of the release scope.
+  outcomes:
+  - 2
+  evidence:
+  - Selection of validation measures
+  rule_ids: []
+  maps_to: []
+- id: VAL.1.BP3
+  name: Perform validation and evaluate results
+  intent: Run the chosen measures, record outcomes and judge them.
+  outcomes:
+  - 3
+  evidence:
+  - Validation results with evaluation
+  rule_ids: []
+  maps_to: []
+- id: VAL.1.BP4
+  name: Ensure consistency and establish traceability
+  intent: Link measures to their sources among stakeholder requirements and results to measures, and keep them consistent.
+  outcomes:
+  - 4
+  evidence:
+  - Traceability and consistency results
+  rule_ids: []
+  maps_to: []
+- id: VAL.1.BP5
+  name: Summarize and communicate results
+  intent: Summarise the validation results and inform all concerned.
+  outcomes:
+  - 5
+  evidence:
+  - Validation summary
+  rule_ids: []
+  maps_to: []
+output_work_products:
+- id: 08-59
+  name: Validation Measure
+  outcomes:
+  - 1
+- id: 08-58
+  name: Validation Measure Selection Set
+  outcomes:
+  - 2
+- id: 13-24
+  name: Validation Results
+  outcomes:
+  - 3
+- id: 13-51
+  name: Consistency Evidence
+  outcomes:
+  - 4
+- id: 13-52
+  name: Communication Evidence
+  outcomes:
+  - 5

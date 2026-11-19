@@ -1,0 +1,103 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: HWE.3
+name: Verification against Hardware Design
+group: HWE
+scope: extended
+purpose: Make sure that hardware built to the production data has been verified against the hardware design.
+outcomes:
+- n: 1
+  text: Measures to verify the hardware against its design, including interfaces and dynamics, are defined.
+- n: 2
+  text: Measures are chosen for the release scope, with regression in mind.
+- n: 3
+  text: Verification is carried out, on samples matching production data where applicable, and the results are recorded.
+- n: 4
+  text: Hardware elements and verification measures are consistent and linked in both directions.
+- n: 5
+  text: Measures and results are linked in both directions.
+- n: 6
+  text: Results are summarised and shared with all concerned.
+base_practices:
+- id: HWE.3.BP1
+  name: Specify verification measures for the verification against hardware design
+  intent: Define measures with techniques, pass/fail and entry/exit criteria, sequence and environment, covering
+    the design and its dynamic aspects.
+  outcomes:
+  - 1
+  evidence:
+  - Hardware design verification measures
+  rule_ids: []
+  maps_to: []
+- id: HWE.3.BP2
+  name: Ensure use of compliant samples
+  intent: Check that the samples used correspond to the production data and special characteristics.
+  outcomes:
+  - 3
+  evidence:
+  - Sample report, inspection record or similar
+  rule_ids: []
+  maps_to: []
+- id: HWE.3.BP3
+  name: Select verification measures
+  intent: Record the choice of measures with regression criteria and sufficient coverage of the release scope.
+  outcomes:
+  - 2
+  evidence:
+  - Selection of verification measures
+  rule_ids: []
+  maps_to: []
+- id: HWE.3.BP4
+  name: Verify hardware design
+  intent: Run the chosen measures and record outcomes with pass/fail data and output data.
+  outcomes:
+  - 3
+  evidence:
+  - Verification results
+  rule_ids: []
+  maps_to: []
+- id: HWE.3.BP5
+  name: Ensure consistency and establish bidirectional traceability
+  intent: Link hardware elements to measures and measures to results, and keep them consistent.
+  outcomes:
+  - 4
+  - 5
+  evidence:
+  - Traceability and consistency results
+  rule_ids: []
+  maps_to: []
+- id: HWE.3.BP6
+  name: Summarize and communicate results
+  intent: Condense the results into a summary and pass it on.
+  outcomes:
+  - 6
+  evidence:
+  - Summary of verification results
+  rule_ids: []
+  maps_to: []
+output_work_products:
+- id: 08-60
+  name: Verification Measure
+  outcomes:
+  - 1
+- id: 08-58
+  name: Verification Measure Selection Set
+  outcomes:
+  - 2
+- id: 15-52
+  name: Verification Results
+  outcomes:
+  - 3
+  - 5
+- id: 13-51
+  name: Consistency Evidence
+  outcomes:
+  - 4
+- id: 13-52
+  name: Communication Evidence
+  outcomes:
+  - 6
+catalog_only: true

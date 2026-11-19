@@ -1,0 +1,124 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: MAN.6
+name: Measurement
+group: MAN
+scope: other
+purpose: Collect and analyse data about development results and the processes used in the organisation and its projects,
+  to help manage those processes well.
+outcomes:
+- n: 1
+  text: The information needs for judging whether process objectives and documented information goals are met are
+    identified.
+- n: 2
+  text: Metrics that follow from the information needs are chosen or created.
+- n: 3
+  text: Measurement activities are identified and carried out.
+- n: 4
+  text: The needed metrics are collected, stored and analysed and the results interpreted.
+- n: 5
+  text: Metrics support decisions and give an objective basis for communication.
+base_practices:
+- id: MAN.6.BP1
+  name: Identify information needs
+  intent: Identify what must be measured to evaluate process objectives and documented information; needs change,
+    so the cycle may repeat.
+  outcomes:
+  - 1
+  evidence:
+  - List of information needs
+  rule_ids: []
+  maps_to: []
+- id: MAN.6.BP2
+  name: Specify metrics
+  intent: Develop a fitting set of metrics, about processes or development results, from the information needs.
+  outcomes:
+  - 2
+  evidence:
+  - Metric definitions
+  rule_ids: []
+  maps_to: []
+- id: MAN.6.BP3
+  name: Collect and store metrics
+  intent: Collect and store base and derived metrics with the context needed to understand them.
+  outcomes:
+  - 3
+  - 4
+  evidence:
+  - Stored metric data with context
+  rule_ids: []
+  maps_to: []
+- id: MAN.6.BP4
+  name: Analyze collected metrics
+  intent: Analyse and interpret the measured values to support decisions.
+  outcomes:
+  - 4
+  evidence:
+  - Analysis results
+  rule_ids: []
+  maps_to: []
+- id: MAN.6.BP5
+  name: Communicate analysis results
+  intent: Pass the analysis results on to all affected parties.
+  outcomes:
+  - 5
+  evidence:
+  - Communication records of analysis results
+  rule_ids: []
+  maps_to: []
+- id: MAN.6.BP6
+  name: Use metrics for decision-making
+  intent: Make metric information and analysis results available and use them in relevant decisions.
+  outcomes:
+  - 5
+  evidence:
+  - Decisions referring to metrics
+  rule_ids: []
+  maps_to: []
+output_work_products:
+- id: 03-03
+  name: Benchmarking data
+  outcomes:
+  - 4
+- id: 03-04
+  name: Customer satisfaction data
+  outcomes:
+  - 4
+- id: 03-06
+  name: Process performance information
+  outcomes:
+  - 3
+  - 4
+- id: 07-01
+  name: Customer satisfaction survey
+  outcomes:
+  - 3
+- id: 07-04
+  name: Process metric
+  outcomes:
+  - 2
+  - 3
+- id: 07-05
+  name: Project metric
+  outcomes:
+  - 2
+  - 3
+- id: 07-06
+  name: Quality metric
+  outcomes:
+  - 2
+  - 3
+- id: 07-08
+  name: Service level metric
+  outcomes:
+  - 2
+  - 3
+- id: 15-51
+  name: Analysis results
+  outcomes:
+  - 4
+  - 5
+catalog_only: true

@@ -1,0 +1,193 @@
+id: MAN.6
+name: Measurement
+group: MAN
+scope: other
+purpose: Collect and analyse data about products and processes of the organisation and its projects, so processes
+  are managed well and product quality is shown objectively.
+outcomes:
+- n: 1
+  text: The organisation commits to measurement and keeps that commitment.
+- n: 2
+  text: The information that organisational and management processes need from measurement is identified.
+- n: 3
+  text: A set of measures that follows from those needs is chosen or created.
+- n: 4
+  text: Measurement activities are determined and carried out.
+- n: 5
+  text: Needed data is collected, kept and analysed, and the results interpreted.
+- n: 6
+  text: Information products back decisions and give an objective basis for communication.
+- n: 7
+  text: The measurement process and the measures are evaluated and the results given to the process owner.
+base_practices:
+- id: MAN.6.BP1
+  name: Establish organizational commitment for measurement
+  intent: Management and staff commit to measurement, and this is made known to the organisational unit.
+  outcomes:
+  - 1
+  evidence:
+  - Management commitment statement
+  rule_ids: []
+- id: MAN.6.BP2
+  name: Develop measurement strategy
+  intent: Define a strategy for identifying, performing and evaluating measurement, based on organisation and project
+    needs.
+  outcomes:
+  - 1
+  evidence:
+  - Measurement strategy
+  rule_ids: []
+- id: MAN.6.BP3
+  name: Identify measurement information needs
+  intent: Determine what information organisational and management processes need from measurement.
+  outcomes:
+  - 2
+  evidence:
+  - Information needs list
+  rule_ids: []
+- id: MAN.6.BP4
+  name: Specify measures
+  intent: Choose or define measures that follow from the information needs.
+  outcomes:
+  - 3
+  evidence:
+  - Measure definitions
+  rule_ids: []
+- id: MAN.6.BP5
+  name: Perform measurement activities
+  intent: Determine and carry out measurement activities.
+  outcomes:
+  - 4
+  evidence:
+  - Measurement schedule and records
+  rule_ids: []
+- id: MAN.6.BP6
+  name: Retrieve measurement data
+  intent: Collect and store base and derived measures with the context needed to check and understand them.
+  outcomes:
+  - 5
+  evidence:
+  - Measurement data store
+  rule_ids: []
+- id: MAN.6.BP7
+  name: Analyze measures
+  intent: Analyse and interpret the data and produce information products.
+  outcomes:
+  - 5
+  evidence:
+  - Analysis reports
+  rule_ids: []
+- id: MAN.6.BP8
+  name: Use measurement information for decision-making
+  intent: Make accurate, current measurement information available to the decisions that need it.
+  outcomes:
+  - 6
+  evidence:
+  - Decision records citing measures
+  rule_ids: []
+- id: MAN.6.BP9
+  name: Communicate measures
+  intent: Share measurement information with its users and gather their feedback on suitability.
+  outcomes:
+  - 5
+  - 6
+  evidence:
+  - Distributed reports
+  - Feedback records
+  rule_ids: []
+- id: MAN.6.BP10
+  name: Evaluate information products and measurement activities
+  intent: Judge information products and measurement activities against the needs and strategy, and note possible
+    improvements.
+  outcomes:
+  - 7
+  evidence:
+  - Evaluation report
+  rule_ids: []
+- id: MAN.6.BP11
+  name: Communicate potential improvements
+  intent: Tell the people concerned about the improvements found for their processes.
+  outcomes:
+  - 7
+  evidence:
+  - Improvement notifications
+  rule_ids: []
+output_work_products:
+- id: 02-01
+  name: Commitment/agreement
+  outcomes:
+  - 1
+- id: 03-03
+  name: Benchmarking data
+  outcomes:
+  - 5
+- id: 03-04
+  name: Customer satisfaction data
+  outcomes:
+  - 5
+- id: 03-06
+  name: Process performance data
+  outcomes:
+  - 6
+- id: 07-01
+  name: Customer satisfaction survey
+  outcomes:
+  - 3
+  - 7
+- id: 07-02
+  name: Field measure
+  outcomes:
+  - 3
+  - 7
+- id: 07-03
+  name: Personnel performance measure
+  outcomes:
+  - 3
+  - 4
+  - 7
+- id: 07-04
+  name: Process measure
+  outcomes:
+  - 3
+  - 4
+  - 7
+- id: 07-05
+  name: Project measure
+  outcomes:
+  - 3
+  - 4
+  - 7
+- id: 07-06
+  name: Quality measure
+  outcomes:
+  - 3
+  - 4
+  - 7
+- id: 07-07
+  name: Risk measure
+  outcomes:
+  - 3
+  - 4
+  - 7
+- id: 07-08
+  name: Service level measure
+  outcomes:
+  - 3
+  - 4
+  - 7
+- id: 15-01
+  name: Analysis report
+  outcomes:
+  - 2
+  - 5
+- id: 15-05
+  name: Evaluation report
+  outcomes:
+  - 5
+  - 7
+- id: 15-18
+  name: Process performance report
+  outcomes:
+  - 5
+  - 7
+catalog_only: true

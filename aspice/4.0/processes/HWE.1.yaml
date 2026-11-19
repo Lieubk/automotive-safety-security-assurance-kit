@@ -1,0 +1,109 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: HWE.1
+name: Hardware Requirements Analysis
+group: HWE
+scope: extended
+purpose: Establish a structured, analysed set of hardware requirements that agrees with the system requirements
+  and system architecture.
+outcomes:
+- n: 1
+  text: Hardware requirements are written down.
+- n: 2
+  text: Hardware requirements are grouped and given priorities.
+- n: 3
+  text: Hardware requirements are checked for being correct and technically achievable.
+- n: 4
+  text: What hardware requirements imply for the surrounding operating environment is examined.
+- n: 5
+  text: Hardware requirements and system requirements are consistent and linked in both directions.
+- n: 6
+  text: Hardware requirements and system architecture are consistent and linked in both directions.
+- n: 7
+  text: The agreed hardware requirements are made known to all concerned.
+base_practices:
+- id: HWE.1.BP1
+  name: Specify hardware requirements
+  intent: Use system requirements and architecture, interface definitions included, to derive functional and non-functional
+    hardware requirements, written with the agreed qualities of a good requirement.
+  outcomes:
+  - 1
+  evidence:
+  - Hardware requirements specification
+  rule_ids: []
+  maps_to: []
+- id: HWE.1.BP2
+  name: Structure hardware requirements
+  intent: Arrange the requirements, for instance by function or variant, and rank them by need.
+  outcomes:
+  - 2
+  evidence:
+  - Requirements with structure and priority attributes
+  rule_ids: []
+  maps_to: []
+- id: HWE.1.BP3
+  name: Analyze hardware requirements
+  intent: Examine requirements and dependencies for correctness and feasibility, for instance against a given platform,
+    and support project estimates.
+  outcomes:
+  - 3
+  evidence:
+  - Analysis results on correctness and feasibility
+  rule_ids: []
+  maps_to: []
+- id: HWE.1.BP4
+  name: Analyze the impact on the operating environment
+  intent: Identify interfaces to the surrounding elements and examine what the requirements mean for them.
+  outcomes:
+  - 4
+  evidence:
+  - Impact analysis on the operating environment
+  rule_ids: []
+  maps_to: []
+- id: HWE.1.BP5
+  name: Ensure consistency and establish bidirectional traceability
+  intent: Keep hardware requirements consistent with, and linked to, system requirements and system architecture.
+  outcomes:
+  - 5
+  - 6
+  evidence:
+  - Traceability records
+  - Consistency check result
+  rule_ids: []
+  maps_to: []
+- id: HWE.1.BP6
+  name: Communicate agreed hardware requirements and impact on the operating environment
+  intent: Pass the agreed requirements and impact findings to everyone concerned.
+  outcomes:
+  - 7
+  evidence:
+  - Communication records
+  rule_ids: []
+  maps_to: []
+output_work_products:
+- id: 13-52
+  name: Communication Evidence
+  outcomes:
+  - 7
+- id: 13-51
+  name: Consistency Evidence
+  outcomes:
+  - 5
+  - 6
+- id: 17-58
+  name: Hardware Requirement
+  outcomes:
+  - 1
+- id: 17-54
+  name: Requirement Attribute
+  outcomes:
+  - 2
+- id: 15-51
+  name: Analysis Results
+  outcomes:
+  - 3
+  - 4
+catalog_only: true

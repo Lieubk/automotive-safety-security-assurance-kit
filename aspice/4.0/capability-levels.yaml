@@ -1,0 +1,211 @@
+# Capability dimension of Automotive SPICE 4.0 as data - from the DRAFT 3.991, which is not for assessments.
+# Levels 1 and 2 only: the toolkit observes nothing above level 2. Names of process attributes and
+# generic practices are official; intents are paraphrases. `maps_to` names the 3.1 generic practices
+# whose observations (`traceability.py generic`) are combined for the 4.0 practice.
+
+model: Automotive SPICE
+version: '4.0'
+source: draft 3.991, 2023-06-06
+capability_levels:
+- level: 0
+  name: Incomplete
+  process_attributes: []
+  summary: Results of the process are missing or not adequate.
+- level: 1
+  name: Performed
+  process_attributes:
+  - PA 1.1
+  summary: The process achieves its outcomes.
+- level: 2
+  name: Managed
+  process_attributes:
+  - PA 2.1
+  - PA 2.2
+  summary: Execution is planned, monitored and adjusted, responsibilities are defined, and work products are quality-checked
+    and kept under control.
+- level: 3
+  name: Established
+  process_attributes:
+  - PA 3.1
+  - PA 3.2
+  summary: The process runs as a defined process derived from an organizational standard process, and the organization
+    improves that standard.
+- level: 4
+  name: Predictable
+  process_attributes:
+  - PA 4.1
+  - PA 4.2
+  summary: Process performance is measured and controlled statistically within defined limits.
+- level: 5
+  name: Innovating
+  process_attributes:
+  - PA 5.1
+  - PA 5.2
+  summary: The process is improved continually, driven by quantitative feedback and organizational goals.
+process_attributes:
+- id: PA 1.1
+  name: Process performance
+  level: 1
+  intent: Measures how far the process achieves its purpose; fully achieved when the process produces its defined
+    outcomes.
+  achievements:
+  - id: a
+    text: The process achieves its defined outcomes.
+  generic_resources:
+  - Resources actually used to carry out the base practices of the process.
+  generic_practices:
+  - id: GP 1.1.1
+    name: Achieve the process outcomes
+    achievements:
+    - a
+    intent: The intent of every base practice is met and work products exist that demonstrate the outcomes.
+    evidence:
+    - Output work products of the process with the expected content
+    - Statements of the people doing the work that match those work products
+    rule_ids: []
+    related_processes: []
+    related_practices: []
+- id: PA 2.1
+  name: Performance management
+  level: 2
+  intent: Measures how far the execution of the process is managed.
+  achievements:
+  - id: a
+    text: Objectives for performing the process are identified.
+  - id: b
+    text: Performance of the process is planned.
+  - id: c
+    text: Performance of the process is monitored.
+  - id: d
+    text: Performance is adjusted so that plans are met.
+  - id: e
+    text: Responsibilities and authorities are defined, assigned and communicated.
+  - id: f
+    text: The people performing the process are prepared for their responsibilities.
+  - id: g
+    text: Needed resources and information are identified, provided, allocated and used.
+  - id: h
+    text: Interfaces between the parties involved are managed so that communication works and responsibility is
+      clearly assigned.
+  generic_practices:
+  - id: GP 2.1.1
+    name: Identify the objectives and define a strategy for the performance of the process
+    intent: Objectives for the process are set and the way of performing it is chosen to reach them.
+    evidence:
+    - Per-process planning record stating due dates or cadence, effort and resource budget
+    - Quality targets for the outputs of the process
+    - Stated scope, assumptions and constraints
+    maps_to:
+    - GP 2.1.1
+    rule_ids: []
+  - id: GP 2.1.2
+    name: Plan the performance of the process
+    intent: Activities, estimates, schedule and reviews of the process are planned to meet its objectives.
+    evidence:
+    - Schedule or backlog entries for the activities of this process with owner, effort and dates
+    - Milestone or iteration plan
+    - Estimate records including their updates
+    - Planned review dates per work product
+    maps_to:
+    - GP 2.1.2
+    rule_ids: []
+  - id: GP 2.1.3
+    name: Determine resource needs
+    intent: The people, roles, skills, tools and infrastructure the process needs are worked out.
+    evidence:
+    - Role assignment for this process, for example a responsibility matrix
+    - Named reviewers and approvers per work product type
+    - Skill requirements per role
+    - Proof that the assignment was communicated
+    maps_to:
+    - GP 2.1.5
+    - GP 2.1.6
+    rule_ids: []
+  - id: GP 2.1.4
+    name: Identify and make available resources
+    intent: The resources that were determined are found and put at the disposal of the process.
+    evidence:
+    - Resource plan for people, tools, licences and test equipment, with evidence of availability
+    - Training, mentoring or coaching records for the assigned people
+    - Access of the team to the input information it needs
+    maps_to:
+    - GP 2.1.6
+    rule_ids: []
+  - id: GP 2.1.5
+    name: Monitor and adjust the performance of the process
+    intent: Performance is compared with the plan and adjusted when it deviates.
+    evidence:
+    - Plan-versus-actual comparison for the tasks of this process
+    - Status reports and progress metrics
+    - Recorded deviations
+    - Issue and action list with owners and closure
+    maps_to:
+    - GP 2.1.3
+    - GP 2.1.4
+    rule_ids: []
+  - id: GP 2.1.6
+    name: Manage the interfaces between involved parties
+    intent: The parties involved know who is responsible for what and how they communicate.
+    evidence:
+    - Stakeholder and interface list for the process
+    - Agreed communication channels and cadence
+    - Minutes and action items
+    - Confirmations or sign-offs exchanged between the parties
+    maps_to:
+    - GP 2.1.7
+    rule_ids: []
+- id: PA 2.2
+  name: Work product management
+  level: 2
+  intent: Measures how well the work products that the process produces are managed. The work products meant are
+    those that result from achieving the process purpose.
+  achievements:
+  - id: a
+    text: What each work product must contain and satisfy is specified.
+  - id: b
+    text: How work products are to be documented and kept under control is specified.
+  - id: c
+    text: Each work product is identifiable, documented and under control.
+  - id: d
+    text: Reviews happen as planned and work products are corrected until they satisfy what was specified.
+  generic_practices:
+  - id: GP 2.2.1
+    name: Define the requirements for the work products
+    intent: What the work products have to contain and meet, and how they are reviewed, is stated.
+    evidence:
+    - Templates or content definitions per work product type
+    - Quality criteria and review checklists
+    - Stated approval criteria
+    maps_to:
+    - GP 2.2.1
+    rule_ids: []
+  - id: GP 2.2.2
+    name: Define the requirements for storage and control of the work products
+    intent: How work products are identified, stored, versioned and made available is stated.
+    evidence:
+    - Rules for naming, identification, versioning, storage, status model, approval and distribution
+    - Map of dependencies between work products
+    maps_to:
+    - GP 2.2.2
+    rule_ids: []
+  - id: GP 2.2.3
+    name: Identify, store and control the work products
+    intent: Work products are kept under the control that was stated.
+    evidence:
+    - Configuration item list and repository history
+    - Change records
+    - Baselines that tie work product versions to a product configuration
+    - Access rights and visible version and status in each work product
+    maps_to:
+    - GP 2.2.3
+    rule_ids: []
+  - id: GP 2.2.4
+    name: Review and adjust work products
+    intent: Work products are reviewed against their requirements and corrected where needed.
+    evidence:
+    - Review records per work product version that reference the criteria used
+    - Findings tracked to closure
+    - Evidence of rework and approval
+    maps_to:
+    - GP 2.2.4
+    rule_ids: []

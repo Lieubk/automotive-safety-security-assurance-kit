@@ -1,0 +1,183 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: MAN.3
+name: Project Management
+group: MAN
+scope: vda
+purpose: Identify and control the activities of a project and set up the resources it needs to develop a product,
+  within the requirements and limits of the project.
+outcomes:
+- n: 1
+  text: The scope of the project's work is defined.
+- n: 2
+  text: It is evaluated whether the project goals can be reached with available resources and limits.
+- n: 3
+  text: The effort and resources required to finish the work are estimated.
+- n: 4
+  text: Interfaces within the project and to other projects and organisational units are identified and monitored.
+- n: 5
+  text: Plans for carrying out the project are developed, put into effect and kept up to date.
+- n: 6
+  text: Project progress is monitored and reported.
+- n: 7
+  text: The project adjusts when its goals are not reached.
+base_practices:
+- id: MAN.3.BP1
+  name: Define the scope of work
+  intent: Identify what the project aims at, why, and where its boundaries lie.
+  outcomes:
+  - 1
+  evidence:
+  - Scope of work
+  rule_ids: []
+  maps_to:
+  - MAN.3.BP1
+- id: MAN.3.BP2
+  name: Define project life cycle
+  intent: Define a life cycle that fits the scope, context and complexity, with a release scope for relevant milestones.
+  outcomes:
+  - 5
+  evidence:
+  - Project life cycle and milestones
+  rule_ids: []
+  maps_to:
+  - MAN.3.BP2
+- id: MAN.3.BP3
+  name: Evaluate feasibility of the project
+  intent: Judge whether the goals are achievable in time, estimates and resources.
+  outcomes:
+  - 2
+  evidence:
+  - Feasibility analysis
+  rule_ids: []
+  maps_to:
+  - MAN.3.BP3
+- id: MAN.3.BP4
+  name: Define and monitor work packages
+  intent: Define work packages and dependencies from the life cycle and estimates, and monitor them.
+  outcomes:
+  - 3
+  - 5
+  evidence:
+  - Work packages with dependencies
+  rule_ids: []
+  maps_to:
+  - MAN.3.BP4
+- id: MAN.3.BP5
+  name: Define and monitor project estimates and resources
+  intent: Define and monitor estimates of effort and resources from goals, risks and boundaries.
+  outcomes:
+  - 3
+  evidence:
+  - Estimates and resource plan
+  rule_ids: []
+  maps_to:
+  - MAN.3.BP5
+- id: MAN.3.BP6
+  name: Define and monitor required skills, knowledge, and experience
+  intent: Identify and monitor needed skills, knowledge and experience in line with estimates and work packages.
+  outcomes:
+  - 3
+  - 5
+  evidence:
+  - Skills needs and their monitoring
+  rule_ids: []
+  maps_to:
+  - MAN.3.BP6
+- id: MAN.3.BP7
+  name: Define and monitor project interfaces and agreed commitments
+  intent: Agree interfaces with affected stakeholders, monitor commitments and define escalation for unmet ones.
+  outcomes:
+  - 4
+  - 7
+  evidence:
+  - Stakeholder list, commitments and escalation path
+  rule_ids: []
+  maps_to:
+  - MAN.3.BP7
+- id: MAN.3.BP8
+  name: Define and monitor project schedule
+  intent: Assign resources to work packages, schedule every activity and monitor against the schedule.
+  outcomes:
+  - 5
+  evidence:
+  - Schedule
+  rule_ids: []
+  maps_to:
+  - MAN.3.BP8
+- id: MAN.3.BP9
+  name: Ensure consistency
+  intent: Regularly adjust estimates, resources, skills, packages, schedules, plans, interfaces and commitments
+    so they stay consistent with the scope.
+  outcomes:
+  - 5
+  - 7
+  evidence:
+  - Evidence of adjusted plans
+  - Consistency evidence
+  rule_ids: []
+  maps_to:
+  - MAN.3.BP9
+- id: MAN.3.BP10
+  name: Review and report progress of the project
+  intent: Review and report project status and work package fulfilment against estimates to those affected, and
+    prevent identified problems from recurring.
+  outcomes:
+  - 6
+  - 7
+  evidence:
+  - Project status reports
+  - Corrective actions
+  rule_ids: []
+  maps_to:
+  - MAN.3.BP10
+output_work_products:
+- id: 08-53
+  name: Scope of work
+  outcomes:
+  - 1
+- id: 08-54
+  name: Feasibility analysis
+  outcomes:
+  - 2
+- id: 14-10
+  name: Work package
+  outcomes:
+  - 3
+  - 5
+- id: 13-52
+  name: Communication evidence
+  outcomes:
+  - 4
+  - 6
+- id: 13-16
+  name: Change request
+  outcomes:
+  - 7
+- id: 13-51
+  name: Consistency evidence
+  outcomes:
+  - 5
+- id: 14-02
+  name: Corrective action
+  outcomes:
+  - 7
+- id: 18-52
+  name: Escalation path
+  outcomes:
+  - 4
+- id: 08-56
+  name: Schedule
+  outcomes:
+  - 5
+- id: 14-50
+  name: Stakeholder groups list
+  outcomes:
+  - 4
+- id: 15-06
+  name: Project status report
+  outcomes:
+  - 6

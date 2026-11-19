@@ -1,0 +1,152 @@
+# Automotive SPICE 4.0 - built from the DRAFT 3.991 (yellow-band release of 2023-06-06), which says it is
+# not for assessments. Identifiers and official names only; purpose, outcomes, intents and evidence
+# are paraphrases. `maps_to` names the 3.1 base practices whose evidence structures in
+# schema/items.yaml carry this practice; an empty list means the toolkit holds nothing for it.
+
+id: PIM.3
+name: Process Improvement
+group: PIM
+scope: other
+purpose: Keep improving the organisation's effectiveness and efficiency through the processes it uses, and keep
+  those processes aligned with business needs.
+outcomes:
+- n: 1
+  text: Commitment exists to give the resources that sustain improvement measures.
+- n: 2
+  text: Problems from the organisation's inner or outer surroundings are taken as chances to improve, with reasons
+    for change given.
+- n: 3
+  text: The present state of existing processes is analysed.
+- n: 4
+  text: Improvement goals are identified and ranked, and resulting process changes are defined, documented and put
+    into use.
+- n: 5
+  text: The effects of the changed process are monitored, measured and checked against the improvement goals.
+- n: 6
+  text: What was learned from the improvement is shared in the organisation.
+base_practices:
+- id: PIM.3.BP1
+  name: Establish commitment
+  intent: Gain commitment to support improvement staff and provide resources and other enablers for improvement
+    actions.
+  outcomes:
+  - 1
+  evidence:
+  - Commitment or agreement on improvement resources
+  rule_ids: []
+  maps_to: []
+- id: PIM.3.BP2
+  name: Identify improvement measures
+  intent: Find issues from process performance analysis and derive improvement opportunities with reasons for change.
+  outcomes:
+  - 2
+  evidence:
+  - Improvement opportunities with justification
+  - Assessment or audit reports
+  rule_ids: []
+  maps_to: []
+- id: PIM.3.BP3
+  name: Establish process improvement goals
+  intent: Analyse the current state of the processes and set improvement goals.
+  outcomes:
+  - 3
+  - 4
+  evidence:
+  - Analysis of current process state
+  - Improvement goals
+  rule_ids: []
+  maps_to: []
+- id: PIM.3.BP4
+  name: Prioritize improvements
+  intent: Rank the improvement goals and measures by importance.
+  outcomes:
+  - 4
+  evidence:
+  - Prioritised list of improvements
+  rule_ids: []
+  maps_to: []
+- id: PIM.3.BP5
+  name: Define process improvement measures
+  intent: Define the improvement measures, possibly in small steps.
+  outcomes:
+  - 4
+  evidence:
+  - Defined improvement measures
+  rule_ids: []
+  maps_to: []
+- id: PIM.3.BP6
+  name: Implement process improvement measures
+  intent: Apply the improvements to the processes, update process documentation and train people as needed.
+  outcomes:
+  - 4
+  evidence:
+  - Updated process descriptions and repository
+  - Training material
+  rule_ids: []
+  maps_to: []
+- id: PIM.3.BP7
+  name: Confirm process improvement
+  intent: Monitor and measure the effects of the changed process and confirm that the goals are met.
+  outcomes:
+  - 5
+  evidence:
+  - Process metrics and confirmation of goal achievement
+  rule_ids: []
+  maps_to: []
+- id: PIM.3.BP8
+  name: Communicate results of improvement
+  intent: Pass on lessons from the improvements and the progress of implementation to affected parties.
+  outcomes:
+  - 6
+  evidence:
+  - Communication records
+  rule_ids: []
+  maps_to: []
+output_work_products:
+- id: 02-01
+  name: Commitment/agreement
+  outcomes:
+  - 1
+- id: 05-00
+  name: Goals
+  outcomes:
+  - 3
+  - 4
+- id: 06-04
+  name: Training material
+  outcomes:
+  - 4
+- id: 07-04
+  name: Process metric
+  outcomes:
+  - 5
+- id: 10-00
+  name: Process description
+  outcomes:
+  - 4
+- id: 13-52
+  name: Communication evidence
+  outcomes:
+  - 6
+- id: 13-16
+  name: Change request
+  outcomes:
+  - 4
+- id: 15-51
+  name: Analysis result
+  outcomes:
+  - 3
+- id: 15-13
+  name: Assessment/audit report
+  outcomes:
+  - 2
+  - 3
+- id: 15-16
+  name: Improvement opportunity
+  outcomes:
+  - 2
+- id: 16-06
+  name: Process repository
+  outcomes:
+  - 4
+catalog_only: true
