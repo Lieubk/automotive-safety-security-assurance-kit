@@ -13,6 +13,8 @@ scope:
   role: software-supplier
   processes: [SWE.1, SWE.2, SWE.3, SWE.4, SWE.5, SWE.6, SUP.1, SUP.8, SUP.9, MAN.3]   # the software supplier's responsibility; system level is imported
   assessment_scope: []                              # no assessment planned for the example
+  cybersecurity: [6, 15]                            # ISO/SAE 21434: project management and the TARA of the window
+                                                    # control; item, concept and vehicle are the customer's (PLN-0008)
 inputs:
   - level: system requirements
     source: Front Door Module - System Requirements Specification
@@ -24,10 +26,15 @@ inputs:
     version: "1.4"
     received: "2026-03-02"
     format: text export
+  - level: item definition (cybersecurity)
+    source: Front Door Module - Item Definition for Cybersecurity
+    version: "1.0"
+    received: "2026-03-16"
+    format: text export
 safety:
   highest_asil: B
 security:
-  relevant: false
+  relevant: true
 conventions:                                        # rules the reviews check against; empty = toolkit default
   naming: ""                                        # the defaults of .claude/rules/c-code.md, "Naming"
   design_limits: "Design evaluation of CDS-0001"

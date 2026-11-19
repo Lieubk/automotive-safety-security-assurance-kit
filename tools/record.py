@@ -1234,7 +1234,7 @@ def cmd_cybersecurity_case(project, args):
     products, findings, seen = [], [], set()
     for row in rows:
         for wp in row["work_products"]:
-            if wp["work_product"] in seen:
+            if wp["work_product"] in seen or wp["work_product"] == "WP-06-02":     # the case does not list itself
                 continue
             seen.add(wp["work_product"])
             products.append({"work_product": wp["work_product"], "name": wp["name"], "subclause": row["subclause"],

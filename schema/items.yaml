@@ -756,7 +756,7 @@ types:
       channel: {required: always, note: "how they were informed"}
       sent_at: {required: always}
       agreement: {required: optional, note: "what was agreed and by whom, when the record documents an agreement rather than a notification"}
-      practices: {required: optional, note: "the communicate practices the record serves, for example [SWE.1.BP8]; without it, `practices` counts the record for every one"}
+      practices: {required: optional, note: "the communicate practices the record serves, for example [SWE.1.BP8], or the subclause of ISO/SAE 21434 it belongs to, for example \"21434:15.9\"; without it, `practices` counts the record for every communicate practice"}
 
   query:
     prefix: QRY
