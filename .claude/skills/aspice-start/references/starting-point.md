@@ -87,10 +87,10 @@ Give the order for the processes in scope only, and name the skill for each step
 3. Left side, top down. Each step is drafted, reviewed, and only then built upon; the
    tools hold to this order and refuse to approve an item above one that is not
    approved:
-   SYS.2 and SYS.3 (by hand today), SWE.1 `/sw-requirements`, SWE.2
+   SYS.2 `/sys-requirements`, SYS.3 `/sys-architecture`, SWE.1 `/sw-requirements`, SWE.2
    `/sw-architecture`, SWE.3 `/sw-detailed-design` and then `/sw-unit-implement`.
-4. Right side, bottom up: SWE.4 `/sw-unit-verify`, then SWE.5, SWE.6, SYS.4 and SYS.5
-   (by hand today). A test specification can be written as soon as its reference is
+4. Right side, bottom up: SWE.4 `/sw-unit-verify`, then SWE.5 `/sw-integration-test`, SWE.6
+   `/sw-qualification-test`, SYS.4 `/sys-integration-test` and SYS.5 `/sys-qualification-test`. A test specification can be written as soon as its reference is
    approved: qualification tests from the requirements, integration tests from the
    architecture of the same level.
 5. At any time: `/review` for drafts, `/trace-check` for the state of the links,

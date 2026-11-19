@@ -978,6 +978,88 @@ class ProblemResolution(Case):
         self.assertEqual(states, ["open", "closed"], done.stdout + done.stderr)
 
 
+SYSTEM_SCOPE = SCOPE + ["SWE.5", "SWE.6", "SYS.4", "SYS.5"]
+
+
+def system_items():
+    """The integrated software of integration_items(), integrated into the system in one step and qualified."""
+    items = integration_items()
+    items["SYE-0002"] = ({"type": "system-element", "title": "Vehicle network", "status": "approved", "asil": "B",
+                          "security_relevant": False, "kind": "external", "links": {"fulfils": ["SYR-0001"]}},
+                         {"Responsibility": "Neighbours.", "Dynamic behavior": "Not applicable: external."})
+    items["SYI-0001"] = ({"type": "system-interface", "title": "Obstacle signal", "status": "approved", "asil": "B",
+                          "security_relevant": False, "kind": "hardware-software",
+                          "imported": {"source": "Customer architecture", "version": "1"},
+                          "links": {"fulfils": ["SYR-0001"]}}, {"Definition": "A signal."})
+    plan_sections = {"Scope": "The system.", "Approach": "One step.", "Criteria": "All pass.",
+                     "Environment and tools": "Bench.", "Responsibilities": "Tester."}
+    case = {"status": "approved", "asil": "B", "execution": "manual", "regression": True}
+    items.update({
+        "PLN-0005": ({"type": "plan", "title": "System integration strategy", "status": "approved",
+                      "kind": "system-integration",
+                      "integration_steps": [{"name": "vehicle", "components": ["SYE-0001"], "doubles": ["SYE-0002"]}]},
+                     plan_sections),
+        "PLN-0006": ({"type": "plan", "title": "System qualification strategy", "status": "approved",
+                      "kind": "system-qualification-test"}, plan_sections),
+        "SYIT-0001": ({"type": "system-integration-test", "title": "Obstacle signal reaches the software", **case,
+                       "environment": "bench", "step": "vehicle", "links": {"verifies": ["SYI-0001"]}},
+                      {"Steps": "Signal.", "Expected result": "Seen."}),
+        "SYQT-0001": ({"type": "system-qualification-test", "title": "System reverses", **case,
+                       "environment": "vehicle", "links": {"verifies": ["SYR-0001"]}},
+                      {"Steps": "Block.", "Expected result": "Reverses."}),
+        "BLD-0002": ({"type": "build-record", "status": "final", "level": "system", "step": "vehicle",
+                      "item_under_test": "B-sample 1", "tool": "bench 3", "executed_at": "2026-01-03T09:00:00",
+                      "result": "succeeded",
+                      "contents": [{"component": "SYE-0001", "delivered": "abc123", "build": "BLD-0001"}]}, {}),
+        "RUN-0004": ({"type": "test-run", "status": "final", "level": "system-integration", "item_under_test": "B-sample 1",
+                      "environment": "bench", "executed_at": "2026-01-03T10:00:00", "build": "BLD-0002",
+                      "results": [{"test": "SYIT-0001", "verdict": "passed"}]}, {}),
+        "RUN-0005": ({"type": "test-run", "status": "final", "level": "system-qualification",
+                      "item_under_test": "B-sample 1", "environment": "vehicle", "executed_at": "2026-01-03T11:00:00",
+                      "build": "BLD-0002", "results": [{"test": "SYQT-0001", "verdict": "passed"}]}, {}),
+    })
+    return items
+
+
+class SystemIntegration(Case):
+    def make(self, items=None, **kwargs):
+        kwargs.setdefault("scope", SYSTEM_SCOPE)
+        kwargs.setdefault("files", INTEGRATION_FILES)
+        return super().make(system_items() if items is None else items, **kwargs)
+
+    def test_integrated_and_qualified_system_has_no_findings(self):
+        self.assertEqual(self.make().findings(), [])
+
+    def test_element_in_no_system_step(self):
+        items = system_items()
+        items["PLN-0005"][0]["integration_steps"] = [{"name": "vehicle", "components": ["SYE-0002"]}]
+        self.assertIn(("COV-46", "SYE-0001"), self.make(items).rules())
+
+    def test_system_build_with_older_software(self):
+        items = system_items()
+        items["BLD-0003"] = changed(items, "BLD-0001", executed_at="2026-01-02T09:30:00")["BLD-0001"]
+        messages = [f["message"] for f in self.make(items).findings("error") if f["rule"] == "COV-47"]
+        self.assertTrue(any("older than the software" in m for m in messages), messages)
+
+    def test_system_integration_test_without_a_step_of_the_plan(self):
+        items = changed(system_items(), "SYIT-0001", step="bench")
+        rules = self.make(items).rules()
+        self.assertIn(("COV-48", "SYIT-0001"), rules)
+        self.assertIn(("COV-48", "PLN-0005"), rules)
+
+    def test_qualification_on_a_software_build_is_not_a_system_build(self):
+        items = changed(system_items(), "RUN-0005", build="BLD-0001", item_under_test="abc123")
+        self.assertIn(("COV-49", "RUN-0005"), self.make(items).rules())
+
+    def test_software_and_system_steps_are_kept_apart(self):
+        items = system_items()
+        items["PLN-0005"][0]["integration_steps"] = [{"name": "detection", "components": ["SYE-0001"],
+                                                      "doubles": ["SYE-0002"]}]
+        items["BLD-0002"][0]["step"] = "detection"
+        items["SYIT-0001"][0]["step"] = "detection"
+        self.assertEqual(self.make(items).findings(), [])        # same step name at both levels
+
+
 QA_SCOPE = SCOPE + ["SUP.1"]
 
 

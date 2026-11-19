@@ -62,6 +62,15 @@ TEST_TYPES = {  # type -> (process that owns it, level name used by test runs)
     "system-qualification-test": ("SYS.5", "system-qualification"),
 }
 RUN_LEVELS = {level: process for process, level in TEST_TYPES.values()}   # level of a test run -> its process
+INTEGRATION_LEVELS = {  # integration at software level (SWE.5, SWE.6) and at system level (SYS.4, SYS.5)
+    "software": {"kind": "software-integration", "element": "software-component", "test": "software-integration-test",
+                 "integration": "software-integration", "qualification": "software-qualification",
+                 "practices": ("SWE.5.BP6", "SWE.6.BP4"), "name": "software"},
+    "system": {"kind": "system-integration", "element": "system-element", "test": "system-integration-test",
+               "integration": "system-integration", "qualification": "system-qualification",
+               "practices": ("SYS.4.BP6", "SYS.5.BP4"), "name": "system"},
+}
+LEVEL_OF_TEST = {spec["test"]: level for level, spec in INTEGRATION_LEVELS.items()}
 VERDICTS = {"passed", "failed", "blocked", "not-run"}
 FRONT_MATTER = re.compile(r"\A---\n(.*?)\n---[ \t]*(?:\n|\Z)(.*)\Z", re.S)
 HEADING = re.compile(r"^##\s+(.+?)\s*$")
@@ -391,26 +400,31 @@ class Project:
         return latest([r for r in self.of_type(type_name) if r.status == "final"
                        and all(r.front.get(k) == v for k, v in match.items())])
 
-    # ---- integration steps (SWE.5)
+    # ---- integration steps (SWE.5 and SYS.4)
 
-    def integration_plan(self):
-        """The approved plan of kind software-integration, or None."""
+    def integration_plan(self, level="software"):
+        """The approved integration plan of the level, or None."""
+        kind = INTEGRATION_LEVELS[level]["kind"]
         return next((p for p in sorted(self.of_type("plan"), key=lambda p: record_number(p.id))
-                     if p.status == "approved" and p.front.get("kind") == "software-integration"), None)
+                     if p.status == "approved" and p.front.get("kind") == kind), None)
 
-    def integration_steps(self, plan=None):
-        plan = plan or self.integration_plan()
+    def integration_steps(self, plan=None, level="software"):
+        plan = plan or self.integration_plan(level)
         return [s for s in as_list(plan.front.get("integration_steps")) if isinstance(s, dict) and s.get("name")] \
             if plan else []
 
-    def leaves(self, component_id):
-        """What a step entry stands for: the component, or the components inside a composition."""
-        comp = self.items.get(str(component_id))
-        if comp is None or comp.type != "software-component":
+    def leaves(self, entry):
+        """What a step entry stands for: a system element, a software component, or the components inside a composition."""
+        item = self.items.get(str(entry))
+        if item is None:
             return []
-        if comp.front.get("kind") != "composition":
-            return [comp.id]
-        return [c for c in self.descendants(comp.id) if self.items[c].front.get("kind") != "composition"]
+        if item.type == "system-element":
+            return [item.id]
+        if item.type != "software-component":
+            return []
+        if item.front.get("kind") != "composition":
+            return [item.id]
+        return [c for c in self.descendants(item.id) if self.items[c].front.get("kind") != "composition"]
 
     def integrated_up_to(self, steps, index):
         out = []
@@ -419,8 +433,9 @@ class Project:
                 out += [c for c in self.leaves(entry) if c not in out]
         return out
 
-    def builds_of(self, step_name, succeeded=False):
+    def builds_of(self, step_name, succeeded=False, level="software"):
         return [b for b in self.of_type("build-record") if b.status == "final" and b.front.get("step") == step_name
+                and (b.front.get("level") or "software") == level
                 and (not succeeded or b.front.get("result") == "succeeded")]
 
     def problem_plan(self):
@@ -438,10 +453,14 @@ class Project:
         self.add("warning" if problem.status == "open" else "error", rule_id, problem.id, message,
                  self.own_supports(rule_id, problem))
 
-    def build_step(self, run):
-        """The integration step of the build a test run names, or None."""
+    def build_step(self, run, level=None):
+        """The integration step of the build a test run names (of the given level, if one is given), or None."""
         build = self.items.get(str(run.front.get("build") or ""))
-        return build.front.get("step") if build is not None and build.type == "build-record" else None
+        if build is None or build.type != "build-record":
+            return None
+        if level and (build.front.get("level") or "software") != level:
+            return None
+        return build.front.get("step")
 
     # ---- structural checks
 
@@ -619,10 +638,12 @@ class Project:
                     if str(ref) not in self.items:
                         self.add("error", "LINK", record.id, "subject names %s, which does not exist" % ref)
         for build in self.of_type("build-record"):
+            element = INTEGRATION_LEVELS.get(build.front.get("level") or "software", INTEGRATION_LEVELS["software"])["element"]
             for entry in as_list(build.front.get("contents")):
                 if not isinstance(entry, dict) or getattr(self.items.get(str(entry.get("component"))), "type", None) \
-                        != "software-component":
-                    self.add("error", "LINK", build.id, "contents entries must name a software component under 'component'")
+                        != element:
+                    self.add("error", "LINK", build.id, "contents entries must name a %s under 'component'"
+                             % element.replace("-", " "))
                     continue
                 for unit_id in as_list(entry.get("units")):
                     if getattr(self.items.get(str(unit_id)), "type", None) != "software-unit":
@@ -821,9 +842,9 @@ class Project:
     def cov_18(self, rule):
         for test in self.tests_in_scope():
             level, step = TEST_TYPES[test.type][1], test.front.get("step")
-            if test.type == "software-integration-test" and step:
-                run = latest([r for r in self.of_type("test-run") if r.status == "final"
-                              and r.front.get("level") == level and self.build_step(r) == step])
+            if test.type in LEVEL_OF_TEST and step:
+                run = latest([r for r in self.of_type("test-run") if r.status == "final" and r.front.get("level") == level
+                              and self.build_step(r, LEVEL_OF_TEST[test.type]) == step])
                 if run is None:
                     self.gap(rule, test, "no final test run of level %s on a build of step '%s' exists" % (level, step))
                     continue
@@ -1045,7 +1066,38 @@ class Project:
                              % (activity.get("name"), end, finish))
 
     def cov_35(self, rule):
-        supports, plan = self.rules[rule]["supports"], self.integration_plan()
+        self.check_integration_plan(rule, "software")
+
+    def cov_36(self, rule):
+        self.check_integration_builds(rule, "software")
+
+    def cov_37(self, rule):
+        self.check_integration_tests(rule, "software")
+
+    def cov_38(self, rule):
+        self.check_integration_runs(rule, "software")
+
+    def cov_46(self, rule):
+        self.check_integration_plan(rule, "system")
+
+    def cov_47(self, rule):
+        self.check_integration_builds(rule, "system")
+
+    def cov_48(self, rule):
+        self.check_integration_tests(rule, "system")
+
+    def cov_49(self, rule):
+        self.check_integration_runs(rule, "system")
+
+    def integrated_elements(self, level):
+        """The elements a strategy of the level has to account for: no compositions, no external systems."""
+        spec = INTEGRATION_LEVELS[level]
+        skip = ("composition",) if level == "software" else ("external",)
+        return [e for e in self.of_type(spec["element"]) if self.live(e) and e.front.get("kind") not in skip]
+
+    def check_integration_plan(self, rule, level):
+        spec = INTEGRATION_LEVELS[level]
+        supports, plan = self.rules[rule]["supports"], self.integration_plan(level)
         if plan is None:
             return                                        # COV-27 reports the missing plan
         steps = self.integration_steps(plan)
@@ -1056,10 +1108,10 @@ class Project:
         for n, step in enumerate(steps):
             for key in ("components", "doubles"):
                 for entry in as_list(step.get(key)):
-                    comp = self.items.get(str(entry))
-                    if comp is None or comp.type != "software-component" or not self.live(comp):
-                        self.add("error", rule, plan.id, "step '%s' names %s under %s, which is not a live software "
-                                 "component" % (step.get("name"), entry, key), supports)
+                    item = self.items.get(str(entry))
+                    if item is None or item.type != spec["element"] or not self.live(item):
+                        self.add("error", rule, plan.id, "step '%s' names %s under %s, which is not a live %s"
+                                 % (step.get("name"), entry, key, spec["element"].replace("-", " ")), supports)
             for entry in as_list(step.get("components")):
                 for leaf in self.leaves(entry):
                     added[leaf].append((n, str(step.get("name"))))
@@ -1071,26 +1123,27 @@ class Project:
                                  % (step.get("name"), leaf, earlier[0]), supports)
         last_doubles = {leaf for entry in as_list(steps[-1].get("doubles")) for leaf in self.leaves(entry)} \
             if steps else set()
-        for comp in self.of_type("software-component"):
-            if not self.live(comp) or comp.front.get("kind") == "composition":
-                continue
-            if len(added[comp.id]) > 1:
-                self.add("error", rule, comp.id, "integrated in more than one step of %s: %s"
-                         % (plan.id, ", ".join(name for _, name in added[comp.id])), supports)
-            elif not added[comp.id] and comp.id not in last_doubles:
-                self.add("error", rule, comp.id, "integrated in no step of %s, and not named as a double of its last "
+        for element in self.integrated_elements(level):
+            if len(added[element.id]) > 1:
+                self.add("error", rule, element.id, "integrated in more than one step of %s: %s"
+                         % (plan.id, ", ".join(name for _, name in added[element.id])), supports)
+            elif not added[element.id] and element.id not in last_doubles:
+                self.add("error", rule, element.id, "integrated in no step of %s, and not named as a double of its last "
                          "step" % plan.id, supports)
 
-    def cov_36(self, rule):
-        supports, plan = self.rules[rule]["supports"], self.integration_plan()
+    def check_integration_builds(self, rule, level):
+        supports, plan = self.rules[rule]["supports"], self.integration_plan(level)
         steps = self.integration_steps(plan)
         for n, step in enumerate(steps):
             name, expected = str(step.get("name")), self.integrated_up_to(steps, n)
-            coded = {cid: [u.id for u in self.sources(cid, "part_of", ["software-unit"])
-                           if as_list(u.front.get("source_files"))] for cid in expected}
-            developed = [c for c in expected if self.items[c].front.get("origin") == "developed"]
-            pending = bool(developed) and not any(coded[c] for c in developed)
-            build = latest(self.builds_of(name))
+            if level == "software":
+                coded = {cid: [u.id for u in self.sources(cid, "part_of", ["software-unit"])
+                               if as_list(u.front.get("source_files"))] for cid in expected}
+                developed = [c for c in expected if self.items[c].front.get("origin") == "developed"]
+                pending = bool(developed) and not any(coded[c] for c in developed)
+            else:
+                coded, developed, pending = {}, [], False
+            build = latest(self.builds_of(name, level=level))
             if build is None:
                 if pending:
                     self.add("warning", rule, plan.id, "step '%s' has no final build record (pending: no unit of the "
@@ -1109,10 +1162,13 @@ class Project:
                     self.add("error", rule, plan.id, "the latest build %s of step '%s' does not contain %s"
                              % (build.id, name, cid), supports)
                     continue
-                missing = [u for u in coded[cid] if u not in map(str, as_list(contents[cid].get("units")))]
+                missing = [u for u in coded.get(cid, []) if u not in map(str, as_list(contents[cid].get("units")))]
                 if cid in developed and missing:
                     self.add("error", rule, plan.id, "the latest build %s of step '%s' does not contain %s of %s"
                              % (build.id, name, ", ".join(missing), cid), supports)
+            if level == "system":
+                self.check_software_in_system_build(rule, plan, name, build, contents, supports)
+                continue
             for entry in as_list(build.front.get("sources")):
                 if not isinstance(entry, dict):
                     continue
@@ -1131,34 +1187,60 @@ class Project:
                             self.add("error", rule, plan.id, "build %s of step '%s' did not build %s of %s"
                                      % (build.id, name, path, unit_id), supports)
 
-    def cov_37(self, rule):
-        plan = self.integration_plan()
+    def check_software_in_system_build(self, rule, plan, name, build, contents, supports):
+        """A system build that integrates software names the software build; it has to be the latest one."""
+        software_steps = self.integration_steps(level="software")
+        for cid, entry in sorted(contents.items()):
+            ref = entry.get("build")
+            if not ref:
+                continue
+            software = self.items.get(str(ref))
+            if software is None or software.type != "build-record" or software.status != "final" \
+                    or (software.front.get("level") or "software") != "software":
+                self.add("error", rule, plan.id, "build %s of step '%s' names %s for %s, which is not a final software "
+                         "build record" % (build.id, name, ref, cid), supports)
+                continue
+            if software.front.get("result") != "succeeded":
+                self.add("error", rule, plan.id, "build %s of step '%s' integrates %s, a software build that failed"
+                         % (build.id, name, ref), supports)
+            if software_steps and software.front.get("step") == software_steps[-1].get("name"):
+                newest = latest(self.builds_of(software.front.get("step"), succeeded=True))
+                if newest is not None and newest.id != software.id:
+                    self.add("error", rule, plan.id, "build %s of step '%s' integrates software build %s; the latest "
+                             "software build is %s: the system build is older than the software"
+                             % (build.id, name, ref, newest.id), supports)
+
+    def check_integration_tests(self, rule, level):
+        spec = INTEGRATION_LEVELS[level]
+        plan = self.integration_plan(level)
         names = [str(s.get("name")) for s in self.integration_steps(plan)]
-        tests = [t for t in self.of_type("software-integration-test") if self.live(t)]
+        tests = [t for t in self.of_type(spec["test"]) if self.live(t)]
         for test in tests:
             step = test.front.get("step")
             if step in (None, ""):
                 continue                                  # SCHEMA reports it once it is due
             if plan is None:
-                self.gap(rule, test, "names step '%s', but no approved software-integration plan exists" % step)
+                self.gap(rule, test, "names step '%s', but no approved %s plan exists" % (step, spec["kind"]))
             elif str(step) not in names:
                 self.gap(rule, test, "names step '%s', which %s does not have (steps: %s)"
                          % (step, plan.id, ", ".join(names)))
         for name in names:
             if not any(str(t.front.get("step")) == name for t in tests):
-                self.add("error", rule, plan.id, "no software integration test belongs to step '%s'" % name,
+                self.add("error", rule, plan.id, "no %s integration test belongs to step '%s'" % (spec["name"], name),
                          self.rules[rule]["supports"])
 
-    def cov_38(self, rule):
-        supports, plan = self.rules[rule]["supports"], self.integration_plan()
+    def check_integration_runs(self, rule, level):
+        spec = INTEGRATION_LEVELS[level]
+        plan = self.integration_plan(level)
         steps = self.integration_steps(plan)
         runs = [r for r in self.of_type("test-run") if r.status == "final"]
 
         def judge(run, step_name, practice):
             build = self.items.get(str(run.front.get("build") or ""))
-            if build is None or build.type != "build-record" or build.status != "final":
-                self.add("error", rule, run.id, "names %s: which integrated software was tested is not recorded by a "
-                         "final build record" % (run.front.get("build") or "no build"), [practice])
+            if build is None or build.type != "build-record" or build.status != "final" \
+                    or (build.front.get("level") or "software") != level:
+                self.add("error", rule, run.id, "names %s: which integrated %s was tested is not recorded by a final "
+                         "%s build record" % (run.front.get("build") or "no build", spec["name"], spec["name"]), [practice])
                 return
             problems = []
             if build.front.get("result") != "succeeded":
@@ -1169,24 +1251,24 @@ class Project:
             if str(build.front.get("item_under_test")) != str(run.front.get("item_under_test")):
                 problems.append("tested %s, built from %s, but names %s as item under test"
                                 % (build.id, build.front.get("item_under_test"), run.front.get("item_under_test")))
-            newest = latest(self.builds_of(build.front.get("step"), succeeded=True))
+            newest = latest(self.builds_of(build.front.get("step"), succeeded=True, level=level))
             if not problems and newest is not None and newest.id != build.id:
                 problems.append("tested %s; the latest build of step '%s' is %s: the run does not describe it"
                                 % (build.id, build.front.get("step"), newest.id))
             for text in problems:
                 self.add("error", rule, run.id, text, [practice])
 
-        integration = [r for r in runs if r.front.get("level") == "software-integration"]
+        integration = [r for r in runs if r.front.get("level") == spec["integration"]]
         for step in steps:
-            run = latest([r for r in integration if self.build_step(r) == step.get("name")])
+            run = latest([r for r in integration if self.build_step(r, level) == step.get("name")])
             if run is not None:
-                judge(run, step.get("name"), "SWE.5.BP6")
+                judge(run, step.get("name"), spec["practices"][0])
         newest = latest(integration)
-        if newest is not None and self.build_step(newest) is None:
-            judge(newest, None, "SWE.5.BP6")
-        qualification = self.latest_run("test-run", level="software-qualification")
+        if newest is not None and self.build_step(newest, level) is None:
+            judge(newest, None, spec["practices"][0])
+        qualification = self.latest_run("test-run", level=spec["qualification"])
         if qualification is not None and steps:
-            judge(qualification, steps[-1].get("name"), "SWE.6.BP4")
+            judge(qualification, steps[-1].get("name"), spec["practices"][1])
 
     def cov_39(self, rule):
         plan = self.problem_plan()

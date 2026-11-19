@@ -27,6 +27,7 @@ design and verification results were made known.
 | SWE.1.BP8, SWE.2.BP9, SWE.3.BP7 (communicate agreed requirements, architecture, detailed design) | records who was informed of the baseline that holds the approved items, how, and what was agreed, as the user states it | `communication-record` naming the baseline (COV-26) |
 | SWE.4.BP7 Summarize and communicate results | records who received the unit verification results; the summary itself comes from `/sw-unit-verify` | `communication-record` naming the baseline and the runs (COV-26) |
 | SWE.5.BP9, SWE.6.BP7 Summarize and communicate results | records who received the integration and qualification results; the summaries come from `/sw-integration-test` and `/sw-qualification-test` | `communication-record` naming the baseline, the builds and the runs (COV-26) |
+| SYS.2.BP8, SYS.3.BP8, SYS.4.BP9, SYS.5.BP7 (communicate agreed system requirements and architecture, and the system test results) | records who was informed of the baseline that holds the approved system items or the runs, how, and what was agreed, as the user states it | `communication-record` naming the baseline (COV-26) |
 
 For SUP.8.BP2 to SUP.8.BP5, SUP.8.BP8 and SUP.8.BP9 the schema has no evidence
 structure. `python tools/traceability.py practices SUP.8` says so, and

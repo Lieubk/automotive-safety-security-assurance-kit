@@ -28,6 +28,8 @@ repository - one item per file - and a trace engine checks them.
 |---|---|---|
 | `/aspice-start` | - | set up or change the project scope |
 | `/import-inputs` | boundary of the scope | register what was received and prepare its acceptance |
+| `/sys-requirements` | SYS.2 | derive and analyse system requirements from stakeholder requirements |
+| `/sys-architecture` | SYS.3 | system elements, interfaces, views, decisions, allocation |
 | `/sw-requirements` | SWE.1 | derive and analyse software requirements |
 | `/sw-architecture` | SWE.2 | components, interfaces, views, decisions, allocation |
 | `/sw-detailed-design` | SWE.3 | component designs and software units |
@@ -35,6 +37,8 @@ repository - one item per file - and a trace engine checks them.
 | `/sw-unit-verify` | SWE.4 | strategy, unit test cases, tests, static analysis, coverage, records |
 | `/sw-integration-test` | SWE.5 | integration strategy and steps, integration test cases, builds, runs |
 | `/sw-qualification-test` | SWE.6 | qualification strategy, test cases from requirements, runs, bench reports |
+| `/sys-integration-test` | SYS.4 | system integration strategy and steps, integration tests, system builds and bench runs |
+| `/sys-qualification-test` | SYS.5 | system qualification strategy, test cases from system requirements, bench and vehicle runs |
 | `/review` | all | the only way an item becomes approved |
 | `/trace-check` | all | explain what the trace engine reports |
 | `/process-gate` | all | readiness of a process, practice by practice |

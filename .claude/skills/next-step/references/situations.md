@@ -74,7 +74,8 @@ Whether an input was registered and accepted is looked up; the tools report the 
 | `software-qualification-test` | SWE.6 | `/sw-qualification-test` |
 | `problem-resolution` | SUP.9 | `/problem-resolution` |
 | `quality-assurance` | SUP.1 | `/quality-assurance` |
-| `system-integration`, `system-qualification-test` | SYS.4, SYS.5 | by hand: a `plan` item with the sections of the schema |
+| `system-integration` | SYS.4 | `/sys-integration-test` |
+| `system-qualification-test` | SYS.5 | `/sys-qualification-test` |
 
 These skills draft the plan of their process; their base practice tables say so.
 If one of them is not installed, its plan is written by hand like the others. A plan
@@ -100,9 +101,9 @@ sections that are missing. Such a draft goes back to its authoring skill, not to
 
 | Process | Rule | The message means | Recommend |
 |---|---|---|---|
-| SYS.2 | `COV-01` | an accepted stakeholder requirement has no system requirement | by hand |
-| SYS.2 | `COV-02` | a system requirement has neither a parent nor a rationale for having none | by hand |
-| SYS.3 | `COV-03`, `COV-04` | a system requirement is not allocated; an element has nothing allocated | by hand |
+| SYS.2 | `COV-01` | an accepted stakeholder requirement has no system requirement | `/sys-requirements` |
+| SYS.2 | `COV-02` | a system requirement has neither a parent nor a rationale for having none | `/sys-requirements` |
+| SYS.3 | `COV-03`, `COV-04` | a system requirement is not allocated; an element has nothing allocated | `/sys-architecture` |
 | SWE.1 | `COV-05` | a system requirement allocated to software has no software requirement | `/sw-requirements` |
 | SWE.1 | `COV-06` | a software requirement has neither a parent nor a rationale | `/sw-requirements` |
 | SWE.2 | `COV-07` | a software requirement is not allocated | `/sw-architecture` |
@@ -120,8 +121,9 @@ sections that are missing. Such a draft goes back to its authoring skill, not to
 | SWE.5 | `COV-35`, `COV-37` | a component is in no step of the strategy, or in two; a step has no test, or a test names an unknown step | `/sw-integration-test` |
 | SWE.5 | `COV-36`, `COV-38` | a step has no current successful build, or its latest run tested an older build | `/sw-integration-test`, to build and run again |
 | SWE.6 | `COV-14`; `COV-17`, `COV-18`, `COV-38` on its tests and runs | a software requirement has no qualification test or review; a test has no verdict; the run tested an older build | `/sw-qualification-test` |
-| SYS.4 | `COV-15` | a system interface has no integration test | by hand |
-| SYS.5 | `COV-16` | a system requirement has no qualification test or review | by hand |
+| SYS.4 | `COV-15`; `COV-17`, `COV-18` on its tests | a system interface has no integration test; a test has no verdict on a build of its step | `/sys-integration-test` |
+| SYS.4 | `COV-46` to `COV-49` | an element in no step or two; a step without a current system build, or whose build holds older software; a step without tests; a run on an older build | `/sys-integration-test` |
+| SYS.5 | `COV-16`; `COV-17`, `COV-18`, `COV-49` on its tests and runs | a system requirement has no qualification test or review; the run tested an older system build | `/sys-qualification-test` |
 | any | `COV-23` | an item has a lower ASIL than what it depends on; a test case lower than what it verifies | the authoring skill of the item; a decomposition needs an approved `design-decision` |
 | MAN.3 | `COV-31`, `COV-33`, `COV-34` | the work breakdown has a cycle, lacks a category, or dates that do not fit | `/work-breakdown` |
 | MAN.3 | `COV-32` | an item no work package delivers | `/work-breakdown link` |
@@ -141,15 +143,16 @@ Question 2, by type:
 | Item type in `status` | Process | Authoring skill | Then |
 |---|---|---|---|
 | `stakeholder-requirement` | SYS.1 | `/import-inputs` registers; assessment by people | `/review` |
-| `system-requirement` | SYS.2 | none today | `/review` |
-| `system-element`, `system-interface` | SYS.3 | none today | `/review` |
+| `system-requirement` | SYS.2 | `/sys-requirements` | `/review` |
+| `system-element`, `system-interface` | SYS.3 | `/sys-architecture` | `/review` |
 | `software-requirement` | SWE.1 | `/sw-requirements` | `/review` |
 | `software-component`, `software-interface`, `architecture-view`, `design-decision` | SWE.2 (views and decisions of level `system`: SYS.3; decisions of level `detailed-design`: SWE.3) | `/sw-architecture` | `/review` |
 | `component-design`, `software-unit` | SWE.3 | `/sw-detailed-design`; code: `/sw-unit-implement` | `/review` |
 | `unit-test` | SWE.4 | `/sw-unit-verify` | `/review` |
 | `software-integration-test` | SWE.5 | `/sw-integration-test` | `/review` |
 | `software-qualification-test` | SWE.6 | `/sw-qualification-test` | `/review` |
-| `system-integration-test`, `system-qualification-test` | SYS.4, SYS.5 | none today | `/review` |
+| `system-integration-test` | SYS.4 | `/sys-integration-test` | `/review` |
+| `system-qualification-test` | SYS.5 | `/sys-qualification-test` | `/review` |
 | `plan` | the process of its `kind` (stop 4) | see stop 4 | `/review` |
 | `change-request` | SUP.10 | `/change-request` | - |
 | `work-package` | MAN.3 | `/work-breakdown` | `/review` |

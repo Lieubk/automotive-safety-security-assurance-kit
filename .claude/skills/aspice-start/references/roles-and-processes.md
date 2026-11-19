@@ -29,10 +29,10 @@ type and no rule for the process, so its evidence lives outside the toolkit.
 | Group | Process | Name | VDA | Toolkit support today |
 |---|---|---|---|---|
 | System | SYS.1 | Requirements Elicitation | extended | checked; `/import-inputs` registers what was received |
-| System | SYS.2 | System Requirements Analysis | vda | checked |
-| System | SYS.3 | System Architectural Design | vda | checked |
-| System | SYS.4 | System Integration and Integration Test | vda | checked |
-| System | SYS.5 | System Qualification Test | vda | checked |
+| System | SYS.2 | System Requirements Analysis | vda | authoring: `/sys-requirements` |
+| System | SYS.3 | System Architectural Design | vda | authoring: `/sys-architecture` |
+| System | SYS.4 | System Integration and Integration Test | vda | authoring: `/sys-integration-test` |
+| System | SYS.5 | System Qualification Test | vda | authoring: `/sys-qualification-test` |
 | Software | SWE.1 | Software Requirements Analysis | vda | authoring: `/sw-requirements` |
 | Software | SWE.2 | Software Architectural Design | vda | authoring: `/sw-architecture` |
 | Software | SWE.3 | Software Detailed Design and Unit Construction | vda | authoring: `/sw-detailed-design`, `/sw-unit-implement` |

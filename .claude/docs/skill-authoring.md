@@ -35,9 +35,9 @@ The model is chosen by what a wrong answer costs, not by how hard the work looks
 
 | Work | Model, effort | Where |
 |---|---|---|
-| Independent judgement that people rely on: a missed contradiction becomes an approved defect | `opus`, `high` | `aspice-reviewer`, `software-architect` |
+| Independent judgement that people rely on: a missed contradiction becomes an approved defect | `opus`, `high` | `aspice-reviewer`, `software-architect`, `system-engineer` |
 | Writing items or code from a given input and template, where a review follows | `sonnet`, `high` | `software-requirements-engineer`, `software-developer` |
-| Deriving from a design and driving tools, turning their output into records | `sonnet`, `medium` | `unit-verification-engineer`, `software-test-engineer`, `configuration-manager`, `project-manager` |
+| Deriving from a design and driving tools, turning their output into records | `sonnet`, `medium` | `unit-verification-engineer`, `software-test-engineer`, `system-test-engineer`, `configuration-manager`, `project-manager` |
 | Reading tool output and explaining it; no question to the user, nothing written | `haiku`, `low` or `medium`, forked | `/trace-check`, `/next-step` |
 | Working through a task with the user | the session's model | every other skill |
 

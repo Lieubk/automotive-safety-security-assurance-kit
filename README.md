@@ -14,11 +14,11 @@ Early. One vertical slice works end to end and is demonstrated by the example:
 | Area | State |
 |---|---|
 | Process catalog | 23 processes of Automotive SPICE 3.1 with base practices, work products and rating dependencies (identifiers and official names; descriptions in our own words) |
-| Item schema | 32 item types, 17 link roles, 45 coverage rules, scope-aware |
+| Item schema | 32 item types, 17 link roles, 49 coverage rules, scope-aware |
 | Trace engine | structure, links, coverage, stale approvals, suspect links, impact, traceability matrices, evidence per base practice, changes since a review, progress against the plan, integration steps and the builds and runs on them |
-| Skills | project scoping and input registration; project management (MAN.3); SWE.1 to SWE.6; reviews and quality assurance; baselines, change requests and problem resolution; trace check, process gates and a mock assessment |
+| Skills | project scoping and input registration; project management (MAN.3); SYS.2 to SYS.5 and SWE.1 to SWE.6; reviews and quality assurance; baselines, change requests and problem resolution; trace check, process gates and a mock assessment |
 | Hooks | imported inputs, final records and baselined items are protected; every written item is checked |
-| Not yet | system level skills (SYS), risk management (MAN.5), exchange with ALM tools (ReqIF), ISO 26262 and ISO/SAE 21434 extensions, Automotive SPICE 4.0 |
+| Not yet | risk management (MAN.5), exchange with ALM tools (ReqIF), ISO 26262 and ISO/SAE 21434 extensions, Automotive SPICE 4.0 |
 
 ## What it does not do
 
@@ -46,9 +46,9 @@ and routine work a cheaper one:
 
 | Agent or skill | Model | Effort |
 |---|---|---|
-| `aspice-reviewer`, `software-architect` | `opus` | high |
+| `aspice-reviewer`, `software-architect`, `system-engineer` | `opus` | high |
 | `software-requirements-engineer`, `software-developer` | `sonnet` | high |
-| `unit-verification-engineer`, `software-test-engineer`, `configuration-manager`, `project-manager` | `sonnet` | medium |
+| `unit-verification-engineer`, `software-test-engineer`, `system-test-engineer`, `configuration-manager`, `project-manager` | `sonnet` | medium |
 | `/trace-check`, `/next-step` (run in a fork) | `haiku` | low, medium |
 | every other skill | the model of your session | your setting |
 

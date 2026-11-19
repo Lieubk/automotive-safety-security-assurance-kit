@@ -39,9 +39,16 @@ Commands
         regression set, the impact of a change), in the strategy's terms.
         Evidence files are copied to verification/evidence/<record id>/.
 
-    build --step NAME --manifest FILE --item-under-test REF
-        final build record of one step of the approved software-integration plan,
-        from the manifest (JSON) the project's build writes:
+    build --step NAME --manifest FILE --item-under-test REF [--level software|system]
+        final build record of one step of the approved integration plan of the
+        level (software: software-integration; system: system-integration).
+        At system level the manifest is what the bench or the integration
+        records: {"executed_at", "tool": "<bench, setup>", "result",
+        "elements": [{"element": "SYE-0001", "version": "<sample, tag, drawing>",
+                      "build": "<BLD-ID of the software build>"}],
+        "doubles": [{"element": "SYE-0003", "description": "<rest-bus simulation ...>"}],
+        "evidence": "<path>"}; the software build named must be a final record.
+        At software level, from the manifest (JSON) the project's build writes:
         {"executed_at": "<ISO time>", "tool": "<build tool and compiler, versions>",
          "result": "succeeded" | "failed",
          "files": ["src/a.c", ...],                     (project sources built)
@@ -287,32 +294,42 @@ def cmd_test_run(project, args):
         return stop(["the results give no time of execution; pass the time the tests ran with --executed-at"])
     cases = {i.id: i for i in project.of_type(levels[args.level])}
     build, required, allowed = None, (lambda case: True), (lambda case: True)
-    steps = [str(s.get("name")) for s in project.integration_steps()]
+    level = "system" if args.level.startswith("system-") else "software"
+    spec = trace.INTEGRATION_LEVELS[level]
+    steps = [str(s.get("name")) for s in project.integration_steps(level=level)]
+    integrating = args.level == spec["integration"]
+    qualifying = args.level == spec["qualification"]
+    if args.build and not (integrating or qualifying):
+        return stop(["--build belongs to runs on integrated software or systems, not to level %s" % args.level])
     if args.build:
         build = project.items.get(args.build)
         if build is None or build.type != "build-record" or build.status != "final":
             return stop(["%s is not a final build record" % args.build])
         if build.front.get("result") != "succeeded":
             return stop(["%s records a build that failed: nothing can have been tested on it" % build.id])
+        if (build.front.get("level") or "software") != level:
+            return stop(["%s is a build of level %s; a run of level %s needs a %s build"
+                         % (build.id, build.front.get("level") or "software", args.level, level)])
         if str(build.front.get("item_under_test")) != args.item_under_test:
             return stop(["%s was built from %s, not from %s" % (build.id, build.front.get("item_under_test"),
                                                                  args.item_under_test)])
         step = str(build.front.get("step"))
         if step not in steps:
-            return stop(["%s carries out step '%s', which the approved software-integration plan does not have"
-                         % (build.id, step)])
-        if args.level == "software-integration":
+            return stop(["%s carries out step '%s', which the approved %s plan does not have"
+                         % (build.id, step, spec["kind"])])
+        if integrating:
             done = steps[:steps.index(step) + 1]
             required = lambda case: str(case.front.get("step")) == step               # noqa: E731
             allowed = lambda case: str(case.front.get("step")) in done                # noqa: E731
-        elif args.level == "software-qualification" and step != steps[-1]:
-            return stop(["%s is a build of step '%s'; the software is qualified on a build of the last step '%s'"
-                         % (build.id, step, steps[-1])])
-    elif args.level == "software-integration":
-        return stop(["a software integration run needs --build: the build record of the integration step tested"])
-    elif args.level == "software-qualification" and steps:
-        return stop(["the project has an approved software-integration plan: name the build of its last step "
-                     "that was tested with --build"])
+        elif qualifying and step != steps[-1]:
+            return stop(["%s is a build of step '%s'; the %s is qualified on a build of the last step '%s'"
+                         % (build.id, step, spec["name"], steps[-1])])
+    elif integrating:
+        return stop(["a %s integration run needs --build: the build record of the integration step tested"
+                     % spec["name"]])
+    elif qualifying and steps:
+        return stop(["the project has an approved %s plan: name the build of its last step that was tested with "
+                     "--build" % spec["kind"]])
     problems, results = [], []
     for entry in data.get("results", []):
         test, verdict = entry.get("test"), entry.get("verdict")
@@ -383,13 +400,16 @@ def cmd_test_run(project, args):
 
 
 def cmd_build(project, args):
-    plan = project.integration_plan()
+    kind = trace.INTEGRATION_LEVELS[args.level]["kind"]
+    plan = project.integration_plan(args.level)
     if plan is None:
-        return stop(["no approved software-integration plan: the steps a build carries out are defined there"])
+        return stop(["no approved %s plan: the steps a build carries out are defined there" % kind])
     steps = [str(s.get("name")) for s in project.integration_steps(plan)]
     if args.step not in steps:
         return stop(["%s has no step '%s'; its steps: %s" % (plan.id, args.step, ", ".join(steps))])
     data = json.loads(Path(args.manifest).read_text(encoding="utf-8"))
+    if args.level == "system":
+        return system_build(project, args, plan, steps, data)
     problems = ["the manifest gives no %s" % key for key in ("executed_at", "tool") if not data.get(key)]
     if data.get("result") not in ("succeeded", "failed"):
         problems.append("the manifest gives result %r; one of succeeded, failed" % data.get("result"))
@@ -457,6 +477,54 @@ def cmd_build(project, args):
     absent = [c for c in expected if c not in contents]
     print("wrote %s: step '%s', %s, %d components (%s)" % (path, args.step, data["result"], len(contents),
                                                              ", ".join(sorted(contents))))
+    if absent:
+        print("not in this build, although the step integrates them: %s" % ", ".join(absent))
+    return 0
+
+
+def system_build(project, args, plan, steps, data):
+    """A build of a system integration step: the elements and their versions, as the bench records them."""
+    problems = ["the manifest gives no %s" % key for key in ("executed_at", "tool") if not data.get(key)]
+    if data.get("result") not in ("succeeded", "failed"):
+        problems.append("the manifest gives result %r; one of succeeded, failed" % data.get("result"))
+    contents, doubles = [], []
+    for entry in data.get("elements", []):
+        element = project.items.get(str(entry.get("element")))
+        if element is None or element.type != "system-element":
+            problems.append("elements names %s, which is not a system element" % entry.get("element"))
+            continue
+        if not entry.get("version"):
+            problems.append("%s needs the version that was integrated (hardware sample, software tag, drawing)"
+                            % element.id)
+            continue
+        row = {"component": element.id, "delivered": str(entry["version"])}
+        if entry.get("build"):
+            software = project.items.get(str(entry["build"]))
+            if software is None or software.type != "build-record" or software.status != "final":
+                problems.append("%s names %s as its software build, which is not a final build record"
+                                % (element.id, entry["build"]))
+            row["build"] = str(entry["build"])
+        contents.append(row)
+    for entry in data.get("doubles", []):
+        element = project.items.get(str(entry.get("element")))
+        if element is None or element.type != "system-element" or not entry.get("description"):
+            problems.append("a double needs the system element it stands for and a description: %s" % entry)
+        else:
+            doubles.append({"component": element.id, "description": str(entry["description"])})
+    if problems:
+        return stop(problems)
+    record_id = next_id(project, "build-record")
+    front = {"id": record_id, "type": "build-record", "status": "final", "level": "system", "step": args.step,
+             "item_under_test": args.item_under_test, "tool": data["tool"], "executed_at": data["executed_at"],
+             "result": data["result"], "contents": sorted(contents, key=lambda c: c["component"])}
+    if doubles:
+        front["doubles"] = sorted(doubles, key=lambda d: d["component"])
+    if data.get("evidence"):
+        front["evidence"] = keep_evidence(project, record_id, data["evidence"])
+    path = write_item(project, "build-record", front)
+    expected = project.integrated_up_to(project.integration_steps(plan), steps.index(args.step))
+    absent = [c for c in expected if c not in {row["component"] for row in contents}]
+    print("wrote %s: system step '%s', %s, %d elements" % (path, args.step, data["result"], len(contents)))
     if absent:
         print("not in this build, although the step integrates them: %s" % ", ".join(absent))
     return 0
@@ -1081,6 +1149,7 @@ def main():
     built.add_argument("--step", required=True)
     built.add_argument("--manifest", required=True)
     built.add_argument("--item-under-test", required=True)
+    built.add_argument("--level", choices=["software", "system"], default="software")
     analysis = sub.add_parser("analysis-run")
     analysis.add_argument("--results", required=True)
     analysis.add_argument("--item-under-test", required=True)

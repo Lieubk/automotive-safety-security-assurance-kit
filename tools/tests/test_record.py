@@ -444,6 +444,47 @@ class QualityChecks(RecordCase):
         self.assertEqual(report["subject"], [names[-2][:-3]])
 
 
+class SystemBuilds(RecordCase):
+    """A system integration step added to the copy of the example: its software element and its hardware."""
+
+    def setUp(self):
+        super().setUp()
+        front = {"id": "PLN-0098", "type": "plan", "title": "System integration strategy", "status": "approved",
+                 "kind": "system-integration", "integration_steps": [{"name": "door", "components": ["SYE-0001", "SYE-0002"]}]}
+        (self.project / "plans" / "PLN-0098.md").write_text(
+            "---\n" + yaml.safe_dump(front, sort_keys=False) + "---\n\n## Scope\n\nx\n", encoding="utf-8")
+
+    def build(self, elements):
+        data = {"executed_at": "2026-06-20T09:00:00+00:00", "tool": "door bench 2", "result": "succeeded",
+                "elements": elements, "doubles": [{"element": "SYE-0002", "description": "not used"}][:0]}
+        return self.record("build", "--level", "system", "--step", "door", "--manifest",
+                           self.json_file("system.json", data), "--item-under-test", "door module B2")
+
+    def test_a_system_build_records_the_versions_and_the_software_build(self):
+        code, out = self.build([{"element": "SYE-0001", "version": "r1.0-rc1", "build": "BLD-0002"},
+                                {"element": "SYE-0002", "version": "B2 sample"}])
+        self.assertEqual(code, 0, out)
+        record = self.front("verification/builds/" + self.records("verification/builds", "BLD-")[-1])
+        self.assertEqual(record["level"], "system")
+        self.assertEqual(record["contents"][0], {"component": "SYE-0001", "delivered": "r1.0-rc1", "build": "BLD-0002"})
+
+    def test_a_system_build_names_system_elements_with_their_versions(self):
+        code, out = self.build([{"element": "CMP-0003", "version": "x"}, {"element": "SYE-0002"}])
+        self.assertEqual(code, 1)
+        self.assertIn("CMP-0003, which is not a system element", out)
+        self.assertIn("SYE-0002 needs the version", out)
+
+    def test_a_software_run_cannot_name_a_system_build(self):
+        self.build([{"element": "SYE-0001", "version": "r1.0-rc1", "build": "BLD-0002"},
+                    {"element": "SYE-0002", "version": "B2 sample"}])
+        system = self.records("verification/builds", "BLD-")[-1][:-3]
+        data = {"executed_at": "2026-06-20T10:00:00+00:00", "results": [{"test": "SIT-0001", "verdict": "passed"}]}
+        code, out = self.record("test-run", "--level", "software-integration", "--results", self.json_file("r.json", data),
+                                "--item-under-test", "door module B2", "--environment", "bench", "--build", system)
+        self.assertEqual(code, 1)
+        self.assertIn("a run of level software-integration needs a software build", out)
+
+
 class SelfAssessments(RecordCase):
     """Ratings of SUP.9 in the example, where every practice shows evidence present."""
 
