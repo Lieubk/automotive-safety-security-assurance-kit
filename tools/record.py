@@ -658,6 +658,31 @@ def find_checklist(citation):
     return None
 
 
+def cmd_checks_template(project, args):
+    """A file of check results to fill in for a review: one entry per check of the checklist, its kind shown,
+    result and note empty. With --plan-kind the parts of the plan checklist for other kinds are left out
+    (record.py review fills them in as not-applicable)."""
+    listed = find_checklist(args.checklist)
+    if listed is None:
+        return stop(["'%s' cites no checklist of this toolkit: expected '<name> v<N>' for a file under "
+                     ".claude/docs/checklists" % args.checklist])
+    if listed["version"] != listed["cited"]:
+        return stop(["%s is at version %s, the citation says v%s" % (listed["file"], listed["version"], listed["cited"])])
+    other = {c for kind, ids in listed["kinds"].items() if args.plan_kind and kind != args.plan_kind for c in ids}
+    if args.plan_kind and args.plan_kind not in listed["kinds"]:
+        return stop(["%s has no part for plan kind %s; it has: %s" % (listed["file"], args.plan_kind,
+                                                                      ", ".join(listed["kinds"]))])
+    entries = [{"check": c, "kind": k, "result": "", "note": ""} for c, k in listed["checks"].items() if c not in other]
+    text = json.dumps(entries, indent=1)
+    if args.out:
+        Path(args.out).write_text(text + "\n", encoding="utf-8")
+        print("wrote %s: %d checks of %s v%s; fill in result (pass, finding, not-applicable, not-assessed) and note"
+              % (args.out, len(entries), listed["file"], listed["version"]))
+    else:
+        print(text)
+    return 0
+
+
 def cmd_review(project, args):
     problems = ["no such item: %s" % i for i in args.ids if i not in project.items]
     if problems:
@@ -668,6 +693,7 @@ def cmd_review(project, args):
         if finding.get("state") not in ("open", "closed") or finding.get("severity") not in ("major", "minor"):
             problems.append("finding %s needs severity major|minor and state open|closed" % finding.get("id"))
     checks = json.loads(Path(args.checks).read_text(encoding="utf-8")) if args.checks else []
+    checks = [{k: v for k, v in e.items() if k != "kind"} if isinstance(e, dict) else e for e in checks]
     subjects = set(args.ids)
     for finding in findings:
         if finding.get("item") and finding["item"] not in subjects:
@@ -934,6 +960,7 @@ def cmd_quality_check(project, args):
         "criteria": args.criteria,
         "checked_by": args.checked_by,
         "checked_at": checked_at,
+        "recorded_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
         "result": args.result,
         "findings": findings,
         "facts": facts,
@@ -1105,6 +1132,7 @@ def cmd_self_assessment(project, args):
         "assessors": args.assessor,
         "processes": processes,
         "target_level": (project.config.get("aspice") or {}).get("target_level"),
+        "model": model_name(project),
         "ratings": sorted(data.get("practices", []), key=lambda e: str(e.get("practice"))),
         "attribute_ratings": data.get("attributes", []),
         "observations": observations,
@@ -1116,6 +1144,9 @@ def cmd_self_assessment(project, args):
         front["generic_observations"] = generic_observations
     if not front["attribute_ratings"]:
         del front["attribute_ratings"]
+    if not any(relation for pid in processes for relation in depends_on(project, pid)):
+        front["not_checked"] = ("ratings against the practices they depend on: the catalog of %s carries no rating "
+                                "dependencies for these processes" % front["model"])
     path = write_item(project, "self-assessment", front, "\n## Summary\n\n%s\n" % summary)
     print("wrote %s: %d practices rated, %d consistency flags" % (path, len(front["ratings"]), len(flags)))
     return 0
@@ -1191,6 +1222,15 @@ def cmd_baseline(project, args):
         return stop(["the trace check reports %d errors; a baseline with purpose '%s' needs none"
                      % (len(errors), args.purpose)]
                     + ["  %s %s %s" % (f["rule"], f["item"], f["message"]) for f in errors[:10]])
+    plan = project.quality_plan()                         # COV-43: the checks this purpose has to follow
+    if plan and args.purpose not in internal:
+        made = {r.front.get("check") for r in project.of_type("quality-record") if r.status == "final"}
+        missing = [c.get("name") for c in trace.as_list(plan.front.get("quality_checks")) if isinstance(c, dict)
+                   and args.purpose in map(str, trace.as_list(c.get("before"))) and c.get("name") not in made]
+        if missing:
+            return stop(["%s asks for the check %s before a baseline with purpose '%s', and no final quality "
+                         "record of it exists: /quality-assurance first" % (plan.id, ", ".join(map(repr, missing)),
+                                                                             args.purpose)])
     engineering = [i for i in project.items.values()
                    if project.types[i.type]["lifecycle"] == "engineering" and project.live(i)]
     # an internal baseline is a snapshot of everything; any other holds what is approved
@@ -1484,8 +1524,24 @@ def latest_final(project, type_name):
     return max(records, key=lambda r: (str(r.front.get("as_of", "")), trace.record_number(r.id))) if records else None
 
 
+def model_name(project):
+    """The Automotive SPICE version the project's catalog is, with its source when that is a draft."""
+    version = str((project.config.get("aspice") or {}).get("version") or "3.1")
+    levels = trace.ROOT / "aspice" / version / "capability-levels.yaml"
+    source = (yaml.safe_load(levels.read_text(encoding="utf-8")) or {}).get("source") if levels.is_file() else None
+    return "Automotive SPICE %s%s" % (version, " (%s, not for assessments)" % source if source and "draft" in str(source) else "")
+
+
+def depends_on(project, pid):
+    version = str((project.config.get("aspice") or {}).get("version") or "3.1")
+    source = trace.ROOT / "aspice" / version / "processes" / (pid + ".yaml")
+    return (yaml.safe_load(source.read_text(encoding="utf-8")) or {}).get("depends_on") or [] if source.is_file() else []
+
+
 def cmd_communication(project, args):
     problems = ["no such item: %s" % s for s in args.subject if s not in project.items]
+    if args.received_from and not args.channel:
+        problems.append("--channel names how it was received")
     if args.sent_at:
         try:
             if datetime.date.fromisoformat(args.sent_at) > datetime.date.today():
@@ -1506,6 +1562,8 @@ def cmd_communication(project, args):
     }
     if args.agreement:
         front["agreement"] = args.agreement
+    if args.received_from:
+        front["received_from"] = args.received_from
     if args.practice:
         front["practices"] = args.practice
     path = write_item(project, "communication-record", front)
@@ -1535,6 +1593,10 @@ def main():
     analysis = sub.add_parser("analysis-run")
     analysis.add_argument("--results", required=True)
     analysis.add_argument("--item-under-test", required=True)
+    template = sub.add_parser("checks-template", help="a file of check results to fill in for a review")
+    template.add_argument("--checklist", required=True, help="'<name> v<N>' of a file under .claude/docs/checklists")
+    template.add_argument("--plan-kind", help="for the plan checklist: the kind of the plans under review")
+    template.add_argument("--out", help="the file to write; default: print")
     review = sub.add_parser("review")
     review.add_argument("--checklist")
     review.add_argument("--reviewer", required=True, action="append")
@@ -1642,11 +1704,13 @@ def main():
     told.add_argument("--channel", required=True)
     told.add_argument("--agreement")
     told.add_argument("--sent-at", help="date it was sent, when not today")
+    told.add_argument("--received-from", help="who sent it, when the record documents a delivery or notice received")
     told.add_argument("--practice", action="append", help="communicate practice the record serves, e.g. SWE.1.BP8")
     args = ap.parse_args()
     project = Project(args.project)
     commands = {"next-id": cmd_next_id, "test-run": cmd_test_run, "analysis-run": cmd_analysis_run,
                 "review": cmd_review, "baseline": cmd_baseline, "communication": cmd_communication,
+                "checks-template": cmd_checks_template,
                 "cybersecurity-case": cmd_cybersecurity_case, "cybersecurity-assessment": cmd_cybersecurity_assessment,
                 "confirmation-measure": cmd_confirmation_measure, "safety-case": cmd_safety_case,
                 "release": cmd_release,

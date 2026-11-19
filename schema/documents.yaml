@@ -466,10 +466,12 @@ documents:
 
   vulnerability-report:
     title: Weaknesses and vulnerabilities
-    supports: ["21434:8.4", "21434:8.5", "21434:8.6", "21434:WP-08-05", "21434:WP-08-06"]
+    supports: ["21434:8.4", "21434:8.5", "21434:8.6", "21434:WP-08-03", "21434:WP-08-05", "21434:WP-08-06"]
     chapters:
+      - title: Cybersecurity events
+        table: {types: [cybersecurity-event], all_states: true, columns: [id, title, status, received_at, source, relevant, triaged_by]}
       - title: Overview
-        table: {types: [weakness], all_states: true, columns: [id, title, status, found_by, source, vulnerability, risk_value, treatment]}
+        table: {types: [weakness], all_states: true, columns: [id, title, status, found_by, source, vulnerability, impact, feasibility, risk_value, treatment]}
       - title: Weaknesses
         items: {types: [weakness], all_states: true}
       - title: Open findings

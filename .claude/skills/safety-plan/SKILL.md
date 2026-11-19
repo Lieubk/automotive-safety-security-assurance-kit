@@ -68,6 +68,12 @@ items, `confirmation-measure` records and a `safety-case`.
   written (the unit verification, integration and qualification strategies, the coding
   guideline). Write one `method_selection` entry per table. The toolkit lists the
   tables by number and title only.
+- A table nobody can answer yet is `decision: pending` with `due` and `responsible`: the
+  plan can be approved with it, `check` warns until the date and reports an error after
+  it. Do not answer on the user's behalf to get the plan approved.
+- A clause decision may hold for some elements only: `items` lists them (for example
+  8:12 not-applicable for the component the interface agreement covers, while a reused
+  one still needs a qualification or a proven in use argument; COV-75 then asks for it).
 - When clause 8:14 is performed (a proven in use credit), the entries of the proven in
   use tables state the incident rate limits and the confidence the project applies; the
   argument itself is written with `/component-qualification`.

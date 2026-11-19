@@ -80,6 +80,7 @@ INTEGRATION_LEVELS = {  # integration at software level (SWE.5, SWE.6) and at sy
 }
 LEVEL_OF_TEST = {spec["test"]: level for level, spec in INTEGRATION_LEVELS.items()}
 CS_PREFIX = "21434:"                       # references to ISO/SAE 21434 in `supports`
+SUPPLIER_REVIEW_KINDS = {"ACQ.4.BP3": "technical", "ACQ.4.BP4": "progress"}   # which reviews evidence which practice
 STANDARD_PREFIXES = (CS_PREFIX, "26262-")  # types that only these standards use are evidence of each they name
 FS_PREFIX = "26262:"                       # scope key of a part of ISO 26262; references read "26262-<part>:<clause>"
 ASIL_RANK = {"QM": 0, "A": 1, "B": 2, "C": 3, "D": 4}
@@ -514,9 +515,9 @@ class Project:
                      if p.status == "approved" and p.front.get("kind") == "problem-resolution"), None)
 
     def risk_plan(self):
-        """The approved plan of kind risk-management, or None."""
-        return next((p for p in sorted(self.of_type("plan"), key=lambda p: record_number(p.id))
-                     if p.status == "approved" and p.front.get("kind") == "risk-management"), None)
+        """The approved plan of kind risk-management, or else the one in work, so that risks are rated against the
+        scale while the plan is written; outputs name its state."""
+        return self.plan_in_work("risk-management")
 
     def quality_plan(self):
         """The approved plan of kind quality-assurance, or None."""
@@ -804,6 +805,11 @@ class Project:
                 self.gap(rule, element, "no system requirement is allocated to it")
 
     def cov_05(self, rule):
+        live = [r for r in self.of_type("system-requirement") if self.live(r)]
+        if live and not any(self.allocation_targets(r) for r in live):
+            self.add("warning", rule, "project", "no system requirement is allocated to an element: COV-05 cannot tell "
+                     "which of the %d need software requirements; register the allocation the delivery states, or ask "
+                     "the source for it" % len(live), self.rules[rule]["supports"])
         for req in self.of_type("system-requirement"):
             if not self.live(req):
                 continue
@@ -1459,7 +1465,8 @@ class Project:
                 if base.front.get("purpose") not in map(str, as_list(check.get("before"))):
                     continue
                 done = [r for r in records if r.front.get("check") == check.get("name")
-                        and as_date(r.front.get("checked_at")) and (created is None or as_date(r.front.get("checked_at")) <= created)]
+                        and as_date(r.front.get("checked_at")) and (created is None or as_date(r.front.get("checked_at")) <= created)
+                        and written_before(r.front.get("recorded_at"), base.front.get("created_at"))]
                 if not done:
                     self.add("error", rule, base.id, "no final quality record of check '%s' was made before this %s "
                              "baseline, as %s asks" % (check.get("name"), base.front.get("purpose"), plan.id),
@@ -1716,12 +1723,14 @@ class Project:
     def cov_75(self, rule):
         plan = self.plan_in_work("safety")
         entry = self.safety_entries(plan, "safety_activities", "clause").get("8:12") if plan else None
-        if entry and entry.get("decision") in ("not-applicable", "by-customer") and entry.get("rationale"):
-            return                                        # waived by the safety plan, with its reason
+        waived = bool(entry and entry.get("decision") in ("not-applicable", "by-customer") and entry.get("rationale"))
+        limited = {str(i) for i in as_list(entry.get("items"))} if entry else set()
         for component in self.of_type("software-component"):
             if not self.live(component) or component.front.get("origin") not in ("supplied", "reused") \
                     or ASIL_RANK.get(str(component.front.get("asil")), 0) == 0:
                 continue
+            if waived and (not limited or component.id in limited):
+                continue                                  # waived by the safety plan, with its reason
             good = [q for q in self.sources(component.id, "qualifies", ["component-qualification"])
                     if q.status == "approved" and q.front.get("result") in ("qualified", "qualified-with-restrictions")]
             good += [a for a in self.sources(component.id, "qualifies", ["proven-in-use-argument"])
@@ -1838,8 +1847,18 @@ class Project:
                 entry = entries.get(key)
                 if entry is None:
                     self.plan_gap(rule, plan, "method_selection has no entry for table %s (%s)" % (key, table["name"]))
+                elif entry.get("decision") == "pending":
+                    due = as_date(entry.get("due"))
+                    if due is None or not entry.get("responsible"):
+                        self.plan_gap(rule, plan, "table %s is pending without a due date and a responsible person" % key)
+                    elif due < datetime.date.today():
+                        self.plan_gap(rule, plan, "table %s is still pending; it was due on %s (%s)"
+                                      % (key, due, entry.get("responsible")))
+                    else:
+                        self.add("warning", rule, plan.id, "table %s is pending until %s (%s)"
+                                 % (key, due, entry.get("responsible")), self.rules[rule]["supports"])
                 elif entry.get("decision") not in ("applied", "not-applicable"):
-                    self.plan_gap(rule, plan, "table %s: decision %r, allowed: applied, not-applicable" % (key, entry.get("decision")))
+                    self.plan_gap(rule, plan, "table %s: decision %r, allowed: applied, not-applicable, pending" % (key, entry.get("decision")))
                 elif entry["decision"] == "applied" and not (entry.get("methods") or entry.get("applied_in")):
                     self.plan_gap(rule, plan, "table %s is applied, but names neither methods nor where they are applied" % key)
                 elif entry["decision"] == "not-applicable" and not entry.get("rationale"):
@@ -2215,12 +2234,27 @@ class Project:
             treatment = [str(t) for t in as_list(weakness.front.get("treatment"))]
             if "reduce" in treatment and self.due(weakness, "before-approval") \
                     and not self.sources(weakness.id, "resolves", ["change-request"]) \
-                    and not self.sources(weakness.id, "affects", ["problem-report"]):
-                self.gap(rule, weakness, "treatment reduce, but no change request resolves it and no problem report "
-                         "carries the correction")
+                    and not self.sources(weakness.id, "affects", ["problem-report"]) \
+                    and not weakness.front.get("corrected_by"):
+                self.gap(rule, weakness, "treatment reduce, but no change request resolves it, no problem report "
+                         "carries the correction, and corrected_by names no release of another party")
+            impact, feasibility = weakness.front.get("impact"), weakness.front.get("feasibility")
+            if impact and feasibility:
+                plan = self.cs_plan()
+                method = plan.front.get("tara_method") if plan and isinstance(plan.front.get("tara_method"), dict) else None
+                expected = self.matrix_value(method, str(impact), str(feasibility)) if method else None
+                if expected is not None and weakness.front.get("risk_value") != expected:
+                    self.gap(rule, weakness, "risk value %s, but the risk matrix of %s gives %s for impact %s and "
+                             "feasibility %s" % (weakness.front.get("risk_value"), plan.id, expected, impact, feasibility))
             kept = [t for t in treatment if t in ("share", "retain")]
             if kept and not self.sources(weakness.id, "addresses", ["cybersecurity-claim"]):
                 self.gap(rule, weakness, "treatment %s, but no cybersecurity claim addresses it" % " and ".join(kept))
+
+    def cov_78(self, rule):
+        for event in self.of_type("cybersecurity-event"):
+            if self.live(event) and event.front.get("relevant") is True and event.status == "closed" \
+                    and not self.sources(event.id, "derived_from", ["weakness"]):
+                self.gap(rule, event, "triaged relevant, but no weakness is derived from it")
 
     def cov_62(self, rule):
         for goal in self.of_type("cybersecurity-goal"):
@@ -2662,8 +2696,25 @@ def risks(project, as_of):
                "in_treatment": sum(1 for e in live if e["state"] == "in-treatment"),
                "actions_overdue": sum(len(e["actions_overdue"]) for e in live),
                "indicators_at_threshold": sum(len(e["indicators_at_threshold"]) for e in live)}
-    return {"as_of": str(as_of), "plan": plan.id if plan else None, "acceptable_up_to": limit, "risks": entries,
-            "figures": figures}
+    return {"as_of": str(as_of), "plan": plan.id if plan else None, "plan_status": plan.status if plan else None,
+            "acceptable_up_to": limit, "risks": entries, "figures": figures}
+
+
+def stamp(value):
+    """A point in time from a datetime value or an ISO string, or None."""
+    if isinstance(value, datetime.datetime):
+        return value if value.tzinfo else value.replace(tzinfo=datetime.timezone.utc)
+    try:
+        moment = datetime.datetime.fromisoformat(str(value))
+    except (TypeError, ValueError):
+        return None
+    return moment if moment.tzinfo else moment.replace(tzinfo=datetime.timezone.utc)
+
+
+def written_before(first, second):
+    """False only when both times are known and the first is later; a date alone cannot tell the order."""
+    a, b = stamp(first), stamp(second)
+    return not (a and b and len(str(first)) > 10 and len(str(second)) > 10 and a > b)
 
 
 def _number(value):
@@ -2682,7 +2733,9 @@ def cmd_risks(project, args):
     if args.json:
         print(json.dumps(data, indent=2))
         return 0
-    print("Risks as of %s (plan %s, acceptable up to %s)" % (as_of, data["plan"] or "none approved", data["acceptable_up_to"]))
+    print("Risks as of %s (plan %s, acceptable up to %s)" % (
+        as_of, ("%s, %s" % (data["plan"], data["plan_status"]) if data["plan_status"] != "approved" else data["plan"])
+        if data["plan"] else "none", data["acceptable_up_to"]))
     for e in data["risks"]:
         notes = []
         if e["actions_overdue"]:
@@ -3159,12 +3212,16 @@ def practice_rows(project, process_id=None):
             refs = set(bp["maps_to"]) if "maps_to" in bp else {ref}     # 4.0: the 3.1 practices that carry it
             types = [name for name, spec in schema["types"].items() if refs & set(map(str, spec.get("supports") or []))]
             kinds = [kind for kind, kind_refs in schema["plan_kinds"].items() if refs & set(map(str, kind_refs))]
+            if kinds and "plan" not in types:            # a strategy practice is evidenced by its plan
+                types.append("plan")
+            review_kinds = {SUPPLIER_REVIEW_KINDS[r] for r in refs if r in SUPPLIER_REVIEW_KINDS}
             roles = sorted({role for role, link in schema["links"].items()
                             for pair in link["pairs"] if refs & set(map(str, pair["supports"]))})
             rules = sorted(r["id"] for r in schema["coverage"] if refs & set(map(str, r["supports"])))
             held = [i for i in project.items.values() if i.type in types and project.live(i)
                     and (i.type != "plan" or i.front.get("kind") in kinds or not kinds)
                     and (i.type != "test-run" or RUN_LEVELS.get(i.front.get("level")) == pid)
+                    and (i.type != "supplier-review" or not review_kinds or i.front.get("kind") in review_kinds)
                     and (i.type != "communication-record" or not i.front.get("practices")
                          or (refs | {ref}) & set(map(str, as_list(i.front.get("practices")))))]
             if not types:                                 # evidenced by links or rules only: count what carries them
@@ -3340,6 +3397,18 @@ def generic_rows_31(project, process_id, version):
     return rows
 
 
+def model_caveat(project):
+    """The line a reader of practices and generic needs when the catalog is not the released 3.1 model."""
+    version = str((project.config.get("aspice") or {}).get("version") or project.schema.get("aspice_version"))
+    levels = ROOT / "aspice" / version / "capability-levels.yaml"
+    source = (yaml.safe_load(levels.read_text(encoding="utf-8")) or {}).get("source") if levels.is_file() else None
+    if version == "3.1":
+        return None
+    return ("Automotive SPICE %s%s: practices are evidenced through the 3.1 practices each maps to (`as 3.1`); "
+            "rules, checklists and notes are those of 3.1" % (version, " from the %s, not for assessments" % source
+                                                             if source and "draft" in str(source) else ""))
+
+
 def cmd_generic(project, args):
     wanted = [args.process] if args.process else sorted(project.scope or [])
     out = []
@@ -3352,6 +3421,9 @@ def cmd_generic(project, args):
     if args.json:
         print(json.dumps(out, indent=2))
         return 0
+    caveat = model_caveat(project)
+    if caveat:
+        print(caveat)
     for r in out:
         print("%-7s %-9s %-22s %3d  %s" % (r["process"], r["practice"], r["state"], len(r["evidence"]), r["note"]))
     print("observations of what the repository holds per generic practice of level 2, not ratings; much of level 2 "
@@ -3367,6 +3439,9 @@ def cmd_practices(project, args):
     if args.json:
         print(json.dumps(rows, indent=2))
         return 0
+    caveat = model_caveat(project)
+    if caveat:
+        print(caveat)
     print("%-11s %-22s %8s %8s %6s %8s  %s" % ("practice", "state", "evidence", "settled", "errors", "warnings", "name"))
     for row in rows:
         print("%-11s %-22s %8d %8d %6d %8d  %s" % (row["practice"], row["state"], row["evidence"], row["settled"],

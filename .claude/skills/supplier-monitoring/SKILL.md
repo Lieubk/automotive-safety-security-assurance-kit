@@ -61,7 +61,10 @@ named people, and are recorded as they state them.
   `delivered`. Deliveries and information sent: ask what, to whom, when, by which channel.
 - When the user states that something was sent or received, record it:
   `python tools/record.py communication --subject <SAG-ID> [--subject <item IDs>]
-  --audience "<party>" --channel "<how>" --practice ACQ.4.BP2 [--sent-at <date>]`.
+  --audience "<party>" --channel "<how>" --practice ACQ.4.BP2 [--sent-at <date>]`; for
+  something received add `--received-from "<sender>"` (the audience is who received it
+  here). Compare what arrived with what the agreement promised - version, documents,
+  date; a difference is a deviation for step 5, not a note.
 - Whether a delivery is accepted, and on which criteria, is the user's decision. Record
   the answer; do not write it.
 

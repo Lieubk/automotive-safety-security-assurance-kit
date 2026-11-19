@@ -240,13 +240,14 @@ structures:
     note: "criterion: what the supplier has to show, for example a process for functional safety or cybersecurity, competence, past assessments, capacity; result met, partly-met or not-met; evidence: what was looked at"
   safety-activities:               # plan.safety_activities when kind is safety
     mandatory: [clause, decision, responsible]
-    keys: [rationale, work_products, due]
+    keys: [rationale, work_products, due, items]
     dates: [due]
-    note: "one entry per clause of the parts of ISO 26262 under scope.safety, written \"<part>:<clause>\" (\"6:7\"); decision performed, tailored, not-applicable, by-customer, by-supplier or by-organization; tailored and not-applicable need a rationale that says how the purpose of the clause is still reached (COV-63)"
+    note: "one entry per clause of the parts of ISO 26262 under scope.safety, written \"<part>:<clause>\" (\"6:7\"); decision performed, tailored, not-applicable, by-customer, by-supplier or by-organization; tailored and not-applicable need a rationale that says how the purpose of the clause is still reached (COV-63); items: the components or elements the decision is limited to - for example clause 8:12 not-applicable for one component developed under the interface agreement while another needs a qualification; without items the decision covers the whole clause"
   method-selection:                # plan.method_selection when kind is safety
     mandatory: [table, decision]
-    keys: [asil, methods, applied_in, rationale]
-    note: "one entry per table of ISO 26262 parts 4, 5, 6 and 8 under scope.safety, written \"<part>:<table>\" (\"6:7\"); decision applied or not-applicable; methods: what the project applies for which ASIL, in its own words; applied_in: the plan or strategy that carries the methods; the content of the tables is in the standard and is not copied here (COV-64)"
+    keys: [asil, methods, applied_in, rationale, due, responsible]
+    dates: [due]
+    note: "one entry per table of ISO 26262 parts 4, 5, 6 and 8 under scope.safety, written \"<part>:<table>\" (\"6:7\"); decision applied, not-applicable or pending (not decided yet: with due and responsible; a warning until the due date, an error after it); methods: what the project applies for which ASIL, in its own words; applied_in: the plan or strategy that carries the methods; the content of the tables is in the standard and is not copied here (COV-64)"
   confirmation-plan:               # plan.confirmation_measures when kind is safety
     mandatory: [measure, subject, independence]
     keys: [asil, by, when]
@@ -832,6 +833,22 @@ types:
       Claim: before-review
       Rationale: before-review
 
+  cybersecurity-event:             # collected information that a trigger of the monitoring plan made an event, and its triage
+    prefix: CEV
+    folder: records/cybersecurity/events
+    lifecycle: query
+    supports: ["21434:8.3", "21434:8.4", "21434:WP-08-03"]
+    attributes:
+      use: [common]
+      received_at: {format: date, required: always}
+      source: {required: always, note: "the source of the monitoring plan it came from, with the identifier of the advisory or notice"}
+      trigger: {required: always, note: "the trigger of the monitoring plan that made it an event"}
+      relevant: {values: [true, false], required: before-review, note: "the triage: whether it concerns a component and version of the item"}
+      triaged_by: {required: before-review, note: "who decided the triage, and when"}
+    sections:
+      Description: always          # what was received, about which component and version
+      Triage: before-review        # why it is or is not relevant; for a relevant one, the weaknesses recorded
+
   weakness:                        # a weakness found in development or in the field, and whether it is a vulnerability
     prefix: WKN
     folder: records/cybersecurity
@@ -844,8 +861,11 @@ types:
       source: {required: always, note: "where it came from: the advisory, notice, test run, review or event, with its identifier"}
       vulnerability: {values: [true, false], required: before-review, note: "the result of the vulnerability analysis"}
       attack_paths: {structure: attack-paths, required: optional, note: "for a vulnerability: how it can be exploited"}
-      risk_value: {values: [1, 2, 3, 4, 5], required: optional, note: "mandatory for a vulnerability from state analysed on"}
+      impact: {values: [severe, major, moderate, negligible], required: optional, note: "for a vulnerability: the highest impact on the assets it endangers, rated as the TARA method of the cybersecurity plan says"}
+      feasibility: {values: [very-low, low, medium, high], required: optional, note: "for a vulnerability: the attack feasibility of its easiest attack path"}
+      risk_value: {values: [1, 2, 3, 4, 5], required: optional, note: "mandatory for a vulnerability from state analysed on; with impact and feasibility it must be the value of the risk matrix (COV-61)"}
       treatment: {required: optional, note: "list of avoid, reduce, share, retain; mandatory for a vulnerability from state analysed on (COV-61)"}
+      corrected_by: {required: optional, note: "for reduce in a component the project does not baseline: the supplier's or customer's release that carries the correction, and when it is integrated"}
       closure: {structure: closure, required: optional, note: "mandatory in state closed"}
     sections:
       Description: always          # what was found, in which version, by whom
@@ -979,6 +999,7 @@ types:
       channel: {required: always, note: "how they were informed"}
       sent_at: {required: always}
       agreement: {required: optional, note: "what was agreed and by whom, when the record documents an agreement rather than a notification"}
+      received_from: {required: optional, note: "who sent it, when the record documents something received - a supplier's delivery or notice - rather than something sent"}
       practices: {required: optional, note: "the communicate practices the record serves, for example [SWE.1.BP8], or the subclause of ISO/SAE 21434 it belongs to, for example \"21434:15.9\"; without it, `practices` counts the record for every communicate practice"}
 
   query:
@@ -1135,6 +1156,7 @@ types:
       criteria: {required: always, note: "what was checked against: checklist and version, plan, strategy section"}
       checked_by: {required: always, note: "the person in the quality assurance role who stands behind the verdict"}
       checked_at: {format: date, required: always}
+      recorded_at: {required: optional, note: "generated: when the record was written, so that its order against a baseline of the same day is known (COV-43)"}
       result: {values: [conforms, conforms-with-findings, does-not-conform], required: always}
       findings: {structure: quality-findings, required: always, may_be_empty: true}
       facts: {required: always, note: "generated: what the tools showed at the time - per item its state, hash and approving review; per process the evidence per base practice; for a summary the figures of `traceability.py quality`"}
@@ -1155,6 +1177,8 @@ types:
       assessors: {required: always, note: "the people who gave the ratings; a self-assessment of the team, not an assessment"}
       processes: {required: always}
       target_level: {required: optional}
+      model: {required: optional, note: "generated: the Automotive SPICE version of the catalog the ratings refer to"}
+      not_checked: {required: optional, note: "generated: what the consistency check could not check, and why"}
       ratings: {required: always, note: "list of {practice, rating: N | P | L | F, note}: one entry per base practice of the processes"}
       attribute_ratings: {required: optional, note: "list of {process, attribute, rating, note}, for example PA 1.1"}
       generic_ratings: {required: optional, note: "level 2: list of {process, practice: GP 2.1.1 ..., rating, note}"}
@@ -1278,6 +1302,7 @@ links:
   derived_from:
     meaning: "the item states at its own level what the target requires"
     pairs:
+      - {from: weakness, to: [cybersecurity-event], supports: ["21434:8.4", "21434:WP-08-04"]}
       - {from: system-requirement, to: [stakeholder-requirement], supports: [SYS.2.BP6, SYS.2.BP7]}
       - {from: software-requirement, to: [system-requirement, system-element, system-interface], supports: [SWE.1.BP6, SWE.1.BP7]}
       - {from: system-requirement, to: [cybersecurity-goal], supports: ["21434:9.5", "21434:WP-09-06"]}
@@ -1477,7 +1502,8 @@ coverage:
   - {id: COV-58, subject: threat-scenario, expect: "from in-review on: a treatment of avoid, reduce, share or retain; reduce -> a cybersecurity-goal addresses it; share or retain -> a cybersecurity-claim addresses it; retain above retain_up_to of the plan -> a decision naming who accepted it", waiver: "none", supports: ["21434:15.9", "21434:9.4"]}
   - {id: COV-59, subject: cybersecurity-goal, expect: "at least one system-requirement or software-requirement derived_from it; also for a goal received from the customer", waiver: "none", supports: ["21434:9.5", "21434:10.4.1"]}
   - {id: COV-60, subject: any-engineering-item, expect: "derived from a cybersecurity goal or a security-relevant requirement, or fulfilling a security-relevant requirement -> security_relevant true", waiver: "none", supports: ["21434:9.5", "21434:10.4.1"]}
-  - {id: COV-61, subject: weakness, expect: "from state analysed on: vulnerability decided; a vulnerability has a risk value and a treatment; reduce -> from in-resolution on a change-request resolves it; share or retain -> a cybersecurity-claim addresses it", waiver: "none", supports: ["21434:8.5", "21434:8.6"]}
+  - {id: COV-61, subject: weakness, expect: "from state analysed on: vulnerability decided; a vulnerability has a risk value and a treatment, and with impact and feasibility the risk value of the plan's matrix; reduce -> from in-resolution on a change-request resolves it, a problem report carries it, or corrected_by names the release of another party; share or retain -> a cybersecurity-claim addresses it", waiver: "none", supports: ["21434:8.5", "21434:8.6"]}
+  - {id: COV-78, subject: cybersecurity-event, expect: "triaged relevant and closed -> at least one weakness derived_from it", waiver: "none", supports: ["21434:8.4"]}
   - {id: COV-62, subject: cybersecurity-goal, expect: "at least one system-qualification-test verifies it", waiver: "none; where the customer validates on the vehicle, clause 11 is not under scope.cybersecurity", supports: ["21434:11"]}
   - {id: COV-63, subject: project, expect: "the approved safety plan has an entry in safety_activities for every clause of the parts under scope.safety, each with a decision of performed, tailored, not-applicable, by-customer, by-supplier or by-organization; tailored and not-applicable carry a rationale", waiver: "none", supports: ["26262-2:6"]}
   - {id: COV-64, subject: project, expect: "the approved safety plan has an entry in method_selection for every table of parts 4, 5, 6 and 8 under scope.safety; applied entries name the methods or where they are applied, not-applicable entries carry a rationale", waiver: "none", supports: ["26262-2:6", "26262-4:5", "26262-5:5", "26262-6:5", "26262-8:9"]}

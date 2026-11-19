@@ -190,7 +190,9 @@ python tests/qualification/run_tests.py
 ```
 
 The integration runner reads the steps of `plans/PLN-0004.md` and the units' source
-files with the toolkit's trace engine (it needs PyYAML), takes the files of the
+files with the toolkit's trace engine (it needs PyYAML; when a copy of this project
+lives outside the toolkit, set the environment variable `TOOLKIT_DIR` to the toolkit's
+folder), takes the files of the
 components taken over and of the doubles from `tests/integration/integration.yaml`,
 and builds one test program per step. Under `build/integration/<step>/` it writes the
 build manifest (`manifest.json`, the input of `tools/record.py build`), the build log,

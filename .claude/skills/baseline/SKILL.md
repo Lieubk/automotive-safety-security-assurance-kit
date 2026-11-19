@@ -46,7 +46,11 @@ structure. `python tools/traceability.py practices SUP.8` says so, and
    name when the project is not the current directory.
 4. Find the plan: Grep `kind: configuration-management` in `plans/`. If there is none,
    or the check reports `COV-27` for this kind, do step 1 and stop after it: until the
-   plan is approved the tool refuses every baseline that is not an internal one.
+   plan is approved the tool refuses every baseline that is not an internal one. The
+   same holds for every other error: each plan the scope needs (`COV-27`, written by the
+   skill of its process) comes before the first baseline that is not internal, and so
+   does every quality check the quality assurance plan asks for before this purpose -
+   the tool refuses the baseline until its record exists (`/quality-assurance`).
 5. Run `git status --short --branch`. If the project is not under Git, the checks of
    branch, working tree and tag are `NOT ASSESSED`: say so and ask the user how the
    plan's version control answers them. Do not guess commands of another system.

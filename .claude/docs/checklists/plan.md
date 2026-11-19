@@ -1,6 +1,6 @@
 # Plan review checklist
 
-Version 12. Applies to: `plan`. Supports: MAN.3.BP1, SUP.2.BP1, SUP.2.BP2, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6,
+Version 13. Applies to: `plan`. Supports: MAN.3.BP1, SUP.2.BP1, SUP.2.BP2, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6,
 MAN.3.BP7, SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1,
 SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1, MAN.5.BP1, MAN.5.BP2, the subclauses of
 ISO/SAE 21434 that the cybersecurity kinds name, and the clauses of ISO 26262 the kind safety
@@ -166,10 +166,10 @@ empty, ask the user; do not assume a value.
 
 | ID | Check | How to check | Kind |
 |---|---|---|---|
-| PLN-178 | The plan names every work product type of the processes in scope that is verified, with the method (review with a named checklist, test, analysis), the tools, and when it happens | read `Approach` next to `scope.processes` and the checklists under `.claude/docs/checklists` | semantic |
-| PLN-179 | The criteria per work product type are named: the checklist and version a review applies, or the pass criteria of a test or analysis; criteria of the project beyond the toolkit's are written down | read `Criteria` | semantic |
-| PLN-180 | The independence a verifier needs is stated per work product type, at least where a safety or security level asks for more | read `Approach` next to `conventions` of `project.yaml` | semantic |
-| PLN-181 | Findings of verification go to problem resolution or are closed in the review record, and who receives the results is named | read `Approach` next to the problem resolution strategy | semantic |
+| PLN-185 | The plan names every work product type of the processes in scope that is verified, with the method (review with a named checklist, test, analysis), the tools, and when it happens | read `Approach` next to `scope.processes` and the checklists under `.claude/docs/checklists` | semantic |
+| PLN-186 | The criteria per work product type are named: the checklist and version a review applies, or the pass criteria of a test or analysis; criteria of the project beyond the toolkit's are written down | read `Criteria` | semantic |
+| PLN-187 | The independence a verifier needs is stated per work product type, at least where a safety or security level asks for more | read `Approach` next to `conventions` of `project.yaml` | semantic |
+| PLN-188 | Findings of verification go to problem resolution or are closed in the review record, and who receives the results is named | read `Approach` next to the problem resolution strategy | semantic |
 
 ## Kind problem-resolution (SUP.9.BP1)
 
@@ -272,7 +272,7 @@ empty, ask the user; do not assume a value.
 |---|---|---|---|
 | PLN-163 | `safety_activities`, `method_selection` and `confirmation_measures` are present | `check`: no `SCHEMA` finding on the item | script |
 | PLN-164 | Every clause of the parts in `scope.safety` has an entry with a decision; tailored and not-applicable entries have a rationale | `check`: no `COV-63` finding; `safety` shows the decision per clause | script |
-| PLN-165 | Every table of parts 4, 5, 6 and 8 in scope has an entry; applied entries say which methods or where they are written; not-applicable entries have a rationale | `check`: no `COV-64` finding | script |
+| PLN-165 | Every table of parts 4, 5, 6 and 8 in scope has an entry; applied entries say which methods or where they are written; not-applicable entries have a rationale; pending entries have a due date ahead and a responsible person | `check`: no `COV-64` error (a pending table is a warning until its date) | script |
 | PLN-166 | Each tailored or not-applicable clause says how its purpose is still reached or why it does not apply to this item | read `rationale` next to the clause's purpose in `iso-26262/2018/catalog.yaml` | semantic |
 | PLN-167 | `Scope` holds the impact analysis: what is new, changed or reused, and what follows for the activities | read `Scope` | semantic |
 | PLN-168 | The methods named per table agree with the strategies that apply them (unit verification, integration, qualification, coding guideline) | read `method_selection` next to those plans | semantic |
@@ -289,7 +289,7 @@ empty, ask the user; do not assume a value.
 | PLN-174 | Every clause of the safety plan decided by-customer or by-supplier appears, and each activity has exactly one side that performs it | read next to `safety_activities` | semantic |
 | PLN-175 | What is exchanged, when, and how problems and changes of safety requirements reach the other side is stated | read `exchange` and `Approach` | semantic |
 | PLN-176 | Both parties have agreed to the arrangement, as a communication record with `agreement` shows | read the communication record; the note names who agreed and when | accountable |
-| PLN-177 | For trucks, buses, trailers and semi-trailers only: when the counterpart integrates under another standard, the agreement states the systems it may modify, the permitted limits and the safety measures it applies (26262-8:15); when a system developed under another standard is integrated, it states the criteria by which that system meets the required functional safety and the measures agreed to verify them (26262-8:16). Otherwise not-applicable, with the reason | read `Approach` and `shared_activities` next to the safety plan's entries for 8:15 and 8:16 | semantic |
+| PLN-184 | For trucks, buses, trailers and semi-trailers only: when the counterpart integrates under another standard, the agreement states the systems it may modify, the permitted limits and the safety measures it applies (26262-8:15); when a system developed under another standard is integrated, it states the criteria by which that system meets the required functional safety and the measures agreed to verify them (26262-8:16). Otherwise not-applicable, with the reason | read `Approach` and `shared_activities` next to the safety plan's entries for 8:15 and 8:16 | semantic |
 
 ## Kind release (SPL.2.BP1, SPL.2.BP2, SPL.2.BP3, SPL.2.BP4, SPL.2.BP6, SPL.2.BP7, SPL.2.BP8)
 

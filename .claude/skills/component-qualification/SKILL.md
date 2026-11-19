@@ -44,6 +44,10 @@ safety plan says so for clause 8:12 instead, and no qualification is written.
   allocated requirements, tests of those requirements on the component (as unit or
   integration tests of this project, with their runs), or both, at the depth its ASIL
   calls for. Name the evidence; a test result exists only as a run record.
+- Documents of another party that the evidence rests on (a supplier's test report, a
+  customer's field data report or safety manual) are listed under `inputs` of
+  `project.yaml` with version and date received, and kept under `inputs/`, so that the
+  reviewer reads the same version (`/aspice-start` adds the entry).
 - The result and any restrictions are the safety manager's statement. Restrictions are
   carried into the architecture or the requirements of the components that use it.
 

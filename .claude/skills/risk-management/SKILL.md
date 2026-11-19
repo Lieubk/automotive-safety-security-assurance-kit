@@ -67,7 +67,9 @@ where treatment stalls, and the risk figures in the project status report.
   reduce impact, transfer, accept) and ask the owner which. The choice is theirs.
 - Treatment: write `treatment` with action, owner, due date and state `open`, and the
   indicators that show whether the risk grows or the treatment works, each with a
-  threshold. Write `Treatment and monitoring`, state `in-treatment`.
+  threshold. An indicator can be simple - the answer to a query not received by the
+  action's due date, with that date as threshold - but it is stated, not left out.
+  Write `Treatment and monitoring`, state `in-treatment`.
 - Acceptance: only a named person accepts a risk above the threshold. Record who, when
   and why in `decision`, state `accepted`. Within the threshold, state `accepted` needs
   no decision, but say so in `Analysis`.

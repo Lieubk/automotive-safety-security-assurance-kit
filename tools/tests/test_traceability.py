@@ -314,6 +314,10 @@ class Coverage(Case):
     def test_deriving_from_the_element_does_not_cover_the_requirement(self):
         items = changed(base_items(), "SWR-0001", links={"derived_from": ["SYE-0001"]})
         self.expect("COV-05", "SYR-0001", items)
+        unallocated = {k: v for k, v in base_items().items() if v[0]["type"] != "system-element"}
+        fixture = self.make(unallocated)
+        self.assertTrue(any(f["rule"] == "COV-05" and f["item"] == "project" and "cannot tell" in f["message"]
+                            for f in fixture.findings("warning")))
         fixture = self.make(items, config={"trace": {"derive_via_elements": True}})
         self.assertNotIn(("COV-05", "SYR-0001"), fixture.rules())
 
@@ -1194,6 +1198,12 @@ class QualityAssurance(Case):
         items = changed(quality_items(), "QAR-0001", checked_at="2026-01-07")
         self.assertIn(("COV-43", "BL-0001"), self.make(items).rules())
 
+    def test_a_check_of_the_same_day_counts_only_when_written_before_the_baseline(self):
+        items = changed(quality_items(), "QAR-0001", checked_at="2026-01-06", recorded_at="2026-01-06T11:00:00+00:00")
+        self.assertIn(("COV-43", "BL-0001"), self.make(items).rules())
+        items = changed(quality_items(), "QAR-0001", checked_at="2026-01-06", recorded_at="2026-01-06T09:00:00+00:00")
+        self.assertNotIn(("COV-43", "BL-0001"), self.make(items).rules())
+
     def test_finding_without_an_existing_action(self):
         items = changed(quality_items(), "QAR-0001",
                         findings=[{"id": "F1", "text": "No regression rule.", "action": "CA-0099"}])
@@ -1413,6 +1423,32 @@ class Cybersecurity(Case):
                             {"Description": "Update.", "Impact analysis": "One unit."})
         self.assertNotIn(("COV-61", "WKN-0001"), self.make(items, config=monitoring).rules())
 
+    def test_a_vulnerability_is_rated_by_the_matrix_and_may_be_corrected_by_another_party(self):
+        items = cs_items()
+        items["WKN-0001"] = ({"type": "weakness", "title": "Stack weakness", "status": "in-resolution",
+                              "reported_at": "2026-03-01", "found_by": "monitoring", "source": "bulletin 7",
+                              "vulnerability": True, "impact": "major", "feasibility": "medium", "risk_value": 2,
+                              "treatment": ["reduce"], "corrected_by": "platform release 4.3 of the customer, in B2",
+                              "links": {"affects": ["UNT-0001"]}},
+                             {"Description": "In the platform.", "Analysis": "Reachable from the bus."})
+        monitoring = {"scope": {"processes": SCOPE, "cybersecurity": [8]}}
+        messages = [f["message"] for f in self.make(items, config=monitoring).findings() if f["rule"] == "COV-61"]
+        self.assertEqual(len(messages), 1, messages)                          # corrected_by carries the reduction
+        self.assertIn("gives 4 for impact major and feasibility medium", messages[0])
+        items["WKN-0001"][0]["risk_value"] = 4
+        self.assertNotIn(("COV-61", "WKN-0001"), self.make(items, config=monitoring).rules())
+
+    def test_a_relevant_event_leads_to_weaknesses(self):
+        items = cs_items()
+        items["CEV-0001"] = ({"type": "cybersecurity-event", "title": "Bulletin 7", "status": "closed",
+                              "received_at": "2026-03-01", "source": "supplier bulletin 7", "trigger": "component in use",
+                              "relevant": True, "triaged_by": "Cybersecurity lead, 2026-03-02"},
+                             {"Description": "Stack weakness.", "Triage": "The release is in use."})
+        monitoring = {"scope": {"processes": SCOPE, "cybersecurity": [8]}}
+        self.assertIn(("COV-78", "CEV-0001"), self.make(items, config=monitoring).rules())
+        items["CEV-0001"][0]["relevant"] = False
+        self.assertNotIn(("COV-78", "CEV-0001"), self.make(items, config=monitoring).rules())
+
     def test_tara_lists_threats_with_what_their_risk_rests_on(self):
         from traceability import tara
         fixture = self.make(changed(cs_items(), "THR-0001", risk_value=3))
@@ -1531,6 +1567,28 @@ class FunctionalSafety(Case):
         self.assertTrue(any("clause 6:7 Software architectural design" in m for m in self.messages(fixture, "COV-63")))
         self.assertTrue(any("table 6:9" in m for m in self.messages(fixture, "COV-64")))
         self.assertTrue(any("not-applicable without a rationale" in m for m in self.messages(fixture, "COV-64")))
+
+    def test_a_method_table_may_be_pending_until_its_date(self):
+        items = fs_items()
+        items["PLN-0009"][0]["method_selection"][0].update(decision="pending", due="2999-01-01", responsible="Safety manager")
+        fixture = self.make(items)
+        self.assertEqual(self.messages(fixture, "COV-64"), [])
+        self.assertTrue(any("pending until 2999-01-01" in m for m in self.messages(fixture, "COV-64", "warning")))
+        items["PLN-0009"][0]["method_selection"][0].update(due="2020-01-01")
+        self.assertTrue(any("was due on 2020-01-01" in m for m in self.messages(self.make(items), "COV-64")))
+
+    def test_a_clause_decision_limited_to_named_components(self):
+        items = fs_items()
+        items["CMP-0002"][0]["origin"] = "supplied"
+        items["CMP-0002"][0]["supplier"] = "Library vendor"
+        for entry in items["PLN-0009"][0]["safety_activities"]:
+            if entry["clause"] == "8:12":
+                entry.update(decision="not-applicable", rationale="the platform is under the DIA", items=["CMP-0099"])
+        self.assertIn(("COV-75", "CMP-0002"), self.make(items).rules())
+        for entry in items["PLN-0009"][0]["safety_activities"]:
+            if entry["clause"] == "8:12":
+                entry["items"] = ["CMP-0002"]
+        self.assertNotIn(("COV-75", "CMP-0002"), self.make(items).rules())
 
     def test_the_asil_follows_the_determination_the_plan_states(self):
         fixture = self.make(changed(fs_items(), "HZE-0001", asil="A"))

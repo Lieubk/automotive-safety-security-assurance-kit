@@ -15,7 +15,8 @@ software-integration under plans/; the approved one if there is one) the script
   `tools/record.py test-run --level software-integration --build <BLD-ID>`.
 
 Steps and components are read from the items with the toolkit's trace engine
-(tools/traceability.py, found in the project or a folder above it). The compiler
+(tools/traceability.py, in the folder the environment variable TOOLKIT_DIR names, or
+else in the project or a folder above it). The compiler
 is chosen as for the unit tests (tests/unit/run_tests.py); warnings are errors.
 Verdict lines are `SIT-0001 PASS` or `SIT-0001 FAIL <file>:<line>`; a test case
 of the test file that prints no PASS line counts as failed.
@@ -27,6 +28,7 @@ failed, 2 = nothing could be run. Needs PyYAML, like the toolkit.
 import datetime
 import importlib.util
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -51,8 +53,10 @@ TEST_FUNCTION = re.compile(r"\btest_(SIT|SQT)_(\d{4})_\w+\s*\(\s*void\s*\)\s*\{"
 
 
 def trace_engine():
-    """The Project class of the toolkit's trace engine, or None."""
-    for folder in [ROOT] + list(ROOT.parents):
+    """The Project class of the toolkit's trace engine, or None: from the folder TOOLKIT_DIR names, else from the
+    project or a folder above it."""
+    named = [Path(os.environ["TOOLKIT_DIR"])] if os.environ.get("TOOLKIT_DIR") else []
+    for folder in named + [ROOT] + list(ROOT.parents):
         if (folder / "tools" / "traceability.py").is_file():
             sys.path.insert(0, str(folder / "tools"))
             from traceability import Project
@@ -68,7 +72,8 @@ def load():
     """(project, plan, steps, configuration) or an error text."""
     project_class = trace_engine()
     if project_class is None:
-        return "the toolkit's tools/traceability.py was not found above %s" % ROOT
+        return ("the toolkit's tools/traceability.py was not found above %s; set TOOLKIT_DIR to the toolkit's "
+                "folder when the project lives elsewhere" % ROOT)
     project = project_class(ROOT)
     plans = [p for p in project.of_type("plan") if p.front.get("kind") == "software-integration" and project.live(p)]
     plans.sort(key=lambda p: (p.status != "approved", p.id))

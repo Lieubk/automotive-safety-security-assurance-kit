@@ -115,6 +115,22 @@ class Review(RecordCase):
         self.assertEqual({c["note"] for c in filled}, {"plan of kind unit-verification"})
         self.assertEqual(len(record["checks"]), len(re.findall(r"(?m)^\|\s*([A-Z]{2,5}-\d+)\s*\|", text)))
 
+    def test_a_checks_template_lists_every_check_once(self):
+        out = Path(self.tmp.name) / "c.json"
+        code, text = self.record("checks-template", "--checklist", "software-requirements v2", "--out", out)
+        self.assertEqual(code, 0, text)
+        entries = json.loads(out.read_text(encoding="utf-8"))
+        ids = re.findall(r"(?m)^\|\s*([A-Z]{2,5}-\d+)\s*\|", CHECKLIST.read_text(encoding="utf-8"))
+        self.assertEqual([e["check"] for e in entries], ids)
+        self.assertTrue(all(e["result"] == "" and e["kind"] for e in entries))
+        for entry in entries:
+            entry.update(result="pass", note="test")
+        out.write_text(json.dumps(entries), encoding="utf-8")
+        code, text = self.review("--checks", out)
+        self.assertEqual(code, 0, text)
+        record = self.front("records/reviews/" + self.records("records/reviews")[-1])
+        self.assertNotIn("kind", record["checks"][0])
+
     def test_not_applicable_needs_its_reason(self):
         checks = json.loads(self.all_checks().read_text(encoding="utf-8"))
         checks[0] = {"check": checks[0]["check"], "result": "not-applicable"}
@@ -565,6 +581,9 @@ class SelfAssessments(RecordCase):
         self.assertEqual(len(record["ratings"]), 9)
         self.assertEqual(record["observations"][0], {"practice": "SUP.9.BP1", "state": "evidence present"})
         self.assertEqual(record["consistency"], [])
+        self.assertEqual(record["model"], "Automotive SPICE 3.1")
+        if "not_checked" in record:                       # SUP.9 has no rating dependencies in the catalog
+            self.assertIn("carries no rating dependencies", record["not_checked"])
 
     def test_every_practice_needs_a_rating(self):
         path = self.json_file("ratings.json", {"practices": [{"practice": "SUP.9.BP1", "rating": "F"}]})
@@ -810,6 +829,14 @@ class Releases(RecordCase):
 
 
 class Baselines(RecordCase):
+    def test_a_baseline_waits_for_the_quality_checks_the_plan_asks_for(self):
+        record = self.project / "records" / "quality" / "QAR-0001.md"
+        record.write_text(record.read_text(encoding="utf-8").replace("check: work product sample", "check: another check", 1),
+                          encoding="utf-8")
+        code, out = self.record("baseline", "--tag", "rc-x", "--purpose", "release candidate")
+        self.assertEqual(code, 1)
+        self.assertIn("asks for the check 'work product sample' before a baseline with purpose 'release candidate'", out)
+
     def test_baseline_lists_approved_engineering_items_only(self):
         code, out = self.record("baseline", "--tag", "design-1", "--purpose", "design freeze")
         self.assertEqual(code, 0, out)

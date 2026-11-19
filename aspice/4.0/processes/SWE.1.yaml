@@ -37,6 +37,7 @@ base_practices:
   maps_to:
   - SWE.1.BP1
   - SWE.1.BP5
+  maps_note: the draft treats verification criteria as a characteristic of the requirement itself (verifiability, its note on BP1), so the evidence of 3.1 BP5 counts here
 - id: SWE.1.BP2
   name: Structure software requirements
   intent: Arrange the requirements, for instance by function or variant, and rank them by need.

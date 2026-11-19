@@ -37,6 +37,10 @@ judgement of the people named in the safety plan; the skill proposes with reason
 - An item definition written for ISO/SAE 21434 serves here too; read it and complete what
   safety needs: functions and their behaviour at vehicle level, known hazards, legal
   requirements, the elements the item depends on. Read `references/hara-templates.md`.
+- An imported item definition (`imported`, delivered by the customer) is never edited.
+  When clause 3:5 is the project's, write the project's own item definition, naming the
+  delivered one in its text and taking over what still holds; otherwise what safety
+  needs from it is a `query` to whoever delivered it (`/import-inputs`).
 
 ### 2. Malfunctions, hazards, situations
 - For each function, propose malfunctioning behaviours with a guide-word method the

@@ -34,6 +34,7 @@ base_practices:
   maps_to:
   - SYS.2.BP1
   - SYS.2.BP5
+  maps_note: the draft treats verification criteria as a characteristic of the requirement itself (verifiability, its note on BP1), so the evidence of 3.1 BP5 counts here
 - id: SYS.2.BP2
   name: Structure system requirements
   intent: Arrange the requirements, for instance by function or variant, and rank them by need.

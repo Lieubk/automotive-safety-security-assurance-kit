@@ -57,7 +57,7 @@ reviews. AntiPinch, a unit of similar size, took 11 days.
 | `process`, `release` | optional | the process the work serves; the release it belongs to |
 | `estimate` | before review | effort in the unit of the project plan, normally person-days |
 | `planned_start`, `planned_finish` | before review | dates, quoted, `YYYY-MM-DD` |
-| `activities` | optional | steps with owner, estimate, planned finish and the skill they need |
+| `activities` | optional | steps with owner, estimate, planned finish and the skill they need; quote a name that holds a comma or a colon, or YAML splits it |
 | `links.part_of` | below the top | the one package it belongs to (COV-31) |
 | `links.depends_on` | where it waits | the packages that must finish before it starts (COV-34) |
 | `links.delivers` | once items exist | the items it produces; tracking, not plan |

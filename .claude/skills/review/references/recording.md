@@ -217,6 +217,12 @@ The example is shortened; a real file has all 20 check IDs of that checklist.
 
 ## The command
 
+Start the checks file from the checklist, so that no ID is missed or stale: `python
+tools/record.py checks-template --checklist "software-requirements v2" --out
+build/review-checks.json` writes one entry per check with its kind and an empty result
+and note (for plans add `--plan-kind <kind>`: the parts of other kinds are filled in by
+the review command). A checks file of an earlier review is not reused.
+
 ```
 python tools/record.py review --checklist "software-requirements v2" --reviewer "<name as the user stated it>" --verdict rework --findings build/review-findings.json --checks build/review-checks.json SWR-0010 SWR-0011
 ```

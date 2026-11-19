@@ -222,7 +222,7 @@ def lint_checklist(path, vocab, skills, errors, warnings):
     if not re.search(r"^Version \d+", text, re.M):
         errors.append("%s: no 'Version <n>' line" % name)
     rows = [line for line in text.splitlines() if line.startswith("|") and not re.match(r"^\|[\s:|-]+\|$", line)]
-    checks = 0
+    checks, seen = 0, set()
     for row in rows:
         cells = [c.strip() for c in row.strip().strip("|").split("|")]
         if cells and cells[0] == "ID":
@@ -230,6 +230,9 @@ def lint_checklist(path, vocab, skills, errors, warnings):
                 errors.append("%s: table header must end with the column 'Kind'" % name)
             continue
         checks += 1
+        if cells and cells[0] in seen:                  # a review record keeps one result per ID
+            errors.append("%s: check ID %s is used twice" % (name, cells[0]))
+        seen.add(cells[0] if cells else "")
         kind = cells[-1] if cells else ""
         if kind not in KINDS:
             errors.append("%s: check %s has kind '%s'; one of %s" % (name, cells[0] if cells else "?", kind, sorted(KINDS)))
