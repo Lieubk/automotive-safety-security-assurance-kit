@@ -308,7 +308,9 @@ def pre_shell(payload):
         plain = PROJECT_OPTION.sub(r"\1", toolkit_relative(command.strip()))   # --project <dir> right after the script is allowed
         if SHELL_OPERATORS.search(plain) or not any(fnmatch.fnmatchcase(plain, p) for p in allowed):
             return deny("The agent %s may run only these commands, one at a time and without shell operators: "
-                        "%s. Ask the caller for anything else." % (payload.get("agent_type"), "; ".join(allowed) or "none"))
+                        "%s. A script of the toolkit may also be named by its full path (the toolkit root before "
+                        "tools/); run it from the project folder, without cd. Ask the caller for anything else."
+                        % (payload.get("agent_type"), "; ".join(allowed) or "none"))
     if not any(commits_into_toolkit(target) for target in commit_targets(command, payload.get("cwd") or os.getcwd())):
         return 0                                      # no commit, or a commit into another repository (a project)
     if not (ROOT / ".confidential").is_dir():
@@ -359,6 +361,10 @@ def session_start(payload):
     errors = [f for f in findings if f["level"] == "error"]
     warnings = [f for f in findings if f["level"] == "warning"]
     scope = ", ".join(sorted(project.scope)) if project.scope else "all processes (no scope set)"
+    if project.cs_scope:
+        scope += "; ISO/SAE 21434 clauses %s" % ", ".join(sorted((c.split(":")[1] for c in project.cs_scope), key=int))
+    if project.fs_scope:
+        scope += "; ISO 26262 parts %s" % ", ".join(sorted((c.split(":")[1] for c in project.fs_scope), key=int))
     active = sum(1 for rule in project.rules if project.active(rule))
     print("Automotive Safety & Security Assurance Kit. Scope: %s. %d items, %d of %d coverage rules active, "
           "%d errors, %d warnings." % (scope, len(project.items), active, len(project.rules), len(errors), len(warnings)))
