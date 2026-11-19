@@ -76,6 +76,7 @@ marked DRAFT, because every item they show is approved.
 - **PDF** is the HTML printed on A4 with page numbers; GitHub shows it in the browser.
 - **HTML** is the native output, one self-contained file; GitHub shows it as source, so download it
   and open it in a browser. Diagrams are drawn by Mermaid when the browser is online.
+  [`html/index.html`](html/index.html) is this index as a page, with links to every format.
 - **Word** uses a neutral style here; with a customer's `.docx` or `.dotx` template (`--template`,
   or `documents.template` in `project.yaml`) it takes the customer's styles.
 - **Excel** has one sheet per chapter; a customer's workbook can be filled through a map file.
