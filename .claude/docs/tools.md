@@ -136,6 +136,14 @@ module text). Records are final when written and are never edited afterwards.
   items the record lists that no longer exist, and approved items the record does not
   list.
 
+## Exchange with ALM tools - `python tools/reqif.py [--project DIR] <command>`
+
+| Command | Use it to |
+|---|---|
+| `import FILE --type T --source NAME --version V [--received DATE] [--id-attribute A] [--title-attribute A] [--text-attribute A] [--dry-run]` | register a ReqIF delivery: one imported item in state draft per object, text unchanged, `imported` with source, version, date and source identifier. Refused when the source already has imported items |
+| `compare FILE --source NAME` | see what a new version changes against the imported items of the source: new, changed and removed objects |
+| `export --type T [--type T ...] --out FILE [--title TEXT]` | deliver items to an ALM tool: identifier, title, text, type, status and ASIL per object, links between exported items as relations |
+
 ## Continuous integration
 
 `ci/github-actions.yml` and `ci/gitlab-ci.yml` are templates for a project: the pipeline

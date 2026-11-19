@@ -2,7 +2,7 @@
 name: import-inputs
 description: "Register delivered inputs (customer or stakeholder requirements, system requirements, system architecture and interfaces, or software-level inputs when the scope starts lower) as imported items, unchanged, one item per delivered requirement or element; write the questions to their source as query items; and prepare the input acceptance review. Use after /aspice-start, when a document was received, when a new version of an input arrives, or when a query has been answered."
 argument-hint: "[path of the delivered document, the source name of an entry in inputs of project.yaml, or a query ID to record its answer]"
-allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Bash(python tools/traceability.py *), Bash(python tools/record.py *)
+allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Bash(python tools/traceability.py *), Bash(python tools/record.py *), Bash(python tools/reqif.py *)
 ---
 
 # Registering delivered inputs

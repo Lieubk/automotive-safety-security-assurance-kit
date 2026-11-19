@@ -25,7 +25,9 @@ the source and with the entries of `inputs` in `project.yaml`.
    --imported` names the imported inputs with their state; Grep the item folders for
    the `source` name to keep those of this document. Leave out the ones that are
    `obsolete` or `rejected`. Read the others by ID.
-2. Take stock of the new version as in step 1 of the skill.
+2. Take stock of the new version as in step 1 of the skill. For a ReqIF delivery,
+   `python tools/reqif.py compare <file> --source "<document>"` lists the new, changed
+   and removed objects by their identifier in the source; it writes nothing.
 3. Compare object by object through the source identifier: every text section and the
    attributes that were mapped. Differences in line breaks and spacing are not
    changes; a changed value, word, unit or attribute is. Compare the allocation

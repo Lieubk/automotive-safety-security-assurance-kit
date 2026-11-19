@@ -16,9 +16,10 @@ Early. One vertical slice works end to end and is demonstrated by the example:
 | Process catalog | 23 processes of Automotive SPICE 3.1 with base practices, work products and rating dependencies (identifiers and official names; descriptions in our own words) |
 | Item schema | 34 item types, 17 link roles, 49 coverage rules, scope-aware |
 | Trace engine | structure, links, coverage, stale approvals, suspect links, impact, traceability matrices, evidence per base practice, changes since a review, progress against the plan, integration steps and the builds and runs on them at software and system level, problems, quality assurance, observations per generic practice of level 2 |
+| Exchange | ReqIF import, comparison of a new version, export (`tools/reqif.py`); pipeline templates for GitHub Actions and GitLab CI (`ci/`) |
 | Skills | project scoping and input registration; project management (MAN.3); SYS.2 to SYS.5 and SWE.1 to SWE.6; reviews and quality assurance; baselines, change requests and problem resolution; supplier monitoring; trace check, process gates and a mock assessment |
 | Hooks | imported inputs, final records and baselined items are protected; every written item is checked |
-| Not yet | risk management (MAN.5), exchange with ALM tools (ReqIF), ISO 26262 and ISO/SAE 21434 extensions, Automotive SPICE 4.0 |
+| Not yet | risk management (MAN.5), exchange with ALM tools beyond ReqIF, ISO 26262 and ISO/SAE 21434 extensions, Automotive SPICE 4.0 |
 
 ## What it does not do
 

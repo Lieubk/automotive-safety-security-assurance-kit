@@ -149,6 +149,23 @@ hook refuses it otherwise. In that case `/change-request` comes first.
 
 A problem with what the source wrote is none of these. It is a query.
 
+## A delivery as ReqIF
+
+An export of an ALM tool (DOORS, Polarion, codeBeamer and others) as a ReqIF file is
+registered by the tool, not by hand:
+
+1. `python tools/reqif.py import <file> --type <type> --source "<document>" --version <v>
+   --received <date> --dry-run` shows how many objects would become items. The source
+   identifier, title and text are read from the attributes ReqIF.ForeignID, ReqIF.Name
+   and ReqIF.Text; a tool that names them differently is given its names with
+   `--id-attribute`, `--title-attribute`, `--text-attribute`. Show the user the count
+   and two items as they would be written, and ask.
+2. Without `--dry-run` the items are written in state `draft`, text unchanged in the
+   first section of the type. Attributes the type asks for before review (for a
+   requirement: `kind`, `priority`, ASIL ...) are what the delivery says, set with the
+   user afterwards; nothing is guessed.
+3. Then continue as for any registered input: `check`, queries, the acceptance review.
+
 ## Large deliveries
 
 Work chapter by chapter: take stock, show, ask, write, check. Keep the running
