@@ -69,9 +69,11 @@ on one model instead, set `CLAUDE_CODE_SUBAGENT_MODEL` to that model and
 
 ## Quick start
 
-Look at the worked example first:
+Clone the repository and look at the worked example first:
 
 ```
+git clone https://github.com/Lieubk/automotive-safety-security-assurance-kit.git
+cd automotive-safety-security-assurance-kit
 python tools/traceability.py --project examples/power-window check
 python tools/traceability.py --project examples/power-window practices
 python tools/traceability.py --project examples/power-window impact SWR-0003
