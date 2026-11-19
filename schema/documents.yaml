@@ -319,8 +319,10 @@ documents:
 
   release-note:
     title: Release note
-    supports: [SUP.8.BP6, SUP.8.BP7, "13-08"]
+    supports: [SUP.8.BP6, SUP.8.BP7, SPL.2.BP12, "13-06", "13-08"]
     chapters:
+      - title: Release
+        items: {types: [release], latest: true}
       - title: Baseline
         text: "What the baseline contains, and what changed since the baseline before it."
         baseline: {}

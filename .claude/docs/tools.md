@@ -46,7 +46,7 @@ ratings:
 
 Finding levels: `error` (approved items, or always-wrong structure), `warning` (items
 in review, or missing consistency evidence), `info` (drafts). Rule names: `FORMAT`,
-`SCHEMA`, `LINK` (structure), `COV-01` to `COV-73` (coverage rules of
+`SCHEMA`, `LINK` (structure), `COV-01` to `COV-74` (coverage rules of
 `schema/items.yaml`), `SUSPECT` (an upstream item, or the code of a unit, changed after
 the review), `CONSISTENCY` (a review did not record what the item was compared with, or
 did not record the code of a unit), `UPSTREAM` (approved above something that is not),
@@ -76,6 +76,7 @@ active. The summary line says how many.
 | `cybersecurity-assessment --case CSE-ID --assessor NAME --independence TEXT --judgement accepted\|conditionally-accepted\|rejected --report FILE [--conditions TEXT] [--as-of DATE]` | record the judgement of an independent assessor on a case | refused when the assessor prepared the case, without the report, or for a conditional acceptance without its conditions |
 | `confirmation-measure --kind confirmation-review\|functional-safety-audit\|functional-safety-assessment --subject TEXT [--item ID ...] --performed-by NAME --independence I0..I3 --result RESULT --report FILE [--conditions TEXT] [--as-of DATE]` | record what the person who performed a confirmation measure states, with the items covered and their hashes | refused when the safety plan plans no such measure of that subject, without the report, or for a conditional acceptance without conditions |
 | `safety-case --prepared-by NAME --argument FILE [--part N ...] [--as-of DATE]` | write a safety case: per clause of the parts in scope (or given) the decision and the items that give evidence, the open findings, and the argument of the person who prepares it | refused without the argument or without a part |
+| `release --baseline BL-ID --release NAME --kind delivery\|release-for-production\|release-for-post-development [--kind ...] --product "name=...;version=...[;file=...]" ... --approved-by NAME [--approved-at DATE] --delivered-to PARTY --note FILE [--classification TEXT] [--build BLD-ID] [--support TEXT] [--media TEXT]` | write a release record from a final baseline: products, approval, the cases it rests on, open problems and the check at the time, and the release note of who releases | refused for an internal or changed baseline, while the check reports errors, without the note, for a release for production without a safety case or for post-development without a cybersecurity case, for an approval dated in the future |
 | `problem-trends --reported-by NAME --assessment FILE [--as-of DATE] [--period TEXT]` | write a problem trend report: the list and figures of `problems` for the date, and the analyst's assessment from the file, in their words. Refused without an assessment |
 | `communication --subject ID --audience WHO --channel TEXT [--agreement TEXT] [--sent-at DATE] [--practice BP]` | record what was made known to whom, and what was agreed; `--subject`, `--audience` and `--practice` may repeat. `--practice` names the communicate practices the record serves; `practices` counts it for those only |
 

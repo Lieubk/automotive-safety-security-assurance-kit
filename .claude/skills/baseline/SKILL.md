@@ -96,7 +96,8 @@ structure. `python tools/traceability.py practices SUP.8` says so, and
 
 ### 5. Commit and tag
 - For a delivery, offer the documents the customer expects from this baseline:
-  `/documents` generates them with `--baseline <BL-ID>` once the tag is set.
+  `/documents` generates them with `--baseline <BL-ID>` once the tag is set; `/release`
+  records the release made from it and its delivery.
 - Show the exact commands of section "Commit and tag" of the reference, with the real
   file name, message and tag. Ask whether you shall run them or the user will. Run none
   of them without an explicit yes to the commands shown.

@@ -62,6 +62,7 @@ repository - one item per file - and a trace engine checks them.
 | `/hara` | ISO 26262-3 | item definition, hazardous events classified, ASIL, safety goals |
 | `/safety-concept` | ISO 26262-3, 4, 6, 9 | functional, technical and software safety requirements, ASIL inheritance, decomposition, validation |
 | `/safety-analysis` | ISO 26262-9, 6, 4 | FMEA, FTA, DFA with findings carried into requirements or design |
+| `/release` | SPL.2, ISO 26262-2, ISO/SAE 21434 6.4.9 | release plan, release record from a baseline with approval and release note, delivery and receipt |
 | `/documents` | all | 34 kinds of documents from the items - specifications, SAD, SDD, test specifications and reports, traceability, release, QA, problem, project, risk, TARA and cybersecurity reports - as HTML, Word or Excel, neutral or in the customer's template |
 | `/next-step` | - | where the project stands and what to do next |
 

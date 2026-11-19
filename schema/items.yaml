@@ -317,7 +317,7 @@ types:
     prefix: SYR
     folder: spec/system/requirements
     lifecycle: engineering
-    supports: [SYS.2.BP1, SYS.2.BP2, SYS.2.BP3, SYS.2.BP4, SYS.2.BP5, "17-12", "17-50", "21434:10.4.1", "21434:WP-10-01", "26262-3:7", "26262-4:6", "26262-4:6.5.1", "26262-8:6"]
+    supports: [SYS.2.BP1, SYS.2.BP2, SYS.2.BP3, SYS.2.BP4, SYS.2.BP5, "17-12", "17-50", "21434:10.4.1", "21434:WP-10-01", "26262-3:7", "26262-4:6", "26262-4:6.5.1", "26262-8:6", "26262-4:6.5.5"]
     attributes: {use: [common, criticality, requirement]}
     sections:
       Statement: before-review
@@ -329,7 +329,7 @@ types:
     prefix: SYE
     folder: spec/system/architecture
     lifecycle: engineering
-    supports: [SYS.3.BP1, SYS.3.BP4, "04-06", "21434:10.4.1", "21434:WP-10-01", "26262-4:6", "26262-4:6.5.3"]
+    supports: [SYS.3.BP1, SYS.3.BP4, "04-06", "21434:10.4.1", "21434:WP-10-01", "26262-4:6", "26262-4:6.5.3", "26262-4:6.5.2"]
     attributes:
       use: [common, criticality]
       kind: {values: [hardware, software, mechanical, external], required: before-review}
@@ -341,7 +341,7 @@ types:
     prefix: SYI
     folder: spec/system/architecture
     lifecycle: engineering
-    supports: [SYS.3.BP3, "04-06", "17-08", "21434:10.4.1", "21434:WP-10-01", "26262-4:6", "26262-4:6.5.4"]
+    supports: [SYS.3.BP3, "04-06", "17-08", "21434:10.4.1", "21434:WP-10-01", "26262-4:6", "26262-4:6.5.4", "26262-6:6.5.2"]
     attributes:
       use: [common, criticality]
       kind: {values: [hardware-software, bus, electrical, mechanical, diagnostic, external], required: before-review}
@@ -365,7 +365,7 @@ types:
     prefix: CMP
     folder: spec/software/architecture
     lifecycle: engineering
-    supports: [SWE.2.BP1, SWE.2.BP4, SWE.2.BP5, "04-04", "21434:10.4.1", "21434:WP-10-01", "26262-6:7", "26262-6:7.5.1"]
+    supports: [SWE.2.BP1, SWE.2.BP4, SWE.2.BP5, "04-04", "21434:10.4.1", "21434:WP-10-01", "26262-6:7", "26262-6:7.5.1", "26262-9:6.5.1"]
     attributes:
       use: [common, criticality]
       kind: {values: [composition, application, sensor-actuator, service, complex-driver, ecu-abstraction, parameter, basic-software, library, other], required: before-review}
@@ -384,7 +384,7 @@ types:
     prefix: IFC
     folder: spec/software/architecture
     lifecycle: engineering
-    supports: [SWE.2.BP3, "04-04", "17-08", "21434:10.4.1", "21434:WP-10-01", "26262-6:7", "26262-6:7.5.1"]
+    supports: [SWE.2.BP3, "04-04", "17-08", "21434:10.4.1", "21434:WP-10-01", "26262-6:7", "26262-6:7.5.1", "26262-6:6.5.2"]
     attributes:
       use: [common, criticality]
       kind: {values: [sender-receiver, client-server, mode-switch, parameter, non-volatile-data, trigger, function-call, debug, other], required: before-review}
@@ -413,7 +413,7 @@ types:
     prefix: ADR
     folder: spec/decisions
     lifecycle: engineering
-    supports: [SYS.3.BP5, SWE.2.BP6, SWE.3.BP4]
+    supports: [SYS.3.BP5, SWE.2.BP6, SWE.3.BP4, "26262-9:5", "26262-9:5.5.1", "26262-9:5.5.2"]
     attributes:
       use: [common]
       level: {values: [system, software, detailed-design], required: always}
@@ -441,7 +441,7 @@ types:
     prefix: UNT
     folder: spec/software/design
     lifecycle: engineering
-    supports: [SWE.3.BP1, SWE.3.BP2, SWE.3.BP3, SWE.3.BP8, "04-05", "11-05", "21434:10.4.1", "21434:WP-10-01", "26262-6:8", "26262-6:8.5.1", "26262-6:8.5.2"]
+    supports: [SWE.3.BP1, SWE.3.BP2, SWE.3.BP3, SWE.3.BP8, "04-05", "11-05", "21434:10.4.1", "21434:WP-10-01", "26262-6:8", "26262-6:8.5.1", "26262-6:8.5.2", "26262-9:6.5.1"]
     attributes:
       use: [common, criticality]
       origin: {values: [handwritten, generated, reused, third-party], required: before-review}
@@ -465,7 +465,7 @@ types:
     supports: [MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6, MAN.3.BP7, SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1, SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1, "08-12", "08-52", "08-04", "08-13", "08-27", "08-28"]
     attributes:
       use: [common]
-      kind: {values: [project, unit-verification, software-integration, software-qualification-test, system-integration, system-qualification-test, configuration-management, quality-assurance, problem-resolution, change-request-management, risk-management, cybersecurity, cybersecurity-interface-agreement, cybersecurity-monitoring, cybersecurity-incident-response, production-control, end-of-cybersecurity-support, safety, development-interface-agreement], required: always}
+      kind: {values: [project, unit-verification, software-integration, software-qualification-test, system-integration, system-qualification-test, configuration-management, quality-assurance, problem-resolution, change-request-management, risk-management, cybersecurity, cybersecurity-interface-agreement, cybersecurity-monitoring, cybersecurity-incident-response, production-control, end-of-cybersecurity-support, safety, development-interface-agreement, release], required: always}
       milestones: {structure: milestones, required: optional, note: "project plans: the milestones of the life cycle, each with its date and the baseline purpose that marks it"}
       coverage_targets: {required: optional, note: "unit-verification plans: structural coverage a unit must reach, per ASIL, as {<ASIL>: {statement_percent, branch_percent, mcdc_percent}} with any subset of the metrics; an ASIL without an entry has no target"}
       integration_steps: {structure: integration-steps, required: optional, note: "software-integration and system-integration plans: the integration steps in order (conditions)"}
@@ -520,7 +520,7 @@ types:
     prefix: UT
     folder: verification/unit
     lifecycle: engineering
-    supports: [SWE.4.BP2, "08-50", "26262-6:9", "26262-6:9.5.1"]
+    supports: [SWE.4.BP2, "08-50", "26262-6:9", "26262-6:9.5.1", "26262-8:9.5.2"]
     attributes: {use: [common, test-case]}
     sections: {Preconditions: optional, Steps: before-review, Expected result: before-review}
 
@@ -528,7 +528,7 @@ types:
     prefix: SIT
     folder: verification/software-integration
     lifecycle: engineering
-    supports: [SWE.5.BP3, SWE.5.BP5, "08-50", "21434:10.4.2", "21434:WP-10-06", "26262-6:10", "26262-6:10.5.1"]
+    supports: [SWE.5.BP3, SWE.5.BP5, "08-50", "21434:10.4.2", "21434:WP-10-06", "26262-6:10", "26262-6:10.5.1", "26262-8:9.5.2"]
     attributes:
       use: [common, test-case]
       step: {required: before-review, note: "name of the integration step of the software-integration plan whose build the case is run on first; later builds may repeat it as regression"}
@@ -538,7 +538,7 @@ types:
     prefix: SQT
     folder: verification/software-qualification
     lifecycle: engineering
-    supports: [SWE.6.BP2, SWE.6.BP3, "08-50", "21434:10.4.2", "21434:WP-10-06", "26262-6:11", "26262-6:11.5.1"]
+    supports: [SWE.6.BP2, SWE.6.BP3, "08-50", "21434:10.4.2", "21434:WP-10-06", "26262-6:11", "26262-6:11.5.1", "26262-8:9.5.2"]
     attributes: {use: [common, test-case]}
     sections: {Preconditions: optional, Steps: before-review, Expected result: before-review}
 
@@ -546,7 +546,7 @@ types:
     prefix: SYIT
     folder: verification/system-integration
     lifecycle: engineering
-    supports: [SYS.4.BP3, SYS.4.BP5, "08-50", "21434:10.4.2", "21434:WP-10-06", "26262-4:7"]
+    supports: [SYS.4.BP3, SYS.4.BP5, "08-50", "21434:10.4.2", "21434:WP-10-06", "26262-4:7", "26262-8:9.5.2"]
     attributes:
       use: [common, test-case]
       step: {required: before-review, note: "name of the integration step of the system-integration plan whose build the case is run on first"}
@@ -556,9 +556,36 @@ types:
     prefix: SYQT
     folder: verification/system-qualification
     lifecycle: engineering
-    supports: [SYS.5.BP2, SYS.5.BP3, "08-50", "21434:11", "21434:WP-11-01", "26262-4:7", "26262-4:8", "26262-4:8.5.1"]
+    supports: [SYS.5.BP2, SYS.5.BP3, "08-50", "21434:11", "21434:WP-11-01", "26262-4:7", "26262-4:8", "26262-4:8.5.1", "26262-8:9.5.2"]
     attributes: {use: [common, test-case]}
     sections: {Preconditions: optional, Steps: before-review, Expected result: before-review}
+
+  release:                         # a product release: what is delivered from which baseline, approved by whom, to whom
+    prefix: REL
+    folder: records/releases
+    lifecycle: record
+    supports: [SPL.2.BP5, SPL.2.BP9, SPL.2.BP10, SPL.2.BP11, SPL.2.BP12, SPL.2.BP13, "26262-2:6", "26262-2:6.5.6", "21434:6.4.9", "21434:WP-06-04", "13-06"]
+    attributes:
+      id: {required: always}
+      type: {required: always}
+      status: {required: always}
+      title: {required: optional}
+      release: {required: always, note: "name and number of the release, by the numbering scheme of the release plan"}
+      kinds: {required: always, note: "list of delivery, release-for-production (ISO 26262), release-for-post-development (ISO/SAE 21434)"}
+      baseline: {required: always, note: "the final baseline the release is built from"}
+      classification: {required: optional, note: "for example A-sample, B-sample, series, as the release plan classifies"}
+      products: {required: always, note: "list of {name, version, file}: what is delivered"}
+      build: {required: optional, note: "the build record the delivered software comes from"}
+      support: {required: optional, note: "type, service level and duration of support, as communicated"}
+      media: {required: optional, note: "delivery medium and packaging"}
+      approved_by: {required: always, note: "the person who approved the release for delivery"}
+      approved_at: {format: date, required: always}
+      delivered_to: {required: always}
+      cases: {required: optional, note: "generated: the safety and cybersecurity cases and assessments the release rests on"}
+      open_problems: {required: always, may_be_empty: true, note: "generated: unresolved problem reports and weaknesses at the time, with their state"}
+      check: {required: always, note: "generated: the summary of the trace check at the time"}
+    sections:
+      Release note: always         # functional content, changes since the last release, known limitations and open problems, in the words of who releases
 
   # ---- ISO 26262 (functional safety); active only for the parts under scope.safety
 
@@ -750,7 +777,7 @@ types:
     prefix: WKN
     folder: records/cybersecurity
     lifecycle: problem-report
-    supports: ["21434:8.4", "21434:8.5", "21434:8.6", "21434:10.4.1", "21434:WP-08-04", "21434:WP-08-05", "21434:WP-08-06", "21434:WP-10-05"]
+    supports: ["21434:8.4", "21434:8.5", "21434:8.6", "21434:10.4.1", "21434:WP-08-04", "21434:WP-08-05", "21434:WP-08-06", "21434:WP-10-05", "21434:WP-08-03"]
     attributes:
       use: [common]
       reported_at: {format: date, required: always}
@@ -806,7 +833,7 @@ types:
     prefix: RUN
     folder: verification/runs
     lifecycle: record
-    supports: [SWE.4.BP4, SWE.5.BP5, SWE.5.BP6, SWE.6.BP3, SWE.6.BP4, SYS.4.BP5, SYS.4.BP6, SYS.5.BP3, SYS.5.BP4, "13-50", "21434:WP-10-07", "21434:WP-11-01", "26262-6:9.5.2", "26262-6:10.5.3", "26262-6:11.5.2"]   # a run records which test cases were selected and what they showed
+    supports: [SWE.4.BP4, SWE.5.BP5, SWE.5.BP6, SWE.6.BP3, SWE.6.BP4, SYS.4.BP5, SYS.4.BP6, SYS.5.BP3, SYS.5.BP4, "13-50", "21434:WP-10-07", "21434:WP-11-01", "26262-6:9.5.2", "26262-6:10.5.3", "26262-6:11.5.2", "26262-4:7.5.2", "26262-8:9.5.3"]   # a run records which test cases were selected and what they showed
     attributes:
       id: {required: always}
       type: {required: always}
@@ -825,7 +852,7 @@ types:
     prefix: BLD
     folder: verification/builds
     lifecycle: record
-    supports: [SWE.5.BP4, SYS.4.BP4, "01-50", "17-02"]
+    supports: [SWE.5.BP4, SYS.4.BP4, "01-50", "17-02", "26262-6:10", "26262-6:10.5.2"]
     attributes:
       id: {required: always}
       type: {required: always}
@@ -860,7 +887,7 @@ types:
     prefix: REV
     folder: records/reviews
     lifecycle: record
-    supports: [SUP.1.BP2, SUP.4.BP4, "13-19", "21434:WP-09-05", "21434:WP-09-07", "21434:WP-10-04", "26262-3:6.5.2", "26262-3:7.5.2", "26262-6:6.5.3", "26262-6:7.5.4", "26262-9:7.5.2", "26262-9:8.5.2", "26262-8:9.5.3"]
+    supports: [SUP.1.BP2, SUP.4.BP4, "13-19", "21434:WP-09-05", "21434:WP-09-07", "21434:WP-10-04", "26262-3:6.5.2", "26262-3:7.5.2", "26262-6:6.5.3", "26262-6:7.5.4", "26262-9:7.5.2", "26262-9:8.5.2", "26262-8:9.5.3", "26262-4:6.5.6"]
     attributes:
       id: {required: always}
       type: {required: always}
@@ -913,7 +940,7 @@ types:
     prefix: CR
     folder: records/changes
     lifecycle: change-request
-    supports: [SUP.10.BP2, SUP.10.BP3, SUP.10.BP4, SUP.10.BP5, SUP.10.BP6, SUP.10.BP7, SYS.1.BP5, "13-16", "13-21", "26262-8:8", "26262-8:8.5.2"]
+    supports: [SUP.10.BP2, SUP.10.BP3, SUP.10.BP4, SUP.10.BP5, SUP.10.BP6, SUP.10.BP7, SYS.1.BP5, "13-16", "13-21", "26262-8:8", "26262-8:8.5.2", "26262-8:8.5.3", "26262-8:8.5.4", "21434:13.4", SUP.8.BP5]
     attributes:
       use: [common]
       requester: {required: always}
@@ -1003,7 +1030,7 @@ types:
     prefix: SAG
     folder: plans/suppliers
     lifecycle: engineering
-    supports: [ACQ.4.BP1, "02-01"]
+    supports: [ACQ.4.BP1, "02-01", "26262-8:5", "26262-8:5.5.5"]
     attributes:
       use: [common]
       supplier: {required: always, note: "the supplier, by name or role, and the contract or order the agreement belongs to"}
@@ -1100,7 +1127,7 @@ types:
     prefix: BL
     folder: records/baselines
     lifecycle: record
-    supports: [SUP.8.BP6, SUP.8.BP7, SYS.1.BP4, "13-08", "26262-8:7"]   # the record lists every item with hash and status
+    supports: [SUP.8.BP6, SUP.8.BP7, SYS.1.BP4, "13-08", "26262-8:7", SUP.8.BP5, SUP.8.BP8]   # the record lists every item with hash and status
     attributes:
       id: {required: always}
       type: {required: always}
@@ -1119,24 +1146,25 @@ types:
 # ---------------------------------------------------------------------------
 plan_kinds:
   project: [MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6, MAN.3.BP7]
-  unit-verification: [SWE.4.BP1, "26262-6:9"]
-  software-integration: [SWE.5.BP1, SWE.5.BP2, "26262-6:10"]
-  software-qualification-test: [SWE.6.BP1, "26262-6:11"]
-  system-integration: [SYS.4.BP1, SYS.4.BP2, "26262-4:7"]
+  unit-verification: [SWE.4.BP1, "26262-6:9", "26262-8:9", "26262-8:9.5.1"]
+  software-integration: [SWE.5.BP1, SWE.5.BP2, "26262-6:10", "26262-8:9", "26262-8:9.5.1"]
+  software-qualification-test: [SWE.6.BP1, "26262-6:11", "26262-8:9", "26262-8:9.5.1"]
+  system-integration: [SYS.4.BP1, SYS.4.BP2, "26262-4:7", "26262-4:7.5.1"]
   system-qualification-test: [SYS.5.BP1]
-  configuration-management: [SUP.8.BP1, "26262-8:7", "26262-8:7.5.1", "26262-8:10"]
+  configuration-management: [SUP.8.BP1, "26262-8:7", "26262-8:7.5.1", "26262-8:10", "26262-8:10.5.1", "26262-8:10.5.2", SUP.8.BP2, SUP.8.BP3, SUP.8.BP4, SUP.8.BP9]
   quality-assurance: [SUP.1.BP1]
   problem-resolution: [SUP.9.BP1]
   risk-management: [MAN.5.BP1, MAN.5.BP2]
   change-request-management: [SUP.10.BP1, "26262-8:8", "26262-8:8.5.1"]
-  cybersecurity: ["21434:6.4.1", "21434:6.4.2", "21434:6.4.3", "21434:6.4.4", "21434:6.4.5", "21434:6.4.6", "21434:15.8", "21434:WP-06-01"]
+  cybersecurity: ["21434:6.4.1", "21434:6.4.2", "21434:6.4.3", "21434:6.4.4", "21434:6.4.5", "21434:6.4.6", "21434:15.8", "21434:WP-06-01", "21434:WP-10-03"]
   cybersecurity-interface-agreement: ["21434:7.4.3", "21434:WP-07-01"]
   cybersecurity-monitoring: ["21434:8.3", "21434:WP-08-01", "21434:WP-08-02"]
   cybersecurity-incident-response: ["21434:13.3", "21434:WP-13-01"]
-  production-control: ["21434:12", "21434:WP-12-01"]
-  end-of-cybersecurity-support: ["21434:14.3", "21434:WP-14-01"]
-  safety: ["26262-2:6", "26262-2:6.5.3", "26262-4:5", "26262-5:5", "26262-6:5"]
+  production-control: ["21434:12", "21434:WP-12-01", "21434:WP-10-02"]
+  end-of-cybersecurity-support: ["21434:14.3", "21434:WP-14-01", "21434:14.4"]
+  safety: ["26262-2:6", "26262-2:6.5.3", "26262-4:5", "26262-5:5", "26262-6:5", "26262-2:6.5.1", "26262-2:6.5.2", "26262-6:5.5.1"]
   development-interface-agreement: ["26262-8:5", "26262-8:5.5.2"]
+  release: [SPL.2.BP1, SPL.2.BP2, SPL.2.BP3, SPL.2.BP4, SPL.2.BP6, SPL.2.BP7, SPL.2.BP8]
 
 # ---------------------------------------------------------------------------
 # Conditional requirements: attributes or sections that become mandatory when
@@ -1394,6 +1422,7 @@ coverage:
   - {id: COV-71, subject: tool-evaluation, expect: "from in-review on: TCL2 and TCL3 name a qualification method and its evidence; the confidence level is the one the tcl_determination of the approved safety plan gives, where the plan states one", waiver: "none", supports: ["26262-8:11"]}
   - {id: COV-72, subject: project, expect: "every tool named in a final build-record or static-analysis-run is covered by a live tool-evaluation", waiver: "none", supports: ["26262-8:11"]}
   - {id: COV-73, subject: project, expect: "for every entry of confirmation_measures of the approved safety plan, a final confirmation-measure record of that kind and subject exists with at least the independence planned and a result other than failed or rejected", waiver: "none", supports: ["26262-2:6"]}
+  - {id: COV-74, subject: release, expect: "its baseline is final and not internal; a final communication-record names the release as delivered, with the receipt stated under agreement", waiver: "none", supports: [SPL.2.BP13, SPL.2.BP11, "21434:6.4.9", "26262-2:6"]}
   - {id: COV-26, subject: baseline, expect: "at least one final communication-record names the baseline as subject", waiver: "baseline purpose marked internal in the project configuration", supports: [SYS.2.BP8, SYS.3.BP8, SYS.4.BP9, SYS.5.BP7, SWE.1.BP8, SWE.2.BP9, SWE.3.BP7, SWE.4.BP7, SWE.5.BP9, SWE.6.BP7]}
 
 # ---------------------------------------------------------------------------

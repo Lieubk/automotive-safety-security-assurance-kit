@@ -1392,6 +1392,87 @@ def cmd_safety_case(project, args):
     return 0
 
 
+def cmd_release(project, args):
+    approved_at = trace.as_date(args.approved_at) if args.approved_at else datetime.date.today()
+    problems = [] if approved_at else ["--approved-at must be a date YYYY-MM-DD"]
+    if approved_at and approved_at > datetime.date.today():
+        problems.append("--approved-at %s lies in the future: the release records an approval that happened" % approved_at)
+    base = project.items.get(args.baseline)
+    internal = (project.config.get("trace") or {}).get("internal_baselines") or []
+    if base is None or base.type != "baseline" or base.status != "final":
+        problems.append("--baseline %s is not a final baseline" % args.baseline)
+    elif base.front.get("purpose") in internal:
+        problems.append("%s is an internal baseline (purpose %s): a release is built from a baseline others rely on"
+                        % (base.id, base.front.get("purpose")))
+    else:
+        changed = [e.get("item") for e in trace.as_list(base.front.get("items")) if isinstance(e, dict)
+                   and e.get("item") in project.items and project.items[e.get("item")].hash != str(e.get("hash"))]
+        if changed:
+            problems.append("%d items differ from %s (%s): the release is made from the baseline's state; check out tag %s"
+                            % (len(changed), base.id, ", ".join(sorted(changed)[:6]), base.front.get("tag")))
+    products = []
+    for entry in args.product or []:
+        parts = dict(p.split("=", 1) for p in entry.split(";") if "=" in p)
+        if not parts.get("name") or not parts.get("version"):
+            problems.append("--product %r needs name=...;version=...[;file=...]" % entry)
+        products.append(parts)
+    note = read_text_file(args.note, "note")
+    if not note:
+        problems.append("--note names no file with text: the release note is written by who releases")
+    errors = [f for f in project.check() if f["level"] == "error"]
+    if errors:
+        problems.append("the trace check reports %d errors; a release needs none" % len(errors))
+    cases = []
+    if "release-for-production" in args.kind:
+        case = latest_final(project, "safety-case")
+        if project.fs_scope and case is None:
+            problems.append("release for production: no safety case (record.py safety-case)")
+        cases += [c.id for c in [case] if c]
+        cases += [r.id for r in project.of_type("confirmation-measure") if r.status == "final"
+                  and r.front.get("kind") == "functional-safety-assessment"]
+    if "release-for-post-development" in args.kind:
+        case = latest_final(project, "cybersecurity-case")
+        if project.cs_scope and case is None:
+            problems.append("release for post-development: no cybersecurity case (record.py cybersecurity-case)")
+        cases += [c.id for c in [case] if c]
+        cases += [r.id for r in project.of_type("cybersecurity-assessment") if r.status == "final"]
+    if problems:
+        return stop(problems)
+    open_problems = [{"item": i.id, "state": i.status, "title": i.title} for i in sorted(
+        project.of_type("problem-report", "weakness"), key=lambda i: i.id) if i.status in trace.UNRESOLVED]
+    counts = {level: sum(1 for f in project.check() if f["level"] == level) for level in ("error", "warning")}
+    front = {
+        "id": next_id(project, "release"),
+        "type": "release",
+        "status": "final",
+        "title": "Release %s" % args.release,
+        "release": args.release,
+        "kinds": args.kind,
+        "baseline": args.baseline,
+        "products": products,
+        "approved_by": args.approved_by,
+        "approved_at": str(approved_at),
+        "delivered_to": args.delivered_to,
+        "open_problems": open_problems,
+        "check": "%d errors, %d warnings" % (counts["error"], counts["warning"]),
+    }
+    for key in ("classification", "build", "support", "media"):
+        if getattr(args, key):
+            front[key] = getattr(args, key)
+    if cases:
+        front["cases"] = cases
+    path = write_item(project, "release", front, "\n## Release note\n\n%s\n" % note)
+    print("wrote %s: release %s from %s, %d products, %d open problems; record its delivery with "
+          "`record.py communication --subject %s ... --agreement \"<receipt>\"`"
+          % (path, args.release, args.baseline, len(products), len(open_problems), front["id"]))
+    return 0
+
+
+def latest_final(project, type_name):
+    records = [r for r in project.of_type(type_name) if r.status == "final"]
+    return max(records, key=lambda r: (str(r.front.get("as_of", "")), trace.record_number(r.id))) if records else None
+
+
 def cmd_communication(project, args):
     problems = ["no such item: %s" % s for s in args.subject if s not in project.items]
     if args.sent_at:
@@ -1528,6 +1609,20 @@ def main():
     case_fs.add_argument("--argument", required=True)
     case_fs.add_argument("--part", action="append", help="part of ISO 26262 the case covers (default: scope.safety)")
     case_fs.add_argument("--as-of")
+    rel = sub.add_parser("release")
+    rel.add_argument("--baseline", required=True)
+    rel.add_argument("--release", required=True, help="name and number of the release")
+    rel.add_argument("--kind", action="append", required=True,
+                     choices=["delivery", "release-for-production", "release-for-post-development"])
+    rel.add_argument("--product", action="append", help="name=...;version=...[;file=...] - one per delivered product")
+    rel.add_argument("--approved-by", required=True)
+    rel.add_argument("--approved-at")
+    rel.add_argument("--delivered-to", required=True)
+    rel.add_argument("--note", required=True, help="file with the release note")
+    rel.add_argument("--classification")
+    rel.add_argument("--build")
+    rel.add_argument("--support")
+    rel.add_argument("--media")
     told = sub.add_parser("communication")
     told.add_argument("--subject", required=True, action="append")
     told.add_argument("--audience", required=True, action="append")
@@ -1541,6 +1636,7 @@ def main():
                 "review": cmd_review, "baseline": cmd_baseline, "communication": cmd_communication,
                 "cybersecurity-case": cmd_cybersecurity_case, "cybersecurity-assessment": cmd_cybersecurity_assessment,
                 "confirmation-measure": cmd_confirmation_measure, "safety-case": cmd_safety_case,
+                "release": cmd_release,
                 "status-report": cmd_status_report, "build": cmd_build,
                 "problem-trends": cmd_problem_trends, "quality-check": cmd_quality_check,
                 "quality-report": cmd_quality_report, "self-assessment": cmd_self_assessment,

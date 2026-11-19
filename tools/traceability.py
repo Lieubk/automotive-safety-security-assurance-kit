@@ -1688,6 +1688,30 @@ class Project:
                              % (problem.id, problem.front.get("severity"), problem.status))
 
 
+    def cov_74(self, rule):
+        internal = as_list((self.config.get("trace") or {}).get("internal_baselines"))
+        told = {}
+        for record in self.of_type("communication-record"):
+            if record.status == "final":
+                for subject in as_list(record.front.get("subject")):
+                    told.setdefault(str(subject), []).append(record)
+        for release in self.of_type("release"):
+            if release.status != "final":
+                continue
+            base = self.items.get(str(release.front.get("baseline")))
+            if base is None or base.type != "baseline" or base.status != "final":
+                self.add("error", rule, release.id, "names baseline %s, which is not a final baseline" % release.front.get("baseline"),
+                         self.rules[rule]["supports"])
+            elif base.front.get("purpose") in internal:
+                self.add("error", rule, release.id, "is built from %s, an internal baseline" % base.id, self.rules[rule]["supports"])
+            notices = told.get(release.id, [])
+            if not notices:
+                self.add("error", rule, release.id, "no final communication record names the release as delivered",
+                         self.rules[rule]["supports"])
+            elif not any(n.front.get("agreement") for n in notices):
+                self.add("warning", rule, release.id, "delivered (%s), but no record states the receipt under agreement"
+                         % ", ".join(n.id for n in notices), self.rules[rule]["supports"])
+
     # ---- ISO 26262
 
     def safety_plan(self):

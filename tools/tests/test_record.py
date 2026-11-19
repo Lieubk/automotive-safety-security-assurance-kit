@@ -746,6 +746,54 @@ class SafetyRecords(unittest.TestCase):
         self.assertIn("SAN-0001", [i["item"] for i in clauses["9:8"]["items"]])
 
 
+class Releases(RecordCase):
+    def setUp(self):
+        super().setUp()
+        self.note = Path(self.tmp.name) / "note.md"
+        self.note.write_text("R1.0: the window control software. No known limitation.", encoding="utf-8")
+
+    def release(self, *extra):
+        return self.record("release", "--baseline", "BL-0001", "--release", "R1.0", "--kind", "delivery",
+                           "--product", "name=window control sources;version=1.0", "--approved-by", "P. Lead",
+                           "--delivered-to", "Customer", "--note", self.note, *extra)
+
+    def test_a_release_is_made_from_a_baseline_and_delivered_with_its_receipt(self):
+        changes = self.project / "records" / "changes"
+        changes.mkdir(parents=True, exist_ok=True)
+        (changes / "CR-0001.md").write_text("\n".join([
+            "---", "id: CR-0001", "type: change-request", "title: Correction of the end of automatic closing",
+            "status: closed", "requester: Software lead", "decision: Software lead, 2026-05-20", "links:",
+            "  resolves: [PRB-0001]", "  affects: [CMP-0002]", "---", "", "## Description", "", "Correction.", "",
+            "## Impact analysis", "", "One component.", ""]), encoding="utf-8")
+        self.record("baseline", "--tag", "work-1", "--purpose", "working")
+        code, out = self.release()
+        self.assertEqual(code, 1)
+        self.assertIn("internal baseline", out)
+        self.record("baseline", "--tag", "design-1", "--purpose", "design freeze")
+        self.record("communication", "--subject", "BL-0002", "--audience", "Customer", "--channel", "mail")
+        code, out = self.record("release", "--baseline", "BL-0002", "--release", "R1.0", "--kind", "delivery",
+                                "--product", "name=sources;version=1.0", "--approved-by", "P. Lead",
+                                "--delivered-to", "Customer", "--note", self.note)
+        self.assertEqual(code, 0, out)
+        sys.path.insert(0, str(ROOT / "tools"))
+        from traceability import Project
+        rules = {(f["rule"], f["item"], f["level"]) for f in Project(self.project).check()}
+        self.assertIn(("COV-74", "REL-0001", "error"), rules)
+        self.record("communication", "--subject", "REL-0001", "--audience", "Customer", "--channel", "portal")
+        rules = {(f["rule"], f["item"], f["level"]) for f in Project(self.project).check()}
+        self.assertIn(("COV-74", "REL-0001", "warning"), rules)
+        self.record("communication", "--subject", "REL-0001", "--audience", "Customer", "--channel", "portal",
+                    "--agreement", "received by the customer's purchasing on 2026-06-26")
+        self.assertFalse([f for f in Project(self.project).check() if f["rule"] == "COV-74"])
+
+    def test_a_release_for_production_needs_the_safety_case(self):
+        self.record("baseline", "--tag", "design-1", "--purpose", "design freeze")
+        (self.project / "records" / "safety" / "SFC-0001.md").unlink()
+        code, out = self.release("--kind", "release-for-production")
+        self.assertEqual(code, 1)
+        self.assertIn("no safety case", out)
+
+
 class Baselines(RecordCase):
     def test_baseline_lists_approved_engineering_items_only(self):
         code, out = self.record("baseline", "--tag", "design-1", "--purpose", "design freeze")

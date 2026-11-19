@@ -1,6 +1,6 @@
 # Plan review checklist
 
-Version 9. Applies to: `plan`. Supports: MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6,
+Version 10. Applies to: `plan`. Supports: MAN.3.BP1, MAN.3.BP2, MAN.3.BP3, MAN.3.BP6,
 MAN.3.BP7, SWE.4.BP1, SWE.5.BP1, SWE.5.BP2, SWE.6.BP1, SYS.4.BP1, SYS.4.BP2, SYS.5.BP1,
 SUP.1.BP1, SUP.8.BP1, SUP.9.BP1, SUP.10.BP1, MAN.5.BP1, MAN.5.BP2, the subclauses of
 ISO/SAE 21434 that the cybersecurity kinds name, and the clauses of ISO 26262 the kind safety
@@ -278,3 +278,13 @@ empty, ask the user; do not assume a value.
 | PLN-174 | Every clause of the safety plan decided by-customer or by-supplier appears, and each activity has exactly one side that performs it | read next to `safety_activities` | semantic |
 | PLN-175 | What is exchanged, when, and how problems and changes of safety requirements reach the other side is stated | read `exchange` and `Approach` | semantic |
 | PLN-176 | Both parties have agreed to the arrangement, as a communication record with `agreement` shows | read the communication record; the note names who agreed and when | accountable |
+
+## Kind release (SPL.2.BP1, SPL.2.BP2, SPL.2.BP3, SPL.2.BP4, SPL.2.BP6, SPL.2.BP7, SPL.2.BP8)
+
+| ID | Check | How to check | Kind |
+|---|---|---|---|
+| PLN-177 | The content of each planned release is named, with the milestone or order it serves | read `Scope` next to the project plan | semantic |
+| PLN-178 | Classification and numbering are defined, and the numbering agrees with the baseline tags | read `Approach` next to the configuration management plan | semantic |
+| PLN-179 | The build of a release and its environment are named, and the build comes from configured items | read `Environment and tools` | semantic |
+| PLN-180 | Support, media and packaging are stated per classification | read `Approach`, `Environment and tools` | semantic |
+| PLN-181 | Who approves a release and how the receipt is confirmed is stated, and the people named agree | ask them; the note names who and when | accountable |
