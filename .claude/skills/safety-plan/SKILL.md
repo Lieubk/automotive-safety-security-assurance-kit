@@ -6,6 +6,7 @@ allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Bash(python tools
 ---
 
 # Functional safety management of the project (ISO 26262-2 clause 6, 26262-8 clause 11)
+> Toolkit root: `${CLAUDE_PLUGIN_ROOT}` - where this shows a placeholder instead of a folder, it is the repository you are in. The `tools/`, `schema/`, `aspice/`, `iso-26262/`, `iso-sae-21434/`, `examples/` and `.claude/docs/` named here and in the references lie in the toolkit root; run its tools from the project folder as `python "<toolkit root>/tools/<script>.py"`.
 
 Sets up how the project achieves functional safety and shows that it did: who is
 responsible, which clause of the standard is done how, which methods are applied at

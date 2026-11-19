@@ -89,6 +89,16 @@ def vocabulary():
     }
 
 
+def checklist_versions():
+    """{file stem: current version} of the review checklists."""
+    out = {}
+    for path in (CLAUDE / "docs" / "checklists").glob("*.md"):
+        found = re.search(r"^Version (\d+)", path.read_text(encoding="utf-8"), re.M)
+        if found:
+            out[path.stem] = found.group(1)
+    return out
+
+
 def check_references(path, text, vocab, skills, errors, warnings):
     name = rel(path)
     for ref in sorted(set(re.findall(r"\b[A-Z]{3}\.\d+\.BP\d+\b", text))):
@@ -117,6 +127,10 @@ def check_references(path, text, vocab, skills, errors, warnings):
     for skill in sorted(set(re.findall(r"(?<![\w/.])/([a-z][a-z-]{3,})\b(?![/.\w])", text))):
         if skill in CANDIDATE_SKILL_NAMES and skill not in skills:
             errors.append("%s: /%s is not a skill of this toolkit" % (name, skill))
+    versions = checklist_versions()
+    for stem, cited in sorted(set(re.findall(r"`?([a-z][a-z-]+)`?\s+v(\d+)(?!\d)", text))):
+        if stem in versions and cited != versions[stem]:     # a review citing an old version is refused by the tool
+            errors.append("%s: cites checklist %s v%s, which is at version %s" % (name, stem, cited, versions[stem]))
     for target in sorted(set(re.findall(r"\.claude/docs/checklists/[\w-]+\.md", text.replace("\\", "/")))):
         if not (ROOT / target).is_file():
             errors.append("%s: %s does not exist" % (name, target))

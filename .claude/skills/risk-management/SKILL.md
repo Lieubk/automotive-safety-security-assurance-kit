@@ -6,6 +6,7 @@ allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Bash(python tools
 ---
 
 # Risk management (MAN.5)
+> Toolkit root: `${CLAUDE_PLUGIN_ROOT}` - where this shows a placeholder instead of a folder, it is the repository you are in. The `tools/`, `schema/`, `aspice/`, `iso-26262/`, `iso-sae-21434/`, `examples/` and `.claude/docs/` named here and in the references lie in the toolkit root; run its tools from the project folder as `python "<toolkit root>/tools/<script>.py"`.
 
 Looks ahead for events that could harm the project, ranks them, has the owner decide what
 to do about each one and keeps checking whether it works. It never stops: risks are

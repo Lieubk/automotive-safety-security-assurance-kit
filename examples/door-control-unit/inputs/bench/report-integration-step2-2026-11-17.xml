@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="door-bench" tests="4" failures="0" errors="0" skipped="0" timestamp="2026-11-17T10:00:00+00:00">
+    <testcase classname="door-bench" name="SYIT-0005 real motor follows the bridge command" time="9.4"/>
+    <testcase classname="door-bench" name="SYIT-0006 Hall signals of the real motor" time="12.6"/>
+    <testcase classname="door-bench" name="SYIT-0007 switch panel starts the movement" time="8.1"/>
+    <testcase classname="door-bench" name="SYIT-0008 one-touch closing with reversal" time="21.5"/>
+  </testsuite>
+</testsuites>

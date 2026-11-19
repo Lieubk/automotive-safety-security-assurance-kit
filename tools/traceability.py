@@ -393,12 +393,15 @@ class Project:
 
     def allocation_targets(self, requirement):
         """Architectural elements a requirement is allocated to (the elements that fulfil it)."""
-        return self.sources(requirement.id, "fulfils")
+        imported = [self.items[t] for t, _ in requirement.targets("allocated_to") if t in self.items]
+        return self.sources(requirement.id, "fulfils") + [e for e in imported if e not in self.sources(requirement.id, "fulfils")]
 
     def allocated_requirements(self, element_id, types=None):
         """Requirements allocated to an architectural element (the requirements it fulfils)."""
         element = self.items.get(element_id)
         found = [self.items[t] for t, _ in element.targets("fulfils") if t in self.items] if element else []
+        found += [self.items[s] for s in self.incoming[element_id]["allocated_to"] if s in self.items
+                  and self.items[s] not in found] if element else []
         return [r for r in found if self.live(r) and (types is None or r.type in types)]
 
     def covers(self, process):
@@ -672,6 +675,11 @@ class Project:
                     if anchor not in names:
                         self.add("error", "LINK", item.id, "%s target %s#%s: the unit designs no function of that name"
                                  % (role, target_id, anchor))
+        for target_id, _ in item.targets("allocated_to"):
+            target = self.items.get(target_id)
+            if target is not None and not target.imported:
+                self.add("error", "LINK", item.id, "allocated_to %s, an element of the project: the allocation is stated "
+                         "on the element (fulfils); allocated_to is for elements received from outside the scope" % target_id)
         if item.type == "software-interface":
             for name in ("provided_by", "used_by"):
                 for ref in as_list(item.front.get(name)):
@@ -2277,7 +2285,18 @@ class Project:
                 self.add("error", "LINK", record.id, "case names %s, which is not a cybersecurity case"
                          % record.front.get("case"))
 
+    def check_inputs(self):
+        """The record of what was received names what, which version and when."""
+        for n, entry in enumerate(as_list(self.config.get("inputs")), 1):
+            if not isinstance(entry, dict):
+                continue
+            missing = [k for k in ("source", "version", "received") if not str(entry.get(k) or "").strip()]
+            if missing:
+                self.add("warning", "SCHEMA", "project.yaml", "inputs entry %d (%s) has no %s: what was received is "
+                         "recorded with its version and date" % (n, entry.get("source") or "-", ", ".join(missing)))
+
     def check(self):
+        self.check_inputs()
         self.check_structure()
         self.check_coverage()
         self.check_upstream()

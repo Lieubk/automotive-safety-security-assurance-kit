@@ -28,7 +28,8 @@ import sys
 from contextlib import redirect_stdout
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[2]             # the toolkit: this repository, or the installed plugin
+PROJECT_DIR = Path(os.environ.get("CLAUDE_PROJECT_DIR") or os.getcwd()).resolve()   # where the session works
 sys.path.insert(0, str(ROOT / "tools"))
 STRUCTURAL = ("FORMAT", "SCHEMA", "LINK")
 
@@ -204,8 +205,9 @@ def agent_commands(agent_type):
 
     Claude Code grants the whole Bash tool for an entry such as `Bash(python tools/x.py *)`
     in an agent's `tools`; the pattern is enforced here."""
+    agent_type = str(agent_type or "").split(":")[-1]       # a plugin's agents carry its name as a prefix
     path = ROOT / ".claude" / "agents" / ("%s.md" % agent_type)
-    if not agent_type or not re.match(r"^[\w-]+$", str(agent_type)) or not path.is_file():
+    if not agent_type or not re.match(r"^[\w-]+$", agent_type) or not path.is_file():
         return None
     head = re.match(r"\A---\n(.*?)\n---", path.read_text(encoding="utf-8").replace("\r\n", "\n"), re.S)
     line = re.search(r"(?m)^tools:\s*(.+)$", head.group(1)) if head else None
@@ -276,11 +278,34 @@ def commits_into_toolkit(target):
     return resolved == ROOT or ROOT in resolved.parents
 
 
+TOOL_CALL = re.compile(r"""^(python3?)\s+("?)([^\s"]+)\2(?=\s|$)""")
+
+
+def toolkit_relative(command):
+    """`python <toolkit root>/tools/x.py ...` as `python tools/x.py ...`, so that the patterns of an agent's tools
+    hold where the toolkit is installed as a plugin. Only a script of this toolkit is rewritten."""
+    m = TOOL_CALL.match(command)
+    if not m:
+        return command
+    script = m.group(3).replace("\\", "/")
+    name = re.match(r"^(?:\$\{CLAUDE_PLUGIN_ROOT\}|.*?)/?tools/(\w+\.py)$", script)
+    if not name:
+        return command
+    prefix = script[:-len("tools/" + name.group(1))].rstrip("/")
+    if prefix not in ("", ".", "${CLAUDE_PLUGIN_ROOT}"):
+        try:
+            if Path(prefix).resolve() != ROOT:
+                return command
+        except (OSError, ValueError):
+            return command
+    return "%s tools/%s%s" % (m.group(1), name.group(1), command[m.end():])
+
+
 def pre_shell(payload):
     command = str((payload.get("tool_input") or {}).get("command") or "")
     allowed = agent_commands(payload.get("agent_type"))
     if allowed is not None:
-        plain = PROJECT_OPTION.sub(r"\1", command.strip())     # --project <dir> right after the script is allowed
+        plain = PROJECT_OPTION.sub(r"\1", toolkit_relative(command.strip()))   # --project <dir> right after the script is allowed
         if SHELL_OPERATORS.search(plain) or not any(fnmatch.fnmatchcase(plain, p) for p in allowed):
             return deny("The agent %s may run only these commands, one at a time and without shell operators: "
                         "%s. Ask the caller for anything else." % (payload.get("agent_type"), "; ".join(allowed) or "none"))
@@ -311,13 +336,25 @@ def session_start(payload):
     if trace is None:
         print(not_assessed("session-start"))
         return 0
-    if not (ROOT / "project.yaml").is_file():
+    plugin = PROJECT_DIR != ROOT
+    if plugin:                                            # the toolkit is a plugin: say where it is and how to work
+        print("Automotive Safety & Security Assurance Kit, installed as a plugin. Toolkit root: %s. Its tools run "
+              "from this project folder as: python \"%s/tools/<script>.py\" ...; the paths tools/, schema/, aspice/, "
+              "iso-26262/, iso-sae-21434/, examples/ and .claude/docs/ in its skills, agents and documents are "
+              "relative to the toolkit root." % (ROOT.as_posix(), ROOT.as_posix()))
+        agreement = ROOT / ".claude" / "docs" / "working-agreement.md"
+        if agreement.is_file():
+            print(agreement.read_text(encoding="utf-8"))
+    if not (PROJECT_DIR / "project.yaml").is_file():
+        example = ('python "%s/tools/traceability.py" --project "%s/examples/power-window" check'
+                   % (ROOT.as_posix(), ROOT.as_posix()) if plugin
+                   else "python tools/traceability.py --project examples/power-window check")
         print("Automotive Safety & Security Assurance Kit: this repository has no project.yaml yet. "
               "/aspice-start sets up the scope "
               "(role, inputs received, processes the team is responsible for). A worked example is in "
-              "examples/power-window: python tools/traceability.py --project examples/power-window check")
+              "examples/power-window of the toolkit: " + example)
         return 0
-    project = trace.Project(ROOT)
+    project = trace.Project(PROJECT_DIR)
     findings = project.check()
     errors = [f for f in findings if f["level"] == "error"]
     warnings = [f for f in findings if f["level"] == "warning"]
@@ -329,7 +366,8 @@ def session_start(payload):
         print("  %s %s: %s" % (finding["rule"], finding["item"], finding["message"]))
     if len(errors) > 8:
         print("  ... %d more errors: python tools/traceability.py check" % (len(errors) - 8))
-    print("Rules of work: .claude/docs/working-agreement.md. /next-step says what to do next.")
+    print("Rules of work: %s. /next-step says what to do next."
+          % ("above" if PROJECT_DIR != ROOT else ".claude/docs/working-agreement.md"))
     return 0
 
 

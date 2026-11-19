@@ -1,0 +1,41 @@
+{
+  "name": "assurance-kit",
+  "displayName": "Automotive Safety & Security Assurance Kit",
+  "version": "0.1.0",
+  "description": "Process, safety and security assurance for automotive ECU software: skills, agents, hooks and a trace engine for Automotive SPICE 3.1 (and 4.0 from its draft), ISO 26262 and ISO/SAE 21434, with engineering items as text files in your repository.",
+  "author": {
+    "name": "lieund"
+  },
+  "homepage": "https://github.com/Lieubk/automotive-safety-security-assurance-kit",
+  "repository": "https://github.com/Lieubk/automotive-safety-security-assurance-kit",
+  "license": "MIT",
+  "keywords": [
+    "automotive",
+    "aspice",
+    "iso-26262",
+    "iso-sae-21434",
+    "functional-safety",
+    "cybersecurity",
+    "traceability",
+    "ecu",
+    "autosar"
+  ],
+  "skills": [
+    "./.claude/skills/"
+  ],
+  "agents": [
+    "./.claude/agents/aspice-reviewer.md",
+    "./.claude/agents/configuration-manager.md",
+    "./.claude/agents/cybersecurity-engineer.md",
+    "./.claude/agents/project-manager.md",
+    "./.claude/agents/safety-engineer.md",
+    "./.claude/agents/software-architect.md",
+    "./.claude/agents/software-developer.md",
+    "./.claude/agents/software-requirements-engineer.md",
+    "./.claude/agents/software-test-engineer.md",
+    "./.claude/agents/system-engineer.md",
+    "./.claude/agents/system-test-engineer.md",
+    "./.claude/agents/unit-verification-engineer.md"
+  ],
+  "hooks": "./hooks/hooks.json"
+}

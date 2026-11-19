@@ -24,7 +24,9 @@ trace engine checks them.
 | `tools/` | trace engine, record writer, validators |
 | `.claude/skills/`, `.claude/agents/`, `.claude/hooks/` | the toolkit itself |
 | `.claude/docs/` | working agreement, command reference (`tools.md`), review checklists, authoring conventions |
-| `examples/power-window/` | a complete worked example |
+| `examples/power-window/` | worked example of a software supplier (SWE.1 to SWE.6, ISO 26262 at ASIL B, a TARA) |
+| `examples/door-control-unit/` | worked example of a system supplier (SYS.2 to SYS.5, supplier, risks, vulnerability monitoring, release) |
+| `.claude-plugin/`, `hooks/hooks.json` | the packaging as a Claude Code plugin: manifest, marketplace, the hooks run from the plugin |
 
 ## Skills
 
@@ -91,7 +93,9 @@ for the first time in a session.
 
 ## Changing the toolkit itself
 
-- Follow `.claude/docs/skill-authoring.md` for skills, checklists and agents.
+- Follow `.claude/docs/skill-authoring.md` for skills, checklists and agents. A new agent is
+  also listed in `.claude-plugin/plugin.json`; a hook change is made in `.claude/settings.json`
+  and in `hooks/hooks.json` (`tools/tests/test_plugin.py` compares them).
 - `schema/items.yaml` is the single definition of items and rules; after a change run
   `python tools/schema_check.py` and the tests.
 - Text of Automotive SPICE and of other standards (ISO/SAE 21434 and ISO 26262 included,

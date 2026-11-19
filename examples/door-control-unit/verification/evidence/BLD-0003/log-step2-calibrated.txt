@@ -1,0 +1,1 @@
+Step door-bench assembled again 2026-11-17 08:30 with software 1.0.1: only the calibration of the speed ramp of the motor changed. Mechanics and wiring unchanged.

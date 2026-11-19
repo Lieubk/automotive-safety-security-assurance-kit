@@ -6,6 +6,7 @@ allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, Bash(pytho
 ---
 
 # System requirements analysis (SYS.2)
+> Toolkit root: `${CLAUDE_PLUGIN_ROOT}` - where this shows a placeholder instead of a folder, it is the repository you are in. The `tools/`, `schema/`, `aspice/`, `iso-26262/`, `iso-sae-21434/`, `examples/` and `.claude/docs/` named here and in the references lie in the toolkit root; run its tools from the project folder as `python "<toolkit root>/tools/<script>.py"`.
 
 Turns the accepted stakeholder requirements into system requirements that each state
 one need of the system as a whole, can be verified, and are traced to their source. The

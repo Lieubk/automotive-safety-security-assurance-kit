@@ -6,6 +6,7 @@ allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, Bash(pytho
 ---
 
 # System integration and integration test (SYS.4)
+> Toolkit root: `${CLAUDE_PLUGIN_ROOT}` - where this shows a placeholder instead of a folder, it is the repository you are in. The `tools/`, `schema/`, `aspice/`, `iso-26262/`, `iso-sae-21434/`, `examples/` and `.claude/docs/` named here and in the references lie in the toolkit root; run its tools from the project folder as `python "<toolkit root>/tools/<script>.py"`.
 
 Puts the system together in the order the strategy gives - hardware samples, mechanical
 parts, the software of the system - and shows at each step that the integrated elements

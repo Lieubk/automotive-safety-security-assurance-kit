@@ -25,6 +25,13 @@ allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Bash(python tools
 ---
 ```
 
+Right below the title of every `SKILL.md` and agent stands the line "Toolkit root:
+`${CLAUDE_PLUGIN_ROOT}` ..." (copy it from any skill). Installed as a plugin, Claude Code puts
+the toolkit's folder in its place, and the model finds `tools/`, `schema/` and
+`.claude/docs/` there while it works in the user's project; in this repository it stays a
+placeholder and the paths are relative to the repository. `tools/tests/test_plugin.py`
+checks that the line is there.
+
 Add `Agent` to `allowed-tools` only when the skill delegates. A skill that works with
 the user states no `model` and no `effort`; see "Model and effort" below.
 Do not run shell commands at load time; the first step runs them.

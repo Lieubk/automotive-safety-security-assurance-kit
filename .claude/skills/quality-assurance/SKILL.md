@@ -6,6 +6,7 @@ allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Agent, Bash(pytho
 ---
 
 # Quality assurance (SUP.1)
+> Toolkit root: `${CLAUDE_PLUGIN_ROOT}` - where this shows a placeholder instead of a folder, it is the repository you are in. The `tools/`, `schema/`, `aspice/`, `iso-26262/`, `iso-sae-21434/`, `examples/` and `.claude/docs/` named here and in the references lie in the toolkit root; run its tools from the project folder as `python "<toolkit root>/tools/<script>.py"`.
 
 Quality assurance gives an independent view: do the work products meet their criteria,
 and are the processes carried out as planned. It builds on what the project already

@@ -6,6 +6,7 @@ allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Bash(python tools
 ---
 
 # Software qualification test (SWE.6)
+> Toolkit root: `${CLAUDE_PLUGIN_ROOT}` - where this shows a placeholder instead of a folder, it is the repository you are in. The `tools/`, `schema/`, `aspice/`, `iso-26262/`, `iso-sae-21434/`, `examples/` and `.claude/docs/` named here and in the references lie in the toolkit root; run its tools from the project folder as `python "<toolkit root>/tools/<script>.py"`.
 
 Shows that the integrated software meets its requirements, looked at from outside:
 stimuli at its inputs, results at its outputs and at the measurement points the strategy

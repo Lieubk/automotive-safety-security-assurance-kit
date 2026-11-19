@@ -24,7 +24,8 @@ The toolkit drafts and checks. People decide, review and are accountable.
 | **6** exchange routes | ReqIF, AUTOSAR ARXML, Excel, and REST connectors to Polarion, codebeamer and Jama Connect |
 | **14** tools, over **9,000** lines of Python | trace engine, record writer, document generator, validators, exchange adapters |
 | **325** regression tests | trace engine, records, documents, exchange adapters and hooks |
-| **155** items, **31** documents, **345** pages | the worked example: a power window with anti-pinch protection at ASIL B |
+| **155** items, **31** documents, **345** pages | the worked example of a software supplier: a power window with anti-pinch protection at ASIL B |
+| **105** items | the worked example of a system supplier: a door control unit from the OEM's requirements through system architecture, bench integration and qualification, supplier, risks and vulnerability monitoring to a delivered release |
 
 **See what it produces:** [31 documents, 345 pages, generated from the worked example](examples/power-window/documents/) -
 requirements, architecture and design, test specifications and reports, traceability, TARA,
@@ -65,7 +66,9 @@ software processes end to end, with ISO 26262 and ISO/SAE 21434 in scope:
 ## Requirements
 
 - Claude Code
-- Python 3.10 or later with PyYAML (`python -m pip install pyyaml`)
+- Python 3.10 or later on the PATH as `python` (or `python3`), with PyYAML
+  (`python -m pip install pyyaml`); python-docx for Word and openpyxl for customer Excel
+  workbooks are optional
 - Git
 - For the example: a C compiler (gcc, clang, or Visual Studio on Windows); gcc with gcov
   for coverage
@@ -105,10 +108,31 @@ python examples/power-window/tests/integration/run_tests.py
 python examples/power-window/tests/qualification/run_tests.py
 ```
 
-Then start your own project in a copy of this repository: open it in Claude Code and
-run `/aspice-start`. It asks who you are in the supply chain, what you were given, and
-which processes you are responsible for, and writes `project.yaml`. From there
-`/next-step` says what to do.
+## Install into your project
+
+The toolkit is a Claude Code plugin. Install it into the repository of your project; the
+items, records and `project.yaml` live there, the toolkit stays in the plugin.
+
+```
+/plugin marketplace add Lieubk/automotive-safety-security-assurance-kit
+/plugin install assurance-kit@assurance-kit
+```
+
+From a shell, `claude plugin marketplace add Lieubk/automotive-safety-security-assurance-kit`
+and `claude plugin install assurance-kit@assurance-kit --scope project` do the same and write
+the plugin into the project's `.claude/settings.json`, so that every member of the team is
+asked to install it.
+
+Then open Claude Code in your project and run `/aspice-start` (as a plugin skill also
+`/assurance-kit:aspice-start`). It asks who you are in the supply chain, what you were
+given, and which processes you are responsible for, and writes `project.yaml`. From there
+`/next-step` says what to do. A new session prints where the toolkit is installed and the
+working agreement; the tools run from your project folder as
+`python "<toolkit root>/tools/<script>.py"`. To be asked less often, allow the read-only
+ones in your project's `.claude/settings.json` with the path the session prints.
+
+Without the plugin you can still work in a copy of this repository: open it in Claude
+Code, and every skill, agent and hook is active there.
 
 ## How it is put together
 
@@ -121,7 +145,8 @@ tools/             trace engine, record writer, validators, tests
 .claude/agents/    roles with boundaries; the reviewing agent cannot write
 .claude/hooks/     protection and checks on every write
 .claude/docs/      working agreement, command reference, review checklists
-examples/          power window control with anti-pinch protection
+.claude-plugin/    plugin manifest and marketplace; hooks/hooks.json runs the hooks from the plugin
+examples/          power-window (software supplier), door-control-unit (system supplier)
 ci/                pipeline templates for projects (GitHub Actions, GitLab CI)
 ```
 

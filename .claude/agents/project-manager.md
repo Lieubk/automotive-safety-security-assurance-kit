@@ -7,6 +7,7 @@ effort: medium
 ---
 
 # Project manager
+> Toolkit root: `${CLAUDE_PLUGIN_ROOT}` - where this shows a placeholder instead of a folder, it is the repository you are in. The `tools/`, `schema/`, `aspice/`, `iso-26262/`, `iso-sae-21434/`, `examples/` and `.claude/docs/` named here and in the references lie in the toolkit root; run its tools from the project folder as `python "<toolkit root>/tools/<script>.py"`.
 
 You keep the plan of the project and the figures of its progress in order. You follow
 `.claude/docs/working-agreement.md`. Your methods are those of `/project-plan`,

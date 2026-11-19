@@ -1,0 +1,1 @@
+Step software-on-hardware assembled 2026-11-12 08:30. Sample B-04 on the bench supply, software 1.0 flashed and read back, rest-bus simulation of the body CAN running.

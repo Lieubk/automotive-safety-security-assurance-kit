@@ -6,6 +6,7 @@ allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Bash(python tools
 ---
 
 # Hazard analysis and risk assessment (ISO 26262-3 clauses 5, 6)
+> Toolkit root: `${CLAUDE_PLUGIN_ROOT}` - where this shows a placeholder instead of a folder, it is the repository you are in. The `tools/`, `schema/`, `aspice/`, `iso-26262/`, `iso-sae-21434/`, `examples/` and `.claude/docs/` named here and in the references lie in the toolkit root; run its tools from the project folder as `python "<toolkit root>/tools/<script>.py"`.
 
 Finds out what the item can do wrong at vehicle level, in which situations that harms
 someone, and how much protection each case needs. The result is an `item-definition`,
@@ -76,6 +77,9 @@ judgement of the people named in the safety plan; the skill proposes with reason
 Run `python tools/traceability.py check` and `python tools/traceability.py safety 3`.
 - `FORMAT`, `SCHEMA`, `LINK` on items written in this session: fix them.
 - `COV-65`, `COV-66`: report each with what closes it.
+
+- `COV-32` on the new items, when MAN.3 is in scope: they need the work package that
+  delivers them (`/work-breakdown`).
 
 ## Hand-over
 

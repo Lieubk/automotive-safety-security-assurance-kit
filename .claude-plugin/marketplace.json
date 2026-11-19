@@ -1,0 +1,13 @@
+{
+  "name": "assurance-kit",
+  "owner": {
+    "name": "lieund"
+  },
+  "plugins": [
+    {
+      "name": "assurance-kit",
+      "source": "./",
+      "description": "Process, safety and security assurance for automotive ECU software: skills, agents, hooks and a trace engine for Automotive SPICE 3.1 (and 4.0 from its draft), ISO 26262 and ISO/SAE 21434, with engineering items as text files in your repository."
+    }
+  ]
+}

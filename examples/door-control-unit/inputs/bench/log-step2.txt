@@ -1,0 +1,1 @@
+Step door-bench assembled 2026-11-13 08:30. Motor 03 mounted on the window in the door frame, OEM switch panel P-02 on the LIN, body CAN simulated by the rest-bus simulation.

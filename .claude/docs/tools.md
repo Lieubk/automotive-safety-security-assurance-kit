@@ -1,8 +1,13 @@
 # Tools
 
-Deterministic commands that skills and agents call. Run them from the toolkit root.
-`--project DIR` selects the project (default: the current directory; the worked
-example is `examples/power-window`). They need Python 3 and PyYAML.
+Deterministic commands that skills and agents call. `--project DIR` selects the project
+(default: the current directory; the worked examples are `examples/power-window` and
+`examples/door-control-unit`). They need Python 3 and PyYAML.
+
+Where this page writes `python tools/<script>.py`, the script is in the toolkit's `tools/`
+folder. In a copy of the repository, run it from the repository root. With the toolkit
+installed as a plugin, run it from your project folder as `python "<toolkit root>/tools/<script>.py"`;
+a new session prints the toolkit root.
 
 ## Trace engine - `python tools/traceability.py [--project DIR] <command>`
 

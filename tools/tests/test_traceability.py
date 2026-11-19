@@ -186,6 +186,19 @@ class Case(unittest.TestCase):
         return fixture
 
 
+class Examples(unittest.TestCase):
+    """The worked examples are free of findings: a reader takes any finding for a defect of the toolkit."""
+
+    def test_the_system_supplier_example_has_no_finding(self):
+        example = Path(__file__).resolve().parents[2] / "examples" / "door-control-unit"
+        findings = [f for f in Project(example).check() if f["level"] in ("error", "warning")]
+        self.assertEqual(findings, [])
+
+    def test_the_software_supplier_example_has_no_error(self):
+        example = Path(__file__).resolve().parents[2] / "examples" / "power-window"
+        self.assertEqual([f for f in Project(example).check() if f["level"] == "error"], [])
+
+
 class GenericPractices(unittest.TestCase):
     """Observations per generic practice of level 2, read from the worked example."""
 

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="door-bench-electronics" tests="4" failures="0" errors="0" skipped="0" timestamp="2026-11-12T10:00:00+00:00">
+    <testcase classname="door-bench-electronics" name="SYIT-0001 lock command acknowledged" time="4.1"/>
+    <testcase classname="door-bench-electronics" name="SYIT-0002 LIN switch frame and time-out" time="6.3"/>
+    <testcase classname="door-bench-electronics" name="SYIT-0003 bridge command at the terminals" time="5.2"/>
+    <testcase classname="door-bench-electronics" name="SYIT-0004 Hall pulses read as position" time="7.8"/>
+  </testsuite>
+</testsuites>

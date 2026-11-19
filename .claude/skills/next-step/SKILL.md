@@ -10,6 +10,7 @@ background: false
 ---
 
 # Where the project stands and what comes next
+> Toolkit root: `${CLAUDE_PLUGIN_ROOT}` - where this shows a placeholder instead of a folder, it is the repository you are in. The `tools/`, `schema/`, `aspice/`, `iso-26262/`, `iso-sae-21434/`, `examples/` and `.claude/docs/` named here and in the references lie in the toolkit root; run its tools from the project folder as `python "<toolkit root>/tools/<script>.py"`.
 
 Reads the facts the tools give - items per type and state, findings of the trace
 check, evidence per base practice - and turns them into one recommendation: the skill

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="door-bench qualification" tests="10" failures="1" errors="0" skipped="0" timestamp="2026-11-14T09:00:00+00:00">
+    <testcase classname="door-bench" name="SYQT-0001 window moves to the end position" time="30.2"/>
+    <testcase classname="door-bench" name="SYQT-0002 one-touch closing time" time="95.0">
+      <failure message="closing time 4.4 s, limit 4.0 s (five runs: 4.4 s 4.4 s 4.3 s 4.4 s 4.4 s)"/>
+    </testcase>
+    <testcase classname="door-bench" name="SYQT-0003 reversal at an obstacle" time="140.0"/>
+    <testcase classname="door-bench" name="SYQT-0004 closing force limit" time="820.0"/>
+    <testcase classname="door-bench" name="SYQT-0005 lock and unlock within 300 ms" time="60.0"/>
+    <testcase classname="door-bench" name="SYQT-0006 lock command on the body CAN" time="12.0"/>
+    <testcase classname="door-bench" name="SYQT-0007 fault memory readable" time="9.0"/>
+    <testcase classname="door-bench" name="SYQT-0008 fault memory erasable" time="8.0"/>
+    <testcase classname="door-bench" name="SYQT-0009 supply voltage range" time="75.0"/>
+    <testcase classname="door-bench" name="SYQT-0010 temperature range" time="1450.0"/>
+  </testsuite>
+</testsuites>

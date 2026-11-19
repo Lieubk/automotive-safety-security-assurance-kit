@@ -1308,9 +1308,15 @@ links:
       - {from: system-requirement, to: [cybersecurity-goal], supports: ["21434:9.5", "21434:WP-09-06"]}
       - {from: software-requirement, to: [cybersecurity-goal], supports: ["21434:9.5", "21434:10.4.1", "21434:WP-09-06"]}
       - {from: system-requirement, to: [safety-goal], supports: ["26262-3:7", "26262-3:7.5.1"]}
+      - {from: system-requirement, to: [system-requirement], supports: ["26262-4:6", "26262-4:6.5.1"]}   # a technical safety requirement from a functional one
       - {from: software-requirement, to: [safety-goal], supports: ["26262-6:6", "26262-6:6.5.1"]}
       - {from: software-requirement, to: [safety-analysis], supports: ["26262-9:8", "26262-6:7"]}
       - {from: system-requirement, to: [safety-analysis], supports: ["26262-9:8", "26262-4:6"]}
+  allocated_to:
+    meaning: "the requirement is allocated to an element that came from outside the scope (imported); allocation to the project's own elements is stated on the element (fulfils)"
+    pairs:
+      - {from: system-requirement, to: [system-element, system-interface], supports: [SYS.3.BP5, "26262-4:6"]}
+      - {from: software-requirement, to: [software-component, software-interface], supports: [SWE.2.BP5]}
   fulfils:
     meaning: "the requirement is allocated to this architectural element. The link is stored on the element because the element depends on the requirement: when the requirement changes, the element becomes suspect"
     pairs:

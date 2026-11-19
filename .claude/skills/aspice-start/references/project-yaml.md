@@ -36,7 +36,9 @@ inputs:                    # what was received: one entry per document and versi
                            # software architecture | detailed design | code.
                            # Component descriptions and models: software architecture
                            # when they describe components and their interfaces,
-                           # detailed design when they describe the inside of one
+                           # detailed design when they describe the inside of one.
+                           # evidence: a document of another party that evidence
+                           # rests on (field data report, safety manual, test report)
     source: ""             # name of the document or baseline as the deliverer calls
                            # it; /import-inputs copies it letter for letter into
                            # `imported.source` of every item registered from it

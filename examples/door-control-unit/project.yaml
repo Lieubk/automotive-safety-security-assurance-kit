@@ -1,0 +1,66 @@
+schema_version: 1
+project:
+  name: "Front door control unit DCU-F"
+  product: "Front door control unit with window lift motor, electronics and software, B-sample release B1"
+aspice:
+  version: "3.1"
+  target_level: 1
+scope:
+  role: system-supplier
+  processes: [SYS.2, SYS.3, SYS.4, SYS.5, ACQ.4, SUP.8, SPL.2, MAN.3, MAN.5]
+  assessment_scope: []
+  safety: []
+  cybersecurity: [6, 8]
+inputs:
+  - level: stakeholder requirements
+    source: "Front door control unit - requirements"
+    version: "1.0"
+    received: "2026-09-15"
+    format: text export
+safety:
+  highest_asil: QM
+security:
+  relevant: true
+documents:
+  template: ""
+  excel_maps: {}
+conventions:
+  naming: ""
+  design_limits: ""
+  design_notation: ""
+  review_independence: ""
+platform:
+  architecture: "door ECU with body CAN and LIN, window lift motor driven by an H-bridge"
+  microcontroller: ""
+  language: C99
+  coding_guideline: ""
+toolchain:
+  compiler: ""
+  static_analysis: ""
+  unit_test: ""
+  coverage: ""
+  alm: ""
+paths:
+  items: [plans, spec, verification, records]
+  source_roots: []
+  generated: []
+  third_party: []
+trace:
+  views_not_applicable: {}
+  internal_baselines: [working]
+  derive_via_elements: false
+people:
+  - name: L. Leader
+    roles: [project lead]
+  - name: E. Engineer
+    roles: [system engineer]
+  - name: V. Verifier
+    roles: [reviewer, bench test lead]
+  - name: M. Config
+    roles: [configuration manager]
+  - name: K. Cyber
+    roles: [cybersecurity lead]
+  - name: O. Engineer
+    roles: [OEM contact]
+  - name: S. Motor
+    roles: [motor supplier contact]

@@ -6,6 +6,7 @@ allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion, Bash(pytho
 ---
 
 # System architectural design (SYS.3)
+> Toolkit root: `${CLAUDE_PLUGIN_ROOT}` - where this shows a placeholder instead of a folder, it is the repository you are in. The `tools/`, `schema/`, `aspice/`, `iso-26262/`, `iso-sae-21434/`, `examples/` and `.claude/docs/` named here and in the references lie in the toolkit root; run its tools from the project folder as `python "<toolkit root>/tools/<script>.py"`.
 
 Turns approved system requirements into an architecture expressed as items: the
 elements the system consists of (hardware, software, mechanics, and the external
@@ -178,7 +179,7 @@ Report, in this order:
 3. Decisions the user has not taken; the queries written, by ID; needs handed to
    `/sys-requirements`.
 4. The remaining findings of the check that concern these items.
-5. Next: `/review` with checklist `system-architecture` v1, top down: requirements
+5. Next: `/review` with checklist `system-architecture` v2, top down: requirements
    before the elements that fulfil them, shown items before or together with their
    views. Then `/baseline`; then `/sw-requirements` for the software element, and
    `/sys-integration-test` and `/sys-qualification-test`.

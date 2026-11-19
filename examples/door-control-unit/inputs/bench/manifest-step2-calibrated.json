@@ -1,0 +1,25 @@
+{
+  "executed_at": "2026-11-17T08:30:00+00:00",
+  "tool": "door-bench, test system release 4.2, setup of 2026-11-12",
+  "result": "succeeded",
+  "elements": [
+    {
+      "element": "SYE-0001",
+      "version": "door ECU B-sample hardware, revision B, sample B-04"
+    },
+    {
+      "element": "SYE-0002",
+      "version": "power window software 1.0.1 (calibration change of the motor speed ramp), flashed onto sample B-04"
+    },
+    {
+      "element": "SYE-0003",
+      "version": "window lift motor B-sample, lot of 2026-10-20, motor 03"
+    },
+    {
+      "element": "SYE-0004",
+      "version": "OEM door switch panel, sample P-02"
+    }
+  ],
+  "doubles": [],
+  "evidence": "inputs/bench/log-step2-calibrated.txt"
+}

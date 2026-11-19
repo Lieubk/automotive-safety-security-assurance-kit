@@ -1,0 +1,26 @@
+{
+  "executed_at": "2026-11-12T08:30:00+00:00",
+  "tool": "door-bench-electronics, test system release 4.2, setup of 2026-11-11",
+  "result": "succeeded",
+  "elements": [
+    {
+      "element": "SYE-0001",
+      "version": "door ECU B-sample hardware, revision B, sample B-04"
+    },
+    {
+      "element": "SYE-0002",
+      "version": "power window software 1.0, flashed onto sample B-04"
+    }
+  ],
+  "doubles": [
+    {
+      "element": "SYE-0003",
+      "description": "load emulation of the motor, 12 V, 8 A, with the Hall emulator on the capture input"
+    },
+    {
+      "element": "SYE-0004",
+      "description": "LIN simulation of the switch panel, one frame every 20 ms"
+    }
+  ],
+  "evidence": "inputs/bench/log-step1.txt"
+}

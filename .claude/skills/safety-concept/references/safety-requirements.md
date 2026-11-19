@@ -8,7 +8,7 @@ The example continues the power window. Values are invented.
 |---|---|---|---|
 | safety goal | `safety-goal` | `addresses` hazardous events | the highest of its events |
 | functional safety requirement | `system-requirement` | `derived_from` the goal | not lower than the goal (COV-23) |
-| technical safety requirement | `system-requirement` | `derived_from` a functional one; fulfilled by system elements | not lower than its source |
+| technical safety requirement | `system-requirement` | `derived_from` a functional one; fulfilled by system elements (`fulfils` on the element, or `allocated_to` on the requirement when the element was received from outside the scope) | not lower than its source |
 | software safety requirement | `software-requirement` | `derived_from` a technical one, a system element, or the goal | not lower than its source |
 | component, interface, unit | `software-component`, `software-interface`, `software-unit` | `fulfils`, `part_of` | not lower than what is allocated (COV-23) |
 
@@ -44,6 +44,10 @@ control shall stop the window and reverse it within 300 ms.
 On the bench, with the reference obstacle of the customer's test specification, the
 window reverses within 300 ms in every closing speed.
 ```
+
+`kind` stays what the requirement is (functional, non-functional, interface, constraint);
+whether it is a functional or a technical safety requirement shows from what it derives
+from: the goal, or a functional safety requirement.
 
 ## A decomposition decision
 

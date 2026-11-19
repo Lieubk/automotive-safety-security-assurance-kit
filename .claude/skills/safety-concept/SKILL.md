@@ -6,6 +6,7 @@ allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, Bash(python tools
 ---
 
 # Safety concept (ISO 26262-3 clause 7, 26262-4 clause 6, 26262-6 clause 6)
+> Toolkit root: `${CLAUDE_PLUGIN_ROOT}` - where this shows a placeholder instead of a folder, it is the repository you are in. The `tools/`, `schema/`, `aspice/`, `iso-26262/`, `iso-sae-21434/`, `examples/` and `.claude/docs/` named here and in the references lie in the toolkit root; run its tools from the project folder as `python "<toolkit root>/tools/<script>.py"`.
 
 Turns each safety goal into requirements that elements of the architecture can fulfil,
 and keeps the ASIL with them. The requirements are the existing `system-requirement`
@@ -71,6 +72,9 @@ write and allocate them; this skill keeps the safety thread.
 Run `python tools/traceability.py check` and `python tools/traceability.py safety`.
 - `FORMAT`, `SCHEMA`, `LINK` on items written in this session: fix them.
 - `COV-23`, `COV-67`, `COV-70`: report each with what closes it.
+
+- `COV-32` on the new items, when MAN.3 is in scope: they need the work package that
+  delivers them (`/work-breakdown`).
 
 ## Hand-over
 
